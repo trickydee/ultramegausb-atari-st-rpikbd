@@ -128,6 +128,10 @@ void HidInput::set_ui(UserInterface& ui) {
 void HidInput::open(const std::string& kbdev, const std::string& mousedev, const std::string joystickdev) {
 }
 
+void HidInput::force_usb_mouse() {
+    ui_->set_mouse_enabled(true);
+}
+
 void HidInput::handle_keyboard() {
     for (auto it : device) {
         if (tuh_hid_get_type(it.first) != HID_KEYBOARD) {

@@ -32,11 +32,13 @@
 #include "AtariSTMouse.h"
 #include "UserInterface.h"
 
+
 #define ROMBASE     256
 #define CYCLES_PER_LOOP 1000
 
 extern unsigned char rom_HD6301V1ST_img[];
 extern unsigned int rom_HD6301V1ST_img_len;
+
 
 /**
  * Read a byte from the physical serial port and pass
@@ -88,6 +90,7 @@ void core1_entry() {
     }
 }
 
+
 int main() {
     //stdio_init_all();
     board_init();
@@ -97,6 +100,12 @@ int main() {
     ui.init();
     ui.update();
 
+    // Overclock the Pico to 250Mhz to improve performance
+    if (!set_sys_clock_khz(250000, false))
+      printf("system clock 250MHz failed\n");
+    else
+      printf("system clock now 250MHz\n");
+
     // Setup the UART and HID instance.
     SerialPort::instance().open();
     SerialPort::instance().set_ui(ui);
@@ -105,6 +114,9 @@ int main() {
 
     // The second CPU core is dedicated to the HD6301 emulation.
     multicore_launch_core1(core1_entry);
+
+    // Force mouse enabled at startup
+    HidInput::instance().force_usb_mouse();
 
     absolute_time_t ten_ms = get_absolute_time();
     while (true) {

@@ -43,6 +43,7 @@ public:
      */
     void open(const std::string& kbdev, const std::string& mousedev, const std::string joystickdev = "");
 
+    void force_usb_mouse();
     void handle_keyboard();
     void handle_mouse(const int64_t cpu_cycles);
     void handle_joystick();
