@@ -20,6 +20,7 @@
 #include "pico/stdlib.h"
 #include "bsp/board.h"
 #include "config.h"
+#include "hardware/clocks.h"
 
 #define DEBOUNCE_COUNT 10
 
@@ -109,6 +110,10 @@ void UserInterface::update_serial() {
 
 void UserInterface::update_status() {
     char buf[32];
+    // stdio_init_all();
+    // Get the current CPU frequency
+    uint32_t cpu_freq = clock_get_hz(clk_sys);
+    //uint32_t cpu_freq = 123;
     ssd1306_clear(&disp);
     sprintf(buf, "USB Keyboard  %d", num_kb);
     ssd1306_draw_string(&disp, 0, 0, 1,  buf);
@@ -118,12 +123,14 @@ void UserInterface::update_status() {
     ssd1306_draw_string(&disp, 0, 18, 1, buf);
     sprintf(buf, "%s", settings.get_settings().mouse_enabled ? "Mouse enabled" : "Joy 0 enabled");
     ssd1306_draw_string(&disp, 0, 27, 1, buf);
+    sprintf(buf, "CPU Clk: %d", cpu_freq);
+    ssd1306_draw_string(&disp, 0, 36, 1, buf);
 }
 
 void UserInterface::update_mouse() {
     char buf[32];
     ssd1306_draw_string(&disp, 0, 45, 1, "Mouse speed");
-    sprintf(buf, "----------------");
+    sprintf(buf, "================");
     buf[settings.get_settings().mouse_speed - MOUSE_MIN] = '*';
     ssd1306_draw_string(&disp, 0, 54, 1, buf);
 }
