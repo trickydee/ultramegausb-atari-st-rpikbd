@@ -28,6 +28,37 @@ All of the external components except the level shifter are optional - you do no
 
 The level shifter is required as the Atari uses 5V logic over the serial connection whereas the Pico uses 3.3V logic. You can possible get away with leaving UART_RX disconnected and connect UART_TX to the Atari without a level shifter but many games and applications will not work like this as they send commands to the IKBD/emulator.
 
+## Compiling the Emulator Firmware
+
+To compile the firmware you will need to checkout this repository, sync the included submodules and make a small change to the picosdk CMakelist.txt.
+Compiling on the mac requires the following: 
+
+Xcode
+gcc arm-none-eabi-gcc ( from Homebrew.)
+
+Mac
+
+Compiling on the mac can be perfomed with the following commands:
+
+```
+# Install GCC components from homebrew
+brew install gcc armmbed/formulae/arm-none-eabi-gcc
+
+# Clone the main repo
+git clone -b main  https://github.com/trickydee/atari-st-rpikb
+cd atari-st-rpikb
+
+# Sync submodules
+git submodule sync
+git submodule update --init --recursive
+
+# fix missing hidparser include in cmakelists.txt
+cp pico-sdk/src/rp2_common/tinyusb/CMakeLists.txt pico-sdk/src/rp2_common/tinyusb/CMakeLists.old
+sed -E $'91i\\\n            ${PICO_TINYUSB_PATH}/src/class/hid/hidparser/HIDParser.c\n' pico-sdk/src/rp2_common/tinyusb/CMakeLists.old > pico-sdk/src/rp2_common/tinyusb/CMakeLists.txt
+
+# Build
+cmake -B build -S . && cd build && make
+```
 
 ## Using the emulator
 If you build the emulator as per the schematic, the Pico is powered directly from the Atari 5V supply. The Pico boots immediately but USB enumeration can take a few seconds. Once this is complete, the emulator is fully operational.
