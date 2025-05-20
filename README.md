@@ -31,14 +31,10 @@ The level shifter is required as the Atari uses 5V logic over the serial connect
 ## Compiling the Emulator Firmware
 
 To compile the firmware you will need to checkout this repository, sync the included submodules and make a small change to the picosdk CMakelist.txt.
-Compiling on the mac requires the following: 
 
-Xcode
-gcc arm-none-eabi-gcc ( from Homebrew.)
+Mac (ARM)  
 
-Mac
-
-Compiling on the mac can be perfomed with the following commands:
+Compiling on the mac requires xcode, gcc amd armi embedded toolchain. A build can be perfomed with the following commands:
 
 ```
 # Install GCC components from homebrew
