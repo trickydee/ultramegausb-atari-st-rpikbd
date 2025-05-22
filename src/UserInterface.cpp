@@ -123,7 +123,7 @@ void UserInterface::update_status() {
     ssd1306_draw_string(&disp, 0, 18, 1, buf);
     sprintf(buf, "%s", settings.get_settings().mouse_enabled ? "Mouse enabled" : "Joy 0 enabled");
     ssd1306_draw_string(&disp, 0, 27, 1, buf);
-    sprintf(buf, "CPU Clk: %d", cpu_freq);
+    sprintf(buf, "CPU: %.2f MHz", static_cast<double>(cpu_freq) / 1000000.0);
     ssd1306_draw_string(&disp, 0, 36, 1, buf);
 }
 
