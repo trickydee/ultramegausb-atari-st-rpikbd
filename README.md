@@ -121,15 +121,15 @@ The user interface has 4 pages that are rotated between by pressing the middle U
 
 1. USB Status + Mouse speed. Left and right buttons change allow the mouse speed to be altered.
    
-   ![Mouse speed](mouse.jpg)
+   ![Mouse speed](mouse_EN.jpg)
 
 2. USB Status + Joystick 0 assignment. Left and right buttons toggle between USB joystick and DB-9 joystick.
    
-   ![Joystick 0](joy0.jpg)
+   ![Joystick 0](joy0_usb.jpg) &emsp; ![Joystick 0](joy0_dsub.jpg)
 
 3. USB Status + Joystick 1 assignment. Left and right buttons toggle between USB joystick and DB-9 joystick.
    
-   ![Joystick 1](joy1.jpg)
+   ![Joystick 1](joy1_usb.jpg)  &emsp; ![Joystick 0](joy1_dsub.jpg)
 
 4. Serial data Tx/Rx between emulator and Atari. Data received from the Atari is on the left, data sent to the Atari is on the right.
    
