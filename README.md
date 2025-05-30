@@ -125,7 +125,7 @@ The user interface has 4 pages that are rotated between by pressing the middle U
 
 2. USB Status + Joystick 0 assignment. Left and right buttons toggle between USB joystick and DB-9 joystick.
    
-   ![Joystick 0](joy0_usb.jpg) &emsp; ![Joystick 0](joy0_dsub.jpg)
+ &emsp; ![Joystick 0](joy0_dsub.jpg)
 
 3. USB Status + Joystick 1 assignment. Left and right buttons toggle between USB joystick and DB-9 joystick.
    
