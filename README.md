@@ -11,6 +11,10 @@ flowing between the emulator and the Atari ST.
 
 The interface is now available in English, French, German, Spanish and Italian.
 
+![English](mouse_EN.jpg) &emsp; ![French](mouse_FR.jpg) &emsp; ![German](mouse_DE.jpg)
+
+![Spanish](mouse_SP.jpg) &emsp; ![Italian](mouse_IT.jpg)
+
 The emulator supports both USB and Atari ST compatible joysticks, supported a maximum of two joysticks at a time. Using the user interface
 you can select whether the USB joystick or Atari joystick are assigned to Joysticks 0 and 1.
 
@@ -107,6 +111,8 @@ cmake -DLANGUAGE=IT # For Italian interface
 
 make
 ```
+## Downloading the firmware
+If you don't know how or can't build the firmware by yourself, please find the builded files here: https://github.com/klyde2278/atari-st-rpikb/releases
 
 ## Using the emulator
 If you build the emulator as per the schematic, the Pico is powered directly from the Atari 5V supply. The Pico boots immediately but USB enumeration can take a few seconds. Once this is complete, the emulator is fully operational.
