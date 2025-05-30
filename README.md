@@ -9,6 +9,8 @@ The emulator displays a simple user interface on an OLED display. This is entire
 it is certainly useful to show successful connection of your USB devices as well as to allow the mouse speed to be tweaked and to view the data
 flowing between the emulator and the Atari ST.
 
+The interface is now available in English, French, German, Spanish and Italian.
+
 The emulator supports both USB and Atari ST compatible joysticks, supported a maximum of two joysticks at a time. Using the user interface
 you can select whether the USB joystick or Atari joystick are assigned to Joysticks 0 and 1.
 
@@ -54,6 +56,56 @@ sed -E $'91i\\\n            ${PICO_TINYUSB_PATH}/src/class/hid/hidparser/HIDPars
 
 # Build
 cmake -B build -S . && cd build && make
+```
+
+PC (Linux)
+```
+#Install GCC
+sudo apt install gcc-arm-none-eabi
+
+#Install cmake
+sudo apt install cmake
+
+#Clone the main repo in your home folder
+git clone --recursive https://github.com/klyde2278/atari-st-rpikb.git
+
+#Update submodules
+cd atari-st-rpkib
+git submodule update --init --recursive
+
+#fix missing hidparser include in cmakelists.txt
+Open file: atari-st-rpikb/pico-sdk/src/rp2_common/tinyusb/CMakeLists.txt
+Add this line after line 91:  ${PICO_TINYUSB_PATH}/src/class/hid/hidparser/HIDParser.c
+You should have:
+
+target_sources(tinyusb_host INTERFACE
+            ${PICO_TINYUSB_PATH}/src/portable/raspberrypi/rp2040/hcd_rp2040.c
+            ${PICO_TINYUSB_PATH}/src/portable/raspberrypi/rp2040/rp2040_usb.c
+            ${PICO_TINYUSB_PATH}/src/host/usbh.c
+            ${PICO_TINYUSB_PATH}/src/host/usbh_control.c
+            ${PICO_TINYUSB_PATH}/src/host/hub.c
+            ${PICO_TINYUSB_PATH}/src/class/cdc/cdc_host.c
+            ${PICO_TINYUSB_PATH}/src/class/hid/hid_host.c
+            ${PICO_TINYUSB_PATH}/src/class/hid/hidparser/HIDParser.c
+            ${PICO_TINYUSB_PATH}/src/class/msc/msc_host.c
+            ${PICO_TINYUSB_PATH}/src/class/vendor/vendor_host.c
+            )
+From your atari-st-rpikb folder:
+mkdir build
+cd build
+
+# Choose one of the cmake command below according to the language you want:
+cmake -DLANGUAGE=EN # For English interface
+or
+cmake -DLANGUAGE=FR # For French interface
+or
+cmake -DLANGUAGE=DE # For German interface
+or
+cmake -DLANGUAGE=SP # For Spanish interface
+or
+cmake -DLANGUAGE=IT # For Italian interface
+
+make
 ```
 
 ## Using the emulator
