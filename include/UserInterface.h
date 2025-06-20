@@ -26,6 +26,8 @@
 #define MOUSE_MIN -7
 #define MOUSE_MAX 8
 
+extern const char* get_translation(const char* key);
+
 class UserInterface {
 public:
     UserInterface();
