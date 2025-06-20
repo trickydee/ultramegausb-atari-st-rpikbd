@@ -115,21 +115,21 @@ void UserInterface::update_status() {
     uint32_t cpu_freq = clock_get_hz(clk_sys);
     //uint32_t cpu_freq = 123;
     ssd1306_clear(&disp);
-    sprintf(buf, "USB Keyboard  %d", num_kb);
+    sprintf(buf, "%s %d", get_translation("USB Keyboard"), num_kb);
     ssd1306_draw_string(&disp, 0, 0, 1,  buf);
-    sprintf(buf, "USB Mouse     %d", num_mouse);
+    sprintf(buf, "%s %d", get_translation("USB Mouse"), num_mouse);
     ssd1306_draw_string(&disp, 0, 9, 1,  buf);
-    sprintf(buf, "USB Joystick  %d", num_joy);
+    sprintf(buf, "%s %d", get_translation("USB Joystick"), num_joy);
     ssd1306_draw_string(&disp, 0, 18, 1, buf);
-    sprintf(buf, "%s", settings.get_settings().mouse_enabled ? "Mouse enabled" : "Joy 0 enabled");
+    sprintf(buf, "%s", get_translation(settings.get_settings().mouse_enabled ? "Mouse enabled" : "Joy 0 enabled"));
     ssd1306_draw_string(&disp, 0, 27, 1, buf);
-    sprintf(buf, "CPU Clk: %d", cpu_freq);
+    sprintf(buf, "CPU: %.2f MHz", static_cast<double>(cpu_freq) / 1000000.0);
     ssd1306_draw_string(&disp, 0, 36, 1, buf);
 }
 
 void UserInterface::update_mouse() {
     char buf[32];
-    ssd1306_draw_string(&disp, 0, 45, 1, "Mouse speed");
+    ssd1306_draw_string(&disp, 0, 45, 1, get_translation("Mouse speed"));
     sprintf(buf, "================");
     buf[settings.get_settings().mouse_speed - MOUSE_MIN] = '*';
     ssd1306_draw_string(&disp, 0, 54, 1, buf);

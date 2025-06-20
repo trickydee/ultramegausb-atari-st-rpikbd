@@ -1,0 +1,12 @@
+#include "UserInterface.h"
+#include <cstring>
+
+const char* get_translation(const char* key) {
+    if (strcmp(key, "USB Keyboard") == 0)  return "USB Keyboard  ";
+    if (strcmp(key, "USB Mouse") == 0)     return "USB Mouse     ";
+    if (strcmp(key, "USB Joystick") == 0)  return "USB Joystick  ";
+    if (strcmp(key, "Mouse enabled") == 0) return "Mouse enabled";
+    if (strcmp(key, "Joy 0 enabled") == 0) return "Joy 0 enabled";
+	if (strcmp(key, "Mouse speed") == 0)   return "Mouse speed";
+    return key;
+}
