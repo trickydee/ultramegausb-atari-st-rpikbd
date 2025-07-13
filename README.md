@@ -36,7 +36,7 @@ The level shifter is required as the Atari uses 5V logic over the serial connect
 
 ## Compiling the Emulator Firmware
 
-To compile the firmware you will need to checkout this repository, sync the included submodules and make a small change to the picosdk CMakelist.txt.
+To compile the firmware you will need to checkout this repository, sync the included submodules and make a small change to the pico-sdk CMakelist.txt.
 
 Mac (ARM)  
 
@@ -98,21 +98,21 @@ From your atari-st-rpikb folder:
 mkdir build
 cd build
 
-# Choose one of the cmake command below according to the language you want:
-cmake -DLANGUAGE=EN # For English interface
+# Choose one of the cmake command below according to the language and version number you want to display:
+cmake -DLANGUAGE=EN -DVERSION="1.1.1" .. # For English interface and version 1.1.1
 or
-cmake -DLANGUAGE=FR # For French interface
+cmake -DLANGUAGE=FR -DVERSION="1.1.1" ..  # For French interface and version 1.1.1
 or
-cmake -DLANGUAGE=DE # For German interface
+cmake -DLANGUAGE=DE -DVERSION="1.1.1" ..  # For German interface and version 1.1.1
 or
-cmake -DLANGUAGE=SP # For Spanish interface
+cmake -DLANGUAGE=SP -DVERSION="1.1.1" ..  # For Spanish interface and version 1.1.1
 or
-cmake -DLANGUAGE=IT # For Italian interface
+cmake -DLANGUAGE=IT -DVERSION="1.1.1" ..  # For Italian interface and version 1.1.1
 
 make
 ```
 ## Downloading the firmware
-If you don't know how or can't build the firmware by yourself, please find the builded files here: https://github.com/klyde2278/atari-st-rpikb/releases
+If you don't know how or can't build the firmware by yourself, please find the released files here: https://github.com/klyde2278/atari-st-rpikb/releases
 
 ## Using the emulator
 If you build the emulator as per the schematic, the Pico is powered directly from the Atari 5V supply. The Pico boots immediately but USB enumeration can take a few seconds. Once this is complete, the emulator is fully operational.
