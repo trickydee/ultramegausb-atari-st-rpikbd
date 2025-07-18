@@ -107,7 +107,7 @@ void UserInterface::update_serial() {
     }
     ssd1306_draw_string(&disp, 24, 27, 1, (char*)"ST <-> Kbd");
 
-	ssd1306_draw_string(&disp, 34, 0, 1, (char*)"V " FIRMWARE_VERSION);	    
+	ssd1306_draw_string(&disp, 34, 0, 1, (char*)"V 1.1.2");	    
 }
 
 void UserInterface::update_status() {
