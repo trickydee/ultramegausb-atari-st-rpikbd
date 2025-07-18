@@ -79,7 +79,7 @@ git submodule update --init --recursive
 
 #fix missing hidparser include in cmakelists.txt
 Open file: atari-st-rpikb/pico-sdk/src/rp2_common/tinyusb/CMakeLists.txt
-Add this line after line 91:  ${PICO_TINYUSB_PATH}/src/class/hid/hidparser/HIDParser.c
+If not present, add this line after line 91:  ${PICO_TINYUSB_PATH}/src/class/hid/hidparser/HIDParser.c
 You should have:
 
 target_sources(tinyusb_host INTERFACE
@@ -99,15 +99,15 @@ mkdir build
 cd build
 
 # Choose one of the cmake command below according to the language and version number you want to display:
-cmake -DLANGUAGE=EN -DVERSION="1.1.1" .. # For English interface and version 1.1.1
+cmake -DLANGUAGE=EN .. # For English interface
 or
-cmake -DLANGUAGE=FR -DVERSION="1.1.1" ..  # For French interface and version 1.1.1
+cmake -DLANGUAGE=FR ..  # For French interface
 or
-cmake -DLANGUAGE=DE -DVERSION="1.1.1" ..  # For German interface and version 1.1.1
+cmake -DLANGUAGE=DE ..  # For German interface
 or
-cmake -DLANGUAGE=SP -DVERSION="1.1.1" ..  # For Spanish interface and version 1.1.1
+cmake -DLANGUAGE=SP ..  # For Spanish interface
 or
-cmake -DLANGUAGE=IT -DVERSION="1.1.1" ..  # For Italian interface and version 1.1.1
+cmake -DLANGUAGE=IT ..  # For Italian interface
 
 make
 ```
