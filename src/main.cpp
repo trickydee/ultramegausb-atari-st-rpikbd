@@ -94,7 +94,10 @@ void core1_entry() {
 int main() {
     //stdio_init_all();
     board_init();
-    tusb_init();
+    if (tusb_init() != TUSB_ERROR_NONE) {
+        printf("Failed to initialize TinyUSB\n");
+        return -1;
+    }
 
     UserInterface ui;
     ui.init();
