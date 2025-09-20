@@ -106,6 +106,8 @@ void UserInterface::update_serial() {
         y += 9;
     }
     ssd1306_draw_string(&disp, 24, 27, 1, (char*)"ST <-> Kbd");
+
+	ssd1306_draw_string(&disp, 34, 0, 1, (char*)"V 1.1.2");	    
 }
 
 void UserInterface::update_status() {
@@ -130,7 +132,7 @@ void UserInterface::update_status() {
 void UserInterface::update_mouse() {
     char buf[32];
     ssd1306_draw_string(&disp, 0, 45, 1, get_translation("Mouse speed"));
-    sprintf(buf, "================");
+    sprintf(buf, "[==============]");
     buf[settings.get_settings().mouse_speed - MOUSE_MIN] = '*';
     ssd1306_draw_string(&disp, 0, 54, 1, buf);
 }

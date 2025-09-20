@@ -229,6 +229,8 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
 }
 
 bool HidInput::get_usb_joystick(int addr, uint8_t& axis, uint8_t& button) {
+	const int DEAD_ZONE = 0x10; // Dead zone value, can be adjusted
+    
     if (tuh_hid_is_mounted(addr) && !tuh_hid_is_busy(addr)) {
         const uint8_t* js = device[addr];
         HID_ReportInfo_t* info = tuh_hid_get_report_info(addr);
@@ -254,17 +256,22 @@ bool HidInput::get_usb_joystick(int addr, uint8_t& axis, uint8_t& button) {
                     }
                     // Up and left have a value < 0x80 (0 for digital)
                     // Down and right have a value > 0x80 (0xff for digital)
+					if (item->Value > (0x80 - DEAD_ZONE) && item->Value < (0x80 + DEAD_ZONE)) {
+                    
                     axis &= ~(0x3 << bit);
-                    if (item->Value < 0x80) {
+                    }
+                    else{
+                        axis &= ~(0x3 << bit);
+                        if (item->Value < 0x80 - DEAD_ZONE) {
                         axis |= 1 << bit;
                     }
-                    else if (item->Value > 0x80) {
+                    else if (item->Value > 0x80 + DEAD_ZONE) {
                         axis |= 1 << (bit + 1);
                     }
                 }
             }
         }
-
+    }
         // Trigger the next report
         tuh_hid_get_report(addr, device[addr]);
         return true;
