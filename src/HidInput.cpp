@@ -263,15 +263,15 @@ bool HidInput::get_usb_joystick(int addr, uint8_t& axis, uint8_t& button) {
                     else{
                         axis &= ~(0x3 << bit);
                         if (item->Value < 0x80 - DEAD_ZONE) {
-                        axis |= 1 << bit;
-                    }
-                    else if (item->Value > 0x80 + DEAD_ZONE) {
-                        axis |= 1 << (bit + 1);
+                            axis |= 1 << bit;
+                        }
+                        else if (item->Value > 0x80 + DEAD_ZONE) {
+                            axis |= 1 << (bit + 1);
+                        }
                     }
                 }
             }
         }
-    }
         // Trigger the next report
         tuh_hid_get_report(addr, device[addr]);
         return true;
