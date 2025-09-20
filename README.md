@@ -36,7 +36,7 @@ The level shifter is required as the Atari uses 5V logic over the serial connect
 
 ## Compiling the Emulator Firmware
 
-To compile the firmware you will need to checkout this repository, sync the included submodules and make a small change to the picosdk CMakelist.txt.
+To compile the firmware you will need to checkout this repository, sync the included submodules and make a small change to the pico-sdk CMakelist.txt.
 
 Mac (ARM)  
 
@@ -79,7 +79,7 @@ git submodule update --init --recursive
 
 #fix missing hidparser include in cmakelists.txt
 Open file: atari-st-rpikb/pico-sdk/src/rp2_common/tinyusb/CMakeLists.txt
-Add this line after line 91:  ${PICO_TINYUSB_PATH}/src/class/hid/hidparser/HIDParser.c
+If not present, add this line after line 91:  ${PICO_TINYUSB_PATH}/src/class/hid/hidparser/HIDParser.c
 You should have:
 
 target_sources(tinyusb_host INTERFACE
@@ -98,21 +98,21 @@ From your atari-st-rpikb folder:
 mkdir build
 cd build
 
-# Choose one of the cmake command below according to the language you want:
-cmake -DLANGUAGE=EN # For English interface
+# Choose one of the cmake command below according to the language and version number you want to display:
+cmake -DLANGUAGE=EN .. # For English interface
 or
-cmake -DLANGUAGE=FR # For French interface
+cmake -DLANGUAGE=FR ..  # For French interface
 or
-cmake -DLANGUAGE=DE # For German interface
+cmake -DLANGUAGE=DE ..  # For German interface
 or
-cmake -DLANGUAGE=SP # For Spanish interface
+cmake -DLANGUAGE=SP ..  # For Spanish interface
 or
-cmake -DLANGUAGE=IT # For Italian interface
+cmake -DLANGUAGE=IT ..  # For Italian interface
 
 make
 ```
 ## Downloading the firmware
-If you don't know how or can't build the firmware by yourself, please find the builded files here: https://github.com/klyde2278/atari-st-rpikb/releases
+If you don't know how or can't build the firmware by yourself, please find the released files here: https://github.com/klyde2278/atari-st-rpikb/releases
 
 ## Using the emulator
 If you build the emulator as per the schematic, the Pico is powered directly from the Atari 5V supply. The Pico boots immediately but USB enumeration can take a few seconds. Once this is complete, the emulator is fully operational.
