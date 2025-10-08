@@ -19,8 +19,8 @@
 #include "HidInput.h"
 #include "st_key_lookup.h"
 #include "AtariSTMouse.h"
-#include "bsp/board.h"
 #include "tusb.h"
+#include "hid_app_host.h"
 #include "config.h"
 #include <map>
 

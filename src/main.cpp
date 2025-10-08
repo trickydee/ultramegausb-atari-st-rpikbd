@@ -25,7 +25,6 @@
 #include "6301.h"
 #include "cpu.h"
 #include "util.h"
-#include "bsp/board.h"
 #include "tusb.h"
 #include "HidInput.h"
 #include "SerialPort.h"
@@ -92,10 +91,10 @@ void core1_entry() {
 
 
 int main() {
-    //stdio_init_all();
-    board_init();
-    if (tusb_init() != TUSB_ERROR_NONE) {
-        printf("Failed to initialize TinyUSB\n");
+    // Note: stdio_init_all() not called as it may interfere with SerialPort UART setup
+    if (!tusb_init()) {
+        // TinyUSB initialization failed
+        // Can't print error since stdio not initialized
         return -1;
     }
 
