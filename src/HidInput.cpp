@@ -24,8 +24,12 @@
 #include "config.h"
 #include <map>
 
-// Mouse toggle key is set to Scroll Lock
-#define TOGGLE_MOUSE_MODE 71
+// Mouse toggle key is set to Ctrl+F12
+#define TOGGLE_MOUSE_MODE 0x45  // F12 key (69 decimal)
+
+// Alt + / sends Atari INSERT
+#define HID_KEY_SLASH 0x38  // Forward slash key (56 decimal)
+#define ATARI_INSERT  82    // Atari ST INSERT scancode
 
 #define ATARI_LSHIFT 42
 #define ATARI_RSHIFT 54
@@ -140,13 +144,45 @@ void HidInput::handle_keyboard() {
         if (tuh_hid_is_mounted(it.first) && !tuh_hid_is_busy(it.first)) {
             hid_keyboard_report_t* kb = (hid_keyboard_report_t*)it.second;
 
+            // Check for Ctrl+F12 to toggle mouse mode
+            static bool last_toggle_state = false;
+            bool ctrl_pressed = (kb->modifier & KEYBOARD_MODIFIER_LEFTCTRL) || (kb->modifier & KEYBOARD_MODIFIER_RIGHTCTRL);
+            bool f12_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == TOGGLE_MOUSE_MODE) {
+                    f12_pressed = true;
+                    break;
+                }
+            }
+            if (ctrl_pressed && f12_pressed) {
+                // Toggle mouse mode on Ctrl+F12
+                if (!last_toggle_state) {
+                    ui_->set_mouse_enabled(!ui_->get_mouse_enabled());
+                    last_toggle_state = true;
+                }
+            } else {
+                last_toggle_state = false;
+            }
+            
+            // Check for Alt + / to send INSERT
+            bool alt_pressed = (kb->modifier & KEYBOARD_MODIFIER_LEFTALT) || (kb->modifier & KEYBOARD_MODIFIER_RIGHTALT);
+            bool slash_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == HID_KEY_SLASH) {
+                    slash_pressed = true;
+                    break;
+                }
+            }
+            
             // Translate the USB HID codes into ST keys that are currently down
             char st_keys[6];
             for (int i = 0; i < 6; ++i) {
                 if ((kb->keycode[i] > 0) && (kb->keycode[i] < 128)) {
-                    st_keys[i] = st_key_lookup_hid_gb[kb->keycode[i]];
-                    if (kb->keycode[i] == TOGGLE_MOUSE_MODE) {
-                        ui_->set_mouse_enabled(!ui_->get_mouse_enabled());
+                    // If Alt + / is pressed, replace / with INSERT
+                    if (alt_pressed && kb->keycode[i] == HID_KEY_SLASH) {
+                        st_keys[i] = ATARI_INSERT;
+                    } else {
+                        st_keys[i] = st_key_lookup_hid_gb[kb->keycode[i]];
                     }
                 }
                 else {
