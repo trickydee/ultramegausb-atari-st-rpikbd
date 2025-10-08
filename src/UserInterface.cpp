@@ -128,11 +128,17 @@ void UserInterface::update_status() {
     sprintf(buf, "CPU: %.2f MHz", static_cast<double>(cpu_freq) / 1000000.0);
     ssd1306_draw_string(&disp, 0, 36, 1, buf);
     // Debug info
-    sprintf(buf, "M:%lu R:%lu C:%lu", 
-        hid_debug_get_mount_calls(), 
+    uint32_t addr_inst = hid_debug_get_last_addr_inst();
+    sprintf(buf, "M:%lu D:%lu A:%d.%d", 
+        hid_debug_get_mount_calls(),
+        hid_debug_get_active_devices(),
+        (addr_inst >> 8) & 0xFF,
+        addr_inst & 0xFF);
+    ssd1306_draw_string(&disp, 0, 45, 1, buf);
+    sprintf(buf, "R:%lu C:%lu", 
         hid_debug_get_report_calls(),
         hid_debug_get_report_copied());
-    ssd1306_draw_string(&disp, 0, 45, 1, buf);
+    ssd1306_draw_string(&disp, 0, 54, 1, buf);
 }
 
 void UserInterface::update_mouse() {

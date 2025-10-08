@@ -21,7 +21,8 @@ typedef struct {
   bool                  report_pending;
 } hidh_device_t;
 
-static hidh_device_t hid_devices[CFG_TUSB_HOST_DEVICE_MAX];
+// Size array for HID interfaces, not just devices (devices can have multiple interfaces)
+static hidh_device_t hid_devices[CFG_TUH_HID];
 static HID_TYPE filter_type = HID_UNDEFINED;
 
 // Debug counters (can be read externally)
@@ -29,16 +30,21 @@ static uint32_t debug_mount_calls = 0;
 static uint32_t debug_report_calls = 0;
 static uint32_t debug_report_copied = 0;
 static uint32_t debug_unmount_calls = 0;
+static uint8_t debug_last_dev_addr = 0;
+static uint8_t debug_last_instance = 0;
+static uint8_t debug_active_devices = 0;
 
 // Accessor functions for debug counters
 uint32_t hid_debug_get_mount_calls(void) { return debug_mount_calls; }
 uint32_t hid_debug_get_report_calls(void) { return debug_report_calls; }
 uint32_t hid_debug_get_report_copied(void) { return debug_report_copied; }
 uint32_t hid_debug_get_unmount_calls(void) { return debug_unmount_calls; }
+uint32_t hid_debug_get_active_devices(void) { return debug_active_devices; }
+uint32_t hid_debug_get_last_addr_inst(void) { return (debug_last_dev_addr << 8) | debug_last_instance; }
 
 // Find device by address
 static hidh_device_t* find_device(uint8_t dev_addr) {
-  for (int i = 0; i < CFG_TUSB_HOST_DEVICE_MAX; i++) {
+  for (int i = 0; i < CFG_TUH_HID; i++) {
     if (hid_devices[i].dev_addr == dev_addr && hid_devices[i].mounted) {
       return &hid_devices[i];
     }
@@ -48,7 +54,7 @@ static hidh_device_t* find_device(uint8_t dev_addr) {
 
 // Find device by address and instance
 static hidh_device_t* find_device_by_inst(uint8_t dev_addr, uint8_t instance) {
-  for (int i = 0; i < CFG_TUSB_HOST_DEVICE_MAX; i++) {
+  for (int i = 0; i < CFG_TUH_HID; i++) {
     if (hid_devices[i].dev_addr == dev_addr && 
         hid_devices[i].instance == instance &&
         hid_devices[i].mounted) {
@@ -60,7 +66,7 @@ static hidh_device_t* find_device_by_inst(uint8_t dev_addr, uint8_t instance) {
 
 // Allocate a new device slot
 static hidh_device_t* alloc_device(uint8_t dev_addr, uint8_t instance) {
-  for (int i = 0; i < CFG_TUSB_HOST_DEVICE_MAX; i++) {
+  for (int i = 0; i < CFG_TUH_HID; i++) {
     if (!hid_devices[i].mounted) {
       memset(&hid_devices[i], 0, sizeof(hidh_device_t));
       hid_devices[i].dev_addr = dev_addr;
@@ -74,7 +80,7 @@ static hidh_device_t* alloc_device(uint8_t dev_addr, uint8_t instance) {
 
 // Free a device slot
 static void free_device(uint8_t dev_addr) {
-  for (int i = 0; i < CFG_TUSB_HOST_DEVICE_MAX; i++) {
+  for (int i = 0; i < CFG_TUH_HID; i++) {
     if (hid_devices[i].dev_addr == dev_addr) {
       memset(&hid_devices[i], 0, sizeof(hidh_device_t));
       return;
@@ -157,9 +163,17 @@ HID_ReportInfo_t* tuh_hid_get_report_info(uint8_t dev_addr) {
 // Invoked when device with HID interface is mounted
 void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_desc, uint16_t desc_len) {
   debug_mount_calls++;
+  debug_last_dev_addr = dev_addr;
+  debug_last_instance = instance;
   
   hidh_device_t* dev = alloc_device(dev_addr, instance);
   if (!dev) return;
+  
+  // Count active devices
+  debug_active_devices = 0;
+  for (int i = 0; i < CFG_TUH_HID; i++) {
+    if (hid_devices[i].mounted) debug_active_devices++;
+  }
   
   uint8_t protocol = tuh_hid_interface_protocol(dev_addr, instance);
   
@@ -174,7 +188,7 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
     // Only call app callback for first interface of this device address
     // Find if we already have another interface for this dev_addr
     bool first_interface = true;
-    for (int i = 0; i < CFG_TUSB_HOST_DEVICE_MAX; i++) {
+    for (int i = 0; i < CFG_TUH_HID; i++) {
       if (hid_devices[i].dev_addr == dev_addr && 
           hid_devices[i].mounted && 
           &hid_devices[i] != dev) {
@@ -264,7 +278,7 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance) {
   
   // Only call app unmount callback once per device (for first instance)
   bool should_notify = true;
-  for (int i = 0; i < CFG_TUSB_HOST_DEVICE_MAX; i++) {
+  for (int i = 0; i < CFG_TUH_HID; i++) {
     if (hid_devices[i].dev_addr == dev_addr && 
         hid_devices[i].mounted && 
         hid_devices[i].instance < instance) {
