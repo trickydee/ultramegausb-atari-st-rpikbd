@@ -148,12 +148,12 @@ void UserInterface::update_splash() {
     ssd1306_clear(&disp);
     
     // ATARI text (centered)
-    ssd1306_draw_string(&disp, 30, 10, 2, (char*)"ATARI");
-    ssd1306_draw_string(&disp, 28, 35, 1, (char*)"USB - Mega");
-    ssd1306_draw_string(&disp, 40, 50, 1, (char*)"Adapter");
+    ssd1306_draw_string(&disp, 30, 0, 2, (char*)"ATARI");
+    ssd1306_draw_string(&disp, 28, 25, 1, (char*)"USB - Mega");
+    ssd1306_draw_string(&disp, 40, 40, 1, (char*)"Adapter");
     
     // Version number at bottom
-    ssd1306_draw_string(&disp, 48, 56, 1, (char*)"v" PROJECT_VERSION_STRING);
+    ssd1306_draw_string(&disp, 45, 55, 1, (char*)"v" PROJECT_VERSION_STRING);
 }
 
 void UserInterface::update_usb_debug() {
