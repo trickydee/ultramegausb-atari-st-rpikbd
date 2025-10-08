@@ -48,19 +48,19 @@ void tuh_hid_mounted_cb(uint8_t dev_addr) {
     if (tp == HID_KEYBOARD) {
         // printf("A keyboard device (address %d) is mounted\r\n", dev_addr);
         device[dev_addr] = new uint8_t[sizeof(hid_keyboard_report_t)];
-        tuh_hid_get_report(dev_addr, device[dev_addr]);
+        hid_app_request_report(dev_addr, device[dev_addr]);
         ++kb_count;
     }
     else if (tp == HID_MOUSE) {
         // printf("A mouse device (address %d) is mounted\r\n", dev_addr);
         device[dev_addr] = new uint8_t[tuh_hid_get_report_size(dev_addr)];
-        tuh_hid_get_report(dev_addr, device[dev_addr]);
+        hid_app_request_report(dev_addr, device[dev_addr]);
         ++mouse_count;
     }
     else if (tp == HID_JOYSTICK) {
         // printf("A joystick device (address %d) is mounted\r\n", dev_addr);
         device[dev_addr] = new uint8_t[tuh_hid_get_report_size(dev_addr)];
-        tuh_hid_get_report(dev_addr, device[dev_addr]);
+        hid_app_request_report(dev_addr, device[dev_addr]);
         ++joy_count;
     }
     if (ui_) {
@@ -173,7 +173,7 @@ void HidInput::handle_keyboard() {
             key_states[ATARI_ALT] = ((kb->modifier & KEYBOARD_MODIFIER_LEFTALT) ||
                                       (kb->modifier & KEYBOARD_MODIFIER_RIGHTALT)) ? 1 : 0;
             // Trigger the next report
-            tuh_hid_get_report(it.first, it.second);
+            hid_app_request_report(it.first, it.second);
         }
     }
 }
@@ -220,7 +220,7 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
                 mouse_state = (mouse_state & 0xfe) | ((buttons & MOUSE_BUTTON_RIGHT) ? 1 : 0);
             }
             // Trigger the next report
-            tuh_hid_get_report(it.first, it.second);
+            hid_app_request_report(it.first, it.second);
         }
     }
     // Handle the mouse acceleration/deceleration configured in the UI.
@@ -273,7 +273,7 @@ bool HidInput::get_usb_joystick(int addr, uint8_t& axis, uint8_t& button) {
             }
         }
         // Trigger the next report
-        tuh_hid_get_report(addr, device[addr]);
+        hid_app_request_report(addr, device[addr]);
         return true;
     }
     return false;
