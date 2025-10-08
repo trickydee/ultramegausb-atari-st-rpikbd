@@ -33,10 +33,12 @@ public:
     UserInterface();
 
     enum PAGE {
+        PAGE_SPLASH,
         PAGE_MOUSE,
         PAGE_JOY0,
         PAGE_JOY1,
-        PAGE_SERIAL
+        PAGE_SERIAL,
+        PAGE_USB_DEBUG
     };
 
     void init();
@@ -81,11 +83,13 @@ private:
     void update_status();
     void update_mouse();
     void update_joy(int index);
+    void update_usb_debug();
+    void update_splash();
     void handle_buttons();
     void on_button_down(int i);
 
 private:
-    PAGE        page = PAGE_MOUSE;
+    PAGE        page = PAGE_SPLASH;
     NVSettings  settings;
     bool        dirty = true;
     int         num_kb = 0;
