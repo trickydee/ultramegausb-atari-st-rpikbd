@@ -46,19 +46,19 @@ extern "C" {
 void tuh_hid_mounted_cb(uint8_t dev_addr) {
     HID_TYPE tp = tuh_hid_get_type(dev_addr);
     if (tp == HID_KEYBOARD) {
-        printf("A keyboard device (address %d) is mounted\r\n", dev_addr);
+        // printf("A keyboard device (address %d) is mounted\r\n", dev_addr);
         device[dev_addr] = new uint8_t[sizeof(hid_keyboard_report_t)];
         tuh_hid_get_report(dev_addr, device[dev_addr]);
         ++kb_count;
     }
     else if (tp == HID_MOUSE) {
-        printf("A mouse device (address %d) is mounted\r\n", dev_addr);
+        // printf("A mouse device (address %d) is mounted\r\n", dev_addr);
         device[dev_addr] = new uint8_t[tuh_hid_get_report_size(dev_addr)];
         tuh_hid_get_report(dev_addr, device[dev_addr]);
         ++mouse_count;
     }
     else if (tp == HID_JOYSTICK) {
-        printf("A joystick device (address %d) is mounted\r\n", dev_addr);
+        // printf("A joystick device (address %d) is mounted\r\n", dev_addr);
         device[dev_addr] = new uint8_t[tuh_hid_get_report_size(dev_addr)];
         tuh_hid_get_report(dev_addr, device[dev_addr]);
         ++joy_count;
@@ -71,15 +71,15 @@ void tuh_hid_mounted_cb(uint8_t dev_addr) {
 void tuh_hid_unmounted_cb(uint8_t dev_addr) {
     HID_TYPE tp = tuh_hid_get_type(dev_addr);
     if (tp == HID_KEYBOARD) {
-        printf("A keyboard device (address %d) is unmounted\r\n", dev_addr);
+        // printf("A keyboard device (address %d) is unmounted\r\n", dev_addr);
         --kb_count;
     }
     else if (tp == HID_MOUSE) {
-        printf("A mouse device (address %d) is unmounted\r\n", dev_addr);
+        // printf("A mouse device (address %d) is unmounted\r\n", dev_addr);
         --mouse_count;
     }
     else if (tp == HID_JOYSTICK) {
-        printf("A joystick device (address %d) is unmounted\r\n", dev_addr);
+        // printf("A joystick device (address %d) is unmounted\r\n", dev_addr);
         --joy_count;
     }
     auto it = device.find(dev_addr);
