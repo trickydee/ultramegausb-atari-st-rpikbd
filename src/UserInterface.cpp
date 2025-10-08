@@ -18,7 +18,7 @@
 */
 #include "UserInterface.h"
 #include "pico/stdlib.h"
-#include "bsp/board.h"
+#include "hid_app_host.h"
 #include "config.h"
 #include "hardware/clocks.h"
 
@@ -127,6 +127,12 @@ void UserInterface::update_status() {
     ssd1306_draw_string(&disp, 0, 27, 1, buf);
     sprintf(buf, "CPU: %.2f MHz", static_cast<double>(cpu_freq) / 1000000.0);
     ssd1306_draw_string(&disp, 0, 36, 1, buf);
+    // Debug info
+    sprintf(buf, "M:%lu R:%lu C:%lu", 
+        hid_debug_get_mount_calls(), 
+        hid_debug_get_report_calls(),
+        hid_debug_get_report_copied());
+    ssd1306_draw_string(&disp, 0, 45, 1, buf);
 }
 
 void UserInterface::update_mouse() {

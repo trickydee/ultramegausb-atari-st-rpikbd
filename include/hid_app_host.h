@@ -38,7 +38,7 @@ HID_TYPE tuh_hid_get_type(uint8_t dev_addr);
 bool tuh_hid_is_busy(uint8_t dev_addr);
 
 // Perform a get report from HID interface
-tusb_error_t tuh_hid_get_report(uint8_t dev_addr, void * p_report);
+bool tuh_hid_get_report(uint8_t dev_addr, void * p_report);
 
 // Get the size of the HID report in bytes
 uint16_t tuh_hid_get_report_size(uint8_t dev_addr);
@@ -49,6 +49,12 @@ HID_ReportInfo_t* tuh_hid_get_report_info(uint8_t dev_addr);
 // Application callbacks
 void tuh_hid_mounted_cb(uint8_t dev_addr);
 void tuh_hid_unmounted_cb(uint8_t dev_addr);
+
+// Debug functions
+uint32_t hid_debug_get_mount_calls(void);
+uint32_t hid_debug_get_report_calls(void);
+uint32_t hid_debug_get_report_copied(void);
+uint32_t hid_debug_get_unmount_calls(void);
 
 #ifdef __cplusplus
 }
