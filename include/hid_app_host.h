@@ -55,6 +55,8 @@ uint32_t hid_debug_get_mount_calls(void);
 uint32_t hid_debug_get_report_calls(void);
 uint32_t hid_debug_get_report_copied(void);
 uint32_t hid_debug_get_unmount_calls(void);
+uint32_t hid_debug_get_active_devices(void);
+uint32_t hid_debug_get_last_addr_inst(void);  // Returns (addr << 8) | instance
 
 #ifdef __cplusplus
 }
