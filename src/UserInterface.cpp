@@ -17,6 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 #include "UserInterface.h"
+#include "version.h"
 #include "pico/stdlib.h"
 #include "hid_app_host.h"
 #include "config.h"
@@ -107,7 +108,7 @@ void UserInterface::update_serial() {
     }
     ssd1306_draw_string(&disp, 24, 27, 1, (char*)"ST <-> Kbd");
 
-	ssd1306_draw_string(&disp, 34, 0, 1, (char*)"V 1.1.2");	    
+	ssd1306_draw_string(&disp, 34, 0, 1, (char*)"V " PROJECT_VERSION_STRING);	    
 }
 
 void UserInterface::update_status() {
@@ -150,6 +151,9 @@ void UserInterface::update_splash() {
     ssd1306_draw_string(&disp, 30, 10, 2, (char*)"ATARI");
     ssd1306_draw_string(&disp, 28, 35, 1, (char*)"USB - Mega");
     ssd1306_draw_string(&disp, 40, 50, 1, (char*)"Adapter");
+    
+    // Version number at bottom
+    ssd1306_draw_string(&disp, 48, 56, 1, (char*)"v" PROJECT_VERSION_STRING);
 }
 
 void UserInterface::update_usb_debug() {

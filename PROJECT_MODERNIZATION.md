@@ -4,8 +4,8 @@
 This document captures the complete modernization process of the Atari ST USB adapter project, including dependency upgrades, compatibility fixes, and performance optimizations.
 
 ## Project Status
-- **Original State**: Custom Pico SDK 1.1.2 fork + Custom TinyUSB 0.10.1 fork
-- **Current State**: Official Pico SDK 1.5.1 + Official TinyUSB 0.19.0
+- **Original State**: Custom Pico SDK 1.1.2 fork + Custom TinyUSB 0.10.1 fork (Version 1.1.2)
+- **Current State**: Official Pico SDK 1.5.1 + Official TinyUSB 0.19.0 (Version 2.0.0)
 - **Performance**: Overclocked to 270 MHz (up from 250 MHz)
 - **Status**: Fully functional with enhanced features
 
