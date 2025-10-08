@@ -17,6 +17,16 @@
 
 cmake_minimum_required(VERSION 3.13...3.27)
 
+# Apply patches for build compatibility
+execute_process(
+    COMMAND ${CMAKE_SOURCE_DIR}/apply-patches.sh
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    RESULT_VARIABLE PATCH_RESULT
+)
+if(NOT PATCH_RESULT EQUAL "0")
+    message(WARNING "Failed to apply patches: ${PATCH_RESULT}")
+endif()
+
 # Pull in SDK (must be before project)
 set(PICO_SDK_PATH ${CMAKE_SOURCE_DIR}/pico-sdk)
 include(pico_sdk_import.cmake)
