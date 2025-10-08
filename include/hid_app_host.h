@@ -37,8 +37,9 @@ HID_TYPE tuh_hid_get_type(uint8_t dev_addr);
 // Check if the interface is currently busy or not
 bool tuh_hid_is_busy(uint8_t dev_addr);
 
-// Perform a get report from HID interface
-bool tuh_hid_get_report(uint8_t dev_addr, void * p_report);
+// Queue a buffer to receive the next report (legacy API wrapper)
+// Renamed from tuh_hid_get_report to avoid collision with TinyUSB 0.19+ API
+bool hid_app_request_report(uint8_t dev_addr, void * p_report);
 
 // Get the size of the HID report in bytes
 uint16_t tuh_hid_get_report_size(uint8_t dev_addr);

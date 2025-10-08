@@ -134,7 +134,7 @@ bool tuh_hid_is_busy(uint8_t dev_addr) {
   return dev->report_pending;
 }
 
-bool tuh_hid_get_report(uint8_t dev_addr, void * p_report) {
+bool hid_app_request_report(uint8_t dev_addr, void * p_report) {
   hidh_device_t* dev = find_device(dev_addr);
   if (!dev) return false;
   
