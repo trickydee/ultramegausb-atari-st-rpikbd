@@ -15,3 +15,4 @@ else
 fi
 
 echo "All patches applied successfully!"
+

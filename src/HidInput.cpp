@@ -31,6 +31,10 @@
 #define HID_KEY_SLASH 0x38  // Forward slash key (56 decimal)
 #define ATARI_INSERT  82    // Atari ST INSERT scancode
 
+// Alt + Plus/Minus for clock speed control
+#define HID_KEY_EQUAL 0x2E  // = key (also + with shift) (46 decimal)
+#define HID_KEY_MINUS 0x2D  // - key (45 decimal)
+
 #define ATARI_LSHIFT 42
 #define ATARI_RSHIFT 54
 #define ATARI_ALT    56
@@ -174,6 +178,42 @@ void HidInput::handle_keyboard() {
                 }
             }
             
+            // Check for Alt + Plus (=) to set 270MHz
+            static bool last_plus_state = false;
+            bool plus_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == HID_KEY_EQUAL) {
+                    plus_pressed = true;
+                    break;
+                }
+            }
+            if (alt_pressed && plus_pressed) {
+                if (!last_plus_state) {
+                    set_sys_clock_khz(270000, false);
+                    last_plus_state = true;
+                }
+            } else {
+                last_plus_state = false;
+            }
+            
+            // Check for Alt + Minus to set 150MHz
+            static bool last_minus_state = false;
+            bool minus_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == HID_KEY_MINUS) {
+                    minus_pressed = true;
+                    break;
+                }
+            }
+            if (alt_pressed && minus_pressed) {
+                if (!last_minus_state) {
+                    set_sys_clock_khz(150000, false);
+                    last_minus_state = true;
+                }
+            } else {
+                last_minus_state = false;
+            }
+            
             // Translate the USB HID codes into ST keys that are currently down
             char st_keys[6];
             for (int i = 0; i < 6; ++i) {
@@ -181,7 +221,12 @@ void HidInput::handle_keyboard() {
                     // If Alt + / is pressed, replace / with INSERT
                     if (alt_pressed && kb->keycode[i] == HID_KEY_SLASH) {
                         st_keys[i] = ATARI_INSERT;
-                    } else {
+                    }
+                    // If Alt + Plus or Alt + Minus, don't send to Atari (used for clock control)
+                    else if (alt_pressed && (kb->keycode[i] == HID_KEY_EQUAL || kb->keycode[i] == HID_KEY_MINUS)) {
+                        st_keys[i] = 0;
+                    }
+                    else {
                         st_keys[i] = st_key_lookup_hid_gb[kb->keycode[i]];
                     }
                 }
