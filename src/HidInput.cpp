@@ -323,7 +323,11 @@ bool HidInput::get_usb_joystick(int addr, uint8_t& axis, uint8_t& button) {
                     continue;
                 // Determine what report item is being tested, process updated value as needed
                 if ((item->Attributes.Usage.Page == USAGE_PAGE_BUTTON) && (item->ItemType == HID_REPORT_ITEM_In)) {
-                    button |= item->Value;
+                    // Set button state directly (don't accumulate with |=)
+                    // This ensures button releases are properly detected
+                    if (item->Value) {
+                        button = 1;
+                    }
                 }
                 else if ((item->Attributes.Usage.Page   == USAGE_PAGE_GENERIC_DCTRL) &&
                             ((item->Attributes.Usage.Usage == USAGE_X) || (item->Attributes.Usage.Usage == USAGE_Y)) &&
@@ -361,9 +365,6 @@ bool HidInput::get_usb_joystick(int addr, uint8_t& axis, uint8_t& button) {
 }
 
 void HidInput::handle_joystick() {
-    uint8_t axis = 0;
-    uint8_t button = 0;
-
     // Find the joystick addresses
     std::vector<int> joystick_addr;
     int next_joystick = 0;
@@ -375,6 +376,10 @@ void HidInput::handle_joystick() {
 
     // See if the joysticks are GPIO or USB
     for (int joystick = 1; joystick >= 0; --joystick) {
+        // Initialize axis and button for each joystick separately to prevent state bleed
+        uint8_t axis = 0;
+        uint8_t button = 0;
+        
         if (ui_->get_joystick() & (1 << joystick)) {
             // GPIO
             if (joystick == 1) {
