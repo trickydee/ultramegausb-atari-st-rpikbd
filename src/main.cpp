@@ -102,11 +102,11 @@ int main() {
     ui.init();
     ui.update();
 
-    // Overclock the Pico to 270Mhz to improve performance
-    if (!set_sys_clock_khz(270000, false))
-      printf("system clock 270MHz failed\n");
+    // Overclock the Pico to 150Mhz to improve performance
+    if (!set_sys_clock_khz(150000, false))
+      printf("system clock 150MHz failed\n");
     else
-      printf("system clock now 270MHz\n");
+      printf("system clock now 150MHz\n");
 
     // Setup the UART and HID instance.
     SerialPort::instance().open();
