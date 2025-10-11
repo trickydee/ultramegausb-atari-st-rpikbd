@@ -183,10 +183,10 @@ u_int offs;
 
     The ROM may write either 1 or 0 on DR2.
     When we read, DDR2 is always 1.
-    Button pressed -> bit cleared (not set)
-    mousek 1 ->   value 2
-    mouesk 2 ->   value 4
-    mousek 3 ->   value 0
+    Button state encoding (replaces entire value, not individual bits):
+    mouse button 1 (JOY1 fire) ->   value 2
+    mouse button 2 (JOY0 fire) ->   value 4
+    both buttons pressed       ->   value 6
 */
 
 static u_char dr2_getb (offs)
@@ -201,7 +201,12 @@ static u_char dr2_getb (offs)
   value=0xFF; // note bits 5-7=111 in monochip mode, bits 3-4=serial lines
   if(st_mouse_buttons()) // clear the correct bit (see above)
   {
-    value=(st_mouse_buttons()*2)%6;
+    // Original formula (mouse_buttons*2)%6 fails when both buttons pressed (returns 0)
+    // Keep the same mapping but handle the both-buttons case correctly:
+    // mouse_state 1 (JOY1) -> value 2
+    // mouse_state 2 (JOY0) -> value 4  
+    // mouse_state 3 (both) -> value 6 (was incorrectly 0 with modulo 6)
+    value = st_mouse_buttons() * 2;
 //    TRACE("HD6301 handling mousek %x -> %x\n",mousek,value);
   }
   return value;
