@@ -463,3 +463,9 @@ unsigned char st_joystick() {
 int st_mouse_enabled() {
     return HidInput::instance().mouse_enabled() ? 1 : 0;
 }
+
+void update_joystick_state() {
+    // Called from 6301 emulator when DR2/DR4 registers are read
+    // Provides on-demand joystick updates for better timing accuracy
+    HidInput::instance().handle_joystick();
+}

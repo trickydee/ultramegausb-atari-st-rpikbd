@@ -198,6 +198,12 @@ static u_char dr2_getb (offs)
   //ASSERT(ddr2==1); // strong
 #endif
   //ASSERT(offs==P2);
+  
+  // Update joystick state on-demand for better timing accuracy
+  // This ensures games get fresh data when they poll DR2 (fire buttons)
+  extern void update_joystick_state();
+  update_joystick_state();
+  
   value=0xFF; // note bits 5-7=111 in monochip mode, bits 3-4=serial lines
   if(st_mouse_buttons()) // clear the correct bit (see above)
   {
@@ -263,6 +269,10 @@ static u_char dr4_getb (offs)
 */
   if(!ddr4 && (ddr2&1) && (dr2&1))
   {
+    // Update joystick state on-demand for better timing accuracy
+    // This ensures games get fresh data when they poll DR4 (directions)
+    extern void update_joystick_state();
+    update_joystick_state();
     if (st_mouse_enabled()) {
       value = (value & (~0xF)) | (mouse_x_counter&3)|((mouse_y_counter&3)<<2);
       // Add joystick 1
