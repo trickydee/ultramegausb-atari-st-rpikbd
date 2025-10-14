@@ -177,3 +177,4 @@ We don't have equivalent real-time polling within the 6301 emulator. Joystick st
 - Consider calling `HidInput::handle_joystick()` from within the 6301 emulator when registers are read
 - Profile the performance impact of more frequent joystick polling
 
+
