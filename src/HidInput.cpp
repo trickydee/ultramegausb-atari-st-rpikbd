@@ -22,6 +22,7 @@
 #include "tusb.h"
 #include "hid_app_host.h"
 #include "config.h"
+#include "hardware/clocks.h"
 #include <map>
 
 // Mouse toggle key is set to Ctrl+F12
