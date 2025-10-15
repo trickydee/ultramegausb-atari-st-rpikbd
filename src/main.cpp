@@ -32,6 +32,7 @@
 #include "SerialPort.h"
 #include "AtariSTMouse.h"
 #include "UserInterface.h"
+#include "xinput.h"
 
 
 #define ROMBASE     256
@@ -165,4 +166,37 @@ int main() {
         }
     }
     return 0;
+}
+
+//--------------------------------------------------------------------+
+// TinyUSB General Mount Callback
+//--------------------------------------------------------------------+
+
+// This is called for ALL USB devices (not just HID)
+// We use it to detect Xbox controllers which are vendor class (0xFF)
+void tuh_mount_cb(uint8_t dev_addr) {
+    printf("USB Device mounted at address %d\n", dev_addr);
+    
+    // Get device VID/PID
+    uint16_t vid, pid;
+    tuh_vid_pid_get(dev_addr, &vid, &pid);
+    
+    printf("  VID: 0x%04X, PID: 0x%04X\n", vid, pid);
+    
+    // Check if this is an Xbox controller
+    if (xinput_is_xbox_controller(vid, pid)) {
+        printf("  -> This is an Xbox controller!\n");
+        xinput_mount_cb(dev_addr);
+    }
+}
+
+// Called when any USB device is unmounted
+void tuh_umount_cb(uint8_t dev_addr) {
+    printf("USB Device unmounted at address %d\n", dev_addr);
+    
+    // Check if it was an Xbox controller
+    xbox_controller_t* xbox = xinput_get_controller(dev_addr);
+    if (xbox) {
+        xinput_unmount_cb(dev_addr);
+    }
 }
