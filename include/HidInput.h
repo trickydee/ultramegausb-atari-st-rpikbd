@@ -92,6 +92,12 @@ unsigned char st_joystick();
  */
 int st_mouse_enabled();
 
+/**
+ * Update joystick state on-demand (called from 6301 emulator)
+ * Provides better timing accuracy for games that poll rapidly
+ */
+void update_joystick_state();
+
 #ifdef __cplusplus
 }
 #endif

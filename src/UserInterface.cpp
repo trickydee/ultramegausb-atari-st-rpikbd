@@ -17,8 +17,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 #include "UserInterface.h"
+#include "version.h"
 #include "pico/stdlib.h"
-#include "bsp/board.h"
+#include "hid_app_host.h"
 #include "config.h"
 #include "hardware/clocks.h"
 
@@ -107,7 +108,7 @@ void UserInterface::update_serial() {
     }
     ssd1306_draw_string(&disp, 24, 27, 1, (char*)"ST <-> Kbd");
 
-	ssd1306_draw_string(&disp, 34, 0, 1, (char*)"V 1.1.2");	    
+	ssd1306_draw_string(&disp, 34, 0, 1, (char*)"V " PROJECT_VERSION_STRING);	    
 }
 
 void UserInterface::update_status() {
@@ -143,6 +144,50 @@ void UserInterface::update_joy(int index) {
     ssd1306_draw_string(&disp, 0, 54, 1, buf);
 }
 
+void UserInterface::update_splash() {
+    ssd1306_clear(&disp);
+    
+    // ATARI text (centered)
+    ssd1306_draw_string(&disp, 30, 0, 2, (char*)"ATARI");
+    ssd1306_draw_string(&disp, 28, 25, 1, (char*)"USB - Mega");
+    ssd1306_draw_string(&disp, 40, 40, 1, (char*)"Adapter");
+    
+    // Version number at bottom
+    ssd1306_draw_string(&disp, 45, 55, 1, (char*)"v" PROJECT_VERSION_STRING);
+}
+
+void UserInterface::update_usb_debug() {
+    char buf[32];
+    ssd1306_clear(&disp);
+    
+    // Title
+    ssd1306_draw_string(&disp, 0, 0, 1, (char*)"USB Debug Info");
+    
+    // Device counts
+    sprintf(buf, "KB:%d Mouse:%d Joy:%d", num_kb, num_mouse, num_joy);
+    ssd1306_draw_string(&disp, 0, 12, 1, buf);
+    
+    // Mount and active device tracking
+    uint32_t addr_inst = hid_debug_get_last_addr_inst();
+    sprintf(buf, "Mounts:%lu Active:%lu", 
+        hid_debug_get_mount_calls(),
+        hid_debug_get_active_devices());
+    ssd1306_draw_string(&disp, 0, 24, 1, buf);
+    
+    // Last device address and instance
+    sprintf(buf, "Last: Addr:%d Inst:%d", 
+        (addr_inst >> 8) & 0xFF,
+        addr_inst & 0xFF);
+    ssd1306_draw_string(&disp, 0, 36, 1, buf);
+    
+    // Report statistics
+    sprintf(buf, "Reports Rx:%lu", hid_debug_get_report_calls());
+    ssd1306_draw_string(&disp, 0, 48, 1, buf);
+    
+    sprintf(buf, "Reports Copy:%lu", hid_debug_get_report_copied());
+    ssd1306_draw_string(&disp, 0, 56, 1, buf);
+}
+
 void UserInterface::handle_buttons() {
     for (int i = 0; i < 3; ++i) {
         bool state = gpio_get(btn_gpio[i]);
@@ -164,7 +209,7 @@ void UserInterface::on_button_down(int i) {
     // Middle button changes page
     if (i == BUTTON_MIDDLE) {
         int pg = (int)page;
-        pg = ((pg + 1) % (PAGE_SERIAL + 1));
+        pg = ((pg + 1) % (PAGE_USB_DEBUG + 1));
         page = (PAGE)pg;
         dirty = true;
     }
@@ -226,6 +271,15 @@ void UserInterface::update() {
                 // Not time yet
                 dirty = true;
             }
+        }
+        else if (page == PAGE_SPLASH) {
+            update_splash();
+        }
+        else if (page == PAGE_USB_DEBUG) {
+            update_usb_debug();
+            ssd1306_show(&disp);
+            // Keep refreshing debug page
+            dirty = true;
         }
         if (!dirty) {
             ssd1306_show(&disp);

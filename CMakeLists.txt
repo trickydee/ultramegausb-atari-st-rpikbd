@@ -15,7 +15,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.13...3.27)
+
+# Apply patches for build compatibility
+execute_process(
+    COMMAND ${CMAKE_SOURCE_DIR}/apply-patches.sh
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    RESULT_VARIABLE PATCH_RESULT
+)
+if(NOT PATCH_RESULT EQUAL "0")
+    message(WARNING "Failed to apply patches: ${PATCH_RESULT}")
+endif()
 
 # Pull in SDK (must be before project)
 set(PICO_SDK_PATH ${CMAKE_SOURCE_DIR}/pico-sdk)
@@ -58,8 +68,10 @@ set(SOURCES
     src/UserInterface.cpp
     ${LANG_SRC}  # Specific language source file
     src/NVSettings.cpp
+    src/hid_app_host.c
     ssd1306/ssd1306.c
     6301/6301.c
+    hidparser/HIDParser.c
 )
 set(INCLUDES
     include
@@ -73,6 +85,7 @@ target_include_directories(
     ssd1306
     src
     include
+    hidparser
     ${INCLUDES}
 )
 
@@ -82,7 +95,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-implicit-int")
 #add_definitions(-DUNIX -DPICO -DTRACE_6301)
 add_definitions(-DUNIX -DPICO)
 
-target_link_libraries(atari_ikbd pico_stdlib pico_multicore hardware_i2c hardware_flash hardware_sync tinyusb_host tinyusb_board)
+target_link_libraries(atari_ikbd pico_stdlib pico_multicore hardware_i2c hardware_flash hardware_sync tinyusb_host)
 pico_enable_stdio_uart(atari_ikbd 1)
 pico_add_extra_outputs(atari_ikbd)
 pico_set_binary_type(atari_ikbd copy_to_ram)

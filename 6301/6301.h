@@ -79,6 +79,7 @@ extern COUNTER_VAR cycles_run;
 BYTE* hd6301_init();
 int hd6301_destroy(); // like a C++ destructor
 int hd6301_reset(int Cold); 
+void hd6301_trigger_reset(); // Trigger reset from external source (e.g. keyboard)
 void hd6301_run_clocks(COUNTER_VAR clocks);
 int hd6301_receive_byte(u_char byte_in); // just passing through
 void hd6301_tx_empty(int empty);
