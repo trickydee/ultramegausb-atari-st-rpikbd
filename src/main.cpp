@@ -35,7 +35,7 @@
 
 
 #define ROMBASE     256
-#define CYCLES_PER_LOOP 1000
+#define CYCLES_PER_LOOP 250  // Reduced from 1000 for better interrupt response (4x improvement)
 
 extern unsigned char rom_HD6301V1ST_img[];
 extern unsigned int rom_HD6301V1ST_img_len;
@@ -49,14 +49,28 @@ static void handle_rx_from_st() {
     // Keep reading while bytes are available AND the 6301 can accept them
     // This ensures multi-byte commands (command + parameters) are received promptly
     unsigned char data;
+    int bytes_received = 0;
+    
     while (SerialPort::instance().recv(data)) {
         if (!hd6301_sci_busy()) {
             //printf("ST -> 6301 %X\n", data);
             hd6301_receive_byte(data);
+            bytes_received++;
         } else {
             // 6301 RDR is full - stop and let ROM process the current byte
             // The UART FIFO will buffer this byte until next iteration
+            //printf("WARNING: 6301 RDR busy, deferring byte 0x%02X\n", data);
             break;
+        }
+    }
+    
+    // Check for serial overrun errors (byte arrived while RDR was still full)
+    // This would indicate the ROM firmware isn't reading bytes fast enough
+    extern u_char iram[];  // Defined in ireg.c
+    if (iram[0x11] & 0x40) {  // TRCSR register, ORFE bit (Overrun/Framing Error)
+        static int overrun_count = 0;
+        if ((++overrun_count % 100) == 1) {  // Don't spam, report every 100th
+            printf("WARNING: Serial overrun error detected! (count: %d)\n", overrun_count);
         }
     }
 }
@@ -82,8 +96,9 @@ void core1_entry() {
     absolute_time_t tm = get_absolute_time();
     while (true) {
         count += CYCLES_PER_LOOP;
-        // Update the tx serial port status based on our serial port handler
-        hd6301_tx_empty(1);
+        
+        // Update the tx serial port status based on actual buffer state
+        hd6301_tx_empty(SerialPort::instance().send_buf_empty() ? 1 : 0);
 
         hd6301_run_clocks(CYCLES_PER_LOOP);
 
