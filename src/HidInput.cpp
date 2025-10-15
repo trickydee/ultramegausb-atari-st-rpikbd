@@ -23,10 +23,17 @@
 #include "hid_app_host.h"
 #include "config.h"
 #include "hardware/clocks.h"
+#include "6301.h"
+#include "ssd1306.h"
 #include <map>
+
+extern ssd1306_t disp;  // External reference to display
 
 // Mouse toggle key is set to Ctrl+F12
 #define TOGGLE_MOUSE_MODE 0x45  // F12 key (69 decimal)
+
+// Ctrl+F11 triggers XRESET
+#define XRESET_KEY 0x44  // F11 key (68 decimal)
 
 // Alt + / sends Atari INSERT
 #define HID_KEY_SLASH 0x38  // Forward slash key (56 decimal)
@@ -215,6 +222,35 @@ void HidInput::handle_keyboard() {
                 last_minus_state = false;
             }
             
+            // Check for Ctrl+F11 to trigger XRESET (HD6301 hardware reset)
+            static bool last_reset_state = false;
+            bool f11_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == XRESET_KEY) {
+                    f11_pressed = true;
+                    break;
+                }
+            }
+            
+            if (ctrl_pressed && f11_pressed) {
+                if (!last_reset_state) {
+                    // Show visual feedback on OLED
+                    ssd1306_clear(&disp);
+                    ssd1306_draw_string(&disp, 30, 20, 2, (char*)"RESET");
+                    ssd1306_draw_string(&disp, 20, 45, 1, (char*)"Ctrl+F11");
+                    ssd1306_show(&disp);
+                    
+                    // Small delay so user can see the message
+                    sleep_ms(500);
+                    
+                    // Trigger the reset
+                    hd6301_trigger_reset();
+                    last_reset_state = true;
+                }
+            } else {
+                last_reset_state = false;
+            }
+            
             // Translate the USB HID codes into ST keys that are currently down
             char st_keys[6];
             for (int i = 0; i < 6; ++i) {
@@ -225,6 +261,10 @@ void HidInput::handle_keyboard() {
                     }
                     // If Alt + Plus or Alt + Minus, don't send to Atari (used for clock control)
                     else if (alt_pressed && (kb->keycode[i] == HID_KEY_EQUAL || kb->keycode[i] == HID_KEY_MINUS)) {
+                        st_keys[i] = 0;
+                    }
+                    // If Ctrl+F11, don't send to Atari (used for XRESET)
+                    else if (ctrl_pressed && kb->keycode[i] == XRESET_KEY) {
                         st_keys[i] = 0;
                     }
                     else {

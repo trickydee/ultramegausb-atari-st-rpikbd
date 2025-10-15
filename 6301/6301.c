@@ -103,6 +103,9 @@ int crashed = 0;
 
 // Interface with Steem
 
+// Global flag for external reset trigger (e.g. from keyboard shortcut)
+static volatile int pending_reset = 0;
+
 BYTE* hd6301_init() {
   return mem_init();
 }
@@ -136,11 +139,25 @@ hd6301_reset(int Cold) {
   mem_putw (OCR, 0xFFFF);
 }
 
+void hd6301_trigger_reset() {
+  // Called from external source (e.g. keyboard handler) to trigger a reset
+  TRACE("6301: Reset triggered externally\n");
+  pending_reset = 1;
+}
+
  
 void hd6301_run_clocks(COUNTER_VAR clocks) {
   // Called by Steem to run some cycles (per scanline or to update before IO)
   int pc;
   COUNTER_VAR starting_cycles=cpu.ncycles;
+
+  // Check for pending reset request (e.g. from keyboard shortcut)
+  if (pending_reset) {
+    TRACE("6301: Executing pending reset\n");
+    pending_reset = 0;
+    hd6301_reset(1);  // Cold reset
+    return;  // Don't run cycles this iteration
+  }
 
   // make sure our 6301 is running OK
   if(!cpu_isrunning())
