@@ -49,3 +49,9 @@
 #define JOY0_LEFT           21
 #define JOY0_RIGHT          22
 #define JOY0_FIRE           26
+
+// Performance tuning
+// Default CPU clock speed in kHz
+// 150000 = 150MHz (default/safe)
+// 270000 = 270MHz (maximum performance)
+#define DEFAULT_CPU_CLOCK_KHZ   270000
