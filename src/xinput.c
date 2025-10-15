@@ -3,12 +3,25 @@
  * Copyright (C) 2025
  * 
  * XInput Protocol Handler Implementation
+ * 
+ * Uses low-level TinyUSB endpoint transfers to communicate with Xbox controllers
+ * Works with TinyUSB 0.19.0 without full vendor class support
  */
 
 #include "xinput.h"
 #include "tusb.h"
+#include "host/usbh.h"
+#include "host/usbh_pvt.h"
 #include <stdio.h>
 #include <string.h>
+
+//--------------------------------------------------------------------
+// Xbox Endpoints
+//--------------------------------------------------------------------
+
+// Xbox One typical endpoints
+#define XBOX_EP_IN      0x81  // Interrupt IN endpoint
+#define XBOX_EP_OUT     0x01  // Interrupt OUT endpoint
 
 //--------------------------------------------------------------------
 // Xbox Initialization Packet
@@ -20,6 +33,9 @@ const uint8_t xbox_init_packet[XBOX_INIT_PACKET_SIZE] = {
     0x05, 0x20, 0x00, 0x01, 0x00
 };
 
+// Buffer for receiving Xbox input reports
+static uint8_t xbox_report_buffer[XBOX_INPUT_REPORT_SIZE];
+
 //--------------------------------------------------------------------
 // Controller Storage
 //--------------------------------------------------------------------
@@ -28,6 +44,13 @@ const uint8_t xbox_init_packet[XBOX_INIT_PACKET_SIZE] = {
 
 static xbox_controller_t controllers[MAX_XBOX_CONTROLLERS];
 static uint8_t controller_count = 0;
+
+//--------------------------------------------------------------------
+// Forward Declarations
+//--------------------------------------------------------------------
+
+static void xbox_init_complete_cb(tuh_xfer_t* xfer);
+static void xbox_report_received_cb(tuh_xfer_t* xfer);
 
 //--------------------------------------------------------------------
 // Helper Functions
@@ -106,22 +129,110 @@ bool xinput_init_controller(uint8_t dev_addr) {
     
     printf("Xbox: Initializing controller at address %d\n", dev_addr);
     
-    // Xbox One controllers need an initialization packet to start sending data
-    // The packet is: {0x05, 0x20, 0x00, 0x01, 0x00}
-    // This should be sent to OUT endpoint 0x01
+    // Step 1: Open endpoint descriptors for Xbox controller
+    // Xbox uses interrupt endpoints (not control transfers)
     
-    // Note: In TinyUSB 0.19.0, we don't have easy vendor transfer support
-    // Some Xbox controllers will start sending data without init packet
-    // Others may need the host to request data via control transfers
+    // Create endpoint descriptor for IN endpoint (receive data from Xbox)
+    tusb_desc_endpoint_t ep_in_desc = {
+        .bLength = sizeof(tusb_desc_endpoint_t),
+        .bDescriptorType = TUSB_DESC_ENDPOINT,
+        .bEndpointAddress = XBOX_EP_IN,  // 0x81
+        .bmAttributes = {.xfer = TUSB_XFER_INTERRUPT},
+        .wMaxPacketSize = 64,
+        .bInterval = 4  // Poll every 4ms
+    };
     
-    // For now, mark as initialized and attempt to read data
-    // Modern Xbox controllers often work without explicit init
+    // Create endpoint descriptor for OUT endpoint (send data to Xbox)
+    tusb_desc_endpoint_t ep_out_desc = {
+        .bLength = sizeof(tusb_desc_endpoint_t),
+        .bDescriptorType = TUSB_DESC_ENDPOINT,
+        .bEndpointAddress = XBOX_EP_OUT,  // 0x01
+        .bmAttributes = {.xfer = TUSB_XFER_INTERRUPT},
+        .wMaxPacketSize = 64,
+        .bInterval = 4
+    };
+    
+    // Step 2: Open endpoints
+    if (tuh_edpt_open(dev_addr, &ep_in_desc)) {
+        printf("Xbox: IN endpoint 0x%02X opened\n", XBOX_EP_IN);
+    } else {
+        printf("Xbox: Failed to open IN endpoint\n");
+        return false;
+    }
+    
+    if (tuh_edpt_open(dev_addr, &ep_out_desc)) {
+        printf("Xbox: OUT endpoint 0x%02X opened\n", XBOX_EP_OUT);
+    } else {
+        printf("Xbox: Warning: Could not open OUT endpoint (may not be critical)\n");
+    }
+    
+    // Step 3: Send initialization packet
+    // Use tuh_edpt_xfer to send the init packet
+    tuh_xfer_t xfer_out = {
+        .daddr = dev_addr,
+        .ep_addr = XBOX_EP_OUT,
+        .buflen = XBOX_INIT_PACKET_SIZE,
+        .buffer = (uint8_t*)xbox_init_packet,
+        .complete_cb = xbox_init_complete_cb,
+        .user_data = (uintptr_t)ctrl
+    };
+    
+    if (tuh_edpt_xfer(&xfer_out)) {
+        printf("Xbox: Init packet queued\n");
+    } else {
+        printf("Xbox: Init packet send failed\n");
+    }
+    
     ctrl->initialized = true;
     
-    printf("Xbox: Controller %d marked as initialized\n", dev_addr);
-    printf("Xbox: Waiting for input reports...\n");
-    
     return true;
+}
+
+// Callback when initialization packet transfer completes
+static void xbox_init_complete_cb(tuh_xfer_t* xfer) {
+    if (xfer->result == XFER_RESULT_SUCCESS) {
+        printf("Xbox: Init packet sent successfully! Controller should now send data.\n");
+        
+        // Start receiving input reports
+        tuh_xfer_t xfer_in = {
+            .daddr = xfer->daddr,
+            .ep_addr = XBOX_EP_IN,
+            .buflen = XBOX_INPUT_REPORT_SIZE,
+            .buffer = xbox_report_buffer,
+            .complete_cb = xbox_report_received_cb,
+            .user_data = xfer->user_data
+        };
+        
+        if (tuh_edpt_xfer(&xfer_in)) {
+            printf("Xbox: Listening for input reports on endpoint 0x%02X\n", XBOX_EP_IN);
+        } else {
+            printf("Xbox: Failed to start listening for reports\n");
+        }
+    } else {
+        printf("Xbox: Init packet failed with result %d\n", xfer->result);
+    }
+}
+
+// Callback when Xbox input report is received
+static void xbox_report_received_cb(tuh_xfer_t* xfer) {
+    if (xfer->result == XFER_RESULT_SUCCESS && xfer->actual_len > 0) {
+        // Process the report
+        xinput_process_report(xfer->daddr, xfer->buffer, xfer->actual_len);
+        
+        // Queue next report (continuous receiving)
+        tuh_xfer_t xfer_in = {
+            .daddr = xfer->daddr,
+            .ep_addr = XBOX_EP_IN,
+            .buflen = XBOX_INPUT_REPORT_SIZE,
+            .buffer = xbox_report_buffer,
+            .complete_cb = xbox_report_received_cb,
+            .user_data = xfer->user_data
+        };
+        
+        tuh_edpt_xfer(&xfer_in);  // Keep listening
+    } else {
+        printf("Xbox: Report receive failed, result=%d, len=%lu\n", xfer->result, xfer->actual_len);
+    }
 }
 
 bool xinput_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len) {
@@ -240,24 +351,10 @@ void xinput_mount_cb(uint8_t dev_addr) {
     printf("  ��� XBOX CONTROLLER DETECTED!\n");
     printf("  Device Address: %d\n", dev_addr);
     printf("  \n");
-    printf("  STATUS: Detected but not yet functional\n");
+    printf("  Attempting initialization with low-level USB API...\n");
+    printf("  (TinyUSB 0.19.0 workaround - manual endpoint setup)\n");
     printf("  \n");
-    printf("  Xbox controller support requires TinyUSB 0.20.0+\n");
-    printf("  Current version (0.19.0) has limited vendor class support\n");
-    printf("  \n");
-    printf("  📋 What's working:\n");
-    printf("     ✓ Controller detection\n");
-    printf("     ✓ VID/PID identification\n");
-    printf("     ✓ XInput protocol framework\n");
-    printf("  \n");
-    printf("  ⏳ Coming in future update:\n");
-    printf("     • Full XInput protocol support\n");
-    printf("     • Button and stick input\n");
-    printf("     • Atari ST joystick mapping\n");
-    printf("  \n");
-    printf("  💡 For now, please use:\n");
-    printf("     - Standard USB HID joysticks\n");
-    printf("     - D-SUB GPIO joysticks\n");
+    printf("  Watch below for initialization progress:\n");
     printf("  \n");
     printf("═══════════════════════════════════════════════════════\n");
     printf("\n");
