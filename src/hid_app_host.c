@@ -5,6 +5,7 @@
 
 #include "tusb.h"
 #include "hid_app_host.h"
+#include "xinput.h"
 #include <string.h>
 
 // Structure to track HID devices
@@ -165,6 +166,18 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
   debug_mount_calls++;
   debug_last_dev_addr = dev_addr;
   debug_last_instance = instance;
+  
+  // Check for Xbox controller (VID/PID detection)
+  uint16_t vid, pid;
+  tuh_vid_pid_get(dev_addr, &vid, &pid);
+  
+  if (xinput_is_xbox_controller(vid, pid)) {
+    printf("Xbox controller detected: VID=0x%04X, PID=0x%04X\n", vid, pid);
+    xinput_mount_cb(dev_addr);
+    // Note: Xbox controllers won't work as HID, they need XInput protocol
+    // For now, we just detect them. Full XInput implementation coming later.
+    return;
+  }
   
   hidh_device_t* dev = alloc_device(dev_addr, instance);
   if (!dev) return;
@@ -328,3 +341,9 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
   // Queue next report - CRITICAL for continuous operation in TinyUSB 0.12+
   tuh_hid_receive_report(dev_addr, instance);
 }
+
+//--------------------------------------------------------------------+
+// Xbox Controller Detection (via Device Descriptor)
+//--------------------------------------------------------------------+
+// Note: TinyUSB 0.19.0 doesn't fully support vendor class callbacks
+// We detect Xbox controllers via VID/PID in the mount callback above
