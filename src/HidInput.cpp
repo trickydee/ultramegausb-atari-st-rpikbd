@@ -19,13 +19,29 @@
 #include "HidInput.h"
 #include "st_key_lookup.h"
 #include "AtariSTMouse.h"
-#include "bsp/board.h"
 #include "tusb.h"
+#include "hid_app_host.h"
 #include "config.h"
+#include "hardware/clocks.h"
+#include "6301.h"
+#include "ssd1306.h"
 #include <map>
 
-// Mouse toggle key is set to Scroll Lock
-#define TOGGLE_MOUSE_MODE 71
+extern ssd1306_t disp;  // External reference to display
+
+// Mouse toggle key is set to Ctrl+F12
+#define TOGGLE_MOUSE_MODE 0x45  // F12 key (69 decimal)
+
+// Ctrl+F11 triggers XRESET
+#define XRESET_KEY 0x44  // F11 key (68 decimal)
+
+// Alt + / sends Atari INSERT
+#define HID_KEY_SLASH 0x38  // Forward slash key (56 decimal)
+#define ATARI_INSERT  82    // Atari ST INSERT scancode
+
+// Alt + Plus/Minus for clock speed control
+#define HID_KEY_EQUAL 0x2E  // = key (also + with shift) (46 decimal)
+#define HID_KEY_MINUS 0x2D  // - key (45 decimal)
 
 #define ATARI_LSHIFT 42
 #define ATARI_RSHIFT 54
@@ -46,21 +62,21 @@ extern "C" {
 void tuh_hid_mounted_cb(uint8_t dev_addr) {
     HID_TYPE tp = tuh_hid_get_type(dev_addr);
     if (tp == HID_KEYBOARD) {
-        printf("A keyboard device (address %d) is mounted\r\n", dev_addr);
+        // printf("A keyboard device (address %d) is mounted\r\n", dev_addr);
         device[dev_addr] = new uint8_t[sizeof(hid_keyboard_report_t)];
-        tuh_hid_get_report(dev_addr, device[dev_addr]);
+        hid_app_request_report(dev_addr, device[dev_addr]);
         ++kb_count;
     }
     else if (tp == HID_MOUSE) {
-        printf("A mouse device (address %d) is mounted\r\n", dev_addr);
+        // printf("A mouse device (address %d) is mounted\r\n", dev_addr);
         device[dev_addr] = new uint8_t[tuh_hid_get_report_size(dev_addr)];
-        tuh_hid_get_report(dev_addr, device[dev_addr]);
+        hid_app_request_report(dev_addr, device[dev_addr]);
         ++mouse_count;
     }
     else if (tp == HID_JOYSTICK) {
-        printf("A joystick device (address %d) is mounted\r\n", dev_addr);
+        // printf("A joystick device (address %d) is mounted\r\n", dev_addr);
         device[dev_addr] = new uint8_t[tuh_hid_get_report_size(dev_addr)];
-        tuh_hid_get_report(dev_addr, device[dev_addr]);
+        hid_app_request_report(dev_addr, device[dev_addr]);
         ++joy_count;
     }
     if (ui_) {
@@ -71,15 +87,15 @@ void tuh_hid_mounted_cb(uint8_t dev_addr) {
 void tuh_hid_unmounted_cb(uint8_t dev_addr) {
     HID_TYPE tp = tuh_hid_get_type(dev_addr);
     if (tp == HID_KEYBOARD) {
-        printf("A keyboard device (address %d) is unmounted\r\n", dev_addr);
+        // printf("A keyboard device (address %d) is unmounted\r\n", dev_addr);
         --kb_count;
     }
     else if (tp == HID_MOUSE) {
-        printf("A mouse device (address %d) is unmounted\r\n", dev_addr);
+        // printf("A mouse device (address %d) is unmounted\r\n", dev_addr);
         --mouse_count;
     }
     else if (tp == HID_JOYSTICK) {
-        printf("A joystick device (address %d) is unmounted\r\n", dev_addr);
+        // printf("A joystick device (address %d) is unmounted\r\n", dev_addr);
         --joy_count;
     }
     auto it = device.find(dev_addr);
@@ -140,13 +156,119 @@ void HidInput::handle_keyboard() {
         if (tuh_hid_is_mounted(it.first) && !tuh_hid_is_busy(it.first)) {
             hid_keyboard_report_t* kb = (hid_keyboard_report_t*)it.second;
 
+            // Check for Ctrl+F12 to toggle mouse mode
+            static bool last_toggle_state = false;
+            bool ctrl_pressed = (kb->modifier & KEYBOARD_MODIFIER_LEFTCTRL) || (kb->modifier & KEYBOARD_MODIFIER_RIGHTCTRL);
+            bool f12_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == TOGGLE_MOUSE_MODE) {
+                    f12_pressed = true;
+                    break;
+                }
+            }
+            if (ctrl_pressed && f12_pressed) {
+                // Toggle mouse mode on Ctrl+F12
+                if (!last_toggle_state) {
+                    ui_->set_mouse_enabled(!ui_->get_mouse_enabled());
+                    last_toggle_state = true;
+                }
+            } else {
+                last_toggle_state = false;
+            }
+            
+            // Check for Alt + / to send INSERT
+            bool alt_pressed = (kb->modifier & KEYBOARD_MODIFIER_LEFTALT) || (kb->modifier & KEYBOARD_MODIFIER_RIGHTALT);
+            bool slash_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == HID_KEY_SLASH) {
+                    slash_pressed = true;
+                    break;
+                }
+            }
+            
+            // Check for Alt + Plus (=) to set 270MHz
+            static bool last_plus_state = false;
+            bool plus_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == HID_KEY_EQUAL) {
+                    plus_pressed = true;
+                    break;
+                }
+            }
+            if (alt_pressed && plus_pressed) {
+                if (!last_plus_state) {
+                    set_sys_clock_khz(270000, false);
+                    last_plus_state = true;
+                }
+            } else {
+                last_plus_state = false;
+            }
+            
+            // Check for Alt + Minus to set 150MHz
+            static bool last_minus_state = false;
+            bool minus_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == HID_KEY_MINUS) {
+                    minus_pressed = true;
+                    break;
+                }
+            }
+            if (alt_pressed && minus_pressed) {
+                if (!last_minus_state) {
+                    set_sys_clock_khz(150000, false);
+                    last_minus_state = true;
+                }
+            } else {
+                last_minus_state = false;
+            }
+            
+            // Check for Ctrl+F11 to trigger XRESET (HD6301 hardware reset)
+            static bool last_reset_state = false;
+            bool f11_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == XRESET_KEY) {
+                    f11_pressed = true;
+                    break;
+                }
+            }
+            
+            if (ctrl_pressed && f11_pressed) {
+                if (!last_reset_state) {
+                    // Show visual feedback on OLED
+                    ssd1306_clear(&disp);
+                    ssd1306_draw_string(&disp, 30, 20, 2, (char*)"RESET");
+                    ssd1306_draw_string(&disp, 20, 45, 1, (char*)"Ctrl+F11");
+                    ssd1306_show(&disp);
+                    
+                    // Small delay so user can see the message
+                    sleep_ms(500);
+                    
+                    // Trigger the reset
+                    hd6301_trigger_reset();
+                    last_reset_state = true;
+                }
+            } else {
+                last_reset_state = false;
+            }
+            
             // Translate the USB HID codes into ST keys that are currently down
             char st_keys[6];
             for (int i = 0; i < 6; ++i) {
                 if ((kb->keycode[i] > 0) && (kb->keycode[i] < 128)) {
-                    st_keys[i] = st_key_lookup_hid_gb[kb->keycode[i]];
-                    if (kb->keycode[i] == TOGGLE_MOUSE_MODE) {
-                        ui_->set_mouse_enabled(!ui_->get_mouse_enabled());
+                    // If Alt + / is pressed, replace / with INSERT
+                    if (alt_pressed && kb->keycode[i] == HID_KEY_SLASH) {
+                        st_keys[i] = ATARI_INSERT;
+                    }
+                    // If Alt + Plus or Alt + Minus, don't send to Atari (used for clock control)
+                    else if (alt_pressed && (kb->keycode[i] == HID_KEY_EQUAL || kb->keycode[i] == HID_KEY_MINUS)) {
+                        st_keys[i] = 0;
+                    }
+                    // If Ctrl+F11, don't send to Atari (used for XRESET)
+                    else if (ctrl_pressed && kb->keycode[i] == XRESET_KEY) {
+                        st_keys[i] = 0;
+                    }
+                    else {
+                        st_keys[i] = st_key_lookup_hid_gb[kb->keycode[i]];
                     }
                 }
                 else {
@@ -173,7 +295,7 @@ void HidInput::handle_keyboard() {
             key_states[ATARI_ALT] = ((kb->modifier & KEYBOARD_MODIFIER_LEFTALT) ||
                                       (kb->modifier & KEYBOARD_MODIFIER_RIGHTALT)) ? 1 : 0;
             // Trigger the next report
-            tuh_hid_get_report(it.first, it.second);
+            hid_app_request_report(it.first, it.second);
         }
     }
 }
@@ -220,7 +342,7 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
                 mouse_state = (mouse_state & 0xfe) | ((buttons & MOUSE_BUTTON_RIGHT) ? 1 : 0);
             }
             // Trigger the next report
-            tuh_hid_get_report(it.first, it.second);
+            hid_app_request_report(it.first, it.second);
         }
     }
     // Handle the mouse acceleration/deceleration configured in the UI.
@@ -242,7 +364,11 @@ bool HidInput::get_usb_joystick(int addr, uint8_t& axis, uint8_t& button) {
                     continue;
                 // Determine what report item is being tested, process updated value as needed
                 if ((item->Attributes.Usage.Page == USAGE_PAGE_BUTTON) && (item->ItemType == HID_REPORT_ITEM_In)) {
-                    button |= item->Value;
+                    // Set button state directly (don't accumulate with |=)
+                    // This ensures button releases are properly detected
+                    if (item->Value) {
+                        button = 1;
+                    }
                 }
                 else if ((item->Attributes.Usage.Page   == USAGE_PAGE_GENERIC_DCTRL) &&
                             ((item->Attributes.Usage.Usage == USAGE_X) || (item->Attributes.Usage.Usage == USAGE_Y)) &&
@@ -263,26 +389,23 @@ bool HidInput::get_usb_joystick(int addr, uint8_t& axis, uint8_t& button) {
                     else{
                         axis &= ~(0x3 << bit);
                         if (item->Value < 0x80 - DEAD_ZONE) {
-                        axis |= 1 << bit;
-                    }
-                    else if (item->Value > 0x80 + DEAD_ZONE) {
-                        axis |= 1 << (bit + 1);
+                            axis |= 1 << bit;
+                        }
+                        else if (item->Value > 0x80 + DEAD_ZONE) {
+                            axis |= 1 << (bit + 1);
+                        }
                     }
                 }
             }
         }
-    }
         // Trigger the next report
-        tuh_hid_get_report(addr, device[addr]);
+        hid_app_request_report(addr, device[addr]);
         return true;
     }
     return false;
 }
 
 void HidInput::handle_joystick() {
-    uint8_t axis = 0;
-    uint8_t button = 0;
-
     // Find the joystick addresses
     std::vector<int> joystick_addr;
     int next_joystick = 0;
@@ -294,6 +417,10 @@ void HidInput::handle_joystick() {
 
     // See if the joysticks are GPIO or USB
     for (int joystick = 1; joystick >= 0; --joystick) {
+        // Initialize axis and button for each joystick separately to prevent state bleed
+        uint8_t axis = 0;
+        uint8_t button = 0;
+        
         if (ui_->get_joystick() & (1 << joystick)) {
             // GPIO
             if (joystick == 1) {
@@ -375,4 +502,10 @@ unsigned char st_joystick() {
 
 int st_mouse_enabled() {
     return HidInput::instance().mouse_enabled() ? 1 : 0;
+}
+
+void update_joystick_state() {
+    // Called from 6301 emulator when DR2/DR4 registers are read
+    // Provides on-demand joystick updates for better timing accuracy
+    HidInput::instance().handle_joystick();
 }

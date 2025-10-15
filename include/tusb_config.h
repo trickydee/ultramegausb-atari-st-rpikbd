@@ -58,13 +58,12 @@ extern "C" {
 //--------------------------------------------------------------------
 
 #define CFG_TUH_HUB                 1
-#define CFG_TUH_HID_KEYBOARD        1
-#define CFG_TUH_HID_MOUSE           1
-#define CFG_TUSB_HOST_HID_GENERIC   1
+#define CFG_TUH_DEVICE_MAX          4  // Number of non-hub devices
+#define CFG_TUH_HID                 8  // Number of HID interfaces (increased for multi-interface devices)
 #define CFG_TUH_MSC                 0
 #define CFG_TUH_CDC                 0
 
-#define CFG_TUSB_HOST_DEVICE_MAX    (CFG_TUH_HUB ? 5 : 1) // normal hub has 4 ports
+#define CFG_TUSB_HOST_DEVICE_MAX    (CFG_TUH_HUB ? 8 : 1) // Increased for multi-interface devices like Logitech Unifying
 
 #ifdef __cplusplus
 }
