@@ -23,6 +23,7 @@
 #include "pico/stdlib.h"
 #include "pico/multicore.h"
 #include "hardware/clocks.h"
+#include "config.h"
 #include "6301.h"
 #include "cpu.h"
 #include "util.h"
@@ -41,15 +42,21 @@ extern unsigned int rom_HD6301V1ST_img_len;
 
 
 /**
- * Read a byte from the physical serial port and pass
- * it to the HD6301
+ * Read bytes from the physical serial port and pass them to the HD6301
+ * Read ALL available bytes to prevent command parameter delays
  */
 static void handle_rx_from_st() {
-    if (!hd6301_sci_busy()) {
-        unsigned char data;
-        if (SerialPort::instance().recv(data)) {
+    // Keep reading while bytes are available AND the 6301 can accept them
+    // This ensures multi-byte commands (command + parameters) are received promptly
+    unsigned char data;
+    while (SerialPort::instance().recv(data)) {
+        if (!hd6301_sci_busy()) {
             //printf("ST -> 6301 %X\n", data);
             hd6301_receive_byte(data);
+        } else {
+            // 6301 RDR is full - stop and let ROM process the current byte
+            // The UART FIFO will buffer this byte until next iteration
+            break;
         }
     }
 }
@@ -103,11 +110,11 @@ int main() {
     ui.init();
     ui.update();
 
-    // Overclock the Pico to 150Mhz to improve performance
-    if (!set_sys_clock_khz(150000, false))
-      printf("system clock 150MHz failed\n");
+    // Overclock the Pico for maximum performance
+    if (!set_sys_clock_khz(DEFAULT_CPU_CLOCK_KHZ, false))
+      printf("system clock %d MHz failed\n", DEFAULT_CPU_CLOCK_KHZ / 1000);
     else
-      printf("system clock now 150MHz\n");
+      printf("system clock now %d MHz\n", DEFAULT_CPU_CLOCK_KHZ / 1000);
 
     // Setup the UART and HID instance.
     SerialPort::instance().open();
@@ -125,15 +132,18 @@ int main() {
     while (true) {
         absolute_time_t tm = get_absolute_time();
 
+        // HIGH PRIORITY: Check for serial data from ST every loop iteration
+        // At 7812 baud, bytes arrive every ~1.28ms - must not miss them!
+        handle_rx_from_st();
+
         AtariSTMouse::instance().update();
 
-        // 10ms handler
+        // 10ms handler for less time-critical tasks
         if (absolute_time_diff_us(ten_ms, tm) >= 10000) {
             ten_ms = tm;
 
             tuh_task();
             HidInput::instance().handle_keyboard();
-            handle_rx_from_st();
             HidInput::instance().handle_mouse(cpu.ncycles);
             HidInput::instance().handle_joystick();
             ui.update();

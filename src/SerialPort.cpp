@@ -53,8 +53,9 @@ void SerialPort::open() {
 
     uart_set_format(UART_ID, DATA_BITS, STOP_BITS, PARITY);
 
-    // We don't want to use the FIFO otherwise we get mouse lag as the serial comms drains.
-    uart_set_fifo_enabled(UART_ID, false);
+    // Enable UART FIFO to buffer incoming bytes and prevent data loss
+    // The RP2040 UART has 32-byte FIFOs which help with timing tolerance
+    uart_set_fifo_enabled(UART_ID, true);
 }
 
 void SerialPort::set_ui(UserInterface& ui) {
