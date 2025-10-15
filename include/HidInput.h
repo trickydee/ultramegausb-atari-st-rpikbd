@@ -57,6 +57,7 @@ public:
 
 private:
     bool get_usb_joystick(int addr, uint8_t& axis, uint8_t& button);
+    bool get_xbox_joystick(int joystick_num, uint8_t& axis, uint8_t& button);
     
 private:
     int keyboard_handle = -1;
