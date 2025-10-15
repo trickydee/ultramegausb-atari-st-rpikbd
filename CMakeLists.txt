@@ -70,6 +70,7 @@ set(SOURCES
     src/NVSettings.cpp
     src/hid_app_host.c
     src/xinput.c
+    src/ps4_controller.c
     ssd1306/ssd1306.c
     6301/6301.c
     hidparser/HIDParser.c

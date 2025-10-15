@@ -26,6 +26,7 @@
 #include "6301.h"
 #include "ssd1306.h"
 #include "xinput.h"
+#include "ps4_controller.h"
 #include <map>
 
 extern ssd1306_t disp;  // External reference to display
@@ -406,18 +407,33 @@ bool HidInput::get_usb_joystick(int addr, uint8_t& axis, uint8_t& button) {
     return false;
 }
 
+bool HidInput::get_ps4_joystick(int joystick_num, uint8_t& axis, uint8_t& button) {
+    // Get PS4 controller state
+    for (uint8_t dev_addr = 1; dev_addr < 8; dev_addr++) {
+        ps4_controller_t* ps4 = ps4_get_controller(dev_addr);
+        if (ps4 && ps4->connected) {
+            // Found a connected PS4 controller!
+            ps4_to_atari(ps4, joystick_num, &axis, &button);
+            
+            // Debug output (every 100 calls)
+            static uint32_t debug_count = 0;
+            if ((debug_count++ % 100) == 0) {
+                printf("PS4->Atari: Joy%d axis=0x%02X fire=%d\n", joystick_num, axis, button);
+            }
+            
+            return true;
+        }
+    }
+    
+    return false;
+}
+
 bool HidInput::get_xbox_joystick(int joystick_num, uint8_t& axis, uint8_t& button) {
     // Get Xbox controller state from XInput module
-    // Xbox controllers are indexed separately from device addresses
-    // For simplicity, map first Xbox controller to joystick 0 or 1
-    
-    // Try to find an Xbox controller
-    // We'll iterate through possible device addresses
     for (uint8_t dev_addr = 1; dev_addr < 8; dev_addr++) {
         xbox_controller_t* xbox = xinput_get_controller(dev_addr);
         if (xbox && xbox->connected && xbox->initialized) {
             // Found a connected Xbox controller!
-            // Use xinput_to_atari to convert Xbox state to Atari format
             xinput_to_atari(xbox, joystick_num, &axis, &button);
             
             // Debug output (every 100 calls)
@@ -430,7 +446,7 @@ bool HidInput::get_xbox_joystick(int joystick_num, uint8_t& axis, uint8_t& butto
         }
     }
     
-    return false;  // No Xbox controller found
+    return false;
 }
 
 void HidInput::handle_joystick() {
@@ -482,9 +498,11 @@ void HidInput::handle_joystick() {
                 ++next_joystick;
             }
             
-            // If no HID joystick, try Xbox controller
+            // If no HID joystick, try PS4 controller, then Xbox
             if (!got_input) {
-                if (get_xbox_joystick(joystick, axis, button)) {
+                if (get_ps4_joystick(joystick, axis, button)) {
+                    got_input = true;
+                } else if (get_xbox_joystick(joystick, axis, button)) {
                     got_input = true;
                 }
             }
