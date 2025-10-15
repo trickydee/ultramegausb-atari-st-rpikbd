@@ -199,147 +199,21 @@ bool xinput_init_controller(uint8_t dev_addr) {
     }
     
     printf("Xbox: Initializing controller at address %d\n", dev_addr);
-    
-    // Step 1: Discover actual endpoint addresses from configuration descriptor
-    xbox_endpoints_t endpoints = find_xbox_endpoints(dev_addr);
-    
-    // Fallback to default addresses if discovery failed
-    if (!endpoints.found || endpoints.ep_in == 0) {
-        printf("Xbox: Using default endpoint addresses\n");
-        endpoints.ep_in = XBOX_EP_IN;
-        endpoints.ep_out = XBOX_EP_OUT;
-    }
+    printf("Xbox: Using TinyUSB HID host (vendor-class workaround)\n");
+    printf("Xbox: Reports will come via tuh_hid_report_received_cb\n");
     
     extern ssd1306_t disp;
     
-    // Show discovered endpoints on OLED
+    // Show initialization on OLED
     ssd1306_clear(&disp);
     ssd1306_draw_string(&disp, 20, 10, 2, (char*)"XBOX");
-    char ep_msg[20];
-    snprintf(ep_msg, sizeof(ep_msg), "EP:%02X/%02X", endpoints.ep_in, endpoints.ep_out);
-    ssd1306_draw_string(&disp, 20, 35, 1, ep_msg);
+    ssd1306_draw_string(&disp, 5, 35, 1, (char*)"HID Workaround");
+    ssd1306_draw_string(&disp, 25, 50, 1, (char*)"Ready!");
     ssd1306_show(&disp);
-    sleep_ms(1000);
-    
-    // Step 2: Open endpoint descriptors for Xbox controller
-    // Create endpoint descriptor for IN endpoint (receive data from Xbox)
-    tusb_desc_endpoint_t ep_in_desc = {
-        .bLength = sizeof(tusb_desc_endpoint_t),
-        .bDescriptorType = TUSB_DESC_ENDPOINT,
-        .bEndpointAddress = endpoints.ep_in,
-        .bmAttributes = {.xfer = TUSB_XFER_INTERRUPT},
-        .wMaxPacketSize = 64,
-        .bInterval = 4  // Poll every 4ms
-    };
-    
-    // Create endpoint descriptor for OUT endpoint (send data to Xbox)
-    tusb_desc_endpoint_t ep_out_desc = {
-        .bLength = sizeof(tusb_desc_endpoint_t),
-        .bDescriptorType = TUSB_DESC_ENDPOINT,
-        .bEndpointAddress = endpoints.ep_out,
-        .bmAttributes = {.xfer = TUSB_XFER_INTERRUPT},
-        .wMaxPacketSize = 64,
-        .bInterval = 4
-    };
-    
-    // Step 3: Open endpoints
-    if (tuh_edpt_open(dev_addr, &ep_in_desc)) {
-        printf("Xbox: IN endpoint 0x%02X opened\n", endpoints.ep_in);
-        
-        // Show success on OLED
-        ssd1306_clear(&disp);
-        ssd1306_draw_string(&disp, 20, 10, 2, (char*)"XBOX");
-        ssd1306_draw_string(&disp, 15, 35, 1, (char*)"EP IN OK");
-        ssd1306_show(&disp);
-        sleep_ms(500);
-    } else {
-        printf("Xbox: Failed to open IN endpoint\n");
-        
-        // Show failure on OLED
-        ssd1306_clear(&disp);
-        ssd1306_draw_string(&disp, 20, 10, 2, (char*)"XBOX");
-        ssd1306_draw_string(&disp, 10, 35, 1, (char*)"EP FAILED");
-        ssd1306_show(&disp);
-        sleep_ms(2000);
-        return false;
-    }
-    
-    if (tuh_edpt_open(dev_addr, &ep_out_desc)) {
-        printf("Xbox: OUT endpoint 0x%02X opened\n", endpoints.ep_out);
-        
-        // Show on OLED
-        ssd1306_clear(&disp);
-        ssd1306_draw_string(&disp, 20, 10, 2, (char*)"XBOX");
-        ssd1306_draw_string(&disp, 10, 35, 1, (char*)"EP OUT OK");
-        ssd1306_show(&disp);
-        sleep_ms(500);
-    } else {
-        printf("Xbox: Warning: Could not open OUT endpoint (may not be critical)\n");
-    }
-    
-    // Step 4: Send initialization packet
-    // Use tuh_edpt_xfer to send the init packet
-    tuh_xfer_t xfer_out = {
-        .daddr = dev_addr,
-        .ep_addr = endpoints.ep_out,
-        .buflen = XBOX_INIT_PACKET_SIZE,
-        .buffer = (uint8_t*)xbox_init_packet,
-        .complete_cb = xbox_init_complete_cb,
-        .user_data = (uintptr_t)ctrl
-    };
-    
-    if (tuh_edpt_xfer(&xfer_out)) {
-        printf("Xbox: Init packet queued\n");
-        
-        // Show on OLED
-        ssd1306_clear(&disp);
-        ssd1306_draw_string(&disp, 20, 10, 2, (char*)"XBOX");
-        ssd1306_draw_string(&disp, 5, 35, 1, (char*)"Sending Init");
-        ssd1306_show(&disp);
-        sleep_ms(500);
-    } else {
-        printf("Xbox: Init packet send failed\n");
-        
-        // Show failure on OLED
-        ssd1306_clear(&disp);
-        ssd1306_draw_string(&disp, 20, 10, 2, (char*)"XBOX");
-        ssd1306_draw_string(&disp, 5, 35, 1, (char*)"Init Failed");
-        ssd1306_show(&disp);
-        sleep_ms(2000);
-    }
-    
-    // WORKAROUND: Some Xbox controllers may not need init packet or callback may not fire
-    // Try to start receiving reports immediately
-    printf("Xbox: Starting report reception immediately (workaround)\n");
-    
-    tuh_xfer_t xfer_in = {
-        .daddr = dev_addr,
-        .ep_addr = endpoints.ep_in,
-        .buflen = XBOX_INPUT_REPORT_SIZE,
-        .buffer = xbox_report_buffer,
-        .complete_cb = xbox_report_received_cb,
-        .user_data = (uintptr_t)ctrl
-    };
-    
-    if (tuh_edpt_xfer(&xfer_in)) {
-        printf("Xbox: Report reception started\n");
-        
-        // Show on OLED
-        ssd1306_clear(&disp);
-        ssd1306_draw_string(&disp, 20, 10, 2, (char*)"XBOX");
-        ssd1306_draw_string(&disp, 10, 35, 1, (char*)"Waiting...");
-        ssd1306_show(&disp);
-    } else {
-        printf("Xbox: Failed to start report reception\n");
-        
-        ssd1306_clear(&disp);
-        ssd1306_draw_string(&disp, 20, 10, 2, (char*)"XBOX");
-        ssd1306_draw_string(&disp, 10, 35, 1, (char*)"RX Failed");
-        ssd1306_show(&disp);
-        sleep_ms(2000);
-    }
     
     ctrl->initialized = true;
+    
+    printf("Xbox: Initialization complete, waiting for reports...\n");
     
     return true;
 }
@@ -470,10 +344,33 @@ static void xbox_report_received_cb(tuh_xfer_t* xfer) {
 }
 
 bool xinput_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len) {
+    static bool first_report_ever = true;
+    extern ssd1306_t disp;
+    
     xbox_controller_t* ctrl = find_controller_by_addr(dev_addr);
     if (!ctrl) {
         printf("Xbox: Controller %d not found\n", dev_addr);
         return false;
+    }
+    
+    // Show that we got SOME data!
+    if (first_report_ever) {
+        first_report_ever = false;
+        printf("Xbox: *** FIRST REPORT RECEIVED! ***\n");
+        printf("Xbox: Length: %d bytes\n", len);
+        printf("Xbox: First 16 bytes: ");
+        for (int i = 0; i < (len < 16 ? len : 16); i++) {
+            printf("%02X ", report[i]);
+        }
+        printf("\n");
+        
+        ssd1306_clear(&disp);
+        ssd1306_draw_string(&disp, 15, 10, 2, (char*)"XBOX!");
+        char msg[20];
+        snprintf(msg, sizeof(msg), "Got %d bytes", len);
+        ssd1306_draw_string(&disp, 10, 35, 1, msg);
+        ssd1306_show(&disp);
+        sleep_ms(2000);
     }
     
     // Minimum report size check
@@ -488,6 +385,7 @@ bool xinput_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len
         if (report[0] == XBOX_REPORT_ID_GUIDE) {
             printf("Xbox: Guide button pressed\n");
         }
+        printf("Xbox: Got report ID 0x%02X (expected 0x%02X)\n", report[0], XBOX_REPORT_ID_INPUT);
         return false;
     }
     
