@@ -6,6 +6,7 @@
 #include "tusb.h"
 #include "hid_app_host.h"
 #include "xinput.h"
+#include "ps4_controller.h"
 #include <string.h>
 
 // Structure to track HID devices
@@ -167,11 +168,37 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
   debug_last_dev_addr = dev_addr;
   debug_last_instance = instance;
   
-  // Check for Xbox controller (VID/PID detection)
+  // Check for game controllers (VID/PID detection)
   uint16_t vid, pid;
   tuh_vid_pid_get(dev_addr, &vid, &pid);
   
-  // Special handling for Xbox controllers
+  // Check for PS4 DualShock 4
+  bool is_ps4 = ps4_is_dualshock4(vid, pid);
+  
+  if (is_ps4) {
+    printf("PS4 DualShock 4 detected: VID=0x%04X, PID=0x%04X\n", vid, pid);
+    
+    // Allocate device slot
+    hidh_device_t* dev = alloc_device(dev_addr, instance);
+    if (!dev) return;
+    
+    // Mark as PS4 joystick
+    dev->hid_type = HID_JOYSTICK;
+    dev->report_size = 64;  // PS4 reports vary but we'll handle up to 64 bytes
+    dev->has_report_info = false;  // We'll parse manually, not via HID parser
+    
+    // Notify PS4 module
+    ps4_mount_cb(dev_addr);
+    
+    // Start receiving reports
+    tuh_hid_receive_report(dev_addr, instance);
+    
+    // Call mounted callback
+    tuh_hid_mounted_cb(dev_addr);
+    return;
+  }
+  
+  // Check for Xbox controller
   bool is_xbox = xinput_is_xbox_controller(vid, pid);
   
   if (is_xbox) {
@@ -182,20 +209,20 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
     hidh_device_t* dev = alloc_device(dev_addr, instance);
     if (!dev) return;
     
-    // Mark as Xbox type joystick (we'll handle reports differently)
-    dev->hid_type = HID_JOYSTICK;  // Treat as joystick
-    dev->report_size = 64;  // Xbox reports are typically 64 bytes
-    dev->has_report_info = false;  // No HID descriptor available
+    // Mark as Xbox type joystick
+    dev->hid_type = HID_JOYSTICK;
+    dev->report_size = 64;
+    dev->has_report_info = false;
     
     // Notify Xbox module
     xinput_mount_cb(dev_addr);
     
-    // Start receiving reports directly
+    // Start receiving reports
     tuh_hid_receive_report(dev_addr, instance);
     
     // Call mounted callback
     tuh_hid_mounted_cb(dev_addr);
-    return;  // Done with Xbox, skip normal HID processing
+    return;
   }
   
   hidh_device_t* dev = alloc_device(dev_addr, instance);
@@ -338,10 +365,21 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
   hidh_device_t* dev = find_device_by_inst(dev_addr, instance);
   if (!dev || !dev->mounted) return;
   
-  // Check if this is an Xbox controller report
+  // Check if this is a game controller report
   uint16_t vid, pid;
   tuh_vid_pid_get(dev_addr, &vid, &pid);
   
+  // PS4 DualShock 4
+  if (ps4_is_dualshock4(vid, pid)) {
+    // This is a PS4 controller report - pass to PS4 handler
+    ps4_process_report(dev_addr, report, len);
+    
+    // Queue next report
+    tuh_hid_receive_report(dev_addr, instance);
+    return;
+  }
+  
+  // Xbox controllers
   if (xinput_is_xbox_controller(vid, pid)) {
     // This is an Xbox controller report - pass to XInput handler
     xinput_process_report(dev_addr, report, len);
