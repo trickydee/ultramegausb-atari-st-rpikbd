@@ -171,12 +171,31 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
   uint16_t vid, pid;
   tuh_vid_pid_get(dev_addr, &vid, &pid);
   
-  if (xinput_is_xbox_controller(vid, pid)) {
+  // Special handling for Xbox controllers
+  bool is_xbox = xinput_is_xbox_controller(vid, pid);
+  
+  if (is_xbox) {
     printf("Xbox controller detected: VID=0x%04X, PID=0x%04X\n", vid, pid);
+    printf("Xbox: Will be treated as raw HID joystick (vendor-class workaround)\n");
+    
+    // Allocate device slot
+    hidh_device_t* dev = alloc_device(dev_addr, instance);
+    if (!dev) return;
+    
+    // Mark as Xbox type joystick (we'll handle reports differently)
+    dev->hid_type = HID_JOYSTICK;  // Treat as joystick
+    dev->report_size = 64;  // Xbox reports are typically 64 bytes
+    dev->has_report_info = false;  // No HID descriptor available
+    
+    // Notify Xbox module
     xinput_mount_cb(dev_addr);
-    // Note: Xbox controllers won't work as HID, they need XInput protocol
-    // For now, we just detect them. Full XInput implementation coming later.
-    return;
+    
+    // Start receiving reports directly
+    tuh_hid_receive_report(dev_addr, instance);
+    
+    // Call mounted callback
+    tuh_hid_mounted_cb(dev_addr);
+    return;  // Done with Xbox, skip normal HID processing
   }
   
   hidh_device_t* dev = alloc_device(dev_addr, instance);
@@ -318,6 +337,19 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
   
   hidh_device_t* dev = find_device_by_inst(dev_addr, instance);
   if (!dev || !dev->mounted) return;
+  
+  // Check if this is an Xbox controller report
+  uint16_t vid, pid;
+  tuh_vid_pid_get(dev_addr, &vid, &pid);
+  
+  if (xinput_is_xbox_controller(vid, pid)) {
+    // This is an Xbox controller report - pass to XInput handler
+    xinput_process_report(dev_addr, report, len);
+    
+    // Queue next report
+    tuh_hid_receive_report(dev_addr, instance);
+    return;
+  }
   
   // Always store the latest report in our buffer
   uint16_t copy_len = (len < 64) ? len : 64;
