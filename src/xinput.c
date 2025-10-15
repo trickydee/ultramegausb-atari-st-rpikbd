@@ -106,12 +106,21 @@ bool xinput_init_controller(uint8_t dev_addr) {
     
     printf("Xbox: Initializing controller at address %d\n", dev_addr);
     
-    // Send initialization packet to endpoint 0x01
-    // Note: This requires TinyUSB vendor transfer support
-    // For now, we'll mark as initialized and the controller should start sending data
+    // Xbox One controllers need an initialization packet to start sending data
+    // The packet is: {0x05, 0x20, 0x00, 0x01, 0x00}
+    // This should be sent to OUT endpoint 0x01
+    
+    // Note: In TinyUSB 0.19.0, we don't have easy vendor transfer support
+    // Some Xbox controllers will start sending data without init packet
+    // Others may need the host to request data via control transfers
+    
+    // For now, mark as initialized and attempt to read data
+    // Modern Xbox controllers often work without explicit init
     ctrl->initialized = true;
     
-    printf("Xbox: Controller %d initialized\n", dev_addr);
+    printf("Xbox: Controller %d marked as initialized\n", dev_addr);
+    printf("Xbox: Waiting for input reports...\n");
+    
     return true;
 }
 
@@ -226,7 +235,33 @@ void xinput_set_deadzone(uint8_t dev_addr, int16_t deadzone) {
 }
 
 void xinput_mount_cb(uint8_t dev_addr) {
-    printf("Xbox: Controller mounted at address %d\n", dev_addr);
+    printf("\n");
+    printf("═══════════════════════════════════════════════════════\n");
+    printf("  ��� XBOX CONTROLLER DETECTED!\n");
+    printf("  Device Address: %d\n", dev_addr);
+    printf("  \n");
+    printf("  STATUS: Detected but not yet functional\n");
+    printf("  \n");
+    printf("  Xbox controller support requires TinyUSB 0.20.0+\n");
+    printf("  Current version (0.19.0) has limited vendor class support\n");
+    printf("  \n");
+    printf("  📋 What's working:\n");
+    printf("     ✓ Controller detection\n");
+    printf("     ✓ VID/PID identification\n");
+    printf("     ✓ XInput protocol framework\n");
+    printf("  \n");
+    printf("  ⏳ Coming in future update:\n");
+    printf("     • Full XInput protocol support\n");
+    printf("     • Button and stick input\n");
+    printf("     • Atari ST joystick mapping\n");
+    printf("  \n");
+    printf("  💡 For now, please use:\n");
+    printf("     - Standard USB HID joysticks\n");
+    printf("     - D-SUB GPIO joysticks\n");
+    printf("  \n");
+    printf("═══════════════════════════════════════════════════════\n");
+    printf("\n");
+    
     xinput_init_controller(dev_addr);
 }
 
