@@ -69,6 +69,7 @@ set(SOURCES
     ${LANG_SRC}  # Specific language source file
     src/NVSettings.cpp
     src/hid_app_host.c
+    src/xinput.c
     ssd1306/ssd1306.c
     6301/6301.c
     hidparser/HIDParser.c
