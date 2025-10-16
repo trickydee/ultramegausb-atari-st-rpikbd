@@ -67,6 +67,12 @@ public:
      */
     uint8_t get_mouse_enabled();
     void set_mouse_enabled(uint8_t en);
+    
+    /**
+     * Toggle joystick source between D-SUB and USB
+     * @param joystick_num 0 or 1
+     */
+    void toggle_joystick_source(uint8_t joystick_num);
 
     /**
      * Update the display if necessary

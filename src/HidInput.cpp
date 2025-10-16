@@ -253,6 +253,64 @@ void HidInput::handle_keyboard() {
                 last_reset_state = false;
             }
             
+            // Check for Ctrl+F10 to toggle Joystick 0 (D-SUB <-> USB)
+            static bool last_joy0_state = false;
+            bool f10_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == HID_KEY_F10) {
+                    f10_pressed = true;
+                    break;
+                }
+            }
+            
+            if (ctrl_pressed && f10_pressed) {
+                if (!last_joy0_state) {
+                    ui_->toggle_joystick_source(0);  // Toggle Joystick 0
+                    last_joy0_state = true;
+                }
+            } else {
+                last_joy0_state = false;
+            }
+            
+            // Check for Ctrl+F9 to toggle Joystick 1 (D-SUB <-> USB)
+            static bool last_joy1_state = false;
+            bool f9_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == HID_KEY_F9) {
+                    f9_pressed = true;
+                    break;
+                }
+            }
+            
+            if (ctrl_pressed && f9_pressed) {
+                if (!last_joy1_state) {
+                    ui_->toggle_joystick_source(1);  // Toggle Joystick 1
+                    last_joy1_state = true;
+                }
+            } else {
+                last_joy1_state = false;
+            }
+            
+            // Check for Alt+[ to send Atari keypad /
+            static bool last_keypad_slash_state = false;
+            bool left_bracket_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == HID_KEY_BRACKET_LEFT) {
+                    left_bracket_pressed = true;
+                    break;
+                }
+            }
+            
+            // Check for Alt+] to send Atari keypad *
+            static bool last_keypad_star_state = false;
+            bool right_bracket_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == HID_KEY_BRACKET_RIGHT) {
+                    right_bracket_pressed = true;
+                    break;
+                }
+            }
+            
             // Translate the USB HID codes into ST keys that are currently down
             char st_keys[6];
             for (int i = 0; i < 6; ++i) {
@@ -261,12 +319,28 @@ void HidInput::handle_keyboard() {
                     if (alt_pressed && kb->keycode[i] == HID_KEY_SLASH) {
                         st_keys[i] = ATARI_INSERT;
                     }
+                    // If Alt + [ is pressed, send Atari keypad / (scancode 101)
+                    else if (alt_pressed && kb->keycode[i] == HID_KEY_BRACKET_LEFT) {
+                        st_keys[i] = 101;  // Atari keypad /
+                    }
+                    // If Alt + ] is pressed, send Atari keypad * (scancode 102)
+                    else if (alt_pressed && kb->keycode[i] == HID_KEY_BRACKET_RIGHT) {
+                        st_keys[i] = 102;  // Atari keypad *
+                    }
                     // If Alt + Plus or Alt + Minus, don't send to Atari (used for clock control)
                     else if (alt_pressed && (kb->keycode[i] == HID_KEY_EQUAL || kb->keycode[i] == HID_KEY_MINUS)) {
                         st_keys[i] = 0;
                     }
                     // If Ctrl+F11, don't send to Atari (used for XRESET)
                     else if (ctrl_pressed && kb->keycode[i] == XRESET_KEY) {
+                        st_keys[i] = 0;
+                    }
+                    // If Ctrl+F10, don't send to Atari (used for Joy0 toggle)
+                    else if (ctrl_pressed && kb->keycode[i] == HID_KEY_F10) {
+                        st_keys[i] = 0;
+                    }
+                    // If Ctrl+F9, don't send to Atari (used for Joy1 toggle)
+                    else if (ctrl_pressed && kb->keycode[i] == HID_KEY_F9) {
                         st_keys[i] = 0;
                     }
                     else {
