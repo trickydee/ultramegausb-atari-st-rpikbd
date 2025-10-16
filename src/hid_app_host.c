@@ -7,6 +7,7 @@
 #include "hid_app_host.h"
 #include "xinput.h"
 #include "ps4_controller.h"
+#include "ssd1306.h"  // For OLED debug display
 #include <string.h>
 
 // Structure to track HID devices
@@ -184,6 +185,30 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
   uint16_t vid, pid;
   tuh_vid_pid_get(dev_addr, &vid, &pid);
   
+  // Debug: Display Logitech device info on OLED
+  if (vid == 0x046D) {  // Logitech VID
+    extern ssd1306_t disp;
+    uint8_t protocol = tuh_hid_interface_protocol(dev_addr, instance);
+    
+    ssd1306_clear(&disp);
+    ssd1306_draw_string(&disp, 10, 0, 1, (char*)"LOGITECH DEVICE");
+    
+    char line1[20];
+    snprintf(line1, sizeof(line1), "Addr:%d Inst:%d", dev_addr, instance);
+    ssd1306_draw_string(&disp, 5, 15, 1, line1);
+    
+    char line2[20];
+    snprintf(line2, sizeof(line2), "VID:%04X PID:%04X", vid, pid);
+    ssd1306_draw_string(&disp, 5, 30, 1, line2);
+    
+    char line3[20];
+    snprintf(line3, sizeof(line3), "Proto:%d Len:%d", protocol, desc_len);
+    ssd1306_draw_string(&disp, 5, 45, 1, line3);
+    
+    ssd1306_show(&disp);
+    sleep_ms(3000);
+  }
+  
   // Check for PS4 DualShock 4
   bool is_ps4 = ps4_is_dualshock4(vid, pid);
   
@@ -321,6 +346,25 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
                              (filter_type == HID_JOYSTICK) ? "JOYSTICK" : "UNKNOWN";
       printf("HID Parser detected: %s (dev_addr=%d, inst=%d)\n", type_str, dev_addr, instance);
       
+      // Debug: Display parsed device type on OLED for Logitech devices
+      if (vid == 0x046D) {
+        extern ssd1306_t disp;
+        
+        ssd1306_clear(&disp);
+        ssd1306_draw_string(&disp, 20, 10, 2, (char*)"PARSED");
+        
+        char type_line[20];
+        snprintf(type_line, sizeof(type_line), "Type: %s", type_str);
+        ssd1306_draw_string(&disp, 5, 35, 1, type_line);
+        
+        char items_line[20];
+        snprintf(items_line, sizeof(items_line), "Items: %d", dev->report_info.TotalReportItems);
+        ssd1306_draw_string(&disp, 5, 50, 1, items_line);
+        
+        ssd1306_show(&disp);
+        sleep_ms(2000);
+      }
+      
       // Start receiving reports
       tuh_hid_receive_report(dev_addr, instance);
       
@@ -385,6 +429,37 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
   // Check if this is a game controller report
   uint16_t vid, pid;
   tuh_vid_pid_get(dev_addr, &vid, &pid);
+  
+  // Debug: Display Logitech report activity on OLED
+  if (vid == 0x046D) {
+    static uint32_t logitech_report_count = 0;
+    logitech_report_count++;
+    
+    if ((logitech_report_count % 100) == 0) {
+      extern ssd1306_t disp;
+      
+      ssd1306_clear(&disp);
+      ssd1306_draw_string(&disp, 15, 0, 1, (char*)"LOGITECH DATA");
+      
+      char type_line[20];
+      const char* type = (dev->hid_type == HID_MOUSE) ? "Mouse" :
+                         (dev->hid_type == HID_KEYBOARD) ? "Keyboard" :
+                         (dev->hid_type == HID_JOYSTICK) ? "Joystick" : "Unknown";
+      snprintf(type_line, sizeof(type_line), "Type: %s", type);
+      ssd1306_draw_string(&disp, 5, 15, 1, type_line);
+      
+      char count_line[20];
+      snprintf(count_line, sizeof(count_line), "Reports: %lu", logitech_report_count);
+      ssd1306_draw_string(&disp, 5, 30, 1, count_line);
+      
+      char data_line[20];
+      snprintf(data_line, sizeof(data_line), "Len:%d A:%d I:%d", 
+               len, dev_addr, instance);
+      ssd1306_draw_string(&disp, 5, 45, 1, data_line);
+      
+      ssd1306_show(&disp);
+    }
+  }
   
   // PS4 DualShock 4
   if (ps4_is_dualshock4(vid, pid)) {
