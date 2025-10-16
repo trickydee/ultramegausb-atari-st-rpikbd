@@ -25,6 +25,8 @@
 #include "hardware/clocks.h"
 #include "6301.h"
 #include "ssd1306.h"
+#include "xinput.h"
+#include "ps4_controller.h"
 #include <map>
 
 extern ssd1306_t disp;  // External reference to display
@@ -405,6 +407,53 @@ bool HidInput::get_usb_joystick(int addr, uint8_t& axis, uint8_t& button) {
     return false;
 }
 
+bool HidInput::get_ps4_joystick(int joystick_num, uint8_t& axis, uint8_t& button) {
+    // Get PS4 controller state
+    for (uint8_t dev_addr = 1; dev_addr < 8; dev_addr++) {
+        ps4_controller_t* ps4 = ps4_get_controller(dev_addr);
+        if (ps4 && ps4->connected) {
+            // Found a connected PS4 controller!
+            ps4_to_atari(ps4, joystick_num, &axis, &button);
+            
+            // Debug disabled for performance
+            // (Enable only for troubleshooting)
+            #if 0
+            static uint32_t debug_count = 0;
+            if ((debug_count++ % 500) == 0) {
+                printf("PS4->Atari: Joy%d axis=0x%02X fire=%d\n", joystick_num, axis, button);
+            }
+            #endif
+            
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+bool HidInput::get_xbox_joystick(int joystick_num, uint8_t& axis, uint8_t& button) {
+    // Get Xbox controller state from XInput module
+    for (uint8_t dev_addr = 1; dev_addr < 8; dev_addr++) {
+        xbox_controller_t* xbox = xinput_get_controller(dev_addr);
+        if (xbox && xbox->connected && xbox->initialized) {
+            // Found a connected Xbox controller!
+            xinput_to_atari(xbox, joystick_num, &axis, &button);
+            
+            // Debug disabled for performance
+            #if 0
+            static uint32_t debug_count = 0;
+            if ((debug_count++ % 500) == 0) {
+                printf("Xbox->Atari: Joy%d axis=0x%02X fire=%d\n", joystick_num, axis, button);
+            }
+            #endif
+            
+            return true;
+        }
+    }
+    
+    return false;
+}
+
 void HidInput::handle_joystick() {
     // Find the joystick addresses
     std::vector<int> joystick_addr;
@@ -443,23 +492,40 @@ void HidInput::handle_joystick() {
             }
         }
         else {
-            // See if there is a USB joystick
+            // Try USB joystick first, then Xbox controller
+            bool got_input = false;
+            
+            // See if there is a USB HID joystick
             if (next_joystick < joystick_addr.size()) {
                 if (get_usb_joystick(joystick_addr[next_joystick], axis, button)) {
-                    if (joystick == 0) {
-                        if (!ui_->get_mouse_enabled()) {
-                            mouse_state = (mouse_state & 0xfd) | (button ? 2 : 0);
-                            joystick_state &= ~0xf;
-                            joystick_state |= axis;
-                        }
-                    }
-                    else {
-                        mouse_state = (mouse_state & 0xfe) | (button ? 1 : 0);
-                        joystick_state &= ~(0xf << 4);
-                        joystick_state |= (axis << 4);
-                    }
+                    got_input = true;
                 }
                 ++next_joystick;
+            }
+            
+            // If no HID joystick, try PS4 controller, then Xbox
+            if (!got_input) {
+                if (get_ps4_joystick(joystick, axis, button)) {
+                    got_input = true;
+                } else if (get_xbox_joystick(joystick, axis, button)) {
+                    got_input = true;
+                }
+            }
+            
+            // Update joystick state if we got input from either source
+            if (got_input) {
+                if (joystick == 0) {
+                    if (!ui_->get_mouse_enabled()) {
+                        mouse_state = (mouse_state & 0xfd) | (button ? 2 : 0);
+                        joystick_state &= ~0xf;
+                        joystick_state |= axis;
+                    }
+                }
+                else {
+                    mouse_state = (mouse_state & 0xfe) | (button ? 1 : 0);
+                    joystick_state &= ~(0xf << 4);
+                    joystick_state |= (axis << 4);
+                }
             }
         }
     }
