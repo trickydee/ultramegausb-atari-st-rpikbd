@@ -314,6 +314,7 @@ void HidInput::handle_keyboard() {
             // Check for Caps Lock key press to toggle Caps Lock state
             static bool last_capslock_state = false;
             static bool capslock_on = false;  // Caps Lock state (persists)
+            static bool capslock_send_pulse = false;  // Send momentary pulse to ST
             bool capslock_pressed = false;
             for (int i = 0; i < 6; ++i) {
                 if (kb->keycode[i] == HID_KEY_CAPS_LOCK) {
@@ -325,9 +326,16 @@ void HidInput::handle_keyboard() {
             if (capslock_pressed && !last_capslock_state) {
                 // Caps Lock key was just pressed - toggle state
                 capslock_on = !capslock_on;
+                capslock_send_pulse = true;  // Send a pulse to the Atari ST
                 last_capslock_state = true;
+                
+                // Update USB keyboard LED to match state
+                // LED report: bit 1 = Caps Lock (0x02)
+                uint8_t led_report = capslock_on ? 0x02 : 0x00;
+                tuh_hid_set_report(it.first, 0, 0, HID_REPORT_TYPE_OUTPUT, &led_report, sizeof(led_report));
             } else if (!capslock_pressed) {
                 last_capslock_state = false;
+                capslock_send_pulse = false;  // Clear pulse after key released
             }
             
             // Translate the USB HID codes into ST keys that are currently down
@@ -371,7 +379,7 @@ void HidInput::handle_keyboard() {
                 }
             }
             
-            // Handle Caps Lock as a toggle - send the key state based on toggle, not physical key
+            // Handle Caps Lock as a toggle - send a momentary pulse to ST when toggled
             // Atari ST Caps Lock scancode is 58
             const int ATARI_CAPSLOCK = 58;
             
@@ -379,9 +387,9 @@ void HidInput::handle_keyboard() {
             for (int i = 1; i < key_states.size(); ++i) {
                 bool down = false;
                 
-                // Special handling for Caps Lock - use toggle state instead of physical key
+                // Special handling for Caps Lock - send pulse only when toggling
                 if (i == ATARI_CAPSLOCK) {
-                    down = capslock_on;  // Use the toggle state
+                    down = capslock_send_pulse;  // Send pulse when toggled, not persistent state
                 } else {
                     // Normal key handling
                     for (int j = 0; j < 6; ++j) {
