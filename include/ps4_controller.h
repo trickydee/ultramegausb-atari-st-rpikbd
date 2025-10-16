@@ -85,7 +85,7 @@ typedef struct {
     uint8_t dev_addr;           // USB device address
     bool connected;             // Connection status
     ps4_report_t report;        // Latest report
-    int16_t deadzone;           // Stick deadzone (default 32 = ~25%)
+    int16_t deadzone;           // Stick deadzone (default 50 = ~39% for drift compensation)
 } ps4_controller_t;
 
 //--------------------------------------------------------------------

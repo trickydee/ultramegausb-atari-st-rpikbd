@@ -44,7 +44,7 @@ static ps4_controller_t* allocate_controller(uint8_t dev_addr) {
     memset(ctrl, 0, sizeof(ps4_controller_t));
     ctrl->dev_addr = dev_addr;
     ctrl->connected = true;
-    ctrl->deadzone = 32;  // Default ~25% deadzone (32 out of 128)
+    ctrl->deadzone = 50;  // Increased deadzone for drift compensation (~39% of range)
     
     return ctrl;
 }
@@ -96,31 +96,11 @@ bool ps4_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len) {
         return false;
     }
     
-    // Show first report with full data dump for debugging
+    // Show first report (minimal, no blocking)
     if (first_report_ever) {
         first_report_ever = false;
-        printf("PS4: *** FIRST REPORT RECEIVED! ***\n");
-        printf("PS4: Length: %d bytes\n", len);
-        printf("PS4: Full report dump:\n");
-        for (int i = 0; i < len; i++) {
-            printf("%02X ", report[i]);
-            if ((i + 1) % 16 == 0) printf("\n");
-        }
-        printf("\n");
-        
-        ssd1306_clear(&disp);
-        ssd1306_draw_string(&disp, 20, 10, 2, (char*)"PS4!");
-        char msg[20];
-        snprintf(msg, sizeof(msg), "%d bytes", len);
-        ssd1306_draw_string(&disp, 15, 35, 1, msg);
-        
-        // Show first few bytes on OLED
-        char hex[20];
-        snprintf(hex, sizeof(hex), "%02X %02X %02X %02X", 
-                 report[0], report[1], report[2], report[3]);
-        ssd1306_draw_string(&disp, 5, 50, 1, hex);
-        ssd1306_show(&disp);
-        sleep_ms(3000);
+        printf("PS4: First report received (%d bytes)\n", len);
+        // No OLED update or sleep - keep it fast!
     }
     
     // Parse PS4 report
@@ -174,29 +154,17 @@ bool ps4_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len) {
         input->r2_trigger = report[offset + 8];
     }
     
-    // Debug output (every 50th report for better feedback)
+    // Minimal debug output (every 500th report = ~2 seconds)
     static uint32_t report_count = 0;
-    if ((report_count++ % 50) == 0) {
-        printf("PS4: Stick L(%d,%d) R(%d,%d) DPad=%d Btns: X=%d O=%d Sq=%d Tr=%d\n",
-               input->x, input->y, input->z, input->rz, input->dpad,
-               input->cross, input->circle, input->square, input->triangle);
-        printf("PS4: L1=%d R1=%d L2=%d R2=%d L2trig=%d R2trig=%d\n",
-               input->l1, input->r1, input->l2, input->r2,
-               input->l2_trigger, input->r2_trigger);
-               
-        // Update OLED with stick values for debugging
-        ssd1306_clear(&disp);
-        ssd1306_draw_string(&disp, 20, 10, 2, (char*)"PS4");
-        char msg[20];
-        snprintf(msg, sizeof(msg), "Rpt:%lu", report_count);
-        ssd1306_draw_string(&disp, 10, 35, 1, msg);
-        
-        // Show stick position
-        char stick[20];
-        snprintf(stick, sizeof(stick), "X:%d Y:%d", input->x, input->y);
-        ssd1306_draw_string(&disp, 10, 50, 1, stick);
-        ssd1306_show(&disp);
+    report_count++;
+    
+    #if 0  // Disable debug output for performance - enable only for troubleshooting
+    if ((report_count % 500) == 0) {
+        int8_t drift_x = input->x - 128;
+        int8_t drift_y = input->y - 128;
+        printf("PS4: Rpt %lu - Drift(%+d,%+d)\n", report_count, drift_x, drift_y);
     }
+    #endif
     
     return true;
 }

@@ -415,11 +415,14 @@ bool HidInput::get_ps4_joystick(int joystick_num, uint8_t& axis, uint8_t& button
             // Found a connected PS4 controller!
             ps4_to_atari(ps4, joystick_num, &axis, &button);
             
-            // Debug output (every 100 calls)
+            // Debug disabled for performance
+            // (Enable only for troubleshooting)
+            #if 0
             static uint32_t debug_count = 0;
-            if ((debug_count++ % 100) == 0) {
+            if ((debug_count++ % 500) == 0) {
                 printf("PS4->Atari: Joy%d axis=0x%02X fire=%d\n", joystick_num, axis, button);
             }
+            #endif
             
             return true;
         }
@@ -436,11 +439,13 @@ bool HidInput::get_xbox_joystick(int joystick_num, uint8_t& axis, uint8_t& butto
             // Found a connected Xbox controller!
             xinput_to_atari(xbox, joystick_num, &axis, &button);
             
-            // Debug output (every 100 calls)
+            // Debug disabled for performance
+            #if 0
             static uint32_t debug_count = 0;
-            if ((debug_count++ % 100) == 0) {
+            if ((debug_count++ % 500) == 0) {
                 printf("Xbox->Atari: Joy%d axis=0x%02X fire=%d\n", joystick_num, axis, button);
             }
+            #endif
             
             return true;
         }
