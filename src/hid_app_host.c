@@ -368,18 +368,26 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
       // Start receiving reports
       tuh_hid_receive_report(dev_addr, instance);
       
-      bool first_interface = true;
-      for (int i = 0; i < CFG_TUSB_HOST_DEVICE_MAX; i++) {
-        if (hid_devices[i].dev_addr == dev_addr && 
-            hid_devices[i].mounted && 
-            &hid_devices[i] != dev) {
-          first_interface = false;
-          break;
-        }
-      }
-      
-      if (first_interface) {
+      // Always call mounted callback for MOUSE devices
+      // (Logitech Unifying has keyboard on inst 0, mouse on inst 1)
+      if (filter_type == HID_MOUSE) {
         tuh_hid_mounted_cb(dev_addr);
+      }
+      // For other device types, only call for first interface
+      else {
+        bool first_interface = true;
+        for (int i = 0; i < CFG_TUSB_HOST_DEVICE_MAX; i++) {
+          if (hid_devices[i].dev_addr == dev_addr && 
+              hid_devices[i].mounted && 
+              &hid_devices[i] != dev) {
+            first_interface = false;
+            break;
+          }
+        }
+        
+        if (first_interface) {
+          tuh_hid_mounted_cb(dev_addr);
+        }
       }
     }
   }
