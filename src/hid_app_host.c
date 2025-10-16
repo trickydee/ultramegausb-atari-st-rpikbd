@@ -107,6 +107,18 @@ bool CALLBACK_HIDParser_FilterHIDReportItem(HID_ReportItem_t* const item)
         break;
       }
     }
+    
+    // Additional detection: If we see X and Y axes with buttons, it's likely a mouse
+    // This helps detect wireless mice on Logitech Unifying receivers which may
+    // not use the standard USAGE_MOUSE collection
+    if (filter_type == HID_UNDEFINED &&
+        item->Attributes.Usage.Page == USAGE_PAGE_GENERIC_DCTRL) {
+      if (item->Attributes.Usage.Usage == USAGE_X || 
+          item->Attributes.Usage.Usage == USAGE_Y) {
+        // Found X or Y axis - likely a mouse (or joystick, but we'll detect buttons later)
+        filter_type = HID_MOUSE;
+      }
+    }
   }
   
   if (filter_type == HID_JOYSTICK || filter_type == HID_MOUSE) {
@@ -296,13 +308,18 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
       tuh_hid_mounted_cb(dev_addr);
     }
   }
-  // For other devices (joysticks), try to parse descriptor
+  // For other devices (joysticks, non-boot mice), try to parse descriptor
   else if (report_desc && desc_len > 0 && desc_len < 512) {
     filter_type = HID_UNDEFINED;
     if (USB_ProcessHIDReport(report_desc, desc_len, &dev->report_info) == HID_PARSE_Successful) {
       dev->has_report_info = true;
       dev->hid_type = filter_type;
       dev->report_size = 64;
+      
+      // Debug: Show what we detected
+      const char* type_str = (filter_type == HID_MOUSE) ? "MOUSE" : 
+                             (filter_type == HID_JOYSTICK) ? "JOYSTICK" : "UNKNOWN";
+      printf("HID Parser detected: %s (dev_addr=%d, inst=%d)\n", type_str, dev_addr, instance);
       
       // Start receiving reports
       tuh_hid_receive_report(dev_addr, instance);

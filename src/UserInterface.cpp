@@ -205,6 +205,15 @@ void UserInterface::handle_buttons() {
     }
 }
 
+void UserInterface::toggle_joystick_source(uint8_t joystick_num) {
+    if (joystick_num > 1) return;  // Only support Joy0 and Joy1
+    
+    // Toggle the joystick device bit (D-SUB <-> USB)
+    settings.get_settings().joy_device ^= (1 << joystick_num);
+    settings.write();
+    dirty = true;
+}
+
 void UserInterface::on_button_down(int i) {
     // Middle button changes page
     if (i == BUTTON_MIDDLE) {
