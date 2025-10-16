@@ -14,13 +14,21 @@ Modern keyboards often lack dedicated keypads or have different layouts. These s
 ### Joystick Source Toggle
 Toggle joystick input sources between D-SUB (GPIO) and USB controllers without using the OLED buttons:
 
-- **Ctrl + F10** → Toggle **Joystick 0** (D-SUB ↔ USB)
+- **Ctrl + F9** → Toggle **Joystick 0** (D-SUB ↔ USB)
   - Same function as pressing left/right buttons on PAGE_JOY0
   - Toggles between physical D-SUB port and USB controllers
   
-- **Ctrl + F9** → Toggle **Joystick 1** (D-SUB ↔ USB)
+- **Ctrl + F10** → Toggle **Joystick 1** (D-SUB ↔ USB)
   - Same function as pressing left/right buttons on PAGE_JOY1
   - Toggles between physical D-SUB port and USB controllers
+
+### Caps Lock Toggle
+Proper Caps Lock toggle behavior like modern keyboards:
+
+- **Caps Lock** → Toggle Caps Lock state (press once = ON, press again = OFF)
+  - Sends persistent state to Atari ST (not just a momentary key press)
+  - Works like a modern keyboard's Caps Lock toggle
+  - State persists until toggled again
 
 ## Complete Keyboard Shortcut Reference
 
@@ -31,13 +39,14 @@ Toggle joystick input sources between D-SUB (GPIO) and USB controllers without u
 - **Alt + -** → Set CPU to 150MHz (default)
 
 ### Joystick Control
-- **Ctrl + F10** → Toggle Joystick 0 source (D-SUB/USB) [NEW]
-- **Ctrl + F9** → Toggle Joystick 1 source (D-SUB/USB) [NEW]
+- **Ctrl + F9** → Toggle Joystick 0 source (D-SUB/USB) [NEW]
+- **Ctrl + F10** → Toggle Joystick 1 source (D-SUB/USB) [NEW]
 
 ### Special Keys
 - **Alt + /** → Atari INSERT key
 - **Alt + [** → Atari Keypad / [NEW]
 - **Alt + ]** → Atari Keypad * [NEW]
+- **Caps Lock** → Toggle Caps Lock state (persistent) [NEW]
 
 ## Implementation Details
 

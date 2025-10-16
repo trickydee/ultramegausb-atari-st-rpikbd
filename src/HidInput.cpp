@@ -253,27 +253,8 @@ void HidInput::handle_keyboard() {
                 last_reset_state = false;
             }
             
-            // Check for Ctrl+F10 to toggle Joystick 0 (D-SUB <-> USB)
+            // Check for Ctrl+F9 to toggle Joystick 0 (D-SUB <-> USB)
             static bool last_joy0_state = false;
-            bool f10_pressed = false;
-            for (int i = 0; i < 6; ++i) {
-                if (kb->keycode[i] == HID_KEY_F10) {
-                    f10_pressed = true;
-                    break;
-                }
-            }
-            
-            if (ctrl_pressed && f10_pressed) {
-                if (!last_joy0_state) {
-                    ui_->toggle_joystick_source(0);  // Toggle Joystick 0
-                    last_joy0_state = true;
-                }
-            } else {
-                last_joy0_state = false;
-            }
-            
-            // Check for Ctrl+F9 to toggle Joystick 1 (D-SUB <-> USB)
-            static bool last_joy1_state = false;
             bool f9_pressed = false;
             for (int i = 0; i < 6; ++i) {
                 if (kb->keycode[i] == HID_KEY_F9) {
@@ -283,6 +264,25 @@ void HidInput::handle_keyboard() {
             }
             
             if (ctrl_pressed && f9_pressed) {
+                if (!last_joy0_state) {
+                    ui_->toggle_joystick_source(0);  // Toggle Joystick 0
+                    last_joy0_state = true;
+                }
+            } else {
+                last_joy0_state = false;
+            }
+            
+            // Check for Ctrl+F10 to toggle Joystick 1 (D-SUB <-> USB)
+            static bool last_joy1_state = false;
+            bool f10_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == HID_KEY_F10) {
+                    f10_pressed = true;
+                    break;
+                }
+            }
+            
+            if (ctrl_pressed && f10_pressed) {
                 if (!last_joy1_state) {
                     ui_->toggle_joystick_source(1);  // Toggle Joystick 1
                     last_joy1_state = true;
@@ -311,6 +311,25 @@ void HidInput::handle_keyboard() {
                 }
             }
             
+            // Check for Caps Lock key press to toggle Caps Lock state
+            static bool last_capslock_state = false;
+            static bool capslock_on = false;  // Caps Lock state (persists)
+            bool capslock_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == HID_KEY_CAPS_LOCK) {
+                    capslock_pressed = true;
+                    break;
+                }
+            }
+            
+            if (capslock_pressed && !last_capslock_state) {
+                // Caps Lock key was just pressed - toggle state
+                capslock_on = !capslock_on;
+                last_capslock_state = true;
+            } else if (!capslock_pressed) {
+                last_capslock_state = false;
+            }
+            
             // Translate the USB HID codes into ST keys that are currently down
             char st_keys[6];
             for (int i = 0; i < 6; ++i) {
@@ -335,11 +354,11 @@ void HidInput::handle_keyboard() {
                     else if (ctrl_pressed && kb->keycode[i] == XRESET_KEY) {
                         st_keys[i] = 0;
                     }
-                    // If Ctrl+F10, don't send to Atari (used for Joy0 toggle)
+                    // If Ctrl+F10, don't send to Atari (used for Joy1 toggle)
                     else if (ctrl_pressed && kb->keycode[i] == HID_KEY_F10) {
                         st_keys[i] = 0;
                     }
-                    // If Ctrl+F9, don't send to Atari (used for Joy1 toggle)
+                    // If Ctrl+F9, don't send to Atari (used for Joy0 toggle)
                     else if (ctrl_pressed && kb->keycode[i] == HID_KEY_F9) {
                         st_keys[i] = 0;
                     }
@@ -351,15 +370,28 @@ void HidInput::handle_keyboard() {
                     st_keys[i] = 0;
                 }
             }
+            
+            // Handle Caps Lock as a toggle - send the key state based on toggle, not physical key
+            // Atari ST Caps Lock scancode is 58
+            const int ATARI_CAPSLOCK = 58;
+            
             // Go through all ST keys and update their state
             for (int i = 1; i < key_states.size(); ++i) {
                 bool down = false;
-                for (int j = 0; j < 6; ++j) {
-                    if (st_keys[j] == i) {
-                        down = true;
-                        break;
+                
+                // Special handling for Caps Lock - use toggle state instead of physical key
+                if (i == ATARI_CAPSLOCK) {
+                    down = capslock_on;  // Use the toggle state
+                } else {
+                    // Normal key handling
+                    for (int j = 0; j < 6; ++j) {
+                        if (st_keys[j] == i) {
+                            down = true;
+                            break;
+                        }
                     }
                 }
+                
                 key_states[i] = down ? 1 : 0;
             }
 
