@@ -332,7 +332,16 @@ void HidInput::handle_keyboard() {
                 // Update USB keyboard LED to match state
                 // LED report: bit 1 = Caps Lock (0x02)
                 uint8_t led_report = capslock_on ? 0x02 : 0x00;
-                tuh_hid_set_report(it.first, 0, 0, HID_REPORT_TYPE_OUTPUT, &led_report, sizeof(led_report));
+                
+                // Try multiple interface indices - wireless keyboards (Logitech Unifying, etc)
+                // may use different interface indices than wired keyboards
+                // Try idx 0 first (standard), then 1, 2 for wireless receivers
+                bool led_sent = false;
+                for (uint8_t idx = 0; idx < 3 && !led_sent; idx++) {
+                    if (tuh_hid_set_report(it.first, idx, 0, HID_REPORT_TYPE_OUTPUT, &led_report, sizeof(led_report))) {
+                        led_sent = true;
+                    }
+                }
             } else if (!capslock_pressed) {
                 last_capslock_state = false;
                 capslock_send_pulse = false;  // Clear pulse after key released
