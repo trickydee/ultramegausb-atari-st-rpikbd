@@ -253,6 +253,100 @@ void HidInput::handle_keyboard() {
                 last_reset_state = false;
             }
             
+            // Check for Ctrl+F9 to toggle Joystick 0 (D-SUB <-> USB)
+            static bool last_joy0_state = false;
+            bool f9_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == HID_KEY_F9) {
+                    f9_pressed = true;
+                    break;
+                }
+            }
+            
+            if (ctrl_pressed && f9_pressed) {
+                if (!last_joy0_state) {
+                    ui_->toggle_joystick_source(0);  // Toggle Joystick 0
+                    last_joy0_state = true;
+                }
+            } else {
+                last_joy0_state = false;
+            }
+            
+            // Check for Ctrl+F10 to toggle Joystick 1 (D-SUB <-> USB)
+            static bool last_joy1_state = false;
+            bool f10_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == HID_KEY_F10) {
+                    f10_pressed = true;
+                    break;
+                }
+            }
+            
+            if (ctrl_pressed && f10_pressed) {
+                if (!last_joy1_state) {
+                    ui_->toggle_joystick_source(1);  // Toggle Joystick 1
+                    last_joy1_state = true;
+                }
+            } else {
+                last_joy1_state = false;
+            }
+            
+            // Check for Alt+[ to send Atari keypad /
+            static bool last_keypad_slash_state = false;
+            bool left_bracket_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == HID_KEY_BRACKET_LEFT) {
+                    left_bracket_pressed = true;
+                    break;
+                }
+            }
+            
+            // Check for Alt+] to send Atari keypad *
+            static bool last_keypad_star_state = false;
+            bool right_bracket_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == HID_KEY_BRACKET_RIGHT) {
+                    right_bracket_pressed = true;
+                    break;
+                }
+            }
+            
+            // Check for Caps Lock key press to toggle Caps Lock state
+            static bool last_capslock_state = false;
+            static bool capslock_on = false;  // Caps Lock state (persists)
+            static bool capslock_send_pulse = false;  // Send momentary pulse to ST
+            bool capslock_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == HID_KEY_CAPS_LOCK) {
+                    capslock_pressed = true;
+                    break;
+                }
+            }
+            
+            if (capslock_pressed && !last_capslock_state) {
+                // Caps Lock key was just pressed - toggle state
+                capslock_on = !capslock_on;
+                capslock_send_pulse = true;  // Send a pulse to the Atari ST
+                last_capslock_state = true;
+                
+                // Update USB keyboard LED to match state
+                // LED report: bit 1 = Caps Lock (0x02)
+                uint8_t led_report = capslock_on ? 0x02 : 0x00;
+                
+                // Try multiple interface indices - wireless keyboards (Logitech Unifying, etc)
+                // may use different interface indices than wired keyboards
+                // Try idx 0 first (standard), then 1, 2 for wireless receivers
+                bool led_sent = false;
+                for (uint8_t idx = 0; idx < 3 && !led_sent; idx++) {
+                    if (tuh_hid_set_report(it.first, idx, 0, HID_REPORT_TYPE_OUTPUT, &led_report, sizeof(led_report))) {
+                        led_sent = true;
+                    }
+                }
+            } else if (!capslock_pressed) {
+                last_capslock_state = false;
+                capslock_send_pulse = false;  // Clear pulse after key released
+            }
+            
             // Translate the USB HID codes into ST keys that are currently down
             char st_keys[6];
             for (int i = 0; i < 6; ++i) {
@@ -261,12 +355,28 @@ void HidInput::handle_keyboard() {
                     if (alt_pressed && kb->keycode[i] == HID_KEY_SLASH) {
                         st_keys[i] = ATARI_INSERT;
                     }
+                    // If Alt + [ is pressed, send Atari keypad / (scancode 101)
+                    else if (alt_pressed && kb->keycode[i] == HID_KEY_BRACKET_LEFT) {
+                        st_keys[i] = 101;  // Atari keypad /
+                    }
+                    // If Alt + ] is pressed, send Atari keypad * (scancode 102)
+                    else if (alt_pressed && kb->keycode[i] == HID_KEY_BRACKET_RIGHT) {
+                        st_keys[i] = 102;  // Atari keypad *
+                    }
                     // If Alt + Plus or Alt + Minus, don't send to Atari (used for clock control)
                     else if (alt_pressed && (kb->keycode[i] == HID_KEY_EQUAL || kb->keycode[i] == HID_KEY_MINUS)) {
                         st_keys[i] = 0;
                     }
                     // If Ctrl+F11, don't send to Atari (used for XRESET)
                     else if (ctrl_pressed && kb->keycode[i] == XRESET_KEY) {
+                        st_keys[i] = 0;
+                    }
+                    // If Ctrl+F10, don't send to Atari (used for Joy1 toggle)
+                    else if (ctrl_pressed && kb->keycode[i] == HID_KEY_F10) {
+                        st_keys[i] = 0;
+                    }
+                    // If Ctrl+F9, don't send to Atari (used for Joy0 toggle)
+                    else if (ctrl_pressed && kb->keycode[i] == HID_KEY_F9) {
                         st_keys[i] = 0;
                     }
                     else {
@@ -277,15 +387,28 @@ void HidInput::handle_keyboard() {
                     st_keys[i] = 0;
                 }
             }
+            
+            // Handle Caps Lock as a toggle - send a momentary pulse to ST when toggled
+            // Atari ST Caps Lock scancode is 58
+            const int ATARI_CAPSLOCK = 58;
+            
             // Go through all ST keys and update their state
             for (int i = 1; i < key_states.size(); ++i) {
                 bool down = false;
-                for (int j = 0; j < 6; ++j) {
-                    if (st_keys[j] == i) {
-                        down = true;
-                        break;
+                
+                // Special handling for Caps Lock - send pulse only when toggling
+                if (i == ATARI_CAPSLOCK) {
+                    down = capslock_send_pulse;  // Send pulse when toggled, not persistent state
+                } else {
+                    // Normal key handling
+                    for (int j = 0; j < 6; ++j) {
+                        if (st_keys[j] == i) {
+                            down = true;
+                            break;
+                        }
                     }
                 }
+                
                 key_states[i] = down ? 1 : 0;
             }
 
