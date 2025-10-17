@@ -62,11 +62,12 @@ extern "C" {
 #define CFG_TUH_HID                 8  // Number of HID interfaces (increased for multi-interface devices)
 #define CFG_TUH_MSC                 0
 #define CFG_TUH_CDC                 0
-// Note: CFG_TUH_VENDOR disabled for TinyUSB 0.19.0 compatibility
-// Xbox controllers will be detected via device descriptor checks instead
-// #define CFG_TUH_VENDOR              2
+#define CFG_TUH_XINPUT              2  // Number of XInput controllers (Xbox)
 
 #define CFG_TUSB_HOST_DEVICE_MAX    (CFG_TUH_HUB ? 8 : 1) // Increased for multi-interface devices like Logitech Unifying
+
+// Increase enumeration buffer for Xbox 360 Wireless receiver (requires > 321 bytes)
+#define CFG_TUH_ENUMERATION_BUFSIZE 512
 
 #ifdef __cplusplus
 }

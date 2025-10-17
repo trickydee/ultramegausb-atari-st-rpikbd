@@ -25,7 +25,7 @@
 #include "hardware/clocks.h"
 #include "6301.h"
 #include "ssd1306.h"
-#include "xinput.h"
+// xinput.h removed - using official xinput_host.h driver now
 #include "ps4_controller.h"
 #include <map>
 
@@ -696,25 +696,9 @@ bool HidInput::get_ps4_joystick(int joystick_num, uint8_t& axis, uint8_t& button
 }
 
 bool HidInput::get_xbox_joystick(int joystick_num, uint8_t& axis, uint8_t& button) {
-    // Get Xbox controller state from XInput module
-    for (uint8_t dev_addr = 1; dev_addr < 8; dev_addr++) {
-        xbox_controller_t* xbox = xinput_get_controller(dev_addr);
-        if (xbox && xbox->connected && xbox->initialized) {
-            // Found a connected Xbox controller!
-            xinput_to_atari(xbox, joystick_num, &axis, &button);
-            
-            // Debug disabled for performance
-            #if 0
-            static uint32_t debug_count = 0;
-            if ((debug_count++ % 500) == 0) {
-                printf("Xbox->Atari: Joy%d axis=0x%02X fire=%d\n", joystick_num, axis, button);
-            }
-            #endif
-            
-            return true;
-        }
-    }
-    
+    // Xbox controller support via official tusb_xinput driver
+    // Will be implemented once driver is working
+    // For now, return false (no Xbox controller)
     return false;
 }
 

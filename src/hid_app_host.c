@@ -5,7 +5,7 @@
 
 #include "tusb.h"
 #include "hid_app_host.h"
-#include "xinput.h"
+// xinput.h removed - using official xinput_host.h driver now
 #include "ps4_controller.h"
 #include "ssd1306.h"  // For OLED debug display
 #include <string.h>
@@ -255,32 +255,8 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
     return;
   }
   
-  // Check for Xbox controller
-  bool is_xbox = xinput_is_xbox_controller(vid, pid);
-  
-  if (is_xbox) {
-    printf("Xbox controller detected: VID=0x%04X, PID=0x%04X\n", vid, pid);
-    printf("Xbox: Will be treated as raw HID joystick (vendor-class workaround)\n");
-    
-    // Allocate device slot
-    hidh_device_t* dev = alloc_device(dev_addr, instance);
-    if (!dev) return;
-    
-    // Mark as Xbox type joystick
-    dev->hid_type = HID_JOYSTICK;
-    dev->report_size = 64;
-    dev->has_report_info = false;
-    
-    // Notify Xbox module
-    xinput_mount_cb(dev_addr);
-    
-    // Start receiving reports
-    tuh_hid_receive_report(dev_addr, instance);
-    
-    // Call mounted callback
-    tuh_hid_mounted_cb(dev_addr);
-    return;
-  }
+  // Xbox controller detection removed - now handled by official xinput_host driver
+  // The driver registers via usbh_app_driver_get_cb() and handles Xbox controllers directly
   
   hidh_device_t* dev = alloc_device(dev_addr, instance);
   if (!dev) return;
@@ -521,15 +497,8 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
     return;
   }
   
-  // Xbox controllers
-  if (xinput_is_xbox_controller(vid, pid)) {
-    // This is an Xbox controller report - pass to XInput handler
-    xinput_process_report(dev_addr, report, len);
-    
-    // Queue next report
-    tuh_hid_receive_report(dev_addr, instance);
-    return;
-  }
+  // Xbox controllers now handled by official xinput_host driver
+  // Reports go directly to tuh_xinput_report_received_cb()
   
   // Always store the latest report in our buffer
   uint16_t copy_len = (len < 64) ? len : 64;

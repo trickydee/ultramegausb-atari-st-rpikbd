@@ -32,7 +32,7 @@
 #include "SerialPort.h"
 #include "AtariSTMouse.h"
 #include "UserInterface.h"
-#include "xinput.h"
+#include "xinput_host.h"  // Official tusb_xinput driver
 
 
 #define ROMBASE     256
@@ -169,34 +169,55 @@ int main() {
 }
 
 //--------------------------------------------------------------------+
-// TinyUSB General Mount Callback
+// TinyUSB XInput Driver Integration
 //--------------------------------------------------------------------+
 
-// This is called for ALL USB devices (not just HID)
-// We use it to detect Xbox controllers which are vendor class (0xFF)
-void tuh_mount_cb(uint8_t dev_addr) {
-    printf("USB Device mounted at address %d\n", dev_addr);
-    
-    // Get device VID/PID
-    uint16_t vid, pid;
-    tuh_vid_pid_get(dev_addr, &vid, &pid);
-    
-    printf("  VID: 0x%04X, PID: 0x%04X\n", vid, pid);
-    
-    // Check if this is an Xbox controller
-    if (xinput_is_xbox_controller(vid, pid)) {
-        printf("  -> This is an Xbox controller!\n");
-        xinput_mount_cb(dev_addr);
-    }
+// Required by tusb_xinput library - register the XInput vendor driver
+usbh_class_driver_t const* usbh_app_driver_get_cb(uint8_t* driver_count) {
+    extern usbh_class_driver_t const usbh_xinput_driver;
+    *driver_count = 1;
+    return &usbh_xinput_driver;
 }
 
-// Called when any USB device is unmounted
-void tuh_umount_cb(uint8_t dev_addr) {
-    printf("USB Device unmounted at address %d\n", dev_addr);
+// XInput mount callback - called when Xbox controller is connected
+void tuh_xinput_mount_cb(uint8_t dev_addr, uint8_t instance, const xinputh_interface_t *xinput_itf) {
+    printf("XINPUT MOUNTED: dev_addr=%d, instance=%d\n", dev_addr, instance);
     
-    // Check if it was an Xbox controller
-    xbox_controller_t* xbox = xinput_get_controller(dev_addr);
-    if (xbox) {
-        xinput_unmount_cb(dev_addr);
+    const char* type_str;
+    switch (xinput_itf->type) {
+        case XBOX360_WIRED:     type_str = "Xbox 360 Wired"; break;
+        case XBOX360_WIRELESS:  type_str = "Xbox 360 Wireless"; break;
+        case XBOXONE:           type_str = "Xbox One"; break;
+        case XBOXOG:            type_str = "Xbox OG"; break;
+        default:                type_str = "Unknown"; break;
     }
+    printf("  Type: %s\n", type_str);
+    
+    // For Xbox 360 Wireless, wait for connection before setting LEDs
+    if (xinput_itf->type == XBOX360_WIRELESS && !xinput_itf->connected) {
+        tuh_xinput_receive_report(dev_addr, instance);
+        return;
+    }
+    
+    // Set LED pattern and start receiving reports
+    tuh_xinput_set_led(dev_addr, instance, 0, true);
+    tuh_xinput_set_rumble(dev_addr, instance, 0, 0, true);
+    tuh_xinput_receive_report(dev_addr, instance);
+}
+
+// XInput unmount callback
+void tuh_xinput_umount_cb(uint8_t dev_addr, uint8_t instance) {
+    printf("XINPUT UNMOUNTED: dev_addr=%d, instance=%d\n", dev_addr, instance);
+}
+
+// XInput report callback - called when controller data is received
+void tuh_xinput_report_received_cb(uint8_t dev_addr, uint8_t instance, 
+                                    xinputh_interface_t const* xid_itf, uint16_t len) {
+    // For now, just acknowledge and request next report
+    // We'll integrate with HidInput joystick handling next
+    if (xid_itf->last_xfer_result == XFER_RESULT_SUCCESS && 
+        xid_itf->connected && xid_itf->new_pad_data) {
+        // Xbox controller data available - will integrate with joystick system
+    }
+    tuh_xinput_receive_report(dev_addr, instance);
 }
