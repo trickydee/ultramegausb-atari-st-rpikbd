@@ -45,10 +45,30 @@ uint32_t hid_debug_get_unmount_calls(void) { return debug_unmount_calls; }
 uint32_t hid_debug_get_active_devices(void) { return debug_active_devices; }
 uint32_t hid_debug_get_last_addr_inst(void) { return (debug_last_dev_addr << 8) | debug_last_instance; }
 
-// Find device by address
+// Forward declaration
+static hidh_device_t* find_device_by_inst(uint8_t dev_addr, uint8_t instance);
+
+// Find device by address (supports multi-interface device keys)
 static hidh_device_t* find_device(uint8_t dev_addr) {
+  // Decode multi-interface device key:
+  // Mouse keys are addr + 128, so decode back to actual address
+  uint8_t actual_addr = (dev_addr >= 128) ? (dev_addr - 128) : dev_addr;
+  
+  // For mouse keys (>= 128), find the MOUSE device at that address
+  if (dev_addr >= 128) {
+    for (int i = 0; i < CFG_TUH_HID; i++) {
+      if (hid_devices[i].dev_addr == actual_addr && 
+          hid_devices[i].mounted &&
+          hid_devices[i].hid_type == HID_MOUSE) {
+        return &hid_devices[i];
+      }
+    }
+    return NULL;
+  }
+  
+  // For normal addresses, find first matching device
   for (int i = 0; i < CFG_TUH_HID; i++) {
-    if (hid_devices[i].dev_addr == dev_addr && hid_devices[i].mounted) {
+    if (hid_devices[i].dev_addr == actual_addr && hid_devices[i].mounted) {
       return &hid_devices[i];
     }
   }
@@ -184,11 +204,12 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
   // Check for game controllers (VID/PID detection)
   uint16_t vid, pid;
   tuh_vid_pid_get(dev_addr, &vid, &pid);
+  uint8_t protocol = tuh_hid_interface_protocol(dev_addr, instance);
   
-  // Debug: Display Logitech device info on OLED
+  // Debug disabled for performance
+  #if 0
   if (vid == 0x046D) {  // Logitech VID
     extern ssd1306_t disp;
-    uint8_t protocol = tuh_hid_interface_protocol(dev_addr, instance);
     
     ssd1306_clear(&disp);
     ssd1306_draw_string(&disp, 10, 0, 1, (char*)"LOGITECH DEVICE");
@@ -202,12 +223,13 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
     ssd1306_draw_string(&disp, 5, 30, 1, line2);
     
     char line3[20];
-    snprintf(line3, sizeof(line3), "Proto:%d Len:%d", protocol, desc_len);
+    snprintf(line3, sizeof(line3), "P:%d L:%d", protocol, desc_len);
     ssd1306_draw_string(&disp, 5, 45, 1, line3);
     
     ssd1306_show(&disp);
     sleep_ms(3000);
   }
+  #endif
   
   // Check for PS4 DualShock 4
   bool is_ps4 = ps4_is_dualshock4(vid, pid);
@@ -271,8 +293,6 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
     if (hid_devices[i].mounted) debug_active_devices++;
   }
   
-  uint8_t protocol = tuh_hid_interface_protocol(dev_addr, instance);
-  
   // Check if it's a keyboard (boot protocol)
   if (protocol == HID_ITF_PROTOCOL_KEYBOARD) {
     dev->hid_type = HID_KEYBOARD;
@@ -318,20 +338,10 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
     // Start receiving reports - CRITICAL for TinyUSB 0.12+
     tuh_hid_receive_report(dev_addr, instance);
     
-    // Only call app callback for first interface of this device address
-    bool first_interface = true;
-    for (int i = 0; i < CFG_TUSB_HOST_DEVICE_MAX; i++) {
-      if (hid_devices[i].dev_addr == dev_addr && 
-          hid_devices[i].mounted && 
-          &hid_devices[i] != dev) {
-        first_interface = false;
-        break;
-      }
-    }
-    
-    if (first_interface) {
-      tuh_hid_mounted_cb(dev_addr);
-    }
+    // Always call mounted callback for boot protocol mice
+    // (Logitech Unifying has mouse on non-zero instance)
+    // Use marker bit to distinguish from keyboard on same address
+    tuh_hid_mounted_cb(dev_addr | 0x80);
   }
   // For other devices (joysticks, non-boot mice), try to parse descriptor
   else if (report_desc && desc_len > 0 && desc_len < 512) {
@@ -346,7 +356,8 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
                              (filter_type == HID_JOYSTICK) ? "JOYSTICK" : "UNKNOWN";
       printf("HID Parser detected: %s (dev_addr=%d, inst=%d)\n", type_str, dev_addr, instance);
       
-      // Debug: Display parsed device type on OLED for Logitech devices
+      // Debug disabled for performance
+      #if 0
       if (vid == 0x046D) {
         extern ssd1306_t disp;
         
@@ -364,16 +375,47 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
         ssd1306_show(&disp);
         sleep_ms(2000);
       }
+      #endif
       
       // Start receiving reports
       tuh_hid_receive_report(dev_addr, instance);
       
-      // Always call mounted callback for MOUSE devices
-      // (Logitech Unifying has keyboard on inst 0, mouse on inst 1)
-      if (filter_type == HID_MOUSE) {
+      // Debug disabled for performance
+      #if 0
+      if (vid == 0x046D) {
+        extern ssd1306_t disp;
+        ssd1306_clear(&disp);
+        ssd1306_draw_string(&disp, 10, 0, 1, (char*)"CALLING CB");
+        
+        char line1[20];
+        const char* ft = (filter_type == HID_MOUSE) ? "MOUSE" : 
+                         (filter_type == HID_KEYBOARD) ? "KEYBOARD" : "OTHER";
+        snprintf(line1, sizeof(line1), "Type: %s", ft);
+        ssd1306_draw_string(&disp, 5, 20, 1, line1);
+        
+        char line2[20];
+        uint8_t cb_addr = (filter_type == HID_MOUSE) ? (dev_addr | 0x80) : dev_addr;
+        snprintf(line2, sizeof(line2), "Addr: %d", cb_addr);
+        ssd1306_draw_string(&disp, 5, 35, 1, line2);
+        
+        ssd1306_show(&disp);
+        sleep_ms(2000);
+      }
+      #endif
+      
+      // Call mounted callback
+      // For keyboards, call normally
+      if (filter_type == HID_KEYBOARD) {
         tuh_hid_mounted_cb(dev_addr);
       }
-      // For other device types, only call for first interface
+      // For mice on multi-interface devices, call with a special marker
+      // so C++ layer knows it's the mouse interface
+      else if (filter_type == HID_MOUSE) {
+        // Mark mouse with high bit set (128-255 range)
+        // This allows C++ layer to distinguish mouse from keyboard on same address
+        tuh_hid_mounted_cb(dev_addr | 0x80);
+      }
+      // For other device types (joysticks), only call for first interface
       else {
         bool first_interface = true;
         for (int i = 0; i < CFG_TUSB_HOST_DEVICE_MAX; i++) {
@@ -438,7 +480,8 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
   uint16_t vid, pid;
   tuh_vid_pid_get(dev_addr, &vid, &pid);
   
-  // Debug: Display Logitech report activity on OLED
+  // Debug disabled for performance
+  #if 0
   if (vid == 0x046D) {
     static uint32_t logitech_report_count = 0;
     logitech_report_count++;
@@ -468,6 +511,7 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
       ssd1306_show(&disp);
     }
   }
+  #endif
   
   // PS4 DualShock 4
   if (ps4_is_dualshock4(vid, pid)) {
