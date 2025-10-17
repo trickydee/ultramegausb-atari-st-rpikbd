@@ -479,10 +479,10 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
     int32_t x = 0;
     int32_t y = 0;
     
-    // Debug disabled for performance
+    // Debug disabled for performance - enable for troubleshooting
     #if 0
     static uint32_t debug_count = 0;
-    if ((debug_count++ % 1000) == 0 && debug_count > 1) {
+    if ((debug_count++ % 500) == 0 && debug_count > 1) {
         extern ssd1306_t disp;
         ssd1306_clear(&disp);
         ssd1306_draw_string(&disp, 10, 0, 1, (char*)"DEVICE MAP");
@@ -504,7 +504,6 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
         }
         
         ssd1306_show(&disp);
-        sleep_ms(2000);
     }
     #endif
     
@@ -550,9 +549,13 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
             const uint8_t* js = it.second;
             HID_ReportInfo_t* info = tuh_hid_get_report_info(it.first);  // Use key
             
-            // For multi-interface mice (Logitech Unifying), HID parser fails
-            // Use direct boot protocol format parsing instead
-            if (it.first >= 128) {
+            // Check if this is a multi-interface mouse (Logitech Unifying)
+            // These have key >= 128 AND are boot protocol mice (have simple 4-byte reports)
+            bool is_multi_interface_mouse = (it.first >= 128);
+            
+            if (is_multi_interface_mouse) {
+                // For multi-interface mice (Logitech Unifying), HID parser fails
+                // Use direct boot protocol format parsing instead
                 // Standard boot protocol mouse format:
                 // Byte 0: Buttons
                 // Byte 1: X movement (signed)

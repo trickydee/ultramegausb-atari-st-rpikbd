@@ -206,29 +206,27 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
   tuh_vid_pid_get(dev_addr, &vid, &pid);
   uint8_t protocol = tuh_hid_interface_protocol(dev_addr, instance);
   
-  // Debug disabled for performance
+  // Debug disabled for performance - enable for troubleshooting
   #if 0
-  if (vid == 0x046D) {  // Logitech VID
-    extern ssd1306_t disp;
-    
-    ssd1306_clear(&disp);
-    ssd1306_draw_string(&disp, 10, 0, 1, (char*)"LOGITECH DEVICE");
-    
-    char line1[20];
-    snprintf(line1, sizeof(line1), "Addr:%d Inst:%d", dev_addr, instance);
-    ssd1306_draw_string(&disp, 5, 15, 1, line1);
-    
-    char line2[20];
-    snprintf(line2, sizeof(line2), "VID:%04X PID:%04X", vid, pid);
-    ssd1306_draw_string(&disp, 5, 30, 1, line2);
-    
-    char line3[20];
-    snprintf(line3, sizeof(line3), "P:%d L:%d", protocol, desc_len);
-    ssd1306_draw_string(&disp, 5, 45, 1, line3);
-    
-    ssd1306_show(&disp);
-    sleep_ms(3000);
-  }
+  extern ssd1306_t disp;
+  
+  ssd1306_clear(&disp);
+  ssd1306_draw_string(&disp, 5, 0, 2, (char*)"HID!!");
+  
+  char line1[20];
+  snprintf(line1, sizeof(line1), "Addr:%d Inst:%d", dev_addr, instance);
+  ssd1306_draw_string(&disp, 5, 25, 1, line1);
+  
+  char line2[20];
+  snprintf(line2, sizeof(line2), "VID:%04X", vid);
+  ssd1306_draw_string(&disp, 5, 40, 1, line2);
+  
+  char line3[20];
+  snprintf(line3, sizeof(line3), "P:%d L:%d", protocol, desc_len);
+  ssd1306_draw_string(&disp, 5, 55, 1, line3);
+  
+  ssd1306_show(&disp);
+  sleep_ms(3000);
   #endif
   
   // Check for PS4 DualShock 4
