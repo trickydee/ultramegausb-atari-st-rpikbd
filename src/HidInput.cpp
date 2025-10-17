@@ -550,29 +550,33 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
             const uint8_t* js = it.second;
             HID_ReportInfo_t* info = tuh_hid_get_report_info(it.first);  // Use key
             
-            // Debug: Show raw mouse data for Logitech (first few reports only)
-            static uint32_t logitech_mouse_debug = 0;
-            if (it.first >= 128 && logitech_mouse_debug < 5) {
-                logitech_mouse_debug++;
-                extern ssd1306_t disp;
-                ssd1306_clear(&disp);
-                ssd1306_draw_string(&disp, 10, 0, 1, (char*)"MOUSE RAW DATA");
+            // For multi-interface mice (Logitech Unifying), HID parser fails
+            // Use direct boot protocol format parsing instead
+            if (it.first >= 128) {
+                // Standard boot protocol mouse format:
+                // Byte 0: Buttons
+                // Byte 1: X movement (signed)
+                // Byte 2: Y movement (signed)
+                // Byte 3: Wheel (optional)
                 
-                char hex1[20];
-                snprintf(hex1, sizeof(hex1), "%02X %02X %02X %02X", js[0], js[1], js[2], js[3]);
-                ssd1306_draw_string(&disp, 5, 20, 1, hex1);
+                int8_t buttons = js[0];
+                int8_t dx = (int8_t)js[1];
+                int8_t dy = (int8_t)js[2];
                 
-                char info_line[20];
-                snprintf(info_line, sizeof(info_line), "Info:%s Items:%d", 
-                         info ? "YES" : "NO", info ? info->TotalReportItems : 0);
-                ssd1306_draw_string(&disp, 5, 35, 1, info_line);
+                // Filter out weird idle value (0xFF in byte 2)
+                if (js[2] == 0xFF && js[1] == 0x00) {
+                    dy = 0;  // Idle state, not actual movement
+                }
                 
-                ssd1306_show(&disp);
-                sleep_ms(3000);
+                x = dx;
+                y = dy;
+                
+                // Update button state
+                mouse_state = (mouse_state & 0xfd) | ((buttons & 0x01) ? 2 : 0);  // Left button
+                mouse_state = (mouse_state & 0xfe) | ((buttons & 0x02) ? 1 : 0);  // Right button
             }
-            
-            if (info) {
-                // Get the data from the HID report
+            else if (info) {
+                // Standard HID parser for regular mice
                 int8_t buttons = 0;
 
                 for (uint8_t i = 0; i < info->TotalReportItems; ++i) {
