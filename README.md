@@ -138,6 +138,35 @@ The user interface has 4 pages that are rotated between by pressing the middle U
 The serial data page should only be used for ensuring the connection works. Displaying the page slows down the emulator and you may seem some mouse lag whilst it is active.
 
 The real ST keyboard has a single DB-9 socket which is shared between the mouse and Joystick 0. The emulator allows you to have a mouse and joystick plugged in simultaneously but you need to select whether the mouse or joystick 0 is active. This can be toggled by pressing the Scroll Lock button on the keyboard. The current mode is shown on any of the status pages on the OLED display.
+
+## Keyboard Shortcuts
+
+The emulator supports several keyboard shortcuts for convenient control:
+
+| Shortcut | Function | Description |
+|----------|----------|-------------|
+| **Ctrl+F12** | Toggle Mouse Mode | Switches between USB mouse and joystick 0 |
+| **Ctrl+F11** | XRESET | Triggers HD6301 hardware reset (like power cycling the IKBD) |
+| **Ctrl+F10** | Toggle Joystick 1 | Switches Joystick 1 between D-SUB and USB |
+| **Ctrl+F9** | Toggle Joystick 0 | Switches Joystick 0 between D-SUB and USB |
+| **Alt+/** | INSERT Key | Sends Atari ST INSERT key (useful for modern keyboards) |
+| **Alt+[** | Keypad /** | Sends Atari ST keypad divide key |
+| **Alt+]** | Keypad *** | Sends Atari ST keypad multiply key |
+| **Alt+Plus** | Set 270MHz | Overclocks RP2040 to 270MHz for maximum performance |
+| **Alt+Minus** | Set 150MHz | Sets RP2040 to 150MHz for stability |
+
+For detailed information about keyboard shortcuts, see [KEYBOARD_SHORTCUTS.md](KEYBOARD_SHORTCUTS.md).
+
+## USB Controller Support
+
+The emulator supports multiple types of USB game controllers:
+
+- **Xbox Controllers**: Xbox 360 (wired/wireless), Xbox One, Original Xbox
+- **PS4 DualShock 4**: Full support via USB
+- **Generic HID Joysticks**: Standard USB joysticks
+
+Xbox controllers are fully supported using the official TinyUSB XInput driver. D-Pad and left analog stick control movement, A button and right trigger act as fire button.
+
 ## Known limitations
 The RP2040 USB host implementation seems to contain a number of bugs. This repository contains a patched branch of the TinyUSB code to workaround many of these issues, however there are still some limitations and occasional issues as summarised below:
 

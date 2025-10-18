@@ -219,3 +219,4 @@ We've hit a wall with TinyUSB 0.19.0's limited vendor class support. However:
 **Status:** Xbox detection working, full support pending TinyUSB upgrade  
 **Branch:** feature/xbox-controller-integration
 
+
