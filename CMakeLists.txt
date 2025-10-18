@@ -69,7 +69,8 @@ set(SOURCES
     ${LANG_SRC}  # Specific language source file
     src/NVSettings.cpp
     src/hid_app_host.c
-    src/xinput_host.c  # Official tusb_xinput driver (replaces custom xinput.c)
+    src/xinput_host.c  # Official tusb_xinput driver
+    src/xinput_atari.cpp  # Xbox-to-Atari joystick mapper
     src/ps4_controller.c
     ssd1306/ssd1306.c
     6301/6301.c

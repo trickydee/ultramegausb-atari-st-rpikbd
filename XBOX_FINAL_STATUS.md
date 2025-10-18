@@ -308,3 +308,4 @@ We did excellent detective work and built a complete Xbox controller framework. 
 **Hardware Tested:** Xbox controllers with endpoints 0x84/0x04  
 **Result:** Detection works, data reception blocked by TinyUSB limitations
 
+

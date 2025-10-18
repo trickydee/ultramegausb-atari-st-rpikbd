@@ -695,11 +695,12 @@ bool HidInput::get_ps4_joystick(int joystick_num, uint8_t& axis, uint8_t& button
     return false;
 }
 
+// Forward declaration for Xbox-to-Atari mapper
+extern "C" bool xinput_to_atari_joystick(int joystick_num, uint8_t* axis, uint8_t* button);
+
 bool HidInput::get_xbox_joystick(int joystick_num, uint8_t& axis, uint8_t& button) {
-    // Xbox controller support via official tusb_xinput driver
-    // Will be implemented once driver is working
-    // For now, return false (no Xbox controller)
-    return false;
+    // Use official tusb_xinput driver via Atari mapper
+    return xinput_to_atari_joystick(joystick_num, &axis, &button);
 }
 
 void HidInput::handle_joystick() {
