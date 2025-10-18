@@ -302,3 +302,4 @@ The serial communication path from ST to ROM is now:
 **Branch:** serial-optimizations  
 **Status:** ✅ Implemented - ready for testing!
 
+

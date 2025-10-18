@@ -1,6 +1,6 @@
 # Atari ST USB Adapter - Keyboard Shortcuts Reference
 
-## v4.0.0 Keyboard Shortcuts
+## v7.0.0 Keyboard Shortcuts
 
 ### System Control Shortcuts
 
@@ -8,6 +8,8 @@
 |----------|----------|-------------|
 | **Ctrl+F12** | Toggle Mouse Mode | Switches between USB mouse and D-SUB joystick 0 |
 | **Ctrl+F11** | XRESET | Triggers HD6301 hardware reset (shows "RESET" on OLED) |
+| **Ctrl+F10** | Toggle Joystick 1 | Switches Joystick 1 between D-SUB and USB |
+| **Ctrl+F9** | Toggle Joystick 0 | Switches Joystick 0 between D-SUB and USB |
 
 ### Clock Speed Control
 
@@ -21,6 +23,8 @@
 | Shortcut | Function | Description |
 |----------|----------|-------------|
 | **Alt+/** | INSERT Key | Sends Atari ST INSERT key (useful for modern keyboards) |
+| **Alt+[** | Keypad /** | Sends Atari ST keypad divide key |
+| **Alt+]** | Keypad *** | Sends Atari ST keypad multiply key |
 
 ---
 
@@ -222,9 +226,45 @@ The OLED status page shows:
 
 ---
 
+## USB Controller Support (NEW in v7.0.0)
+
+The emulator now fully supports Xbox controllers using the official TinyUSB XInput driver:
+
+### Supported Controllers
+- **Xbox 360 Wired**: Full support
+- **Xbox 360 Wireless**: Full support (with wireless receiver)
+- **Xbox One**: Full support
+- **Original Xbox**: Full support
+- **PS4 DualShock 4**: Full support
+
+### Xbox Controller Mapping
+- **D-Pad**: Atari joystick directions (takes priority)
+- **Left Analog Stick**: Atari joystick directions (fallback if D-Pad not pressed)
+  - Deadzone: ~25% (8000 units)
+- **A Button**: Fire button
+- **Right Trigger**: Fire button (when pressed > 50%)
+
+### Controller Assignment
+- First detected controller maps to Joystick 0 or 1 (based on UI settings)
+- Use **Ctrl+F9** to toggle Joystick 0 between D-SUB and USB
+- Use **Ctrl+F10** to toggle Joystick 1 between D-SUB and USB
+
+---
+
 ## Version History
 
-### v4.0.0 (Current)
+### v7.0.0 (Current)
+- **Xbox Controller Support**: Full XInput driver integration
+- **Joystick Toggle Shortcuts**: Ctrl+F9 (Joy 0) and Ctrl+F10 (Joy 1)
+- **Keypad Shortcuts**: Alt+[ (keypad /) and Alt+] (keypad *)
+- All debug displays disabled for maximum performance
+- Official TinyUSB XInput driver integration
+
+### v6.0.0
+- Performance optimizations
+- Serial communication improvements
+
+### v4.0.0
 - All shortcuts implemented and working
 - XRESET via Ctrl+F11
 - Clock control via Alt+/Alt-
@@ -246,13 +286,17 @@ The OLED status page shows:
 
 ## Summary
 
-The Atari ST USB adapter now supports **5 keyboard shortcuts**:
+The Atari ST USB adapter now supports **9 keyboard shortcuts** plus full Xbox controller support:
 
 1. **Ctrl+F12** - Toggle mouse/joystick mode
 2. **Ctrl+F11** - Reset IKBD (XRESET)
-3. **Alt+Plus** - Set 270MHz (performance)
-4. **Alt+Minus** - Set 150MHz (stability)
-5. **Alt+/** - Send INSERT key
+3. **Ctrl+F10** - Toggle Joystick 1 source (D-SUB/USB)
+4. **Ctrl+F9** - Toggle Joystick 0 source (D-SUB/USB)
+5. **Alt+Plus** - Set 270MHz (performance)
+6. **Alt+Minus** - Set 150MHz (stability)
+7. **Alt+/** - Send INSERT key
+8. **Alt+[** - Send keypad divide key
+9. **Alt+]** - Send keypad multiply key
 
 All shortcuts are designed to be:
 - **Non-interfering** with Atari ST software
@@ -264,6 +308,7 @@ These shortcuts provide full control over the adapter's behavior while maintaini
 
 ---
 
-**Version:** 4.0.0  
-**Date:** October 15, 2025  
-**Status:** ✅ All shortcuts implemented and tested
+**Version:** 7.0.0  
+**Date:** October 18, 2025  
+**Status:** ✅ All shortcuts and Xbox controller support implemented and tested
+
