@@ -174,32 +174,33 @@ void UserInterface::update_usb_debug() {
     ssd1306_clear(&disp);
     
 #if ENABLE_CONTROLLER_DEBUG
-    // Debug page with detailed controller diagnostics
-    ssd1306_draw_string(&disp, 0, 0, 1, (char*)"Debug v7.3");
+    // Debug page with controller diagnostics
+    // Path counters at top (replaces title)
+    uint32_t gpio_count = get_gpio_path_count();
+    uint32_t usb_count = get_usb_path_count();
+    sprintf(buf, "GPIO:%lu USB:%lu", gpio_count, usb_count);
+    ssd1306_draw_string(&disp, 0, 0, 1, buf);
     
-    // Source success counters
+    // Device counts
+    sprintf(buf, "KB:%d M:%d J:%d", num_kb, num_mouse, num_joy);
+    ssd1306_draw_string(&disp, 0, 10, 1, buf);
+    
+    // Controller source counters
     uint32_t hid_count = get_hid_joy_success();
     uint32_t ps4_count = get_ps4_success();
     uint32_t xbox_count = get_xbox_success();
-    sprintf(buf, "HID:%lu PS4:%lu", hid_count, ps4_count);
-    ssd1306_draw_string(&disp, 0, 10, 1, buf);
-    
-    sprintf(buf, "Xbox:%lu", xbox_count);
+    sprintf(buf, "HID:%lu", hid_count);
     ssd1306_draw_string(&disp, 0, 20, 1, buf);
     
-    // Xbox report counter
-    uint32_t rx_count = get_xbox_report_count();
-    sprintf(buf, "XboxRx:%lu", rx_count);
+    sprintf(buf, "PS4:%lu", ps4_count);
     ssd1306_draw_string(&disp, 0, 30, 1, buf);
     
-    // Xbox state
-    uint8_t xaddr, xconn, slots;
-    get_xbox_debug_flags(&xaddr, &xconn, &slots);
-    sprintf(buf, "A:%d C:%d S:%d", xaddr, xconn, slots);
+    sprintf(buf, "Xbox:%lu", xbox_count);
     ssd1306_draw_string(&disp, 0, 40, 1, buf);
     
-    // Device counts
-    sprintf(buf, "Dev: KB:%d M:%d J:%d", num_kb, num_mouse, num_joy);
+    // Xbox report reception
+    uint32_t rx_count = get_xbox_report_count();
+    sprintf(buf, "XboxRx:%lu", rx_count);
     ssd1306_draw_string(&disp, 0, 50, 1, buf);
 #else
     // Simple USB status page (set ENABLE_CONTROLLER_DEBUG=0 in config.h)
