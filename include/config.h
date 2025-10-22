@@ -59,3 +59,7 @@
 // Debug features (set to 0 to disable for production)
 // Enables detailed Xbox/PS4/HID diagnostic counters on USB Debug page
 #define ENABLE_CONTROLLER_DEBUG 1
+
+// Switch controller debug logging (set to 0 to disable verbose printf messages)
+// Disabling this improves USB performance, especially for mouse responsiveness
+#define ENABLE_SWITCH_DEBUG 0

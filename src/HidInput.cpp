@@ -27,6 +27,7 @@
 #include "ssd1306.h"
 // xinput.h removed - using official xinput_host.h driver now
 #include "ps4_controller.h"
+#include "switch_controller.h"
 #include <map>
 
 extern ssd1306_t disp;  // External reference to display
@@ -65,6 +66,7 @@ static uint32_t g_usb_path_count = 0;
 static uint32_t g_hid_joy_success = 0;
 static uint32_t g_ps4_success = 0;
 static uint32_t g_xbox_success = 0;
+static uint32_t g_switch_success = 0;
 
 
 extern "C" {
@@ -78,6 +80,7 @@ uint32_t get_usb_path_count() { return g_usb_path_count; }
 uint32_t get_hid_joy_success() { return g_hid_joy_success; }
 uint32_t get_ps4_success() { return g_ps4_success; }
 uint32_t get_xbox_success() { return g_xbox_success; }
+uint32_t get_switch_success() { return g_switch_success; }
 
 // Functions for Xbox controller to notify UI of mount/unmount
 void xinput_notify_ui_mount() {
@@ -736,6 +739,19 @@ bool HidInput::get_xbox_joystick(int joystick_num, uint8_t& axis, uint8_t& butto
     return xinput_to_atari_joystick(joystick_num, &axis, &button);
 }
 
+bool HidInput::get_switch_joystick(int joystick_num, uint8_t& axis, uint8_t& button) {
+    // Get Switch controller state
+    for (uint8_t dev_addr = 1; dev_addr < 8; dev_addr++) {
+        switch_controller_t* sw = switch_get_controller(dev_addr);
+        if (sw && sw->connected) {
+            // Found a connected Switch controller!
+            switch_to_atari(sw, joystick_num, &axis, &button);
+            return true;
+        }
+    }
+    return false;
+}
+
 void HidInput::handle_joystick() {
     // Find the joystick addresses
     std::vector<int> joystick_addr;
@@ -798,7 +814,13 @@ void HidInput::handle_joystick() {
                 g_ps4_success++;  // Track PS4 success
             }
             
-            // Third priority: Xbox controller (always check as final fallback)
+            // Third priority: Switch controller
+            if (!got_input && get_switch_joystick(joystick, axis, button)) {
+                got_input = true;
+                g_switch_success++;  // Track Switch success
+            }
+            
+            // Fourth priority: Xbox controller (always check as final fallback)
             // FIX: This ensures Xbox is checked even if stale HID entries exist
             if (!got_input && get_xbox_joystick(joystick, axis, button)) {
                 got_input = true;

@@ -15,7 +15,7 @@ DIST_DIR="${SCRIPT_DIR}/dist"
 
 echo "================================================================================"
 echo "  Atari ST USB Adapter - Dual Board Build"
-echo "  Version: 7.3.1"
+echo "  Version: 7.5.0"
 echo "  Language: ${LANGUAGE}"
 echo "================================================================================"
 echo ""

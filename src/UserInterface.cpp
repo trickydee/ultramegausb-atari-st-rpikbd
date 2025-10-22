@@ -34,6 +34,15 @@ extern "C" {
     uint32_t get_hid_joy_success();
     uint32_t get_ps4_success();
     uint32_t get_xbox_success();
+    uint32_t get_switch_success();
+    void switch_get_debug_values(uint16_t* buttons, uint8_t* dpad, int16_t* lx, int16_t* ly,
+                                  uint8_t* atari_dir, uint8_t* atari_fire);
+    uint32_t switch_get_report_count(void);
+    void switch_get_pro_init_status(bool* attempted, bool* complete, uint16_t* len_before, uint16_t* len_after);
+    uint32_t switch_get_pro_init_elapsed(void);
+    bool switch_get_pro_init_scheduled(void);
+    void switch_get_raw_bytes(uint8_t* bytes, uint16_t* len);
+    uint8_t switch_get_init_cmd_success(void);
 }
 
 #define DEBOUNCE_COUNT 10
@@ -169,39 +178,166 @@ void UserInterface::update_splash() {
     ssd1306_draw_string(&disp, 45, 55, 1, (char*)"v" PROJECT_VERSION_STRING);
 }
 
+void UserInterface::update_pro_init() {
+    char buf[32];
+    ssd1306_clear(&disp);
+    
+    // Get Pro Controller init status
+    bool init_attempted, init_complete;
+    uint16_t len_before, len_after;
+    switch_get_pro_init_status(&init_attempted, &init_complete, &len_before, &len_after);
+    
+    // Get diagnostic info
+    uint32_t elapsed_ms = switch_get_pro_init_elapsed();
+    bool scheduled = switch_get_pro_init_scheduled();
+    uint32_t report_count = switch_get_report_count();
+    
+    ssd1306_draw_string(&disp, 0, 0, 1, (char*)"Pro Init Status");
+    
+    if (!init_attempted) {
+        // Not attempted yet - show diagnostic info
+        sprintf(buf, "Elapsed: %lu ms", elapsed_ms);
+        ssd1306_draw_string(&disp, 0, 15, 1, buf);
+        
+        sprintf(buf, "Scheduled: %s", scheduled ? "YES" : "NO");
+        ssd1306_draw_string(&disp, 0, 27, 1, buf);
+        
+        sprintf(buf, "Reports: %lu", report_count);
+        ssd1306_draw_string(&disp, 0, 39, 1, buf);
+        
+        if (elapsed_ms >= 3000 && scheduled) {
+            ssd1306_draw_string(&disp, 0, 52, 1, (char*)"Should init!");
+        } else if (!scheduled) {
+            ssd1306_draw_string(&disp, 0, 52, 1, (char*)"Not scheduled?");
+        } else {
+            sprintf(buf, "Wait %lu ms", 3000 - elapsed_ms);
+            ssd1306_draw_string(&disp, 0, 52, 1, buf);
+        }
+    } else if (!init_complete) {
+        // Attempted but not complete yet
+        ssd1306_draw_string(&disp, 0, 20, 1, (char*)"Init sent!");
+        ssd1306_draw_string(&disp, 0, 35, 1, (char*)"Waiting for");
+        ssd1306_draw_string(&disp, 0, 50, 1, (char*)"response...");
+    } else {
+        // Complete - show results
+            sprintf(buf, "Before: %d bytes", len_before);
+            ssd1306_draw_string(&disp, 0, 15, 1, buf);
+            sprintf(buf, "After:  %d bytes", len_after);
+            ssd1306_draw_string(&disp, 0, 25, 1, buf);
+            
+            // Show command success bitmask
+            uint8_t cmd_mask = switch_get_init_cmd_success();
+            sprintf(buf, "Cmds: 0x%02X/0x7F", cmd_mask);
+            ssd1306_draw_string(&disp, 0, 37, 1, buf);
+            
+            if (len_after != len_before && len_before > 0) {
+                if (cmd_mask == 0x7F) {
+                    ssd1306_draw_string(&disp, 0, 52, 1, (char*)"All cmds OK!");
+                } else {
+                    sprintf(buf, "Some failed:%02X", cmd_mask);
+                    ssd1306_draw_string(&disp, 0, 52, 1, buf);
+                }
+            } else {
+                ssd1306_draw_string(&disp, 0, 52, 1, (char*)"NO CHANGE");
+            }
+        }
+    }
+
 void UserInterface::update_usb_debug() {
     char buf[32];
     ssd1306_clear(&disp);
     
 #if ENABLE_CONTROLLER_DEBUG
-    // Debug page with controller diagnostics
-    // Path counters at top (replaces title)
-    uint32_t gpio_count = get_gpio_path_count();
-    uint32_t usb_count = get_usb_path_count();
-    sprintf(buf, "GPIO:%lu USB:%lu", gpio_count, usb_count);
-    ssd1306_draw_string(&disp, 0, 0, 1, buf);
+    // Debug page with live controller diagnostics
+    uint32_t switch_count = get_switch_success();
     
-    // Device counts
-    sprintf(buf, "KB:%d M:%d J:%d", num_kb, num_mouse, num_joy);
-    ssd1306_draw_string(&disp, 0, 10, 1, buf);
-    
-    // Controller source counters
-    uint32_t hid_count = get_hid_joy_success();
-    uint32_t ps4_count = get_ps4_success();
-    uint32_t xbox_count = get_xbox_success();
-    sprintf(buf, "HID:%lu", hid_count);
-    ssd1306_draw_string(&disp, 0, 20, 1, buf);
-    
-    sprintf(buf, "PS4:%lu", ps4_count);
-    ssd1306_draw_string(&disp, 0, 30, 1, buf);
-    
-    sprintf(buf, "Xbox:%lu", xbox_count);
-    ssd1306_draw_string(&disp, 0, 40, 1, buf);
-    
-    // Xbox report reception
-    uint32_t rx_count = get_xbox_report_count();
-    sprintf(buf, "XboxRx:%lu", rx_count);
-    ssd1306_draw_string(&disp, 0, 50, 1, buf);
+    // If Switch controller active, show live values
+    if (switch_count > 0) {
+        // Check if Pro Controller initialization completed
+        bool init_attempted, init_complete;
+        uint16_t len_before, len_after;
+        switch_get_pro_init_status(&init_attempted, &init_complete, &len_before, &len_after);
+        
+        uint32_t rpt_count = switch_get_report_count();
+        sprintf(buf, "SW Rpt:%lu Len:%d", rpt_count, len_after);
+        ssd1306_draw_string(&disp, 0, 0, 1, buf);
+        
+        // Get live Switch values
+        uint16_t btns;
+        uint8_t dpad;
+        int16_t lx, ly;
+        uint8_t atari_dir, atari_fire;
+        switch_get_debug_values(&btns, &dpad, &lx, &ly, &atari_dir, &atari_fire);
+        
+        sprintf(buf, "B:0x%04X DP:%d", btns, dpad);
+        ssd1306_draw_string(&disp, 0, 10, 1, buf);
+        
+        sprintf(buf, "LX:%d LY:%d", lx, ly);
+        ssd1306_draw_string(&disp, 0, 20, 1, buf);
+        
+        // Get raw bytes for mode 0x30 debugging
+        uint8_t raw[9];
+        uint16_t raw_len;
+        switch_get_raw_bytes(raw, &raw_len);
+        
+        // Show raw button bytes (3-5) for mode 0x30
+        if (raw_len >= 49) {
+            sprintf(buf, "B3-5:%02X %02X %02X", raw[0], raw[1], raw[2]);
+            ssd1306_draw_string(&disp, 0, 30, 1, buf);
+            
+            sprintf(buf, "LStk:%02X %02X %02X", raw[3], raw[4], raw[5]);
+            ssd1306_draw_string(&disp, 0, 40, 1, buf);
+        } else {
+            sprintf(buf, "->D:0x%02X F:%d", atari_dir, atari_fire);
+            ssd1306_draw_string(&disp, 0, 30, 1, buf);
+            
+            sprintf(buf, "UseCnt:%lu", switch_count);
+            ssd1306_draw_string(&disp, 0, 40, 1, buf);
+        }
+        
+        // Show if values are changing
+        static uint16_t last_btns_displayed = 0xFFFF;
+        static int16_t last_lx_displayed = 999;
+        static int16_t last_ly_displayed = 999;
+        static uint8_t last_raw3 = 0xFF;
+        if (btns != last_btns_displayed || lx != last_lx_displayed || ly != last_ly_displayed || raw[0] != last_raw3) {
+            sprintf(buf, "CHANGE!");
+            last_btns_displayed = btns;
+            last_lx_displayed = lx;
+            last_ly_displayed = ly;
+            last_raw3 = raw[0];
+        } else {
+            sprintf(buf, "STATIC");
+        }
+        ssd1306_draw_string(&disp, 0, 50, 1, buf);
+    } else {
+        // Standard debug page when no Switch active
+        // Path counters at top
+        uint32_t gpio_count = get_gpio_path_count();
+        uint32_t usb_count = get_usb_path_count();
+        sprintf(buf, "GPIO:%lu USB:%lu", gpio_count, usb_count);
+        ssd1306_draw_string(&disp, 0, 0, 1, buf);
+        
+        // Device counts
+        sprintf(buf, "KB:%d M:%d J:%d", num_kb, num_mouse, num_joy);
+        ssd1306_draw_string(&disp, 0, 10, 1, buf);
+        
+        // Controller source counters
+        uint32_t hid_count = get_hid_joy_success();
+        uint32_t ps4_count = get_ps4_success();
+        uint32_t xbox_count = get_xbox_success();
+        
+        sprintf(buf, "HID:%lu PS4:%lu", hid_count, ps4_count);
+        ssd1306_draw_string(&disp, 0, 20, 1, buf);
+        
+        sprintf(buf, "SW:%lu Xbox:%lu", switch_count, xbox_count);
+        ssd1306_draw_string(&disp, 0, 30, 1, buf);
+        
+        // Xbox report reception
+        uint32_t rx_count = get_xbox_report_count();
+        sprintf(buf, "XRx:%lu", rx_count);
+        ssd1306_draw_string(&disp, 0, 40, 1, buf);
+    }
 #else
     // Simple USB status page (set ENABLE_CONTROLLER_DEBUG=0 in config.h)
     ssd1306_draw_string(&disp, 0, 0, 1, (char*)"USB Debug Info");
@@ -251,7 +387,7 @@ void UserInterface::on_button_down(int i) {
     // Middle button changes page
     if (i == BUTTON_MIDDLE) {
         int pg = (int)page;
-        pg = ((pg + 1) % (PAGE_USB_DEBUG + 1));
+        pg = ((pg + 1) % (PAGE_PRO_INIT + 1));
         page = (PAGE)pg;
         dirty = true;
     }
@@ -321,6 +457,12 @@ void UserInterface::update() {
             update_usb_debug();
             ssd1306_show(&disp);
             // Keep refreshing debug page
+            dirty = true;
+        }
+        else if (page == PAGE_PRO_INIT) {
+            update_pro_init();
+            ssd1306_show(&disp);
+            // Keep refreshing to show latest status
             dirty = true;
         }
         if (!dirty) {
