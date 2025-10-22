@@ -38,7 +38,8 @@ public:
         PAGE_JOY0,
         PAGE_JOY1,
         PAGE_SERIAL,
-        PAGE_USB_DEBUG
+        PAGE_USB_DEBUG,
+        PAGE_PRO_INIT
     };
 
     void init();
@@ -90,6 +91,7 @@ private:
     void update_mouse();
     void update_joy(int index);
     void update_usb_debug();
+    void update_pro_init();
     void update_splash();
     void handle_buttons();
     void on_button_down(int i);

@@ -34,6 +34,10 @@
 #include "UserInterface.h"
 #include "xinput_host.h"  // Official tusb_xinput driver
 
+// Forward declarations
+extern "C" {
+    void switch_check_delayed_init(void);
+}
 
 #define ROMBASE     256
 #define CYCLES_PER_LOOP 250  // Reduced from 1000 for better interrupt response (4x improvement)
@@ -159,6 +163,10 @@ int main() {
             ten_ms = tm;
 
             tuh_task();
+            
+            // Check for Switch Pro Controller delayed initialization
+            switch_check_delayed_init();
+            
             HidInput::instance().handle_keyboard();
             HidInput::instance().handle_mouse(cpu.ncycles);
             HidInput::instance().handle_joystick();
@@ -188,6 +196,9 @@ extern "C" {
     extern int xinput_joy_count;
     void xinput_notify_ui_mount();
     void xinput_notify_ui_unmount();
+    
+    // Switch Pro Controller delayed initialization
+    void switch_check_delayed_init(void);
 }
 
 // Global Xbox report counter for debugging (accessible from UI)
