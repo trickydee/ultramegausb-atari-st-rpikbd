@@ -2,7 +2,7 @@
 
 This project allows you to use a RP2040 or RP2350 microcontroller (Raspberry Pi Pico or Pico 2) to emulate the HD6301 controller that is used as the intelligent keyboard controller for the Atari ST/STe/TT series of computers. This is useful if for example you have a Mega ST that is missing its keyboard. The emulator provides the ability to use a USB keyboard, mouse and joysticks with the ST.
 
-**Latest Version: 7.3.0** - Now with RP2350 (Pico 2) support and fixed Xbox/PS4 controller reconnection!
+**Latest Version: 7.5.0** - Now with Nintendo Switch Pro Controller support!
 
 This project supports both the Raspberry Pi Pico (RP2040) and Raspberry Pi Pico 2 (RP2350). You can select which board to build for using CMake options. The firmware should work on any RP2040/RP2350 based board that includes a USB host capable connector and enough I/O for the external connections.
 
@@ -174,11 +174,14 @@ The emulator supports multiple types of USB game controllers with reliable hot-s
 
 - **Xbox Controllers**: Xbox 360 (wired/wireless), Xbox One, Xbox Series X|S, Original Xbox
 - **PS4 DualShock 4**: Full support via USB (wired)
+- **Nintendo Switch Pro Controller**: Full support with analog stick precision and no drift (v7.5.0)
 - **Generic HID Joysticks**: Standard USB joysticks and gamepads
 
-**v7.3.0 Fix:** Xbox and PS4 controllers can now be swapped freely without issues! Previously Xbox wouldn't work after PS4 usage - this is now fixed.
+**v7.5.0:** Added Nintendo Switch Pro Controller support with BetterJoy-style USB initialization, 12-bit analog stick precision, and automatic deadzone compensation.
 
-Xbox controllers are fully supported using the official TinyUSB XInput driver. D-Pad and left analog stick control movement, A button and right trigger act as fire button. PS4 controllers map similarly with analog stick and buttons.
+**v7.3.0:** Xbox and PS4 controllers can now be swapped freely without issues! Previously Xbox wouldn't work after PS4 usage - this is now fixed.
+
+Controllers use D-Pad and left analog stick for movement, with buttons (A/B/X/Y/triggers) mapped to fire button. All controllers support hot-swapping between different types.
 
 ## Known limitations
 The RP2040 USB host implementation seems to contain a number of bugs. This repository contains a patched branch of the TinyUSB code to workaround many of these issues, however there are still some limitations and occasional issues as summarised below:
@@ -192,3 +195,9 @@ This project has been pieced together from code extracted from [Steem SSE](https
 Steem itself uses the HD6301 emulator provided by sim68xx developed by Arne Riiber. The original website for this seems to have gone but an archive can be found [here](http://www.oocities.org/thetropics/harbor/8707/simulator/sim68xx/).
 
 The code to handle the OLED display is Copyright (c) 2021 David Schramm and taken from https://github.com/daschr/pico-ssd1306.
+
+## Credits
+Special thanks to the following projects for inspiration and reference implementations:
+
+- **[tusb_xinput](https://github.com/Ryzee119/tusb_xinput)** by Ryzee119 - TinyUSB XInput host driver used for Xbox controller support
+- **[BetterJoy](https://github.com/Davidobot/BetterJoy)** by Davidobot - Reference implementation for Nintendo Switch Pro Controller USB initialization and protocol handling
