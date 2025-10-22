@@ -23,6 +23,19 @@
 #include "config.h"
 #include "hardware/clocks.h"
 
+// Forward declare Xbox debug counters (defined in main.cpp and xinput_atari.cpp)
+extern "C" {
+    uint32_t get_xbox_report_count();
+    uint32_t get_xbox_data_read_count();
+    uint32_t get_xbox_lookup_calls();
+    void get_xbox_debug_flags(uint8_t* addr, uint8_t* connected, uint8_t* new_data);
+    uint32_t get_gpio_path_count();
+    uint32_t get_usb_path_count();
+    uint32_t get_hid_joy_success();
+    uint32_t get_ps4_success();
+    uint32_t get_xbox_success();
+}
+
 #define DEBOUNCE_COUNT 10
 
 enum BUTTONS {
@@ -160,32 +173,51 @@ void UserInterface::update_usb_debug() {
     char buf[32];
     ssd1306_clear(&disp);
     
-    // Title
+#if ENABLE_CONTROLLER_DEBUG
+    // Debug page with detailed controller diagnostics
+    ssd1306_draw_string(&disp, 0, 0, 1, (char*)"Debug v7.3");
+    
+    // Source success counters
+    uint32_t hid_count = get_hid_joy_success();
+    uint32_t ps4_count = get_ps4_success();
+    uint32_t xbox_count = get_xbox_success();
+    sprintf(buf, "HID:%lu PS4:%lu", hid_count, ps4_count);
+    ssd1306_draw_string(&disp, 0, 10, 1, buf);
+    
+    sprintf(buf, "Xbox:%lu", xbox_count);
+    ssd1306_draw_string(&disp, 0, 20, 1, buf);
+    
+    // Xbox report counter
+    uint32_t rx_count = get_xbox_report_count();
+    sprintf(buf, "XboxRx:%lu", rx_count);
+    ssd1306_draw_string(&disp, 0, 30, 1, buf);
+    
+    // Xbox state
+    uint8_t xaddr, xconn, slots;
+    get_xbox_debug_flags(&xaddr, &xconn, &slots);
+    sprintf(buf, "A:%d C:%d S:%d", xaddr, xconn, slots);
+    ssd1306_draw_string(&disp, 0, 40, 1, buf);
+    
+    // Device counts
+    sprintf(buf, "Dev: KB:%d M:%d J:%d", num_kb, num_mouse, num_joy);
+    ssd1306_draw_string(&disp, 0, 50, 1, buf);
+#else
+    // Simple USB status page (set ENABLE_CONTROLLER_DEBUG=0 in config.h)
     ssd1306_draw_string(&disp, 0, 0, 1, (char*)"USB Debug Info");
     
     // Device counts
     sprintf(buf, "KB:%d Mouse:%d Joy:%d", num_kb, num_mouse, num_joy);
     ssd1306_draw_string(&disp, 0, 12, 1, buf);
     
-    // Mount and active device tracking
-    uint32_t addr_inst = hid_debug_get_last_addr_inst();
+    // Mount and report stats
     sprintf(buf, "Mounts:%lu Active:%lu", 
         hid_debug_get_mount_calls(),
         hid_debug_get_active_devices());
     ssd1306_draw_string(&disp, 0, 24, 1, buf);
     
-    // Last device address and instance
-    sprintf(buf, "Last: Addr:%d Inst:%d", 
-        (addr_inst >> 8) & 0xFF,
-        addr_inst & 0xFF);
+    sprintf(buf, "Reports:%lu", hid_debug_get_report_calls());
     ssd1306_draw_string(&disp, 0, 36, 1, buf);
-    
-    // Report statistics
-    sprintf(buf, "Reports Rx:%lu", hid_debug_get_report_calls());
-    ssd1306_draw_string(&disp, 0, 48, 1, buf);
-    
-    sprintf(buf, "Reports Copy:%lu", hid_debug_get_report_copied());
-    ssd1306_draw_string(&disp, 0, 56, 1, buf);
+#endif
 }
 
 void UserInterface::handle_buttons() {

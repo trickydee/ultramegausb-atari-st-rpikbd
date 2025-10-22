@@ -416,6 +416,13 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance) {
   hidh_device_t* dev = find_device_by_inst(dev_addr, instance);
   if (!dev) return;
   
+  // FIX: Check if this is a PS4 controller and call its unmount callback
+  uint16_t vid, pid;
+  tuh_vid_pid_get(dev_addr, &vid, &pid);
+  if (ps4_is_dualshock4(vid, pid)) {
+    ps4_unmount_cb(dev_addr);
+  }
+  
   // Clear report destination to prevent callbacks to freed memory
   dev->report_dest = NULL;
   dev->report_pending = false;
@@ -434,6 +441,10 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance) {
   if (should_notify) {
     tuh_hid_unmounted_cb(dev_addr);
   }
+  
+  // Update UI with current counts (including Xbox controllers)
+  extern void xinput_notify_ui_unmount();
+  xinput_notify_ui_unmount();
   
   // Clear this device slot
   memset(dev, 0, sizeof(hidh_device_t));

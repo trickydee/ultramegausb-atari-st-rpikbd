@@ -55,3 +55,7 @@
 // 150000 = 150MHz (default/safe)
 // 270000 = 270MHz (maximum performance)
 #define DEFAULT_CPU_CLOCK_KHZ   270000
+
+// Debug features (set to 0 to disable for production)
+// Enables detailed Xbox/PS4/HID diagnostic counters on USB Debug page
+#define ENABLE_CONTROLLER_DEBUG 1

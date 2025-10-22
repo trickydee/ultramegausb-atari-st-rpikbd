@@ -1,9 +1,10 @@
-# Atari ST RP2040 IKBD Emulator
+# Atari ST RP2040/RP2350 IKBD Emulator
 
-This project allows you to use a RP2040 microcontroller to emulate the HD6301 controller that is used as the intelligent keyboard controller for the Atari ST/STe/TT series of computers. This is useful if for example you have a Mega ST that is missing its keyboard. The emulator provides the ability to use a USB keyboard, mouse and joysticks with the ST.
+This project allows you to use a RP2040 or RP2350 microcontroller (Raspberry Pi Pico or Pico 2) to emulate the HD6301 controller that is used as the intelligent keyboard controller for the Atari ST/STe/TT series of computers. This is useful if for example you have a Mega ST that is missing its keyboard. The emulator provides the ability to use a USB keyboard, mouse and joysticks with the ST.
 
-This project has been built specifically for the Raspberry Pi Pico development board but it should be simple to modify it to use any RP2040 based
-board that includes a USB host capable connector and enough I/O for the external connections.
+**Latest Version: 7.3.0** - Now with RP2350 (Pico 2) support and fixed Xbox/PS4 controller reconnection!
+
+This project supports both the Raspberry Pi Pico (RP2040) and Raspberry Pi Pico 2 (RP2350). You can select which board to build for using CMake options. The firmware should work on any RP2040/RP2350 based board that includes a USB host capable connector and enough I/O for the external connections.
 
 The emulator displays a simple user interface on an OLED display. This is entirely optional and you can build a working version without it but
 it is certainly useful to show successful connection of your USB devices as well as to allow the mouse speed to be tweaked and to view the data
@@ -38,9 +39,16 @@ The level shifter is required as the Atari uses 5V logic over the serial connect
 
 To compile the firmware you will need to checkout this repository, sync the included submodules and make a small change to the pico-sdk CMakelist.txt.
 
-Mac (ARM)  
+### Quick Build (Both Pico and Pico 2)
 
-Compiling on the mac requires xcode, gcc amd armi embedded toolchain. A build can be perfomed with the following commands:
+```bash
+./build-all.sh
+# Outputs: dist/atari_ikbd_pico.uf2 and dist/atari_ikbd_pico2.uf2
+```
+
+### Mac (ARM)  
+
+Compiling on the mac requires xcode, gcc and arm embedded toolchain. A build can be performed with the following commands:
 
 ```
 # Install GCC components from homebrew
@@ -58,8 +66,11 @@ git submodule update --init --recursive
 cp pico-sdk/src/rp2_common/tinyusb/CMakeLists.txt pico-sdk/src/rp2_common/tinyusb/CMakeLists.old
 sed -E $'91i\\\n            ${PICO_TINYUSB_PATH}/src/class/hid/hidparser/HIDParser.c\n' pico-sdk/src/rp2_common/tinyusb/CMakeLists.old > pico-sdk/src/rp2_common/tinyusb/CMakeLists.txt
 
-# Build
-cmake -B build -S . && cd build && make
+# Build for Raspberry Pi Pico (RP2040) - default
+cmake -B build -S . -DPICO_BOARD=pico && cd build && make
+
+# OR build for Raspberry Pi Pico 2 (RP2350)
+cmake -B build -S . -DPICO_BOARD=pico2 && cd build && make
 ```
 
 PC (Linux)
@@ -159,13 +170,15 @@ For detailed information about keyboard shortcuts, see [KEYBOARD_SHORTCUTS.md](K
 
 ## USB Controller Support
 
-The emulator supports multiple types of USB game controllers:
+The emulator supports multiple types of USB game controllers with reliable hot-swapping:
 
-- **Xbox Controllers**: Xbox 360 (wired/wireless), Xbox One, Original Xbox
-- **PS4 DualShock 4**: Full support via USB
-- **Generic HID Joysticks**: Standard USB joysticks
+- **Xbox Controllers**: Xbox 360 (wired/wireless), Xbox One, Xbox Series X|S, Original Xbox
+- **PS4 DualShock 4**: Full support via USB (wired)
+- **Generic HID Joysticks**: Standard USB joysticks and gamepads
 
-Xbox controllers are fully supported using the official TinyUSB XInput driver. D-Pad and left analog stick control movement, A button and right trigger act as fire button.
+**v7.3.0 Fix:** Xbox and PS4 controllers can now be swapped freely without issues! Previously Xbox wouldn't work after PS4 usage - this is now fixed.
+
+Xbox controllers are fully supported using the official TinyUSB XInput driver. D-Pad and left analog stick control movement, A button and right trigger act as fire button. PS4 controllers map similarly with analog stick and buttons.
 
 ## Known limitations
 The RP2040 USB host implementation seems to contain a number of bugs. This repository contains a patched branch of the TinyUSB code to workaround many of these issues, however there are still some limitations and occasional issues as summarised below:
