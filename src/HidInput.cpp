@@ -57,10 +57,42 @@ static std::map<int, uint8_t*> device;
 static UserInterface* ui_ = nullptr;
 static int kb_count = 0;
 static int mouse_count = 0;
-static int joy_count = 0;
+static int joy_count = 0;  // HID joysticks (not Xbox)
+
+// Debug: Path counters (file-level static, accessed via getters)
+static uint32_t g_gpio_path_count = 0;
+static uint32_t g_usb_path_count = 0;
+static uint32_t g_hid_joy_success = 0;
+static uint32_t g_ps4_success = 0;
+static uint32_t g_xbox_success = 0;
 
 
 extern "C" {
+
+// Xbox controller counter (extern, modified by main.cpp xinput callbacks)
+int xinput_joy_count = 0;
+
+// Getters for path counters
+uint32_t get_gpio_path_count() { return g_gpio_path_count; }
+uint32_t get_usb_path_count() { return g_usb_path_count; }
+uint32_t get_hid_joy_success() { return g_hid_joy_success; }
+uint32_t get_ps4_success() { return g_ps4_success; }
+uint32_t get_xbox_success() { return g_xbox_success; }
+
+// Functions for Xbox controller to notify UI of mount/unmount
+void xinput_notify_ui_mount() {
+    if (ui_) {
+        // Total joysticks = HID joysticks + Xbox controllers
+        ui_->usb_connect_state(kb_count, mouse_count, joy_count + xinput_joy_count);
+    }
+}
+
+void xinput_notify_ui_unmount() {
+    if (ui_) {
+        // Total joysticks = HID joysticks + Xbox controllers
+        ui_->usb_connect_state(kb_count, mouse_count, joy_count + xinput_joy_count);
+    }
+}
 
 void tuh_hid_mounted_cb(uint8_t dev_addr) {
     // Decode mouse marker: if bit 7 is set, this is a mouse on a multi-interface device
@@ -132,7 +164,8 @@ void tuh_hid_mounted_cb(uint8_t dev_addr) {
         ++joy_count;
     }
     if (ui_) {
-        ui_->usb_connect_state(kb_count, mouse_count, joy_count);
+        // Total joysticks = HID joysticks + Xbox controllers
+        ui_->usb_connect_state(kb_count, mouse_count, joy_count + xinput_joy_count);
     }
 }
 
@@ -719,8 +752,10 @@ void HidInput::handle_joystick() {
         uint8_t axis = 0;
         uint8_t button = 0;
         
-        if (ui_->get_joystick() & (1 << joystick)) {
-            // GPIO
+        uint8_t joy_setting = ui_->get_joystick();
+        if (joy_setting & (1 << joystick)) {
+            // GPIO path
+            g_gpio_path_count++;
             if (joystick == 1) {
                 mouse_state = (mouse_state & 0xfe) | (gpio_get(JOY1_FIRE) ? 0 : 1);
                 axis |= (gpio_get(JOY1_UP)) ? 0 : 1;
@@ -741,24 +776,33 @@ void HidInput::handle_joystick() {
             }
         }
         else {
-            // Try USB joystick first, then Xbox controller
+            // USB path
+            g_usb_path_count++;
+            
+            // Try all sources: USB HID joystick, then PS4, then Xbox
             bool got_input = false;
             
-            // See if there is a USB HID joystick
+            // First priority: USB HID joystick
             if (next_joystick < joystick_addr.size()) {
                 if (get_usb_joystick(joystick_addr[next_joystick], axis, button)) {
                     got_input = true;
+                    g_hid_joy_success++;  // Track HID success
                 }
                 ++next_joystick;
             }
             
-            // If no HID joystick, try PS4 controller, then Xbox
-            if (!got_input) {
-                if (get_ps4_joystick(joystick, axis, button)) {
-                    got_input = true;
-                } else if (get_xbox_joystick(joystick, axis, button)) {
-                    got_input = true;
-                }
+            // Second priority: PS4 controller (always check, even if HID exists)
+            // FIX: PS4 and Xbox were being skipped if ANY HID entry existed, even disconnected ones
+            if (!got_input && get_ps4_joystick(joystick, axis, button)) {
+                got_input = true;
+                g_ps4_success++;  // Track PS4 success
+            }
+            
+            // Third priority: Xbox controller (always check as final fallback)
+            // FIX: This ensures Xbox is checked even if stale HID entries exist
+            if (!got_input && get_xbox_joystick(joystick, axis, button)) {
+                got_input = true;
+                g_xbox_success++;  // Track Xbox success
             }
             
             // Update joystick state if we got input from either source

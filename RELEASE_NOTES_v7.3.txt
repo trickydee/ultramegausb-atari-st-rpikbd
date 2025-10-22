@@ -1,0 +1,203 @@
+================================================================================
+RELEASE NOTES - Version 7.3.0
+Atari ST USB Adapter Firmware
+================================================================================
+
+RELEASE DATE: October 22, 2025
+BRANCH: bugfixes-rp2350-other-controllers
+
+================================================================================
+CRITICAL BUG FIX
+================================================================================
+
+Fixed Xbox Controller Reconnection Issue
+─────────────────────────────────────────
+
+PROBLEM:
+  Xbox controllers stopped working after PS4 controller usage:
+  - Xbox first → Works ✅
+  - PS4 used → Works ✅
+  - Xbox after PS4 → Broken ❌
+
+ROOT CAUSE:
+  PS4 unmount callback was never being called when controller was unplugged.
+  The PS4 controller stayed marked as "connected" with stale data, blocking
+  Xbox from being checked as a fallback input source.
+
+THE FIX:
+  Added proper PS4 unmount callback wiring in hid_app_host.c. Now when PS4
+  is disconnected, it properly cleans up and allows Xbox to work.
+
+RESULT:
+  ✅ Xbox and PS4 controllers can now be swapped freely
+  ✅ Both controllers work reliably in any order
+  ✅ Multiple reconnection cycles work correctly
+
+================================================================================
+NEW FEATURES
+================================================================================
+
+1. RP2350 (Raspberry Pi Pico 2) Support
+   ─────────────────────────────────────
+   - Full support for building firmware for Pico 2
+   - Use cmake option: -DPICO_BOARD=pico2
+   - Automatic output naming: atari_ikbd_pico2.uf2
+   - Fully tested and working on RP2350 hardware
+
+2. Enhanced Controller Detection
+   ──────────────────────────────
+   - Xbox controllers now increment OLED joystick counter
+   - "XBOX!" splash screen shows controller type and debug info
+   - PS4 splash screen enhanced with device address
+   - Both splash screens display for 2-3 seconds
+
+3. Build Automation
+   ────────────────
+   - New build-all.sh script builds both Pico and Pico 2 firmware
+   - Outputs to dist/ directory for easy access
+   - Single command builds both variants
+
+4. Debug Diagnostics Page (Optional)
+   ──────────────────────────────────
+   - Detailed controller debug info on USB Debug page
+   - Shows HID/PS4/Xbox success counters
+   - Tracks report reception and data flow
+   - Can be disabled: Set ENABLE_CONTROLLER_DEBUG 0 in config.h
+
+================================================================================
+BUILD INSTRUCTIONS
+================================================================================
+
+For Raspberry Pi Pico (RP2040):
+  cmake -B build -S . -DPICO_BOARD=pico -DLANGUAGE=EN
+  cd build && make
+  Flash: build/atari_ikbd_pico.uf2
+
+For Raspberry Pi Pico 2 (RP2350):
+  cmake -B build -S . -DPICO_BOARD=pico2 -DLANGUAGE=EN
+  cd build && make
+  Flash: build/atari_ikbd_pico2.uf2
+
+Build Both Automatically:
+  ./build-all.sh
+  Files in: dist/atari_ikbd_pico.uf2 and dist/atari_ikbd_pico2.uf2
+
+================================================================================
+CONFIGURATION OPTIONS
+================================================================================
+
+In include/config.h:
+
+  ENABLE_CONTROLLER_DEBUG
+    1 = Enable detailed debug page (default for now)
+    0 = Disable debug page (simple USB status instead)
+    
+  DEFAULT_CPU_CLOCK_KHZ
+    270000 = 270MHz (default, maximum performance)
+    150000 = 150MHz (more conservative)
+
+================================================================================
+FILES CHANGED
+================================================================================
+
+Core Bug Fix:
+  src/hid_app_host.c          - Added PS4 unmount callback call
+
+Controller Support:
+  src/main.cpp                - Xbox counter, splash screen, cleaned debug
+  src/HidInput.cpp            - Xbox/PS4 fallback logic, debug counters
+  src/xinput_atari.cpp        - Simplified registration code
+  src/ps4_controller.c        - Enhanced splash screen
+
+UI and Debug:
+  src/UserInterface.cpp       - Conditional debug page with diagnostics
+  include/config.h            - Added ENABLE_CONTROLLER_DEBUG flag
+
+Build System:
+  CMakeLists.txt              - RP2350 board selection
+  build-all.sh                - Automated dual-board build script
+  include/version.h           - Version 7.3.0
+
+Documentation:
+  BUGFIX_SUMMARY_v7.3.md      - Detailed bug analysis
+  BUGFIXES_RP2350.md          - RP2350 and controller fixes
+  RELEASE_NOTES_v7.3.txt      - This file
+
+================================================================================
+UPGRADE FROM 7.0.0 → 7.3.0
+================================================================================
+
+BREAKING CHANGES:
+  None - Fully backward compatible
+
+NEW FUNCTIONALITY:
+  ✅ Xbox/PS4 controllers work reliably after swapping
+  ✅ Can build for Pico 2 (RP2350)
+  ✅ Enhanced OLED feedback for controllers
+  ✅ Optional debug diagnostics page
+
+MIGRATION:
+  Simply flash new firmware - no configuration changes needed
+  Settings and behavior are preserved
+
+================================================================================
+KNOWN LIMITATIONS
+================================================================================
+
+1. Xbox 360 Wireless controllers require wireless receiver
+2. Some generic HID controllers may not work properly
+3. Debug page uses screen space (can be disabled)
+4. PS4 controllers must be wired (wireless not supported)
+
+================================================================================
+TESTED CONTROLLERS
+================================================================================
+
+Xbox Controllers:
+  ✅ Xbox One wired
+  ✅ Xbox Series X|S
+  ✅ Xbox 360 wired
+  ✅ Xbox 360 wireless (with receiver)
+
+PlayStation Controllers:
+  ✅ PS4 DualShock 4 (wired)
+
+HID Joysticks:
+  ✅ Generic USB joysticks
+  ✅ Logitech controllers
+
+Tested Scenarios:
+  ✅ Xbox only
+  ✅ PS4 only
+  ✅ Xbox → PS4 → Xbox (the critical bug fix!)
+  ✅ PS4 → Xbox → PS4
+  ✅ Multiple reconnection cycles
+  ✅ Mixed with HID joysticks
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+Ready for:
+  - Additional controller types (as mentioned by user)
+  - Debug page can be disabled when stable
+  - Further USB device support
+  - RP2350-specific optimizations
+
+Framework in place:
+  - Robust controller detection and cleanup
+  - Flexible fallback system for multiple input sources
+  - Comprehensive diagnostics for troubleshooting
+  - Both Pico and Pico 2 support
+
+================================================================================
+
+**Version:** 7.3.0
+**Status:** ✅ Production Ready
+**Firmware:** dist/atari_ikbd_pico.uf2 (311K) and dist/atari_ikbd_pico2.uf2 (295K)
+**Splash:** Shows v7.3.0 on startup
+
+To disable debug page later: Set ENABLE_CONTROLLER_DEBUG 0 in config.h
+
+================================================================================
+

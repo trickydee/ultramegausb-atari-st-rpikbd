@@ -183,12 +183,21 @@ usbh_class_driver_t const* usbh_app_driver_get_cb(uint8_t* driver_count) {
 extern "C" {
     void xinput_register_controller(uint8_t dev_addr, const xinputh_interface_t* xid_itf);
     void xinput_unregister_controller(uint8_t dev_addr);
+    
+    // Xbox controller counter and UI notification functions (defined in HidInput.cpp)
+    extern int xinput_joy_count;
+    void xinput_notify_ui_mount();
+    void xinput_notify_ui_unmount();
+}
+
+// Global Xbox report counter for debugging (accessible from UI)
+static uint32_t xbox_report_count = 0;
+extern "C" uint32_t get_xbox_report_count() {
+    return xbox_report_count;
 }
 
 // XInput mount callback - called when Xbox controller is connected
 void tuh_xinput_mount_cb(uint8_t dev_addr, uint8_t instance, const xinputh_interface_t *xinput_itf) {
-    printf("XINPUT MOUNTED: dev_addr=%d, instance=%d\n", dev_addr, instance);
-    
     const char* type_str;
     switch (xinput_itf->type) {
         case XBOX360_WIRED:     type_str = "Xbox 360 Wired"; break;
@@ -197,13 +206,16 @@ void tuh_xinput_mount_cb(uint8_t dev_addr, uint8_t instance, const xinputh_inter
         case XBOXOG:            type_str = "Xbox OG"; break;
         default:                type_str = "Unknown"; break;
     }
-    printf("  Type: %s\n", type_str);
+    printf("Xbox controller mounted: %s (addr=%d, inst=%d)\n", type_str, dev_addr, instance);
     
     // Register with Atari mapper
     xinput_register_controller(dev_addr, xinput_itf);
     
-    // OLED message disabled - using persistent storage debug instead
-    #if 0
+    // Increment joystick counter and update UI (FIX: Xbox controllers weren't incrementing counter)
+    xinput_joy_count++;
+    xinput_notify_ui_mount();
+    
+    // Show XBOX splash screen (reinstated with debug info)
     extern ssd1306_t disp;
     ssd1306_clear(&disp);
     ssd1306_draw_string(&disp, 20, 10, 2, (char*)"XBOX!");
@@ -219,11 +231,11 @@ void tuh_xinput_mount_cb(uint8_t dev_addr, uint8_t instance, const xinputh_inter
         ssd1306_draw_string(&disp, 15, 35, 1, (char*)"Detected!");
     }
     
-    snprintf(line, sizeof(line), "A:%d I:%d", dev_addr, instance);
-    ssd1306_draw_string(&disp, 15, 50, 1, line);
+    // Show debug info: Address, Instance, Connection status
+    snprintf(line, sizeof(line), "A:%d I:%d C:%d", dev_addr, instance, xinput_itf->connected);
+    ssd1306_draw_string(&disp, 10, 50, 1, line);
     ssd1306_show(&disp);
-    sleep_ms(2000);
-    #endif
+    sleep_ms(3000);  // Extended to 3 seconds to read debug info
     
     // For Xbox 360 Wireless, wait for connection before setting LEDs
     if (xinput_itf->type == XBOX360_WIRELESS && !xinput_itf->connected) {
@@ -239,15 +251,28 @@ void tuh_xinput_mount_cb(uint8_t dev_addr, uint8_t instance, const xinputh_inter
 
 // XInput unmount callback
 void tuh_xinput_umount_cb(uint8_t dev_addr, uint8_t instance) {
-    printf("XINPUT UNMOUNTED: dev_addr=%d, instance=%d\n", dev_addr, instance);
+    printf("Xbox controller unmounted: addr=%d, inst=%d\n", dev_addr, instance);
     
     // Unregister from Atari mapper
     xinput_unregister_controller(dev_addr);
+    
+    // Decrement joystick counter and update UI (FIX: Xbox controllers weren't decrementing counter)
+    if (xinput_joy_count > 0) {
+        xinput_joy_count--;
+    }
+    xinput_notify_ui_unmount();
 }
 
 // XInput report callback - called when controller data is received
 void tuh_xinput_report_received_cb(uint8_t dev_addr, uint8_t instance, 
                                     xinputh_interface_t const* xid_itf, uint16_t len) {
+    // Increment global counter for UI display
+    xbox_report_count++;
+    
+    // Force new_pad_data flag to 1 (TinyUSB workaround)
+    xinputh_interface_t* mutable_itf = (xinputh_interface_t*)xid_itf;
+    mutable_itf->new_pad_data = 1;
+    
     // Update controller state for mapper
     xinput_register_controller(dev_addr, xid_itf);
     

@@ -31,12 +31,32 @@ endif()
 set(PICO_SDK_PATH ${CMAKE_SOURCE_DIR}/pico-sdk)
 include(pico_sdk_import.cmake)
 
+# Board selection: Set PICO_BOARD before calling project()
+# Options: pico (RP2040), pico2 (RP2350)
+# Usage: cmake -DPICO_BOARD=pico2 .. (for Pico 2)
+# Or:    cmake -DPICO_BOARD=pico ..  (for Pico 1, this is the default)
+if(NOT DEFINED PICO_BOARD)
+    set(PICO_BOARD "pico" CACHE STRING "Pico board type (pico or pico2)")
+    message(STATUS "PICO_BOARD not specified, defaulting to 'pico' (RP2040)")
+else()
+    message(STATUS "Building for board: ${PICO_BOARD}")
+endif()
+
 project(atari_ikbd C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
 # Initialize the SDK
 pico_sdk_init()
+
+# Display what we're building for
+if(PICO_PLATFORM STREQUAL "rp2040")
+    message(STATUS "Target: Raspberry Pi Pico (RP2040)")
+elseif(PICO_PLATFORM STREQUAL "rp2350-arm-s" OR PICO_PLATFORM STREQUAL "rp2350-riscv")
+    message(STATUS "Target: Raspberry Pi Pico 2 (RP2350)")
+else()
+    message(STATUS "Target platform: ${PICO_PLATFORM}")
+endif()
 
 # Select interface language
 set(LANGUAGE "EN" CACHE STRING "Select interface language: EN, FR, DE, SP, IT")
@@ -102,5 +122,14 @@ target_link_libraries(atari_ikbd pico_stdlib pico_multicore hardware_i2c hardwar
 pico_enable_stdio_uart(atari_ikbd 1)
 pico_add_extra_outputs(atari_ikbd)
 pico_set_binary_type(atari_ikbd copy_to_ram)
+
+# Set output name based on board type for clarity
+if(PICO_BOARD STREQUAL "pico2")
+    set_target_properties(atari_ikbd PROPERTIES OUTPUT_NAME "atari_ikbd_pico2")
+    message(STATUS "Output files will be named: atari_ikbd_pico2.*")
+else()
+    set_target_properties(atari_ikbd PROPERTIES OUTPUT_NAME "atari_ikbd_pico")
+    message(STATUS "Output files will be named: atari_ikbd_pico.*")
+endif()
 
 
