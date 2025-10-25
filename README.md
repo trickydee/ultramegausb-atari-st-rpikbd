@@ -5,7 +5,6 @@ This is useful if for example you have a Mega ST that is missing its keyboard. T
 
 The original project was initially created by fieldofcows in 2020 https://github.com/fieldofcows/atari-st-rpikb. This project builds on this great foundation to improve compatability, stability and add support for many modern game controllers.
 
-
 ## USB Support
 USB HID Keyboards
 
@@ -193,12 +192,14 @@ This build also fixes the following bugs in the original build:
 irectly to the Pico and not plugged into another hub.
 
 ## Acknowledgements
-This project is based on the amazing work of many people. Especially fieldofcows **(https://github.com/fieldofcows/atari-st-rpikb)** who created this project.
+This project is based on the amazing work of many people. Especially fieldofcows (https://github.com/fieldofcows/atari-st-rpikb) who created this project.
 In turn the project was pieced together from code extracted from [Steem SSE](https://sourceforge.net/projects/steemsse/). All of the work of wiring up the keyboard functions to the HD6301 CPU is credited to Steem SSE. This project contains a stripped-down version of this interface, connecting it to the Raspberry Pi's serial port.
 
 Steem itself uses the HD6301 emulator provided by sim68xx developed by Arne Riiber. The original website for this seems to have gone but an archive can be found [here](http://www.oocities.org/thetropics/harbor/8707/simulator/sim68xx/).
 
 The code to handle the OLED display is Copyright (c) 2021 David Schramm and taken from https://github.com/daschr/pico-ssd1306.
+
+Mult language support was added by Klyde https://github.com/klyde2278/atari-st-rpikb who also sells a nice kit and device to run this firmware on.
 
 ## Credits
 To create this ultramegausb build I also relied on the following projects for inspiration and reference implementations:
