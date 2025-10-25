@@ -166,7 +166,7 @@ The emulator supports several keyboard shortcuts for convenient control:
 | **Alt+Plus** | Set 270MHz | Overclocks RP2040 to 270MHz for maximum performance |
 | **Alt+Minus** | Set 150MHz | Sets RP2040 to 150MHz for stability |
 
-For detailed information about keyboard shortcuts, see [KEYBOARD_SHORTCUTS.md](KEYBOARD_SHORTCUTS.md).
+For detailed information about keyboard shortcuts, see [KEYBOARD_SHORTCUTS.md](docs/KEYBOARD_SHORTCUTS.md).
 
 ## USB Controller Support
 
