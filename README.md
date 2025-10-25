@@ -1,10 +1,49 @@
 # Atari ST RP2040/RP2350 IKBD Emulator
 
-This project allows you to use a RP2040 or RP2350 microcontroller (Raspberry Pi Pico or Pico 2) to emulate the HD6301 controller that is used as the intelligent keyboard controller for the Atari ST/STe/TT series of computers. This is useful if for example you have a Mega ST that is missing its keyboard. The emulator provides the ability to use a USB keyboard, mouse and joysticks with the ST.
+This project allows you to use a RP2040 or RP2350 microcontroller (Raspberry Pi Pico or Pico 2) to emulate the HD6301 controller that is used as the intelligent keyboard controller for the Atari ST/STe/TT series of computers. 
+This is useful if for example you have a Mega ST that is missing its keyboard. The emulator provides the ability to use a USB keyboard, mouse and joysticks with the ST.
 
-**Latest Version: 7.5.0** - Now with Nintendo Switch Pro Controller support!
+The original project was initially created by fieldofcows in 2020 https://github.com/fieldofcows/atari-st-rpikb. This project builds on this great foundation to improve compatability, stability and add support for many modern game controllers.
 
-This project supports both the Raspberry Pi Pico (RP2040) and Raspberry Pi Pico 2 (RP2350). You can select which board to build for using CMake options. The firmware should work on any RP2040/RP2350 based board that includes a USB host capable connector and enough I/O for the external connections.
+
+## USB Support
+USB HID Keyboards
+
+USB HID Mice
+
+USB HID XY Mice - Inc Microsoft Trackballs
+
+Logitech Unifying Adapter - Keyboard, Mice, Trackball
+
+Logitech Bolt Adapter - Keyboard, Mice, Trackball
+
+## Game Controller support.
+
+USB HID Joysticks
+
+Playstation Dualshock 4 Controllers
+
+Xbox Xinput - Xbox One, Xbox 360 Controllers
+
+Nintendo Switch Pro Controller (Version 1) - Beta
+
+
+## Keyboard Shortcuts
+
+The emulator supports several keyboard shortcuts for convenient control:
+
+| Shortcut | Function | Description |
+|----------|----------|-------------|
+| **Ctrl+F12** | Toggle Mouse Mode | Switches between USB mouse and joystick 0 |
+| **Ctrl+F11** | XRESET | Triggers HD6301 hardware reset (like power cycling the IKBD) |
+| **Ctrl+F10** | Toggle Joystick 1 | Switches Joystick 1 between D-SUB and USB |
+| **Ctrl+F9** | Toggle Joystick 0 | Switches Joystick 0 between D-SUB and USB |
+| **Alt+/** | INSERT Key | Sends Atari ST INSERT key (useful for sending mouse click on Logitech Mac USB keyboards) |
+| **Alt+[** | Keypad /** | Sends Atari ST keypad divide key |
+| **Alt+]** | Keypad *** | Sends Atari ST keypad multiply key |
+| **Alt+Plus** | Set 270MHz | Overclocks RP2040 to 270MHz for maximum performance |
+| **Alt+Minus** | Set 150MHz | Sets RP2040 to 150MHz for stability |
+
 
 The emulator displays a simple user interface on an OLED display. This is entirely optional and you can build a working version without it but
 it is certainly useful to show successful connection of your USB devices as well as to allow the mouse speed to be tweaked and to view the data
@@ -41,36 +80,13 @@ To compile the firmware you will need to checkout this repository, sync the incl
 
 ### Quick Build (Both Pico and Pico 2)
 
-```bash
-./build-all.sh
-# Outputs: dist/atari_ikbd_pico.uf2 and dist/atari_ikbd_pico2.uf2
-```
-
 ### Mac (ARM)  
 
 Compiling on the mac requires xcode, gcc and arm embedded toolchain. A build can be performed with the following commands:
 
-```
-# Install GCC components from homebrew
-brew install gcc armmbed/formulae/arm-none-eabi-gcc
-
-# Clone the main repo
-git clone -b main  https://github.com/trickydee/atari-st-rpikb
-cd atari-st-rpikb
-
-# Sync submodules
-git submodule sync
-git submodule update --init --recursive
-
-# fix missing hidparser include in cmakelists.txt
-cp pico-sdk/src/rp2_common/tinyusb/CMakeLists.txt pico-sdk/src/rp2_common/tinyusb/CMakeLists.old
-sed -E $'91i\\\n            ${PICO_TINYUSB_PATH}/src/class/hid/hidparser/HIDParser.c\n' pico-sdk/src/rp2_common/tinyusb/CMakeLists.old > pico-sdk/src/rp2_common/tinyusb/CMakeLists.txt
-
-# Build for Raspberry Pi Pico (RP2040) - default
-cmake -B build -S . -DPICO_BOARD=pico && cd build && make
-
-# OR build for Raspberry Pi Pico 2 (RP2350)
-cmake -B build -S . -DPICO_BOARD=pico2 && cd build && make
+```bash
+./build-all.sh
+# Outputs: dist/atari_ikbd_pico.uf2 and dist/atari_ikbd_pico2.uf2
 ```
 
 PC (Linux)
@@ -122,8 +138,9 @@ cmake -DLANGUAGE=IT ..  # For Italian interface
 
 make
 ```
+
 ## Downloading the firmware
-If you don't know how or can't build the firmware by yourself, please find the released files here: https://github.com/klyde2278/atari-st-rpikb/releases
+If you don't know how or can't build the firmware by yourself, please use the builds in the releases link.
 
 ## Using the emulator
 If you build the emulator as per the schematic, the Pico is powered directly from the Atari 5V supply. The Pico boots immediately but USB enumeration can take a few seconds. Once this is complete, the emulator is fully operational.
@@ -150,24 +167,6 @@ The serial data page should only be used for ensuring the connection works. Disp
 
 The real ST keyboard has a single DB-9 socket which is shared between the mouse and Joystick 0. The emulator allows you to have a mouse and joystick plugged in simultaneously but you need to select whether the mouse or joystick 0 is active. This can be toggled by pressing the Scroll Lock button on the keyboard. The current mode is shown on any of the status pages on the OLED display.
 
-## Keyboard Shortcuts
-
-The emulator supports several keyboard shortcuts for convenient control:
-
-| Shortcut | Function | Description |
-|----------|----------|-------------|
-| **Ctrl+F12** | Toggle Mouse Mode | Switches between USB mouse and joystick 0 |
-| **Ctrl+F11** | XRESET | Triggers HD6301 hardware reset (like power cycling the IKBD) |
-| **Ctrl+F10** | Toggle Joystick 1 | Switches Joystick 1 between D-SUB and USB |
-| **Ctrl+F9** | Toggle Joystick 0 | Switches Joystick 0 between D-SUB and USB |
-| **Alt+/** | INSERT Key | Sends Atari ST INSERT key (useful for modern keyboards) |
-| **Alt+[** | Keypad /** | Sends Atari ST keypad divide key |
-| **Alt+]** | Keypad *** | Sends Atari ST keypad multiply key |
-| **Alt+Plus** | Set 270MHz | Overclocks RP2040 to 270MHz for maximum performance |
-| **Alt+Minus** | Set 150MHz | Sets RP2040 to 150MHz for stability |
-
-For detailed information about keyboard shortcuts, see [KEYBOARD_SHORTCUTS.md](docs/KEYBOARD_SHORTCUTS.md).
-
 ## USB Controller Support
 
 The emulator supports multiple types of USB game controllers with reliable hot-swapping:
@@ -177,27 +176,32 @@ The emulator supports multiple types of USB game controllers with reliable hot-s
 - **Nintendo Switch Pro Controller**: Full support with analog stick precision and no drift (v7.5.0)
 - **Generic HID Joysticks**: Standard USB joysticks and gamepads
 
-**v7.5.0:** Added Nintendo Switch Pro Controller support with BetterJoy-style USB initialization, 12-bit analog stick precision, and automatic deadzone compensation.
 
-**v7.3.0:** Xbox and PS4 controllers can now be swapped freely without issues! Previously Xbox wouldn't work after PS4 usage - this is now fixed.
 
-Controllers use D-Pad and left analog stick for movement, with buttons (A/B/X/Y/triggers) mapped to fire button. All controllers support hot-swapping between different types.
+## Fixes
+The original fieldofcows build had to fix a number of TinyUSB bugs and contained a patched branch of the TinyUSB code. This project uses the latest mainline version of Tiny USB with customizations being externalized,
 
-## Known limitations
-The RP2040 USB host implementation seems to contain a number of bugs. This repository contains a patched branch of the TinyUSB code to workaround many of these issues, however there are still some limitations and occasional issues as summarised below:
+This build also fixes the following bugs in the original build:
+* USB devices are detected more consistenly and faster due to using the newer TinyUSB library.
+* The build uses mainline Pico SDK and TinyUSB Libraries
+* The Emulator now supports USB devices that enumerate multiple endpoints such as Logitech unifying and bolt adapters.
+* Optimizations to Timing for the Atari RX Serial Link lowering checks from 10ms to us - fixing dropped data - 0x14 Joystick mode commands now work consistently (Great news for Ikari Warriors fans).
+* Reduced Core1 6301 emulator sleep from 1ms → 250μs (4x improvement)
+* Added 6301 buffer reporting.
+* Enabled UART FIFO for RX and TX (32X buffer)
 
-* Occasionally on startup USB devices are not enumerated. You need to restart the emulator to try again.
-* The emulator supports only a single USB hub. So, if you use a keyboard that has a hub built in then that must be connected directly to the Pico and not plugged into another hub.
+irectly to the Pico and not plugged into another hub.
 
 ## Acknowledgements
-This project has been pieced together from code extracted from [Steem SSE](https://sourceforge.net/projects/steemsse/). All of the work of wiring up the keyboard functions to the HD6301 CPU is credited to Steem SSE. This project contains a stripped-down version of this interface, connecting it to the Raspberry Pi's serial port.
+This project is based on the amazing work of many people. Especially fieldofcows **(https://github.com/fieldofcows/atari-st-rpikb)** who created this project.
+In turn the project was pieced together from code extracted from [Steem SSE](https://sourceforge.net/projects/steemsse/). All of the work of wiring up the keyboard functions to the HD6301 CPU is credited to Steem SSE. This project contains a stripped-down version of this interface, connecting it to the Raspberry Pi's serial port.
 
 Steem itself uses the HD6301 emulator provided by sim68xx developed by Arne Riiber. The original website for this seems to have gone but an archive can be found [here](http://www.oocities.org/thetropics/harbor/8707/simulator/sim68xx/).
 
 The code to handle the OLED display is Copyright (c) 2021 David Schramm and taken from https://github.com/daschr/pico-ssd1306.
 
 ## Credits
-Special thanks to the following projects for inspiration and reference implementations:
+To create this ultramegausb build I also relied on the following projects for inspiration and reference implementations:
 
 - **[tusb_xinput](https://github.com/Ryzee119/tusb_xinput)** by Ryzee119 - TinyUSB XInput host driver used for Xbox controller support
 - **[BetterJoy](https://github.com/Davidobot/BetterJoy)** by Davidobot - Reference implementation for Nintendo Switch Pro Controller USB initialization and protocol handling
