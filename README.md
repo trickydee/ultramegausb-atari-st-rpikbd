@@ -5,6 +5,13 @@ This is useful if for example you have a Mega ST that is missing its keyboard. T
 
 The original project was initially created by fieldofcows in 2020 https://github.com/fieldofcows/atari-st-rpikb. This project builds on this great foundation to improve compatability, stability and add support for many modern game controllers.
 
+The "ultramegausb" title is intended to highlight the massively enhanced USB compatability from the great work of TinyUSB project and associated projects listed below.
+
+This project is opensource and I am happy to recieve PR's and issues to further improve capabilies.
+Lookout for a published roadmap of new features and an easy to build hardware device you can self manufacture.
+
+
+
 ## USB Support
 USB HID Keyboards
 
