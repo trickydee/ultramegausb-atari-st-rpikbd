@@ -12,9 +12,9 @@ flowing between the emulator and the Atari ST.
 
 The interface is now available in English, French, German, Spanish and Italian.
 
-![English](mouse_EN.jpg) &emsp; ![French](mouse_FR.jpg) &emsp; ![German](mouse_DE.jpg)
+![English](docs/mouse_EN.jpg) &emsp; ![French](docs/mouse_FR.jpg) &emsp; ![German](docs/mouse_DE.jpg)
 
-![Spanish](mouse_SP.jpg) &emsp; ![Italian](mouse_IT.jpg)
+![Spanish](docs/mouse_SP.jpg) &emsp; ![Italian](docs/mouse_IT.jpg)
 
 The emulator supports both USB and Atari ST compatible joysticks, supported a maximum of two joysticks at a time. Using the user interface
 you can select whether the USB joystick or Atari joystick are assigned to Joysticks 0 and 1.
@@ -29,7 +29,7 @@ The RP2040 USB host port is used to connect a keyboard, mouse and joysticks usin
 ## Building the emulator
 The emulator is configured as per the schematic below.
 
-![Schematic](schematic.png)
+![Schematic](docs/schematic.png)
 
 All of the external components except the level shifter are optional - you do not need to include the display and buttons if you are happy to hardcode mouse acceleration and joystick assignment settings in code. Also, if you only plan to use USB joysticks then you can omit the DB-9 connectors.
 
@@ -132,19 +132,19 @@ The user interface has 4 pages that are rotated between by pressing the middle U
 
 1. USB Status + Mouse speed. Left and right buttons change allow the mouse speed to be altered.
    
-   ![Mouse speed](mouse_EN.jpg)
+   ![Mouse speed](docs/mouse_EN.jpg)
 
 2. USB Status + Joystick 0 assignment. Left and right buttons toggle between USB joystick and DB-9 joystick.
    
-   ![Joystick 0](joy2_usb.jpg) &emsp; ![Joystick 0](joy0_dsub.jpg)
+   ![Joystick 0](docs/joy2_usb.jpg) &emsp; ![Joystick 0](docs/joy0_dsub.jpg)
 
 3. USB Status + Joystick 1 assignment. Left and right buttons toggle between USB joystick and DB-9 joystick.
    
-   ![Joystick 1](joy1_usb.jpg) &emsp; ![Joystick 0](joy1_dsub.jpg)
+   ![Joystick 1](docs/joy1_usb.jpg) &emsp; ![Joystick 0](docs/joy1_dsub.jpg)
 
 4. Serial data Tx/Rx between emulator and Atari. Data received from the Atari is on the left, data sent to the Atari is on the right.
    
-   ![Comms](comms.jpg)
+   ![Comms](docs/comms.jpg)
 
 The serial data page should only be used for ensuring the connection works. Displaying the page slows down the emulator and you may seem some mouse lag whilst it is active.
 
