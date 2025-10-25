@@ -21,7 +21,7 @@ echo "==========================================================================
 echo ""
 
 # Initialize git submodules if needed
-if [ ! -f "${SCRIPT_DIR}/pico-sdk/pico_sdk_init.cmake" ]; then
+if [ ! -d "${SCRIPT_DIR}/pico-sdk/.git" ]; then
     echo ">>> Initializing git submodules..."
     cd "${SCRIPT_DIR}"
     git submodule update --init --recursive
