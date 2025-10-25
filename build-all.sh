@@ -20,6 +20,14 @@ echo "  Language: ${LANGUAGE}"
 echo "================================================================================"
 echo ""
 
+# Initialize git submodules if needed
+if [ ! -f "${SCRIPT_DIR}/pico-sdk/pico_sdk_init.cmake" ]; then
+    echo ">>> Initializing git submodules..."
+    cd "${SCRIPT_DIR}"
+    git submodule update --init --recursive
+    echo ""
+fi
+
 # Apply patches
 echo ">>> Applying patches..."
 "${SCRIPT_DIR}/apply-patches.sh" || echo "Warning: Patch application returned non-zero"
