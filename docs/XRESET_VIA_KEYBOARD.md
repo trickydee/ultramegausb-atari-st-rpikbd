@@ -354,3 +354,5 @@ Track how many times reset has been triggered (useful for debugging).
 The HD6301 emulator resets exactly as if the XRESET pin was pulsed, giving you authentic behavior without any additional wiring!
 
 
+
+
