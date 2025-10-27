@@ -10,6 +10,7 @@
 | **Ctrl+F11** | XRESET | Triggers HD6301 hardware reset (shows "RESET" on OLED) |
 | **Ctrl+F10** | Toggle Joystick 1 | Switches Joystick 1 between D-SUB and USB |
 | **Ctrl+F9** | Toggle Joystick 0 | Switches Joystick 0 between D-SUB and USB |
+| **Ctrl+F8** | Restore Joystick Mode | Sends 0x14 to restore joystick event reporting (useful after reconnect) |
 
 ### Clock Speed Control
 
@@ -41,6 +42,26 @@
 - Includes debouncing to prevent accidental toggles
 
 **Use case:** Games that need joystick 0 instead of mouse
+
+---
+
+### Ctrl+F8 - Restore Joystick Mode
+
+**Purpose:** Send 0x14 (SET JOYSTICK EVENT REPORTING) to restore joystick functionality
+
+**What happens:**
+1. OLED shows "JOYSTICK MODE" and "Ctrl+F8" message
+2. Sends 0x14 command to HD6301 emulator
+3. Re-enables joystick event reporting mode
+4. Waits 500ms for visual confirmation
+
+**Use case:**
+- After reconnecting adapter during a game (adapter reset but game still running)
+- Game sent 0x14 at startup, but you missed it by reconnecting
+- Joysticks not working after reconnect - this restores the default mode
+- Alternative to restarting the game or doing full XRESET
+
+**Technical:** IKBD command 0x14 = "Enter JOYSTICK EVENT REPORTING mode (DEFAULT). Each opening or closure of a joystick switch or trigger causes a joystick event record to be generated."
 
 ---
 

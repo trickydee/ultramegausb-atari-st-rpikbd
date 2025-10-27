@@ -35,6 +35,9 @@ extern ssd1306_t disp;  // External reference to display
 // Mouse toggle key is set to Ctrl+F12
 #define TOGGLE_MOUSE_MODE 0x45  // F12 key (69 decimal)
 
+// Ctrl+F8 sends 0x14 (SET JOYSTICK EVENT REPORTING)
+#define RESTORE_JOYSTICK_KEY 0x41  // F8 key (65 decimal)
+
 // Ctrl+F11 triggers XRESET
 #define XRESET_KEY 0x44  // F11 key (68 decimal)
 
@@ -308,6 +311,37 @@ void HidInput::handle_keyboard() {
                 }
             } else {
                 last_minus_state = false;
+            }
+            
+            // Check for Ctrl+F8 to restore joystick event reporting (send 0x14)
+            static bool last_joy_restore_state = false;
+            bool f8_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == RESTORE_JOYSTICK_KEY) {
+                    f8_pressed = true;
+                    break;
+                }
+            }
+            
+            if (ctrl_pressed && f8_pressed) {
+                if (!last_joy_restore_state) {
+                    // Show visual feedback on OLED
+                    ssd1306_clear(&disp);
+                    ssd1306_draw_string(&disp, 15, 15, 2, (char*)"JOYSTICK");
+                    ssd1306_draw_string(&disp, 30, 35, 1, (char*)"MODE");
+                    ssd1306_draw_string(&disp, 15, 50, 1, (char*)"Ctrl+F8");
+                    ssd1306_show(&disp);
+                    
+                    // Send 0x14 (SET JOYSTICK EVENT REPORTING) to HD6301
+                    hd6301_receive_byte(0x14);
+                    
+                    // Small delay so user can see the message
+                    sleep_ms(500);
+                    
+                    last_joy_restore_state = true;
+                }
+            } else {
+                last_joy_restore_state = false;
             }
             
             // Check for Ctrl+F11 to trigger XRESET (HD6301 hardware reset)
