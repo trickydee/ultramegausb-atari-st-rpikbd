@@ -44,6 +44,7 @@ The emulator supports several keyboard shortcuts for convenient control:
 | **Ctrl+F11** | XRESET | Triggers HD6301 hardware reset (like power cycling the IKBD) |
 | **Ctrl+F10** | Toggle Joystick 1 | Switches Joystick 1 between D-SUB and USB |
 | **Ctrl+F9** | Toggle Joystick 0 | Switches Joystick 0 between D-SUB and USB |
+| **Ctrl+F8** | Restore Joystick Mode | Sends 0x14 to restore joystick event reporting (useful after reconnect) |
 | **Alt+/** | INSERT Key | Sends Atari ST INSERT key (useful for sending mouse click on Logitech Mac USB keyboards) |
 | **Alt+[** | Keypad /** | Sends Atari ST keypad divide key |
 | **Alt+]** | Keypad *** | Sends Atari ST keypad multiply key |
