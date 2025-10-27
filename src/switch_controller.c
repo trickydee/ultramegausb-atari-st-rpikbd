@@ -43,7 +43,7 @@ static bool pro_init_complete = false;
 // Track command success for debugging
 static uint8_t init_cmd_success = 0;  // Bitmask: bits 0-6 for each of 7 commands
 
-#define PRO_INIT_DELAY_MS 3000  // Wait 3 seconds after mount before initializing
+#define PRO_INIT_DELAY_MS 1000  // Wait 1 second after mount before initializing
 
 void switch_get_debug_values(uint16_t* buttons, uint8_t* dpad, int16_t* lx, int16_t* ly,
                               uint8_t* atari_dir, uint8_t* atari_fire) {
@@ -616,9 +616,9 @@ void switch_mount_cb(uint8_t dev_addr) {
     printf("Switch controller mount: %s (addr=%d, VID=0x%04X, PID=0x%04X)\n", 
            controller_name, dev_addr, vid, pid);
     
-    // Show on OLED
+    // Show on OLED (matching PS4/Xbox splash screen style)
     ssd1306_clear(&disp);
-    ssd1306_draw_string(&disp, 15, 10, 2, (char*)"SWITCH");
+    ssd1306_draw_string(&disp, 10, 10, 2, (char*)"SWITCH!");
     
     // Show controller type
     if (vid == POWERA_VENDOR_ID && pid == POWERA_FUSION_ARCADE) {
@@ -629,13 +629,13 @@ void switch_mount_cb(uint8_t dev_addr) {
         ssd1306_draw_string(&disp, 15, 35, 1, (char*)"Controller");
     }
     
-    // Show debug info: Address
+    // Show debug info: Address (matching PS4/Xbox format)
     char debug_line[20];
     snprintf(debug_line, sizeof(debug_line), "Addr:%d", dev_addr);
     ssd1306_draw_string(&disp, 25, 50, 1, debug_line);
     
     ssd1306_show(&disp);
-    // NOTE: Removed sleep_ms here - it blocks USB report processing!
+    sleep_ms(2000);  // Match PS4 timing for consistency
     
     // Allocate controller first
     switch_controller_t* ctrl = allocate_controller(dev_addr);

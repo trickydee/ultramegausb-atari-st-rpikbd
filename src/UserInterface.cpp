@@ -205,12 +205,12 @@ void UserInterface::update_pro_init() {
         sprintf(buf, "Reports: %lu", report_count);
         ssd1306_draw_string(&disp, 0, 39, 1, buf);
         
-        if (elapsed_ms >= 3000 && scheduled) {
+        if (elapsed_ms >= 1000 && scheduled) {
             ssd1306_draw_string(&disp, 0, 52, 1, (char*)"Should init!");
         } else if (!scheduled) {
             ssd1306_draw_string(&disp, 0, 52, 1, (char*)"Not scheduled?");
         } else {
-            sprintf(buf, "Wait %lu ms", 3000 - elapsed_ms);
+            sprintf(buf, "Wait %lu ms", 1000 - elapsed_ms);
             ssd1306_draw_string(&disp, 0, 52, 1, buf);
         }
     } else if (!init_complete) {
