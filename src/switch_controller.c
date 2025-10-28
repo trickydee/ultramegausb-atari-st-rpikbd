@@ -148,6 +148,7 @@ bool switch_is_controller(uint16_t vid, uint16_t pid) {
     if (vid == POWERA_VENDOR_ID) {
         switch (pid) {
             case POWERA_FUSION_ARCADE:
+            case POWERA_FUSION_ARCADE_V2:
             case POWERA_WIRED_PLUS:
             case POWERA_WIRELESS:
                 return true;
@@ -610,7 +611,7 @@ void switch_mount_cb(uint8_t dev_addr) {
         else if (pid == SWITCH_JOYCON_R) controller_name = "Joy-Con Right";
         else if (pid == SWITCH_JOYCON_PAIR) controller_name = "Joy-Con Pair";
     } else if (vid == POWERA_VENDOR_ID) {
-        if (pid == POWERA_FUSION_ARCADE) controller_name = "PowerA Fusion Arcade";
+        if (pid == POWERA_FUSION_ARCADE || pid == POWERA_FUSION_ARCADE_V2) controller_name = "PowerA Fusion Arcade";
         else controller_name = "PowerA Controller";
     }
     printf("Switch controller mount: %s (addr=%d, VID=0x%04X, PID=0x%04X)\n", 
@@ -621,7 +622,7 @@ void switch_mount_cb(uint8_t dev_addr) {
     ssd1306_draw_string(&disp, 10, 10, 2, (char*)"SWITCH!");
     
     // Show controller type
-    if (vid == POWERA_VENDOR_ID && pid == POWERA_FUSION_ARCADE) {
+    if (vid == POWERA_VENDOR_ID && (pid == POWERA_FUSION_ARCADE || pid == POWERA_FUSION_ARCADE_V2)) {
         ssd1306_draw_string(&disp, 5, 35, 1, (char*)"PowerA Arcade");
     } else if (vid == SWITCH_VENDOR_ID && pid == SWITCH_PRO_CONTROLLER) {
         ssd1306_draw_string(&disp, 10, 35, 1, (char*)"Pro Controller");
