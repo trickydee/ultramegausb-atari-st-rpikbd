@@ -31,7 +31,9 @@ Playstation Dualshock 4 Controllers
 
 Xbox Xinput - Xbox One, Xbox 360 Controllers
 
-Nintendo Switch Pro Controller (Version 1) - Beta
+Nintendo Switch Pro Controller (Version 1)
+
+PowerA Fusion Wireless Arcade Stick for Nintendo Switch
 
 
 ## Keyboard Shortcuts
@@ -180,7 +182,8 @@ The emulator supports multiple types of USB game controllers with reliable hot-s
 
 - **Xbox Controllers**: Xbox 360 (wired/wireless), Xbox One, Xbox Series X|S, Original Xbox
 - **PS4 DualShock 4**: Full support via USB (wired)
-- **Nintendo Switch Pro Controller**: Full support with analog stick precision and no drift (v7.5.0)
+- **Nintendo Switch Pro Controller**: Full support with analog stick precision and no drift
+- **PowerA Fusion Wireless Arcade Stick**: Full support for Nintendo Switch arcade sticks (v8.0.0)
 - **Generic HID Joysticks**: Standard USB joysticks and gamepads
 
 

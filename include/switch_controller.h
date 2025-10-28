@@ -38,6 +38,7 @@ extern "C" {
 
 // PowerA Product IDs
 #define POWERA_FUSION_ARCADE    0xA711  // Fusion Wireless Arcade Stick
+#define POWERA_FUSION_ARCADE_V2 0xA715  // Fusion Wireless Arcade Stick (newer version)
 #define POWERA_WIRED_PLUS       0xA712  // Wired Controller Plus (common)
 #define POWERA_WIRELESS         0xA713  // Wireless Controller (common)
 

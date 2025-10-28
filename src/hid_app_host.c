@@ -219,7 +219,7 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
   ssd1306_draw_string(&disp, 5, 25, 1, line1);
   
   char line2[20];
-  snprintf(line2, sizeof(line2), "VID:%04X", vid);
+  snprintf(line2, sizeof(line2), "VID:%04X PID:%04X", vid, pid);
   ssd1306_draw_string(&disp, 5, 40, 1, line2);
   
   char line3[20];
@@ -259,6 +259,24 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
   // Check for Nintendo Switch controllers BEFORE generic HID parsing
   // This prevents Switch controllers from being detected as mice/keyboards
   bool is_switch = switch_is_controller(vid, pid);
+  
+  printf("HID Device detected: VID=0x%04X, PID=0x%04X, Protocol=%d, is_switch=%d\n", 
+         vid, pid, protocol, is_switch);
+  
+  // Debug disabled - was used to verify PowerA detection
+  #if 0
+  if (vid == POWERA_VENDOR_ID) {
+    ssd1306_clear(&disp);
+    ssd1306_draw_string(&disp, 5, 0, 2, (char*)(is_switch ? "SWITCH!" : "NOT SW"));
+    char line[20];
+    snprintf(line, sizeof(line), "is_switch=%d", is_switch);
+    ssd1306_draw_string(&disp, 5, 35, 1, line);
+    snprintf(line, sizeof(line), "PID:%04X", pid);
+    ssd1306_draw_string(&disp, 5, 50, 1, line);
+    ssd1306_show(&disp);
+    sleep_ms(3000);
+  }
+  #endif
   
   if (is_switch) {
     printf("Nintendo Switch controller detected: VID=0x%04X, PID=0x%04X, Protocol=%d\n", 
