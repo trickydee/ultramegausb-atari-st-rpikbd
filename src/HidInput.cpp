@@ -28,6 +28,7 @@
 // xinput.h removed - using official xinput_host.h driver now
 #include "ps4_controller.h"
 #include "switch_controller.h"
+#include "stadia_controller.h"
 #include <map>
 
 extern ssd1306_t disp;  // External reference to display
@@ -786,6 +787,19 @@ bool HidInput::get_switch_joystick(int joystick_num, uint8_t& axis, uint8_t& but
     return false;
 }
 
+bool HidInput::get_stadia_joystick(int joystick_num, uint8_t& axis, uint8_t& button) {
+    // Get Stadia controller state
+    for (uint8_t dev_addr = 1; dev_addr < 8; dev_addr++) {
+        stadia_controller_t* stadia = stadia_get_controller(dev_addr);
+        if (stadia && stadia->connected) {
+            // Found a connected Stadia controller!
+            stadia_to_atari(stadia, joystick_num, &axis, &button);
+            return true;
+        }
+    }
+    return false;
+}
+
 void HidInput::handle_joystick() {
     // Find the joystick addresses
     std::vector<int> joystick_addr;
@@ -854,7 +868,13 @@ void HidInput::handle_joystick() {
                 g_switch_success++;  // Track Switch success
             }
             
-            // Fourth priority: Xbox controller (always check as final fallback)
+            // Fourth priority: Stadia controller
+            if (!got_input && get_stadia_joystick(joystick, axis, button)) {
+                got_input = true;
+                // Note: Stadia uses same success counter as generic HID
+            }
+            
+            // Fifth priority: Xbox controller (always check as final fallback)
             // FIX: This ensures Xbox is checked even if stale HID entries exist
             if (!got_input && get_xbox_joystick(joystick, axis, button)) {
                 got_input = true;

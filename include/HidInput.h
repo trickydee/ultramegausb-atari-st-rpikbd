@@ -60,6 +60,7 @@ private:
     bool get_xbox_joystick(int joystick_num, uint8_t& axis, uint8_t& button);
     bool get_ps4_joystick(int joystick_num, uint8_t& axis, uint8_t& button);
     bool get_switch_joystick(int joystick_num, uint8_t& axis, uint8_t& button);
+    bool get_stadia_joystick(int joystick_num, uint8_t& axis, uint8_t& button);
     
 private:
     int keyboard_handle = -1;

@@ -8,6 +8,7 @@
 // xinput.h removed - using official xinput_host.h driver now
 #include "ps4_controller.h"
 #include "switch_controller.h"
+#include "stadia_controller.h"
 #include "ssd1306.h"  // For OLED debug display
 #include <string.h>
 
@@ -256,6 +257,32 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
     return;
   }
   
+  // Check for Google Stadia Controller
+  bool is_stadia = stadia_is_controller(vid, pid);
+  
+  if (is_stadia) {
+    printf("Google Stadia controller detected: VID=0x%04X, PID=0x%04X\n", vid, pid);
+    
+    // Allocate device slot
+    hidh_device_t* dev = alloc_device(dev_addr, instance);
+    if (!dev) return;
+    
+    // Mark as Stadia joystick
+    dev->hid_type = HID_JOYSTICK;
+    dev->report_size = 64;  // Stadia reports vary
+    dev->has_report_info = false;  // We'll parse manually
+    
+    // Notify Stadia module
+    stadia_mount_cb(dev_addr);
+    
+    // Start receiving reports
+    tuh_hid_receive_report(dev_addr, instance);
+    
+    // Call mounted callback
+    tuh_hid_mounted_cb(dev_addr);
+    return;
+  }
+  
   // Check for Nintendo Switch controllers BEFORE generic HID parsing
   // This prevents Switch controllers from being detected as mice/keyboards
   bool is_switch = switch_is_controller(vid, pid);
@@ -465,13 +492,15 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance) {
   hidh_device_t* dev = find_device_by_inst(dev_addr, instance);
   if (!dev) return;
   
-  // FIX: Check if this is a PS4 or Switch controller and call unmount callback
+  // FIX: Check if this is a PS4, Switch, or Stadia controller and call unmount callback
   uint16_t vid, pid;
   tuh_vid_pid_get(dev_addr, &vid, &pid);
   if (ps4_is_dualshock4(vid, pid)) {
     ps4_unmount_cb(dev_addr);
   } else if (switch_is_controller(vid, pid)) {
     switch_unmount_cb(dev_addr);
+  } else if (stadia_is_controller(vid, pid)) {
+    stadia_unmount_cb(dev_addr);
   }
   
   // Clear report destination to prevent callbacks to freed memory
@@ -563,6 +592,16 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
   if (switch_is_controller(vid, pid)) {
     // This is a Switch controller report - pass to Switch handler
     switch_process_report(dev_addr, report, len);
+    
+    // Queue next report
+    tuh_hid_receive_report(dev_addr, instance);
+    return;
+  }
+  
+  // Google Stadia controllers
+  if (stadia_is_controller(vid, pid)) {
+    // This is a Stadia controller report - pass to Stadia handler
+    stadia_process_report(dev_addr, report, len);
     
     // Queue next report
     tuh_hid_receive_report(dev_addr, instance);
