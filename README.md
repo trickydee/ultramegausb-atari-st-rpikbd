@@ -35,6 +35,8 @@ Nintendo Switch Pro Controller (Version 1)
 
 PowerA Fusion Wireless Arcade Stick for Nintendo Switch
 
+Google Stadia Controller
+
 
 ## Keyboard Shortcuts
 
@@ -184,6 +186,7 @@ The emulator supports multiple types of USB game controllers with reliable hot-s
 - **PS4 DualShock 4**: Full support via USB (wired)
 - **Nintendo Switch Pro Controller**: Full support with analog stick precision and no drift
 - **PowerA Fusion Wireless Arcade Stick**: Full support for Nintendo Switch arcade sticks (v8.0.0)
+- **Google Stadia Controller**: Full support for Stadia controllers (v8.0.0)
 - **Generic HID Joysticks**: Standard USB joysticks and gamepads
 
 
