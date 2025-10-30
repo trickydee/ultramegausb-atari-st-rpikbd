@@ -195,3 +195,4 @@ Users can now simply flash the firmware and plug in their PowerA arcade stick - 
 
 The PowerA Fusion Wireless Arcade Stick is now **fully supported** in version 8.0.0! 🎉
 
+
