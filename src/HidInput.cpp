@@ -759,7 +759,7 @@ bool HidInput::get_usb_joystick(int addr, uint8_t& axis, uint8_t& button) {
                     if (rt > 0x10 || lt > 0x10) button = 1;
                     
                     // Debug: Show D-Pad byte and output
-                    #if 0
+                    #if ENABLE_STADIA_DEBUG
                     static uint32_t stadia_debug_count = 0;
                     if ((stadia_debug_count++ % 50) == 0) {
                         extern ssd1306_t disp;

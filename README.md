@@ -96,7 +96,15 @@ To compile the firmware you will need to checkout this repository, sync the incl
 Compiling on the mac requires xcode, gcc and arm embedded toolchain. A build can be performed with the following commands:
 
 ```bash
+# Production build (debug disabled)
 ./build-all.sh
+
+# Debug build (enable controller debug screens)
+DEBUG=1 ./build-all.sh
+
+# French interface
+LANGUAGE=FR ./build-all.sh
+
 # Outputs: dist/atari_ikbd_pico.uf2 and dist/atari_ikbd_pico2.uf2
 ```
 

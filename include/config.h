@@ -57,9 +57,17 @@
 #define DEFAULT_CPU_CLOCK_KHZ   270000
 
 // Debug features (set to 0 to disable for production)
-// Enables detailed Xbox/PS4/HID diagnostic counters on USB Debug page
-#define ENABLE_CONTROLLER_DEBUG 1
+// Can be overridden by CMake with -DENABLE_DEBUG=1
+#ifndef ENABLE_DEBUG
+  #define ENABLE_DEBUG 0
+#endif
 
-// Switch controller debug logging (set to 0 to disable verbose printf messages)
+// Enables detailed Xbox/PS4/HID diagnostic counters on USB Debug page
+#define ENABLE_CONTROLLER_DEBUG ENABLE_DEBUG
+
+// Switch controller debug logging (verbose printf messages)
 // Disabling this improves USB performance, especially for mouse responsiveness
-#define ENABLE_SWITCH_DEBUG 0
+#define ENABLE_SWITCH_DEBUG ENABLE_DEBUG
+
+// Stadia controller debug displays (OLED screens during detection)
+#define ENABLE_STADIA_DEBUG ENABLE_DEBUG
