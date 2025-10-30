@@ -77,6 +77,16 @@ else()
     set(LANG_SRC src/UserInterface_EN.cpp)
 endif()
 
+# Debug mode (0=production, 1=debug displays enabled)
+set(ENABLE_DEBUG "0" CACHE STRING "Enable debug displays (0 or 1)")
+if(ENABLE_DEBUG EQUAL "1")
+    add_definitions(-DENABLE_DEBUG=1)
+    message(STATUS "Debug mode: ENABLED")
+else()
+    add_definitions(-DENABLE_DEBUG=0)
+    message(STATUS "Debug mode: DISABLED (production)")
+endif()
+
 set(SOURCES
     src/main.cpp
     src/HD6301V1ST.cpp

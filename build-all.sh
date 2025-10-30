@@ -8,11 +8,13 @@ set -e  # Exit on error
 
 # Configuration
 LANGUAGE="${LANGUAGE:-EN}"
+DEBUG="${DEBUG:-0}"  # Set to 1 to enable debug displays
 
 echo "================================================================================"
 echo "  Atari ST USB Adapter - Dual Board Build"
 echo "  Version: 9.0.0"
 echo "  Language: ${LANGUAGE}"
+echo "  Debug Mode: ${DEBUG}"
 echo "================================================================================"
 echo ""
 
@@ -44,6 +46,7 @@ echo "    Configuring CMake for RP2040..."
 cmake -B ./build-pico -S . \
     -DPICO_BOARD=pico \
     -DLANGUAGE="${LANGUAGE}" \
+    -DENABLE_DEBUG="${DEBUG}" \
     > ./build-pico/cmake.log 2>&1
 
 if [ $? -ne 0 ]; then
@@ -82,6 +85,7 @@ echo "    Configuring CMake for RP2350..."
 cmake -B ./build-pico2 -S . \
     -DPICO_BOARD=pico2 \
     -DLANGUAGE="${LANGUAGE}" \
+    -DENABLE_DEBUG="${DEBUG}" \
     > ./build-pico2/cmake.log 2>&1
 
 if [ $? -ne 0 ]; then

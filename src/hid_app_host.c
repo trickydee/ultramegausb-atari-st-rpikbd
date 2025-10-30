@@ -268,7 +268,8 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
   if (is_stadia) {
     printf("Google Stadia controller detected: VID=0x%04X, PID=0x%04X\n", vid, pid);
     
-    // OLED debug: Show we detected Stadia
+    // Debug disabled for production - enable with ENABLE_STADIA_DEBUG
+    #if ENABLE_STADIA_DEBUG
     extern ssd1306_t disp;
     ssd1306_clear(&disp);
     ssd1306_draw_string(&disp, 5, 0, 1, (char*)"STADIA DETECTED");
@@ -279,6 +280,7 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
     ssd1306_draw_string(&disp, 5, 24, 1, line);
     ssd1306_show(&disp);
     sleep_ms(1500);
+    #endif
     
     // DON'T return - let it fall through to use HID parser below
     // This will parse the descriptor properly and get button info
@@ -469,7 +471,8 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
       if (is_stadia) {
         printf("Stadia: Calling tuh_hid_mounted_cb(dev_addr=%d)\n", dev_addr);
         
-        // OLED debug: Show we're calling callback
+        // Debug disabled for production - enable with ENABLE_STADIA_DEBUG
+        #if ENABLE_STADIA_DEBUG
         extern ssd1306_t disp;
         ssd1306_clear(&disp);
         ssd1306_draw_string(&disp, 5, 0, 1, (char*)"STADIA CALLBACK");
@@ -478,6 +481,7 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
         ssd1306_draw_string(&disp, 5, 15, 1, line);
         ssd1306_show(&disp);
         sleep_ms(1000);
+        #endif
         
         tuh_hid_mounted_cb(dev_addr);
       } else {
@@ -578,7 +582,9 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
     if (d) {
       d->hid_type = HID_JOYSTICK;
     }
-    // Minimal OLED hint for troubleshooting
+    
+    #if ENABLE_STADIA_DEBUG
+    // OLED hint for troubleshooting
     extern ssd1306_t disp;
     ssd1306_clear(&disp);
     ssd1306_draw_string(&disp, 0, 0, 1, (char*)"STADIA FIRST RPT");
@@ -587,6 +593,7 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
     ssd1306_draw_string(&disp, 0, 12, 1, line);
     ssd1306_show(&disp);
     sleep_ms(500);
+    #endif
 
     tuh_hid_mounted_cb(dev_addr);
     stadia_notified[dev_addr] = true;
