@@ -140,3 +140,4 @@ No configuration changes required - PowerA arcade sticks will work immediately u
 **Firmware Size:** RP2040: 321K | RP2350: 304K  
 **Branch:** switch-controller-compatability
 
+
