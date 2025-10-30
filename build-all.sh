@@ -11,7 +11,7 @@ LANGUAGE="${LANGUAGE:-EN}"
 
 echo "================================================================================"
 echo "  Atari ST USB Adapter - Dual Board Build"
-echo "  Version: 8.0.0"
+echo "  Version: 8.0.1"
 echo "  Language: ${LANGUAGE}"
 echo "================================================================================"
 echo ""

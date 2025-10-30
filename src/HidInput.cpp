@@ -169,6 +169,15 @@ void tuh_hid_mounted_cb(uint8_t dev_addr) {
         device[actual_addr] = new uint8_t[tuh_hid_get_report_size(actual_addr)];
         hid_app_request_report(actual_addr, device[actual_addr]);
         ++joy_count;
+        
+        // Check if this is a Stadia controller and show splash screen
+        uint16_t vid, pid;
+        tuh_vid_pid_get(actual_addr, &vid, &pid);
+        extern bool stadia_is_controller(uint16_t vid, uint16_t pid);
+        if (stadia_is_controller(vid, pid)) {
+            extern void stadia_mount_cb(uint8_t dev_addr);
+            stadia_mount_cb(actual_addr);
+        }
     }
     if (ui_) {
         // Total joysticks = HID joysticks + Xbox controllers
@@ -689,7 +698,54 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
 
 bool HidInput::get_usb_joystick(int addr, uint8_t& axis, uint8_t& button) {
 	const int DEAD_ZONE = 0x10; // Dead zone value, can be adjusted
-    
+    // Stadia fallback: If this is a Stadia controller, parse known 11-byte simple format
+    {
+        uint16_t vid = 0, pid = 0;
+        tuh_vid_pid_get(addr & 0x7F, &vid, &pid);
+        extern bool stadia_is_controller(uint16_t, uint16_t);
+        if (stadia_is_controller(vid, pid)) {
+            if (tuh_hid_is_mounted(addr) && !tuh_hid_is_busy(addr)) {
+                const uint8_t* js = device[addr];
+                // Expected: 11 bytes: [0-1 header/buttons?][2-3 buttons?][4-5 LX/LY][6-7 RX/RY][8 LT][9 RT][10 pad]
+                if (js) {
+                    // Reset outputs
+                    axis = 0;
+                    button = 0;
+                    
+                    // Try to find buttons - check all possible locations
+                    uint16_t button_word_01 = js[0] | (js[1] << 8);  // 0x0803 at rest
+                    uint16_t button_word_23 = js[2] | (js[3] << 8);  // 0x0000 at rest
+                    
+                    uint8_t lx = js[4];
+                    uint8_t ly = js[5];
+                    uint8_t lt = js[8];
+                    uint8_t rt = js[9];
+                    
+                    // Analog stick (D-Pad byte location unknown, stick works so use it)
+                    // Horizontal
+                    if (lx < 0x80 - DEAD_ZONE) axis |= 0x04; // Left
+                    else if (lx > 0x80 + DEAD_ZONE) axis |= 0x08; // Right
+                    // Vertical (note: up is smaller than 0x80)
+                    if (ly < 0x80 - DEAD_ZONE) axis |= 0x01; // Up
+                    else if (ly > 0x80 + DEAD_ZONE) axis |= 0x02; // Down
+                    
+                    // Fire: Try multiple sources
+                    // 1. Triggers (already working)
+                    if (rt > 0x10 || lt > 0x10) button = 1;
+                    // 2. Face buttons - try bytes 2-3 (most likely)
+                    if (button_word_23 != 0) button = 1;
+                    // 3. Face buttons - try bytes 0-1 (less likely, but test)
+                    // Mask out the constant 0x0803 and check if anything else is set
+                    if ((button_word_01 & ~0x0803) != 0) button = 1;
+                    
+                    // Queue next report
+                    hid_app_request_report(addr, device[addr]);
+                    return true;
+                }
+            }
+        }
+    }
+
     if (tuh_hid_is_mounted(addr) && !tuh_hid_is_busy(addr)) {
         const uint8_t* js = device[addr];
         HID_ReportInfo_t* info = tuh_hid_get_report_info(addr);
@@ -868,11 +924,8 @@ void HidInput::handle_joystick() {
                 g_switch_success++;  // Track Switch success
             }
             
-            // Fourth priority: Stadia controller
-            if (!got_input && get_stadia_joystick(joystick, axis, button)) {
-                got_input = true;
-                // Note: Stadia uses same success counter as generic HID
-            }
+            // Fourth priority: Stadia controller - NOW USES GENERIC HID PATH
+            // (Stadia is detected as standard HID joystick, handled above)
             
             // Fifth priority: Xbox controller (always check as final fallback)
             // FIX: This ensures Xbox is checked even if stale HID entries exist

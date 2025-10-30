@@ -39,6 +39,9 @@ static uint8_t debug_last_dev_addr = 0;
 static uint8_t debug_last_instance = 0;
 static uint8_t debug_active_devices = 0;
 
+// Track whether we've already notified the app layer for Stadia on first report
+static bool stadia_notified[CFG_TUSB_HOST_DEVICE_MAX] = {0};
+
 // Accessor functions for debug counters
 uint32_t hid_debug_get_mount_calls(void) { return debug_mount_calls; }
 uint32_t hid_debug_get_report_calls(void) { return debug_report_calls; }
@@ -258,29 +261,28 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
   }
   
   // Check for Google Stadia Controller
+  // Stadia uses STANDARD HID, so we'll let it fall through to HID parser
+  // We'll show splash screen AFTER device is allocated and parsed
   bool is_stadia = stadia_is_controller(vid, pid);
   
   if (is_stadia) {
     printf("Google Stadia controller detected: VID=0x%04X, PID=0x%04X\n", vid, pid);
     
-    // Allocate device slot
-    hidh_device_t* dev = alloc_device(dev_addr, instance);
-    if (!dev) return;
+    // OLED debug: Show we detected Stadia
+    extern ssd1306_t disp;
+    ssd1306_clear(&disp);
+    ssd1306_draw_string(&disp, 5, 0, 1, (char*)"STADIA DETECTED");
+    char line[20];
+    snprintf(line, sizeof(line), "Addr:%d Inst:%d", dev_addr, instance);
+    ssd1306_draw_string(&disp, 5, 12, 1, line);
+    snprintf(line, sizeof(line), "P:%d L:%d", protocol, desc_len);
+    ssd1306_draw_string(&disp, 5, 24, 1, line);
+    ssd1306_show(&disp);
+    sleep_ms(1500);
     
-    // Mark as Stadia joystick
-    dev->hid_type = HID_JOYSTICK;
-    dev->report_size = 64;  // Stadia reports vary
-    dev->has_report_info = false;  // We'll parse manually
-    
-    // Notify Stadia module
-    stadia_mount_cb(dev_addr);
-    
-    // Start receiving reports
-    tuh_hid_receive_report(dev_addr, instance);
-    
-    // Call mounted callback
-    tuh_hid_mounted_cb(dev_addr);
-    return;
+    // DON'T return - let it fall through to use HID parser below
+    // This will parse the descriptor properly and get button info
+    // Splash screen will be shown after successful parsing
   }
   
   // Check for Nintendo Switch controllers BEFORE generic HID parsing
@@ -396,77 +398,90 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
   // For other devices (joysticks, non-boot mice), try to parse descriptor
   else if (report_desc && desc_len > 0 && desc_len < 512) {
     filter_type = HID_UNDEFINED;
-    if (USB_ProcessHIDReport(report_desc, desc_len, &dev->report_info) == HID_PARSE_Successful) {
+    bool parse_success = (USB_ProcessHIDReport(report_desc, desc_len, &dev->report_info) == HID_PARSE_Successful);
+    
+    if (parse_success) {
       dev->has_report_info = true;
       dev->hid_type = filter_type;
       dev->report_size = 64;
+    } else {
+      // Parser failed - set defaults
+      dev->has_report_info = false;
+      dev->report_size = 64;
+    }
+    
+    // Debug: Show what we detected
+    const char* type_str = (filter_type == HID_MOUSE) ? "MOUSE" : 
+                           (filter_type == HID_JOYSTICK) ? "JOYSTICK" : 
+                           (filter_type == HID_KEYBOARD) ? "KEYBOARD" : "UNKNOWN";
+    printf("HID Parser detected: %s (dev_addr=%d, inst=%d, parse_success=%d)\n", 
+           type_str, dev_addr, instance, parse_success);
+    
+    // Stadia controller: Force to JOYSTICK (splash screen shown in C++ layer)
+    if (is_stadia) {
+      printf("Stadia: HID parser result = %s, forcing to JOYSTICK\n", type_str);
+      printf("Stadia: parse_success=%d, desc_len=%d, filter_type before=%d\n", 
+             parse_success, desc_len, filter_type);
+      dev->hid_type = HID_JOYSTICK;
+      filter_type = HID_JOYSTICK;
+      printf("Stadia: Set filter_type to JOYSTICK (%d)\n", filter_type);
+    }
+    
+    // Debug disabled for performance
+    #if 0
+    if (vid == 0x046D) {
+      extern ssd1306_t disp;
       
-      // Debug: Show what we detected
-      const char* type_str = (filter_type == HID_MOUSE) ? "MOUSE" : 
-                             (filter_type == HID_JOYSTICK) ? "JOYSTICK" : "UNKNOWN";
-      printf("HID Parser detected: %s (dev_addr=%d, inst=%d)\n", type_str, dev_addr, instance);
+      ssd1306_clear(&disp);
+      ssd1306_draw_string(&disp, 20, 10, 2, (char*)"PARSED");
       
-      // Debug disabled for performance
-      #if 0
-      if (vid == 0x046D) {
+      char type_line[20];
+      snprintf(type_line, sizeof(type_line), "Type: %s", type_str);
+      ssd1306_draw_string(&disp, 5, 35, 1, type_line);
+      
+      char items_line[20];
+      snprintf(items_line, sizeof(items_line), "Items: %d", dev->report_info.TotalReportItems);
+      ssd1306_draw_string(&disp, 5, 50, 1, items_line);
+      
+      ssd1306_show(&disp);
+      sleep_ms(2000);
+    }
+    #endif
+    
+    // Start receiving reports
+    tuh_hid_receive_report(dev_addr, instance);
+    
+    // Call mounted callback
+    // For keyboards, call normally
+    if (filter_type == HID_KEYBOARD) {
+      tuh_hid_mounted_cb(dev_addr);
+    }
+    // For mice on multi-interface devices, call with a special marker
+    // so C++ layer knows it's the mouse interface
+    else if (filter_type == HID_MOUSE) {
+      // Mark mouse with high bit set (128-255 range)
+      // This allows C++ layer to distinguish mouse from keyboard on same address
+      tuh_hid_mounted_cb(dev_addr | 0x80);
+    }
+    // For other device types (joysticks including Stadia), call mounted callback
+    else {
+      // For Stadia, always call (no interface check needed)
+      if (is_stadia) {
+        printf("Stadia: Calling tuh_hid_mounted_cb(dev_addr=%d)\n", dev_addr);
+        
+        // OLED debug: Show we're calling callback
         extern ssd1306_t disp;
-        
         ssd1306_clear(&disp);
-        ssd1306_draw_string(&disp, 20, 10, 2, (char*)"PARSED");
-        
-        char type_line[20];
-        snprintf(type_line, sizeof(type_line), "Type: %s", type_str);
-        ssd1306_draw_string(&disp, 5, 35, 1, type_line);
-        
-        char items_line[20];
-        snprintf(items_line, sizeof(items_line), "Items: %d", dev->report_info.TotalReportItems);
-        ssd1306_draw_string(&disp, 5, 50, 1, items_line);
-        
+        ssd1306_draw_string(&disp, 5, 0, 1, (char*)"STADIA CALLBACK");
+        char line[20];
+        snprintf(line, sizeof(line), "filter_type=%d", filter_type);
+        ssd1306_draw_string(&disp, 5, 15, 1, line);
         ssd1306_show(&disp);
-        sleep_ms(2000);
-      }
-      #endif
-      
-      // Start receiving reports
-      tuh_hid_receive_report(dev_addr, instance);
-      
-      // Debug disabled for performance
-      #if 0
-      if (vid == 0x046D) {
-        extern ssd1306_t disp;
-        ssd1306_clear(&disp);
-        ssd1306_draw_string(&disp, 10, 0, 1, (char*)"CALLING CB");
+        sleep_ms(1000);
         
-        char line1[20];
-        const char* ft = (filter_type == HID_MOUSE) ? "MOUSE" : 
-                         (filter_type == HID_KEYBOARD) ? "KEYBOARD" : "OTHER";
-        snprintf(line1, sizeof(line1), "Type: %s", ft);
-        ssd1306_draw_string(&disp, 5, 20, 1, line1);
-        
-        char line2[20];
-        uint8_t cb_addr = (filter_type == HID_MOUSE) ? (dev_addr | 0x80) : dev_addr;
-        snprintf(line2, sizeof(line2), "Addr: %d", cb_addr);
-        ssd1306_draw_string(&disp, 5, 35, 1, line2);
-        
-        ssd1306_show(&disp);
-        sleep_ms(2000);
-      }
-      #endif
-      
-      // Call mounted callback
-      // For keyboards, call normally
-      if (filter_type == HID_KEYBOARD) {
         tuh_hid_mounted_cb(dev_addr);
-      }
-      // For mice on multi-interface devices, call with a special marker
-      // so C++ layer knows it's the mouse interface
-      else if (filter_type == HID_MOUSE) {
-        // Mark mouse with high bit set (128-255 range)
-        // This allows C++ layer to distinguish mouse from keyboard on same address
-        tuh_hid_mounted_cb(dev_addr | 0x80);
-      }
-      // For other device types (joysticks), only call for first interface
-      else {
+      } else {
+        // For other joysticks, only call for first interface
         bool first_interface = true;
         for (int i = 0; i < CFG_TUSB_HOST_DEVICE_MAX; i++) {
           if (hid_devices[i].dev_addr == dev_addr && 
@@ -483,6 +498,17 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
       }
     }
   }
+  // If no descriptor or parsing completely failed, but it's Stadia, still register it
+  else if (is_stadia) {
+    printf("Stadia: No descriptor or parsing failed - fallback path\n");
+    printf("Stadia: report_desc=%p, desc_len=%d\n", report_desc, desc_len);
+    dev->hid_type = HID_JOYSTICK;
+    dev->report_size = 64;
+    tuh_hid_receive_report(dev_addr, instance);
+    // Splash screen shown in C++ layer (tuh_hid_mounted_cb)
+    printf("Stadia: Fallback - Calling tuh_hid_mounted_cb(dev_addr=%d)\n", dev_addr);
+    tuh_hid_mounted_cb(dev_addr);
+  }
 }
 
 // Invoked when device with HID interface is unmounted
@@ -492,15 +518,14 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance) {
   hidh_device_t* dev = find_device_by_inst(dev_addr, instance);
   if (!dev) return;
   
-  // FIX: Check if this is a PS4, Switch, or Stadia controller and call unmount callback
+  // FIX: Check if this is a PS4 or Switch controller and call unmount callback
+  // (Stadia now uses generic HID path, no special unmount needed)
   uint16_t vid, pid;
   tuh_vid_pid_get(dev_addr, &vid, &pid);
   if (ps4_is_dualshock4(vid, pid)) {
     ps4_unmount_cb(dev_addr);
   } else if (switch_is_controller(vid, pid)) {
     switch_unmount_cb(dev_addr);
-  } else if (stadia_is_controller(vid, pid)) {
-    stadia_unmount_cb(dev_addr);
   }
   
   // Clear report destination to prevent callbacks to freed memory
@@ -544,6 +569,28 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
   // Check if this is a game controller report
   uint16_t vid, pid;
   tuh_vid_pid_get(dev_addr, &vid, &pid);
+
+  // Stadia: If reports arrive before the normal mount flow triggers callback,
+  // ensure the application is notified immediately on first report.
+  if (stadia_is_controller(vid, pid) && !stadia_notified[dev_addr]) {
+    // Force classify as joystick for app layer and notify
+    hidh_device_t* d = find_device_by_inst(dev_addr, instance);
+    if (d) {
+      d->hid_type = HID_JOYSTICK;
+    }
+    // Minimal OLED hint for troubleshooting
+    extern ssd1306_t disp;
+    ssd1306_clear(&disp);
+    ssd1306_draw_string(&disp, 0, 0, 1, (char*)"STADIA FIRST RPT");
+    char line[20];
+    snprintf(line, sizeof(line), "A:%d I:%d L:%d", dev_addr, instance, len);
+    ssd1306_draw_string(&disp, 0, 12, 1, line);
+    ssd1306_show(&disp);
+    sleep_ms(500);
+
+    tuh_hid_mounted_cb(dev_addr);
+    stadia_notified[dev_addr] = true;
+  }
   
   // Debug disabled for performance
   #if 0
@@ -598,15 +645,8 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
     return;
   }
   
-  // Google Stadia controllers
-  if (stadia_is_controller(vid, pid)) {
-    // This is a Stadia controller report - pass to Stadia handler
-    stadia_process_report(dev_addr, report, len);
-    
-    // Queue next report
-    tuh_hid_receive_report(dev_addr, instance);
-    return;
-  }
+  // Google Stadia controllers - now using standard HID parsing
+  // Report processing removed - handled by generic HID path below
   
   // Xbox controllers now handled by official xinput_host driver
   // Reports go directly to tuh_xinput_report_received_cb()
