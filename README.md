@@ -228,3 +228,4 @@ To create this ultramegausb build I also relied on the following projects for in
 
 - **[tusb_xinput](https://github.com/Ryzee119/tusb_xinput)** by Ryzee119 - TinyUSB XInput host driver used for Xbox controller support
 - **[BetterJoy](https://github.com/Davidobot/BetterJoy)** by Davidobot - Reference implementation for Nintendo Switch Pro Controller USB initialization and protocol handling
+- **[stadia-vigem](https://github.com/walkco/stadia-vigem)** by walkco - Complete USB HID report format and button mapping for Google Stadia Controller support
