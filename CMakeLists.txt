@@ -102,6 +102,7 @@ set(SOURCES
     src/xinput_host.c  # Official tusb_xinput driver
     src/xinput_atari.cpp  # Xbox-to-Atari joystick mapper
     src/ps4_controller.c
+    src/ps3_controller.c
     src/switch_controller.c  # Nintendo Switch controller support
     src/stadia_controller.c  # Google Stadia controller support
     ssd1306/ssd1306.c

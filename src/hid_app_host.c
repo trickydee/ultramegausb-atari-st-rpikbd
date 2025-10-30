@@ -6,6 +6,7 @@
 #include "tusb.h"
 #include "hid_app_host.h"
 // xinput.h removed - using official xinput_host.h driver now
+#include "ps3_controller.h"
 #include "ps4_controller.h"
 #include "switch_controller.h"
 #include "stadia_controller.h"
@@ -233,6 +234,32 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
   ssd1306_show(&disp);
   sleep_ms(3000);
   #endif
+  
+  // Check for PS3 DualShock 3
+  bool is_ps3 = ps3_is_dualshock3(vid, pid);
+  
+  if (is_ps3) {
+    printf("PS3 DualShock 3 detected: VID=0x%04X, PID=0x%04X\n", vid, pid);
+    
+    // Allocate device slot
+    hidh_device_t* dev = alloc_device(dev_addr, instance);
+    if (!dev) return;
+    
+    // Mark as PS3 joystick
+    dev->hid_type = HID_JOYSTICK;
+    dev->report_size = 64;  // PS3 reports can be large
+    dev->has_report_info = false;  // We'll parse manually, not via HID parser
+    
+    // Notify PS3 module
+    ps3_mount_cb(dev_addr);
+    
+    // Start receiving reports
+    tuh_hid_receive_report(dev_addr, instance);
+    
+    // Call mounted callback
+    tuh_hid_mounted_cb(dev_addr);
+    return;
+  }
   
   // Check for PS4 DualShock 4
   bool is_ps4 = ps4_is_dualshock4(vid, pid);
@@ -526,7 +553,9 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance) {
   // (Stadia now uses generic HID path, no special unmount needed)
   uint16_t vid, pid;
   tuh_vid_pid_get(dev_addr, &vid, &pid);
-  if (ps4_is_dualshock4(vid, pid)) {
+  if (ps3_is_dualshock3(vid, pid)) {
+    ps3_unmount_cb(dev_addr);
+  } else if (ps4_is_dualshock4(vid, pid)) {
     ps4_unmount_cb(dev_addr);
   } else if (switch_is_controller(vid, pid)) {
     switch_unmount_cb(dev_addr);
@@ -632,6 +661,16 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
   }
   #endif
   
+  // PS3 DualShock 3
+  if (ps3_is_dualshock3(vid, pid)) {
+    // This is a PS3 controller report - pass to PS3 handler
+    ps3_process_report(dev_addr, report, len);
+    
+    // Queue next report
+    tuh_hid_receive_report(dev_addr, instance);
+    return;
+  }
+
   // PS4 DualShock 4
   if (ps4_is_dualshock4(vid, pid)) {
     // This is a PS4 controller report - pass to PS4 handler

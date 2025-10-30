@@ -8,11 +8,11 @@ set -e  # Exit on error
 
 # Configuration
 LANGUAGE="${LANGUAGE:-EN}"
-DEBUG="${DEBUG:-0}"  # Set to 1 to enable debug displays
+DEBUG="${DEBUG:-1}"  # Set to 1 to enable debug displays
 
 echo "================================================================================"
 echo "  Atari ST USB Adapter - Dual Board Build"
-echo "  Version: 9.0.0"
+echo "  Version: 9.1.0-dev (PS3 DualShock 3 Support)"
 echo "  Language: ${LANGUAGE}"
 echo "  Debug Mode: ${DEBUG}"
 echo "================================================================================"
