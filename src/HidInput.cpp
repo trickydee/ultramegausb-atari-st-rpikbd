@@ -712,31 +712,72 @@ bool HidInput::get_usb_joystick(int addr, uint8_t& axis, uint8_t& button) {
                     axis = 0;
                     button = 0;
                     
-                    // Try to find buttons - check all possible locations
-                    uint16_t button_word_01 = js[0] | (js[1] << 8);  // 0x0803 at rest
-                    uint16_t button_word_23 = js[2] | (js[3] << 8);  // 0x0000 at rest
+                    // Stadia report format (from stadia-vigem project):
+                    // Byte 0: 0x03 (header)
+                    // Byte 1: D-Pad hat switch (0-7)
+                    // Byte 2: System buttons (bit 7=RS, 6=Options, 5=Menu, 4=Stadia)
+                    // Byte 3: Face buttons (bit 6=A, 5=B, 4=X, 3=Y, 2=LB, 1=RB, 0=LS)
+                    // Bytes 4-5: Left stick X, Y
+                    // Bytes 6-7: Right stick X, Y
+                    // Bytes 8-9: Left/Right triggers
                     
+                    uint8_t dpad = js[1];  // D-Pad in byte 1!
                     uint8_t lx = js[4];
                     uint8_t ly = js[5];
                     uint8_t lt = js[8];
                     uint8_t rt = js[9];
                     
-                    // Analog stick (D-Pad byte location unknown, stick works so use it)
-                    // Horizontal
-                    if (lx < 0x80 - DEAD_ZONE) axis |= 0x04; // Left
-                    else if (lx > 0x80 + DEAD_ZONE) axis |= 0x08; // Right
-                    // Vertical (note: up is smaller than 0x80)
-                    if (ly < 0x80 - DEAD_ZONE) axis |= 0x01; // Up
-                    else if (ly > 0x80 + DEAD_ZONE) axis |= 0x02; // Down
+                    // D-Pad has priority (hat switch 0-7, 8/15 = center)
+                    bool dpad_active = false;
+                    if (dpad < 8) {
+                        dpad_active = true;
+                        switch(dpad) {
+                            case 0: axis |= 0x01; break; // Up
+                            case 1: axis |= 0x01 | 0x08; break; // Up-Right
+                            case 2: axis |= 0x08; break; // Right
+                            case 3: axis |= 0x02 | 0x08; break; // Down-Right
+                            case 4: axis |= 0x02; break; // Down
+                            case 5: axis |= 0x02 | 0x04; break; // Down-Left
+                            case 6: axis |= 0x04; break; // Left
+                            case 7: axis |= 0x01 | 0x04; break; // Up-Left
+                        }
+                    }
                     
-                    // Fire: Try multiple sources
-                    // 1. Triggers (already working)
+                    // If D-Pad not active, use analog stick
+                    if (!dpad_active) {
+                        if (lx < 0x80 - DEAD_ZONE) axis |= 0x04; // Left
+                        else if (lx > 0x80 + DEAD_ZONE) axis |= 0x08; // Right
+                        if (ly < 0x80 - DEAD_ZONE) axis |= 0x01; // Up
+                        else if (ly > 0x80 + DEAD_ZONE) axis |= 0x02; // Down
+                    }
+                    
+                    // Fire buttons (byte 3): A, B, X, Y, LB, RB, LS
+                    // Bit 6=A, 5=B, 4=X, 3=Y, 2=LB, 1=RB, 0=LS
+                    if (js[3] != 0) button = 1;
+                    
+                    // Also check triggers for fire
                     if (rt > 0x10 || lt > 0x10) button = 1;
-                    // 2. Face buttons - try bytes 2-3 (most likely)
-                    if (button_word_23 != 0) button = 1;
-                    // 3. Face buttons - try bytes 0-1 (less likely, but test)
-                    // Mask out the constant 0x0803 and check if anything else is set
-                    if ((button_word_01 & ~0x0803) != 0) button = 1;
+                    
+                    // Debug: Show D-Pad byte and output
+                    #if 0
+                    static uint32_t stadia_debug_count = 0;
+                    if ((stadia_debug_count++ % 50) == 0) {
+                        extern ssd1306_t disp;
+                        ssd1306_clear(&disp);
+                        char line[20];
+                        snprintf(line, sizeof(line), "DPad:%02X B3:%02X", dpad, js[3]);
+                        ssd1306_draw_string(&disp, 0, 0, 1, line);
+                        snprintf(line, sizeof(line), "LX%02X LY%02X", lx, ly);
+                        ssd1306_draw_string(&disp, 0, 13, 1, line);
+                        snprintf(line, sizeof(line), "LT%02X RT%02X", lt, rt);
+                        ssd1306_draw_string(&disp, 0, 26, 1, line);
+                        snprintf(line, sizeof(line), "act:%d", dpad_active);
+                        ssd1306_draw_string(&disp, 0, 39, 1, line);
+                        snprintf(line, sizeof(line), "Ax%02X Bt%d", axis, button);
+                        ssd1306_draw_string(&disp, 0, 52, 1, line);
+                        ssd1306_show(&disp);
+                    }
+                    #endif
                     
                     // Queue next report
                     hid_app_request_report(addr, device[addr]);

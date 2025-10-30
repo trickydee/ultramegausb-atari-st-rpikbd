@@ -226,26 +226,37 @@ void stadia_to_atari(const stadia_controller_t* stadia, uint8_t joystick_num,
 }
 
 void stadia_mount_cb(uint8_t dev_addr) {
-    printf("Stadia controller mount (addr=%d)\n", dev_addr);
+    printf("\n");
+    printf("═══════════════════════════════════════════════════════\n");
+    printf("  🎮 GOOGLE STADIA CONTROLLER DETECTED!\n");
+    printf("  Device Address: %d\n", dev_addr);
+    printf("  \n");
+    printf("  Button mapping:\n");
+    printf("  - Left Stick / D-Pad = Directions\n");
+    printf("  - A/B/X/Y Buttons = Fire\n");
+    printf("  - L/R Triggers = Fire\n");
+    printf("  \n");
+    printf("═══════════════════════════════════════════════════════\n");
+    printf("\n");
     
-    // Show on OLED (matching other controller splash screen style)
+    // Show on OLED (matching PS4/Xbox/Switch style)
     ssd1306_clear(&disp);
-    ssd1306_draw_string(&disp, 10, 10, 2, (char*)"STADIA!");
-    
-    // Show controller type
+    ssd1306_draw_string(&disp, 15, 10, 2, (char*)"STADIA");
     ssd1306_draw_string(&disp, 5, 35, 1, (char*)"Google Controller");
     
     // Show debug info: Address
     char debug_line[20];
     snprintf(debug_line, sizeof(debug_line), "Addr:%d", dev_addr);
-    ssd1306_draw_string(&disp, 25, 50, 1, debug_line);
+    ssd1306_draw_string(&disp, 35, 50, 1, debug_line);
     
     ssd1306_show(&disp);
     sleep_ms(2000);
     
     // Allocate controller
     stadia_controller_t* ctrl = allocate_controller(dev_addr);
-    if (!ctrl) {
+    if (ctrl) {
+        printf("Stadia: Controller registered and ready!\n");
+    } else {
         printf("Stadia: ERROR - Failed to allocate controller!\n");
     }
 }
