@@ -27,6 +27,7 @@
 #include "ssd1306.h"
 // xinput.h removed - using official xinput_host.h driver now
 #include "ps4_controller.h"
+#include "ps3_controller.h"
 #include "switch_controller.h"
 #include "stadia_controller.h"
 #include <map>
@@ -839,6 +840,20 @@ bool HidInput::get_usb_joystick(int addr, uint8_t& axis, uint8_t& button) {
     return false;
 }
 
+bool HidInput::get_ps3_joystick(int joystick_num, uint8_t& axis, uint8_t& button) {
+    // Get PS3 controller state
+    for (uint8_t dev_addr = 1; dev_addr < 8; dev_addr++) {
+        ps3_controller_t* ps3 = ps3_get_controller(dev_addr);
+        if (ps3 && ps3->connected) {
+            // Found a connected PS3 controller!
+            ps3_to_atari(ps3, joystick_num, &axis, &button);
+            return true;
+        }
+    }
+    return false;
+}
+
+
 bool HidInput::get_ps4_joystick(int joystick_num, uint8_t& axis, uint8_t& button) {
     // Get PS4 controller state
     for (uint8_t dev_addr = 1; dev_addr < 8; dev_addr++) {
@@ -957,6 +972,11 @@ void HidInput::handle_joystick() {
             if (!got_input && get_ps4_joystick(joystick, axis, button)) {
                 got_input = true;
                 g_ps4_success++;  // Track PS4 success
+            }
+            
+            // PS3 controller (check after PS4)
+            if (!got_input && get_ps3_joystick(joystick, axis, button)) {
+                got_input = true;
             }
             
             // Third priority: Switch controller
