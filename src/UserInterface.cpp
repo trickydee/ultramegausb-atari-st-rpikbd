@@ -387,7 +387,14 @@ void UserInterface::on_button_down(int i) {
     // Middle button changes page
     if (i == BUTTON_MIDDLE) {
         int pg = (int)page;
+#if ENABLE_CONTROLLER_DEBUG
+        // Debug mode: include Pro Init page
         pg = ((pg + 1) % (PAGE_PRO_INIT + 1));
+#else
+        // Production mode: skip Pro Init page
+        pg = ((pg + 1) % PAGE_USB_DEBUG);
+        if (pg == PAGE_USB_DEBUG) pg = PAGE_SPLASH; // Skip USB_DEBUG and PRO_INIT in production
+#endif
         page = (PAGE)pg;
         dirty = true;
     }
@@ -454,16 +461,20 @@ void UserInterface::update() {
             update_splash();
         }
         else if (page == PAGE_USB_DEBUG) {
+#if ENABLE_CONTROLLER_DEBUG
             update_usb_debug();
             ssd1306_show(&disp);
             // Keep refreshing debug page
             dirty = true;
+#endif
         }
         else if (page == PAGE_PRO_INIT) {
+#if ENABLE_CONTROLLER_DEBUG
             update_pro_init();
             ssd1306_show(&disp);
             // Keep refreshing to show latest status
             dirty = true;
+#endif
         }
         if (!dirty) {
             ssd1306_show(&disp);
