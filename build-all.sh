@@ -12,7 +12,7 @@ DEBUG="${DEBUG:-0}"  # Set to 1 to enable debug displays
 
 echo "================================================================================"
 echo "  Atari ST USB Adapter - Dual Board Build"
-echo "  Version: 9.1.0"
+echo "  Version: 10.0.0"
 echo "  Language: ${LANGUAGE}"
 echo "  Debug Mode: ${DEBUG}"
 echo "================================================================================"

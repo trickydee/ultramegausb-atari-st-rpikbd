@@ -1,0 +1,188 @@
+[  0%] Built target picotoolForceReconfigure
+[  1%] Creating directories for 'picotoolBuild'
+[  2%] No download step for 'picotoolBuild'
+[  3%] No update step for 'picotoolBuild'
+[  4%] No patch step for 'picotoolBuild'
+[  4%] Performing configure step for 'picotoolBuild'
+Not searching for unused variables given on the command line.
+-- The C compiler identification is AppleClang 17.0.0.17000013
+-- The CXX compiler identification is AppleClang 17.0.0.17000013
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Using the single-header code from /Users/rich/Documents/Code/Pico/Atari-Keyboard/7oct-test-2/atari-st-rpikb/build-pico2/_deps/picotool-src/lib/nlohmann_json/single_include/
+PICOTOOL_NO_LIBUSB is set - no USB support will be built
+-- Configuring done (0.5s)
+-- Generating done (0.1s)
+-- Build files have been written to: /Users/rich/Documents/Code/Pico/Atari-Keyboard/7oct-test-2/atari-st-rpikb/build-pico2/_deps/picotool-build
+[  5%] Performing build step for 'picotoolBuild'
+-- The C compiler identification is AppleClang 17.0.0.17000013
+-- The C compiler identification is AppleClang 17.0.0.17000013
+-- The CXX compiler identification is AppleClang 17.0.0.17000013
+-- The CXX compiler identification is AppleClang 17.0.0.17000013
+-- The ASM compiler identification is AppleClang
+-- Found assembler: /usr/bin/cc
+-- The ASM compiler identification is AppleClang
+-- Found assembler: /usr/bin/cc
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info
+[  2%] Built target errors
+-- Detecting C compiler ABI info - done
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+Using precompiled enc_bootloader.elf
+-- Configuring done (1.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/rich/Documents/Code/Pico/Atari-Keyboard/7oct-test-2/atari-st-rpikb/build-pico2/_deps/picotool-build/enc_bootloader
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+Using precompiled enc_bootloader.elf
+-- Configuring done (1.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/rich/Documents/Code/Pico/Atari-Keyboard/7oct-test-2/atari-st-rpikb/build-pico2/_deps/picotool-build/enc_bootloader_mbedtls
+[  9%] Built target enc_bootloader
+[ 16%] Built target enc_bootloader_mbedtls
+[ 18%] Built target elf
+[ 20%] Built target embedded_data_no_libusb
+[ 88%] Built target mbedtls
+[ 90%] Built target elf2uf2
+[ 92%] Built target bintool
+ld: warning: ignoring duplicate libraries: 'errors/liberrors.a'
+[100%] Built target picotool
+[  6%] Performing install step for 'picotoolBuild'
+[  2%] Built target errors
+[  4%] Built target elf
+[ 18%] Built target enc_bootloader_mbedtls
+[ 18%] Built target enc_bootloader
+[ 85%] Built target embedded_data_no_libusb
+[ 88%] Built target mbedtls
+[ 90%] Built target elf2uf2
+[ 92%] Built target bintool
+[100%] Built target picotool
+Install the project...
+-- Install configuration: "Release"
+[  7%] Performing test step for 'picotoolBuild'
+picotool v2.2.0 (Darwin, AppleClang-17.0.0.17000013, Release)
+
+This version of picotool was compiled without USB support. Some commands are not available.
+[  8%] Completed 'picotoolBuild'
+[  8%] Built target picotoolBuild
+[ 10%] Building ASM object pico-sdk/src/rp2350/boot_stage2/CMakeFiles/bs2_default.dir/compile_time_choice.S.o
+[ 11%] Linking ASM executable bs2_default.elf
+[ 11%] Built target bs2_default
+[ 12%] Generating bs2_default.bin
+[ 12%] Generating bs2_default_padded_checksummed.S
+[ 13%] Building ASM object pico-sdk/src/rp2350/boot_stage2/CMakeFiles/bs2_default_library.dir/bs2_default_padded_checksummed.S.o
+[ 13%] Built target bs2_default_library
+[ 14%] Building CXX object CMakeFiles/atari_ikbd.dir/src/main.cpp.o
+[ 14%] Building CXX object CMakeFiles/atari_ikbd.dir/src/AtariSTMouse.cpp.o
+[ 15%] Building CXX object CMakeFiles/atari_ikbd.dir/src/util.cpp.o
+[ 16%] Building CXX object CMakeFiles/atari_ikbd.dir/src/st_key_lookup_hid_gb.cpp.o
+[ 17%] Building CXX object CMakeFiles/atari_ikbd.dir/src/HD6301V1ST.cpp.o
+[ 18%] Building CXX object CMakeFiles/atari_ikbd.dir/src/SerialPort.cpp.o
+[ 20%] Building CXX object CMakeFiles/atari_ikbd.dir/src/HidInput.cpp.o
+[ 20%] Building CXX object CMakeFiles/atari_ikbd.dir/src/UserInterface.cpp.o
+[ 21%] Building CXX object CMakeFiles/atari_ikbd.dir/src/NVSettings.cpp.o
+[ 22%] Building CXX object CMakeFiles/atari_ikbd.dir/src/UserInterface_EN.cpp.o
+[ 23%] Building C object CMakeFiles/atari_ikbd.dir/src/hid_app_host.c.o
+[ 24%] Building C object CMakeFiles/atari_ikbd.dir/src/xinput_host.c.o
+[ 25%] Building CXX object CMakeFiles/atari_ikbd.dir/src/xinput_atari.cpp.o
+[ 26%] Building C object CMakeFiles/atari_ikbd.dir/src/ps4_controller.c.o
+[ 26%] Building C object CMakeFiles/atari_ikbd.dir/src/ps3_controller.c.o
+[ 27%] Building C object CMakeFiles/atari_ikbd.dir/src/switch_controller.c.o
+[ 28%] Building C object CMakeFiles/atari_ikbd.dir/src/stadia_controller.c.o
+[ 30%] Building C object CMakeFiles/atari_ikbd.dir/ssd1306/ssd1306.c.o
+[ 31%] Building C object CMakeFiles/atari_ikbd.dir/6301/6301.c.o
+[ 32%] Building C object CMakeFiles/atari_ikbd.dir/hidparser/HIDParser.c.o
+[ 33%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_stdlib/stdlib.c.o
+[ 33%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/hardware_gpio/gpio.c.o
+[ 34%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2350/pico_platform/platform.c.o
+[ 35%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_platform_common/common.c.o
+[ 36%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_platform_panic/panic.c.o
+[ 37%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/common/hardware_claim/claim.c.o
+[ 38%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/hardware_sync/sync.c.o
+[ 40%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/hardware_sync_spin_lock/sync_spin_lock.c.o
+[ 41%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/hardware_irq/irq.c.o
+[ 41%] Building ASM object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/hardware_irq/irq_handler_chain.S.o
+[ 42%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/common/pico_sync/lock_core.c.o
+[ 43%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/common/pico_sync/sem.c.o
+[ 44%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/common/pico_sync/mutex.c.o
+[ 45%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/common/pico_sync/critical_section.c.o
+[ 46%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/common/pico_time/time.c.o
+[ 47%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/common/pico_time/timeout_helper.c.o
+[ 47%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/hardware_timer/timer.c.o
+[ 48%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/common/pico_util/datetime.c.o
+[ 50%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/common/pico_util/pheap.c.o
+[ 51%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/common/pico_util/queue.c.o
+[ 52%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/hardware_uart/uart.c.o
+[ 53%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/hardware_clocks/clocks.c.o
+[ 54%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/hardware_pll/pll.c.o
+[ 54%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/hardware_vreg/vreg.c.o
+[ 55%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/hardware_watchdog/watchdog.c.o
+[ 56%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/hardware_ticks/ticks.c.o
+[ 57%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_bootrom/bootrom.c.o
+[ 58%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_bootrom/bootrom_lock.c.o
+[ 60%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/hardware_boot_lock/boot_lock.c.o
+[ 61%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_flash/flash.c.o
+[ 61%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/hardware_xosc/xosc.c.o
+[ 62%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/hardware_divider/divider.c.o
+[ 63%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_runtime/runtime.c.o
+[ 64%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_runtime_init/runtime_init.c.o
+[ 65%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_runtime_init/runtime_init_clocks.c.o
+[ 66%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_runtime_init/runtime_init_stack_guard.c.o
+[ 67%] Building ASM object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_bit_ops/bit_ops_aeabi.S.o
+[ 68%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_divider/divider_compiler.c.o
+[ 68%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_double/double_math.c.o
+[ 70%] Building ASM object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_double/double_aeabi_dcp.S.o
+[ 71%] Building ASM object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_double/double_fma_dcp.S.o
+[ 72%] Building ASM object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_double/double_sci_m33.S.o
+[ 73%] Building ASM object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_double/double_conv_m33.S.o
+[ 74%] Building ASM object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_float/float_conv32_vfp.S.o
+[ 75%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_float/float_math.c.o
+[ 75%] Building ASM object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_float/float_common_m33.S.o
+[ 76%] Building ASM object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_float/float_sci_m33_vfp.S.o
+[ 77%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_malloc/malloc.c.o
+[ 78%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_atomic/atomic.c.o
+[ 80%] Building CXX object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cxx_options/new_delete.cpp.o
+[ 81%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_standard_binary_info/standard_binary_info.c.o
+[ 82%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_printf/printf.c.o
+[ 82%] Building ASM object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_crt0/crt0.S.o
+[ 83%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_clib_interface/newlib_interface.c.o
+[ 84%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_stdio/stdio.c.o
+[ 85%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c.o
+[ 86%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_multicore/multicore.c.o
+[ 87%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/hardware_i2c/i2c.c.o
+[ 88%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/hardware_flash/flash.c.o
+[ 88%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/hardware_xip_cache/xip_cache.c.o
+[ 90%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/hcd_rp2040.c.o
+[ 91%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/rp2040_usb.c.o
+[ 92%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/tinyusb/src/host/usbh.c.o
+[ 93%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/tinyusb/src/host/hub.c.o
+[ 94%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/tinyusb/src/class/cdc/cdc_host.c.o
+[ 95%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/tinyusb/src/class/hid/hid_host.c.o
+[ 96%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/tinyusb/src/class/msc/msc_host.c.o
+[ 96%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/tinyusb/src/class/vendor/vendor_host.c.o
+[ 97%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/tinyusb/src/tusb.c.o
+[ 98%] Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/tinyusb/src/common/tusb_fifo.c.o
+[100%] Linking CXX executable atari_ikbd_pico2.elf
+[100%] Built target atari_ikbd

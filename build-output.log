@@ -1,0 +1,19 @@
+================================================================================
+  Atari ST USB Adapter - Dual Board Build
+  Version: 7.5.0
+  Language: EN
+================================================================================
+
+>>> Initializing git submodules...
+
+>>> Applying patches...
+Applying patches for build compatibility...
+Applying pioasm CMake fix...
+patching file 'tools/pioasm/CMakeLists.txt'
+1 out of 1 hunks failed--saving rejects to 'tools/pioasm/CMakeLists.txt.rej'
+Pioasm CMake fix applied successfully
+All patches applied successfully!
+
+>>> Building for Raspberry Pi Pico (RP2040)...
+
+    Configuring CMake for RP2040...
