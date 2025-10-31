@@ -7,6 +7,7 @@
 #include "hid_app_host.h"
 // xinput.h removed - using official xinput_host.h driver now
 #include "ps3_controller.h"
+#include "gamecube_adapter.h"
 #include "ps4_controller.h"
 #include "switch_controller.h"
 #include "stadia_controller.h"
@@ -235,6 +236,61 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
   sleep_ms(3000);
   #endif
   
+  // Check for GameCube USB Adapter
+  bool is_gamecube = gc_is_adapter(vid, pid);
+  
+  // DEBUG: Always show this check
+  printf("GC Check: VID=0x%04X, PID=0x%04X, is_gamecube=%d\n", vid, pid, is_gamecube);
+  
+  // Show on OLED for debugging (no console!) - ALWAYS SHOW, NOT BEHIND DEBUG FLAG
+  // Only show Nintendo VID devices to avoid spam from other devices
+  if (vid == 0x057E) {  // Nintendo VID
+    extern ssd1306_t disp;
+    ssd1306_clear(&disp);
+    ssd1306_draw_string(&disp, 0, 0, 1, (char*)"GC VID Check");
+    ssd1306_draw_string(&disp, 0, 10, 1, (char*)"v10.1.1");
+    char line[32];
+    snprintf(line, sizeof(line), "V:%04X P:%04X", vid, pid);
+    ssd1306_draw_string(&disp, 0, 24, 1, line);
+    snprintf(line, sizeof(line), "Match:%d Inst:%d", is_gamecube, instance);
+    ssd1306_draw_string(&disp, 0, 36, 1, line);
+    snprintf(line, sizeof(line), "Addr:%d Prot:%d", dev_addr, protocol);
+    ssd1306_draw_string(&disp, 0, 48, 1, line);
+    ssd1306_show(&disp);
+    sleep_ms(5000);  // Show for 5 seconds
+  }
+  
+  if (is_gamecube) {
+    printf("GameCube USB Adapter detected: VID=0x%04X, PID=0x%04X, Instance=%d\n", vid, pid, instance);
+    
+    // Allocate device slot
+    hidh_device_t* dev = alloc_device(dev_addr, instance);
+    if (!dev) return;
+    
+    // Mark as GameCube joystick
+    dev->hid_type = HID_JOYSTICK;
+    dev->report_size = 64;  // GameCube reports are 37 bytes
+    dev->has_report_info = false;  // We'll parse manually
+    
+    // Only show splash and send init on FIRST instance (instance 0)
+    // The adapter has 4 interfaces but they all share the same reports
+    if (instance == 0) {
+      // Notify GameCube module (shows splash, sends init)
+      gc_mount_cb(dev_addr);
+      
+      // Call mounted callback
+      tuh_hid_mounted_cb(dev_addr);
+    } else {
+      printf("GC: Additional interface %d registered (shares reports with instance 0)\n", instance);
+    }
+    
+    // Start receiving reports on THIS instance
+    tuh_hid_receive_report(dev_addr, instance);
+    
+    return;
+  }
+  
+
   // Check for PS3 DualShock 3
   bool is_ps3 = ps3_is_dualshock3(vid, pid);
   
@@ -553,7 +609,9 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance) {
   // (Stadia now uses generic HID path, no special unmount needed)
   uint16_t vid, pid;
   tuh_vid_pid_get(dev_addr, &vid, &pid);
-  if (ps3_is_dualshock3(vid, pid)) {
+  if (gc_is_adapter(vid, pid)) {
+    gc_unmount_cb(dev_addr);
+  } else if (ps3_is_dualshock3(vid, pid)) {
     ps3_unmount_cb(dev_addr);
   } else if (ps4_is_dualshock4(vid, pid)) {
     ps4_unmount_cb(dev_addr);
@@ -602,6 +660,35 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
   // Check if this is a game controller report
   uint16_t vid, pid;
   tuh_vid_pid_get(dev_addr, &vid, &pid);
+  
+  // DEBUG: Track GameCube adapter reports
+  static uint32_t gc_vid_count = 0;
+  if (vid == 0x057E && pid == 0x0337) {
+    gc_vid_count++;
+    
+    // Show on OLED immediately for first few reports
+    if (gc_vid_count <= 5 || (gc_vid_count % 50) == 1) {
+      extern ssd1306_t disp;
+      ssd1306_clear(&disp);
+      char line[32];
+      
+      ssd1306_draw_string(&disp, 0, 0, 1, (char*)"GC RPT CALLBACK!");
+      snprintf(line, sizeof(line), "#%lu L:%d", gc_vid_count, len);
+      ssd1306_draw_string(&disp, 0, 12, 1, line);
+      snprintf(line, sizeof(line), "A:%d I:%d", dev_addr, instance);
+      ssd1306_draw_string(&disp, 0, 24, 1, line);
+      
+      if (len >= 3) {
+        snprintf(line, sizeof(line), "B0-2:%02X %02X %02X", report[0], report[1], report[2]);
+        ssd1306_draw_string(&disp, 0, 36, 1, line);
+      }
+      
+      ssd1306_show(&disp);
+      if (gc_vid_count <= 3) sleep_ms(2000);  // Pause on first few
+    }
+    
+    printf("GC: Report in callback! #%lu addr=%d inst=%d len=%d\n", gc_vid_count, dev_addr, instance, len);
+  }
 
   // Stadia: If reports arrive before the normal mount flow triggers callback,
   // ensure the application is notified immediately on first report.
@@ -661,6 +748,24 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
   }
   #endif
   
+  // GameCube USB Adapter
+  if (gc_is_adapter(vid, pid)) {
+    // This is a GameCube adapter report - pass to GC handler
+    static uint32_t gc_callback_count = 0;
+    gc_callback_count++;
+    
+    if ((gc_callback_count % 100) == 1) {
+      printf("GC: Report callback #%lu, len=%d\n", gc_callback_count, len);
+    }
+    
+    gc_process_report(dev_addr, report, len);
+    
+    // Queue next report
+    tuh_hid_receive_report(dev_addr, instance);
+    return;
+  }
+
+
   // PS3 DualShock 3
   if (ps3_is_dualshock3(vid, pid)) {
     // This is a PS3 controller report - pass to PS3 handler

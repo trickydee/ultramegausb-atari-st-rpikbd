@@ -28,6 +28,7 @@
 // xinput.h removed - using official xinput_host.h driver now
 #include "ps4_controller.h"
 #include "ps3_controller.h"
+#include "gamecube_adapter.h"
 #include "switch_controller.h"
 #include "stadia_controller.h"
 #include <map>
@@ -853,6 +854,18 @@ bool HidInput::get_ps3_joystick(int joystick_num, uint8_t& axis, uint8_t& button
     return false;
 }
 
+bool HidInput::get_gamecube_joystick(int joystick_num, uint8_t& axis, uint8_t& button) {
+    // Get GameCube adapter state
+    for (uint8_t dev_addr = 1; dev_addr < 8; dev_addr++) {
+        gc_adapter_t* gc = gc_get_adapter(dev_addr);
+        if (gc && gc->connected && gc->active_port != 0xFF) {
+            // Found a connected GameCube controller!
+            gc_to_atari(gc, joystick_num, &axis, &button);
+            return true;
+        }
+    }
+    return false;
+}
 
 bool HidInput::get_ps4_joystick(int joystick_num, uint8_t& axis, uint8_t& button) {
     // Get PS4 controller state
@@ -976,6 +989,11 @@ void HidInput::handle_joystick() {
             
             // PS3 controller (check after PS4)
             if (!got_input && get_ps3_joystick(joystick, axis, button)) {
+            
+            // GameCube adapter (check after PS3)
+            if (!got_input && get_gamecube_joystick(joystick, axis, button)) {
+                got_input = true;
+            }
                 got_input = true;
             }
             
