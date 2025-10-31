@@ -27,7 +27,9 @@ Logitech Bolt Adapter - Keyboard, Mice, Trackball
 
 USB HID Joysticks
 
-Playstation Dualshock 4 Controllers
+PlayStation 3 DualShock 3 Controllers
+
+PlayStation 4 DualShock 4 Controllers
 
 Xbox Xinput - Xbox One, Xbox 360 Controllers
 

@@ -116,53 +116,68 @@ bool ps3_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len) {
 #endif
     }
     
-    // PS3 report parsing - THIS IS THE KEY PART WE NEED TO DEBUG
-    // Different PS3 controllers may have different report formats
-    // We'll need to examine the actual bytes to determine the format
+    // PS3 DualShock 3 report parsing
+    // Based on actual hardware testing
+    // Report format (48 bytes total):
+    // Byte 0: Report ID (0x01)
+    // Byte 1: Buttons (SELECT=0x01, L3=0x02, R3=0x04, START=0x08, etc)
+    // Byte 2: D-Pad (UP=0x10, RIGHT=0x20, DOWN=0x40, LEFT=0x80)
+    // Byte 3: Buttons (L2=0x01, R2=0x02, L1=0x04, R1=0x08, Triangle=0x10, Circle=0x20, X=0x40, Square=0x80)
+    // Bytes 6-9: Analog sticks (LX, LY, RX, RY) - 0x80 = center
+    // Bytes 18-19: Analog triggers (L2, R2) - 0x00 = released, 0xFF = fully pressed
     
-    // For now, implement a basic parser that we'll refine based on real data
-    if (len >= 6) {
-        // Try to extract analog sticks (typical positions in PS3 reports)
-        // This is a guess - we'll need to adjust based on actual data
-        
-        // Common PS3 USB report format (based on Linux driver):
-        // Byte 0: Report ID or first button byte
-        // Bytes 1-2: More buttons
-        // Bytes 6-9: Analog sticks (left X, left Y, right X, right Y)
-        
+    if (len >= 20) {
         uint8_t offset = 0;
         
-        // Check if first byte looks like report ID
+        // Check if first byte is report ID
         if (report[0] == 0x01) {
             offset = 1;
+            // Without offset: report[0] is report ID
+            // With offset=1: we skip it and read from report[1], report[2], etc.
+        } else {
+            // If no report ID, data starts at byte 0
+            offset = 0;
         }
         
-        // Try to find stick data
-        // PS3 sticks are typically at offset 6-9 (after buttons)
+        // Button bytes
+        ctrl->report.buttons[0] = report[offset + 0];  // SELECT, L3, R3, START
+        ctrl->report.buttons[1] = report[offset + 1];  // D-Pad
+        ctrl->report.buttons[2] = report[offset + 2];  // L2, R2, L1, R1, Triangle, Circle, X, Square
+        
+        // Analog sticks (bytes 6-9 in report, or 5-8 if offset=1)
+        // 0x00 = full left/up, 0x80 = center, 0xFF = full right/down
         if (len >= offset + 9) {
-            ctrl->report.lx = report[offset + 6];
-            ctrl->report.ly = report[offset + 7];
-            ctrl->report.rx = report[offset + 8];
-            ctrl->report.ry = report[offset + 9];
+            ctrl->report.lx = report[offset + 5];  // Left stick X
+            ctrl->report.ly = report[offset + 6];  // Left stick Y  
+            ctrl->report.rx = report[offset + 7];  // Right stick X
+            ctrl->report.ry = report[offset + 8];  // Right stick Y
         }
         
-        // D-Pad is usually in button byte as hat switch or individual bits
-        if (len >= offset + 2) {
-            ctrl->report.dpad = report[offset + 2] & 0x0F;  // Might be hat switch
+        // Analog triggers (bytes 18-19, or 17-18 if offset=1)
+        // 0x00 = released, 0xFF = fully pressed
+        if (len >= offset + 19) {
+            ctrl->report.l2_trigger = report[offset + 17];
+            ctrl->report.r2_trigger = report[offset + 18];
         }
         
-        // Store button bytes
-        if (len >= offset + 3) {
-            ctrl->report.buttons[0] = report[offset + 0];
-            ctrl->report.buttons[1] = report[offset + 1];
-            ctrl->report.buttons[2] = report[offset + 2];
-        }
+        // Extract D-Pad from byte 1 (bitmask format)
+        // UP=0x10, RIGHT=0x20, DOWN=0x40, LEFT=0x80
+        uint8_t dpad_byte = ctrl->report.buttons[1];
+        ctrl->report.dpad = 8;  // Default = centered
         
-        // Triggers (if present)
-        if (len >= offset + 20) {
-            // PS3 has pressure-sensitive buttons, triggers might be further in report
-            ctrl->report.l2_trigger = report[offset + 18];
-            ctrl->report.r2_trigger = report[offset + 19];
+        // Convert bitmask to hat switch format (0-7, 8=center)
+        if (dpad_byte & 0x10) {  // UP
+            if (dpad_byte & 0x20) ctrl->report.dpad = 1;      // UP-RIGHT
+            else if (dpad_byte & 0x80) ctrl->report.dpad = 7; // UP-LEFT  
+            else ctrl->report.dpad = 0;                       // UP
+        } else if (dpad_byte & 0x40) {  // DOWN
+            if (dpad_byte & 0x20) ctrl->report.dpad = 3;      // DOWN-RIGHT
+            else if (dpad_byte & 0x80) ctrl->report.dpad = 5; // DOWN-LEFT
+            else ctrl->report.dpad = 4;                       // DOWN
+        } else if (dpad_byte & 0x20) {  // RIGHT
+            ctrl->report.dpad = 2;
+        } else if (dpad_byte & 0x80) {  // LEFT
+            ctrl->report.dpad = 6;
         }
     }
     
@@ -212,7 +227,7 @@ void ps3_to_atari(const ps3_controller_t* ps3, uint8_t joystick_num,
     *fire = 0;
     
     // Convert analog stick to directions (left stick)
-    // PS3 sticks are 0-255 with 128 as center (like PS4)
+    // PS3 sticks are 0-255 with 128/0x80 as center
     int8_t stick_x = (int8_t)(input->lx - 128);
     int8_t stick_y = (int8_t)(input->ly - 128);
     
@@ -226,15 +241,29 @@ void ps3_to_atari(const ps3_controller_t* ps3, uint8_t joystick_num,
         if (stick_x > ps3->deadzone)  *direction |= 0x08;  // Right
     }
     
-    // D-Pad takes priority (if we can detect it)
-    // This will need adjustment based on actual report format
+    // D-Pad takes priority if pressed (converted to hat switch format 0-7, 8=center)
+    if (input->dpad != 8) {
+        *direction = 0;
+        switch (input->dpad) {
+            case 0: *direction = 0x01; break;  // UP
+            case 1: *direction = 0x09; break;  // UP-RIGHT
+            case 2: *direction = 0x08; break;  // RIGHT
+            case 3: *direction = 0x0A; break;  // DOWN-RIGHT
+            case 4: *direction = 0x02; break;  // DOWN
+            case 5: *direction = 0x06; break;  // DOWN-LEFT
+            case 6: *direction = 0x04; break;  // LEFT
+            case 7: *direction = 0x05; break;  // UP-LEFT
+        }
+    }
     
-    // Fire button - we'll need to figure out which button byte/bit
-    // For now, assume X button (most common fire button)
-    // This will need adjustment based on actual report format
+    // Fire button mapping
+    // buttons[2] contains: L2=0x01, R2=0x02, L1=0x04, R1=0x08, 
+    //                      Triangle=0x10, Circle=0x20, X=0x40, Square=0x80
     
-    // Placeholder - will be refined during testing
-    *fire = 0;
+    // Fire: X button (Cross) only
+    if (input->buttons[2] & 0x40) {
+        *fire = 1;
+    }
 }
 
 void ps3_set_deadzone(uint8_t dev_addr, int16_t deadzone) {
@@ -253,28 +282,46 @@ void ps3_mount_cb(uint8_t dev_addr) {
     printf("  🎮 PS3 DUALSHOCK 3 DETECTED!\n");
     printf("  Device Address: %d\n", dev_addr);
     printf("  \n");
-    printf("  PS3 controllers may require special initialization\n");
-    printf("  Debug mode active - will show report data\n");
+    printf("  Sending PS3 initialization command...\n");
     printf("  \n");
     printf("═══════════════════════════════════════════════════════\n");
     printf("\n");
     
-    // Show on OLED
+    // Show on OLED - match Xbox/PS4/Switch style
     ssd1306_clear(&disp);
     ssd1306_draw_string(&disp, 25, 10, 2, (char*)"PS3");
     ssd1306_draw_string(&disp, 10, 35, 1, (char*)"DualShock 3");
-    
-    // Show debug info: Address
-    char debug_line[20];
-    snprintf(debug_line, sizeof(debug_line), "Addr:%d", dev_addr);
-    ssd1306_draw_string(&disp, 25, 50, 1, debug_line);
-    
     ssd1306_show(&disp);
     sleep_ms(2000);
     
     ps3_controller_t* ctrl = allocate_controller(dev_addr);
     if (ctrl) {
-        printf("PS3: Controller registered and ready for testing!\n");
+        printf("PS3: Controller registered!\n");
+        
+        // PS3 DualShock 3 requires special initialization
+        // Send Feature Report 0xF4 to enable the controller
+        // This stops the 4 flashing lights and activates the controller
+        static const uint8_t ps3_init_report[] = {
+            0x42, 0x0C, 0x00, 0x00  // PS3 enable command
+        };
+        
+        printf("PS3: Sending initialization feature report (0xF4)...\n");
+        
+        // Send feature report to initialize controller
+        // Report ID 0xF4, data length 4 bytes
+        bool result = tuh_hid_set_report(dev_addr, 0, // instance 0
+                                          0xF4,        // report_id
+                                          HID_REPORT_TYPE_FEATURE,
+                                          (uint8_t*)ps3_init_report, 
+                                          sizeof(ps3_init_report));
+        
+        if (result) {
+            printf("PS3: Initialization sent successfully!\n");
+            printf("PS3: Controller should activate (lights stop flashing)\n");
+        } else {
+            printf("PS3: WARNING - Initialization send failed!\n");
+            printf("PS3: Controller may not work properly\n");
+        }
     }
 }
 
