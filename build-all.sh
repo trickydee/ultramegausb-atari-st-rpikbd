@@ -8,20 +8,23 @@ set -e  # Exit on error
 
 # Configuration
 LANGUAGE="${LANGUAGE:-EN}"
-DEBUG="${DEBUG:-0}"  # Set to 1 to enable debug displays
+DEBUG="${DEBUG:-1}"  # Set to 1 to enable debug displays
 
 echo "================================================================================"
 echo "  Atari ST USB Adapter - Dual Board Build"
-echo "  Version: 10.0.0"
+echo "  Version: 10.1.0-dev (GameCube USB Adapter Support)"
 echo "  Language: ${LANGUAGE}"
 echo "  Debug Mode: ${DEBUG}"
 echo "================================================================================"
 echo ""
 
-# Initialize git submodules if needed
-if [ ! -d "./pico-sdk/.git" ]; then
+# Initialize git submodules if needed (skip if pico-sdk exists)
+if [ ! -d "./pico-sdk/src" ]; then
     echo ">>> Initializing git submodules..."
-    git submodule update --init --recursive
+    git submodule update --init --recursive || echo "Warning: Submodule init had issues, continuing..."
+    echo ""
+else
+    echo ">>> Pico SDK found, skipping submodule init"
     echo ""
 fi
 
