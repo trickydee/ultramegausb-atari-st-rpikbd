@@ -7,6 +7,7 @@
 #include "hid_app_host.h"
 // xinput.h removed - using official xinput_host.h driver now
 #include "ps3_controller.h"
+#include "gamecube_adapter.h"
 #include "ps4_controller.h"
 #include "switch_controller.h"
 #include "stadia_controller.h"
@@ -235,6 +236,217 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
   sleep_ms(3000);
   #endif
   
+  // Check for GameCube USB Adapter
+  bool is_gamecube = gc_is_adapter(vid, pid);
+  
+  // DEBUG: Always show this check
+  printf("GC Check: VID=0x%04X, PID=0x%04X, is_gamecube=%d\n", vid, pid, is_gamecube);
+  
+  // Show on OLED for debugging (no console!) - ALWAYS SHOW, NOT BEHIND DEBUG FLAG
+  // Only show Nintendo VID devices to avoid spam from other devices
+  if (vid == 0x057E) {  // Nintendo VID
+    extern ssd1306_t disp;
+    ssd1306_clear(&disp);
+    ssd1306_draw_string(&disp, 0, 0, 1, (char*)"GC VID Check");
+    ssd1306_draw_string(&disp, 0, 10, 1, (char*)"v11.2.0");
+    char line[32];
+    snprintf(line, sizeof(line), "V:%04X P:%04X", vid, pid);
+    ssd1306_draw_string(&disp, 0, 24, 1, line);
+    snprintf(line, sizeof(line), "Match:%d Inst:%d", is_gamecube, instance);
+    ssd1306_draw_string(&disp, 0, 36, 1, line);
+    snprintf(line, sizeof(line), "Addr:%d Prot:%d", dev_addr, protocol);
+    ssd1306_draw_string(&disp, 0, 48, 1, line);
+    ssd1306_show(&disp);
+    sleep_ms(2000);  // Reduced to 2 seconds
+  }
+  
+  if (is_gamecube) {
+    printf("GameCube USB Adapter detected via HID: VID=0x%04X, PID=0x%04X, Instance=%d, Protocol=%d\n", 
+           vid, pid, instance, protocol);
+    
+    // v11.1.3: HID Hijacking approach - let HID claim it, we handle the non-standard protocol
+    // The adapter uses raw 37-byte reports with 0x21 signal byte
+    
+    extern ssd1306_t disp;
+    char dbg[32];
+    
+    // Show protocol info
+    ssd1306_clear(&disp);
+    ssd1306_draw_string(&disp, 0, 0, 1, (char*)"GC HID Mount");
+    snprintf(dbg, sizeof(dbg), "Inst:%d Prot:%d", instance, protocol);
+    ssd1306_draw_string(&disp, 0, 12, 1, dbg);
+    ssd1306_draw_string(&disp, 0, 24, 1, (char*)"Initializing...");
+    ssd1306_show(&disp);
+    sleep_ms(1500);
+    
+    // Allocate device slot
+    hidh_device_t* dev = alloc_device(dev_addr, instance);
+    if (!dev) {
+      printf("GC: ERROR - Cannot allocate device\n");
+      return;
+    }
+    
+    // Mark as GameCube joystick
+    dev->hid_type = HID_JOYSTICK;
+    dev->report_size = 64;  // Buffer size (reports are 37 bytes)
+    dev->has_report_info = false;  // We'll parse manually
+    
+    // Only show splash and send init on instance 0
+    if (instance == 0) {
+      // Show splash
+      ssd1306_clear(&disp);
+      ssd1306_draw_string(&disp, 10, 10, 2, (char*)"GCube");
+      ssd1306_draw_string(&disp, 5, 35, 1, (char*)"USB Adapter");
+      ssd1306_show(&disp);
+      sleep_ms(2000);
+      
+      // STEP 1: Control transfer for third-party adapter compatibility
+      // Windows driver shows this is required: bmRequestType=0x21, bRequest=11, wValue=1, wIndex=0
+      printf("GC: Sending control transfer (request 11, value 1)...\n");
+      tusb_control_request_t ctrl_req = {
+        .bmRequestType_bit = {
+          .recipient = TUSB_REQ_RCPT_INTERFACE,
+          .type = TUSB_REQ_TYPE_CLASS,
+          .direction = TUSB_DIR_OUT
+        },
+        .bRequest = 11,
+        .wValue = 1,
+        .wIndex = 0,
+        .wLength = 0
+      };
+      
+      uint8_t ctrl_result = XFER_RESULT_INVALID;
+      
+      tuh_xfer_t ctrl_xfer = {
+        .daddr = dev_addr,
+        .ep_addr = 0,
+        .setup = &ctrl_req,
+        .buffer = NULL,
+        .complete_cb = NULL,  // Synchronous - blocks until complete
+        .user_data = (uintptr_t)&ctrl_result
+      };
+      
+      bool ctrl_ok = tuh_control_xfer(&ctrl_xfer);
+      printf("GC: Control transfer queued: %d\n", ctrl_ok);
+      
+      // Small delay for control transfer to complete
+      sleep_ms(200);
+      printf("GC: Control transfer result: %d\n", ctrl_result);
+      
+      ssd1306_clear(&disp);
+      ssd1306_draw_string(&disp, 0, 0, 1, (char*)"CTRL XFER");
+      snprintf(dbg, sizeof(dbg), "Req:11 Val:1");
+      ssd1306_draw_string(&disp, 0, 12, 1, dbg);
+      snprintf(dbg, sizeof(dbg), "Result:%d", ctrl_result);
+      ssd1306_draw_string(&disp, 0, 24, 1, dbg);
+      ssd1306_show(&disp);
+      sleep_ms(1500);
+      
+      // STEP 2: Send 0x13 init command via interrupt OUT endpoint
+      // All reference drivers do this after control transfer
+      printf("GC: Sending 0x13 init to interrupt OUT endpoint...\n");
+      static const uint8_t gc_init = 0x13;
+      
+      // Use tuh_hid_send_report() to send to interrupt OUT endpoint 0x02
+      bool send_ok = tuh_hid_send_report(dev_addr, instance, 0, &gc_init, 1);
+      
+      if (send_ok) {
+        printf("GC: Init 0x13 queued to endpoint 0x02\n");
+      } else {
+        printf("GC: WARNING - Init 0x13 queue failed!\n");
+      }
+      
+      // Show status
+      ssd1306_clear(&disp);
+      ssd1306_draw_string(&disp, 0, 0, 1, (char*)"GC Init 0x13");
+      snprintf(dbg, sizeof(dbg), "Addr:%d Inst:%d", dev_addr, instance);
+      ssd1306_draw_string(&disp, 0, 12, 1, dbg);
+      ssd1306_draw_string(&disp, 0, 24, 1, (char*)"PC mode?");
+      ssd1306_draw_string(&disp, 0, 36, 1, (char*)"Ctrl plugged?");
+      ssd1306_draw_string(&disp, 0, 48, 1, (char*)"Waiting...");
+      ssd1306_show(&disp);
+      sleep_ms(3000);
+      
+      // Notify application layer
+      extern void gc_notify_mount(void);
+      gc_notify_mount();
+      
+      // Call mounted callback
+      tuh_hid_mounted_cb(dev_addr);
+    } else {
+      printf("GC: Additional interface %d registered\n", instance);
+      
+      // Send init to additional instances too (might be needed for PC mode)
+      printf("GC: Sending control transfer to instance %d...\n", instance);
+      tusb_control_request_t ctrl_req = {
+        .bmRequestType_bit = {
+          .recipient = TUSB_REQ_RCPT_INTERFACE,
+          .type = TUSB_REQ_TYPE_CLASS,
+          .direction = TUSB_DIR_OUT
+        },
+        .bRequest = 11,
+        .wValue = 1,
+        .wIndex = instance,  // Use instance number for wIndex
+        .wLength = 0
+      };
+      
+      uint8_t ctrl_result = XFER_RESULT_INVALID;
+      tuh_xfer_t ctrl_xfer = {
+        .daddr = dev_addr,
+        .ep_addr = 0,
+        .setup = &ctrl_req,
+        .buffer = NULL,
+        .complete_cb = NULL,
+        .user_data = (uintptr_t)&ctrl_result
+      };
+      
+      tuh_control_xfer(&ctrl_xfer);
+      sleep_ms(50);
+      
+      // Send 0x13 to this instance too
+      static const uint8_t gc_init = 0x13;
+      tuh_hid_send_report(dev_addr, instance, 0, &gc_init, 1);
+      
+      // Also notify for additional instances (causes joystick counter++)
+      extern void gc_notify_mount(void);
+      gc_notify_mount();
+    }
+    
+    // Start receiving reports
+    printf("GC: Calling tuh_hid_receive_report(addr=%d, inst=%d)...\n", dev_addr, instance);
+    
+    // Show we're starting report reception
+    ssd1306_clear(&disp);
+    ssd1306_draw_string(&disp, 0, 0, 2, (char*)"RCV START");
+    snprintf(dbg, sizeof(dbg), "A:%d I:%d", dev_addr, instance);
+    ssd1306_draw_string(&disp, 0, 20, 1, dbg);
+    ssd1306_draw_string(&disp, 0, 32, 1, (char*)"Queueing...");
+    ssd1306_show(&disp);
+    sleep_ms(1000);
+    
+    bool recv_ok = tuh_hid_receive_report(dev_addr, instance);
+    printf("GC: tuh_hid_receive_report result: %d\n", recv_ok);
+    
+    ssd1306_clear(&disp);
+    if (recv_ok) {
+      ssd1306_draw_string(&disp, 0, 0, 2, (char*)"RCV OK!");
+      ssd1306_draw_string(&disp, 0, 20, 1, (char*)"Queued");
+      ssd1306_draw_string(&disp, 0, 32, 1, (char*)"Waiting for");
+      ssd1306_draw_string(&disp, 0, 44, 1, (char*)"controller...");
+    } else {
+      ssd1306_draw_string(&disp, 0, 0, 2, (char*)"RCV FAIL!");
+      snprintf(dbg, sizeof(dbg), "A:%d I:%d", dev_addr, instance);
+      ssd1306_draw_string(&disp, 0, 20, 1, dbg);
+      ssd1306_draw_string(&disp, 0, 32, 1, (char*)"Can't start");
+      ssd1306_draw_string(&disp, 0, 44, 1, (char*)"reports!");
+    }
+    ssd1306_show(&disp);
+    sleep_ms(recv_ok ? 2000 : 5000);
+    
+    return;
+  }
+  
+
   // Check for PS3 DualShock 3
   bool is_ps3 = ps3_is_dualshock3(vid, pid);
   
@@ -553,7 +765,9 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance) {
   // (Stadia now uses generic HID path, no special unmount needed)
   uint16_t vid, pid;
   tuh_vid_pid_get(dev_addr, &vid, &pid);
-  if (ps3_is_dualshock3(vid, pid)) {
+  if (gc_is_adapter(vid, pid)) {
+    gc_unmount_cb(dev_addr);
+  } else if (ps3_is_dualshock3(vid, pid)) {
     ps3_unmount_cb(dev_addr);
   } else if (ps4_is_dualshock4(vid, pid)) {
     ps4_unmount_cb(dev_addr);
@@ -593,15 +807,36 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance) {
 void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report, uint16_t len) {
   debug_report_calls++;
   
+  // DEBUG: Minimal GameCube report tracking (disabled excessive screens)
+  uint16_t vid, pid;
+  tuh_vid_pid_get(dev_addr, &vid, &pid);
+  if (vid == 0x057E && pid == 0x0337) {
+    static uint32_t gc_raw_count = 0;
+    gc_raw_count++;
+    
+    // Only log to console, no OLED spam
+    if ((gc_raw_count % 100) == 1) {
+      printf("GC: Report #%lu addr=%d inst=%d len=%d\n", gc_raw_count, dev_addr, instance, len);
+    }
+  }
+  
   // Safety checks
   if (!report || len == 0 || len > 64) return;
   
   hidh_device_t* dev = find_device_by_inst(dev_addr, instance);
+  
   if (!dev || !dev->mounted) return;
   
-  // Check if this is a game controller report
-  uint16_t vid, pid;
-  tuh_vid_pid_get(dev_addr, &vid, &pid);
+  // DEBUG: Minimal GameCube report tracking (console only, no OLED spam)
+  static uint32_t gc_vid_count = 0;
+  if (vid == 0x057E && pid == 0x0337) {
+    gc_vid_count++;
+    
+    // Console logging only
+    if ((gc_vid_count % 100) == 1) {
+      printf("GC: Report callback #%lu addr=%d inst=%d len=%d\n", gc_vid_count, dev_addr, instance, len);
+    }
+  }
 
   // Stadia: If reports arrive before the normal mount flow triggers callback,
   // ensure the application is notified immediately on first report.
@@ -661,6 +896,24 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
   }
   #endif
   
+  // GameCube USB Adapter
+  if (gc_is_adapter(vid, pid)) {
+    // This is a GameCube adapter report - pass to GC handler
+    static uint32_t gc_callback_count = 0;
+    gc_callback_count++;
+    
+    if ((gc_callback_count % 100) == 1) {
+      printf("GC: Report callback #%lu, len=%d\n", gc_callback_count, len);
+    }
+    
+    gc_process_report(dev_addr, report, len);
+    
+    // Queue next report
+    tuh_hid_receive_report(dev_addr, instance);
+    return;
+  }
+
+
   // PS3 DualShock 3
   if (ps3_is_dualshock3(vid, pid)) {
     // This is a PS3 controller report - pass to PS3 handler

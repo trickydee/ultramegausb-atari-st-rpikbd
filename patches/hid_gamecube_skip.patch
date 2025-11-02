@@ -1,0 +1,23 @@
+--- a/lib/tinyusb/src/class/hid/hid_host.c
++++ b/lib/tinyusb/src/class/hid/hid_host.c
+@@ -475,6 +475,18 @@ bool hidh_open(uint8_t rhport, uint8_t daddr, tusb_desc_interface_t const* desc
+   (void) rhport;
+   (void) max_len;
+ 
++  // PATCH: Skip GameCube adapter (VID:057E PID:0337) - it's not a standard HID device
++  // It uses raw interrupt endpoints and will be handled by direct usbh code instead
++  uint16_t vid, pid;
++  tuh_vid_pid_get(daddr, &vid, &pid);
++  if (vid == 0x057E && pid == 0x0337) {
++    TU_LOG_DRV("[%u] Skipping GameCube adapter (handled by usbh)\r\n", daddr);
++    // Return 0 to indicate we're not claiming this device
++    // This allows usbh handler to take over
++    return 0;
++  }
++  // END PATCH
++
+   TU_VERIFY(TUSB_CLASS_HID == desc_itf->bInterfaceClass);
+   TU_LOG_DRV("[%u] HID opening Interface %u\r\n", daddr, desc_itf->bInterfaceNumber);
+
+
+

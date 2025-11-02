@@ -28,6 +28,7 @@
 // xinput.h removed - using official xinput_host.h driver now
 #include "ps4_controller.h"
 #include "ps3_controller.h"
+#include "gamecube_adapter.h"
 #include "switch_controller.h"
 #include "stadia_controller.h"
 #include <map>
@@ -100,6 +101,17 @@ void xinput_notify_ui_unmount() {
         // Total joysticks = HID joysticks + Xbox controllers
         ui_->usb_connect_state(kb_count, mouse_count, joy_count + xinput_joy_count);
     }
+}
+
+// GameCube adapter mount/unmount notifications (same pattern as Xbox)
+void gc_notify_mount() {
+    joy_count++;
+    xinput_notify_ui_mount();
+}
+
+void gc_notify_unmount() {
+    joy_count--;
+    xinput_notify_ui_unmount();
 }
 
 void tuh_hid_mounted_cb(uint8_t dev_addr) {
@@ -853,6 +865,41 @@ bool HidInput::get_ps3_joystick(int joystick_num, uint8_t& axis, uint8_t& button
     return false;
 }
 
+bool HidInput::get_gamecube_joystick(int joystick_num, uint8_t& axis, uint8_t& button) {
+    // Get GameCube adapter state via HID path (v11.2+: HID hijacking with fixed bit structure)
+    static uint32_t debug_count = 0;
+    debug_count++;
+    
+    for (uint8_t dev_addr = 1; dev_addr < 8; dev_addr++) {
+        gc_adapter_t* gc = gc_get_adapter(dev_addr);
+        
+        if (gc && gc->connected && gc->active_port != 0xFF) {
+            // Found a connected GameCube controller!
+            
+            // Debug first few calls
+            if (debug_count <= 3) {
+                printf("GC: get_gamecube_joystick() - FOUND adapter at addr=%d, port=%d\n", 
+                       dev_addr, gc->active_port);
+            }
+            
+            gc_to_atari(gc, joystick_num, &axis, &button);
+            
+            // Debug conversion result
+            if (debug_count <= 3) {
+                printf("GC: gc_to_atari() returned axis=0x%02X, button=%d\n", axis, button);
+            }
+            
+            return true;
+        }
+    }
+    
+    // Debug if not found
+    if (debug_count == 1) {
+        printf("GC: get_gamecube_joystick() - NO adapter found\n");
+    }
+    
+    return false;
+}
 
 bool HidInput::get_ps4_joystick(int joystick_num, uint8_t& axis, uint8_t& button) {
     // Get PS4 controller state
@@ -976,6 +1023,11 @@ void HidInput::handle_joystick() {
             
             // PS3 controller (check after PS4)
             if (!got_input && get_ps3_joystick(joystick, axis, button)) {
+                got_input = true;
+            }
+            
+            // GameCube adapter (check after PS3)
+            if (!got_input && get_gamecube_joystick(joystick, axis, button)) {
                 got_input = true;
             }
             
