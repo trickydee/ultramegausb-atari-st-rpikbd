@@ -72,11 +72,11 @@ extern "C" {
 //--------------------------------------------------------------------
 
 typedef struct {
-    // Status byte
-    uint8_t powered : 1;    // Controller is powered/connected
-    uint8_t : 1;
-    uint8_t type : 2;       // Controller type (normal, wavebird, etc)
-    uint8_t : 4;
+    // Status byte - CORRECTED based on Linux driver
+    // Bit layout: bits 4-5 contain type (0x10=normal, 0x20=wavebird)
+    uint8_t : 4;            // Lower nibble (bits 0-3) - reserved/extra power
+    uint8_t type : 2;       // Bits 4-5: Controller type (1=normal, 2=wavebird)
+    uint8_t : 2;            // Bits 6-7: reserved
     
     // Button bytes
     uint8_t buttons1;       // D-Pad + face buttons
@@ -136,11 +136,24 @@ bool gc_is_adapter(uint16_t vid, uint16_t pid);
 bool gc_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len);
 
 /**
- * Get GameCube adapter state
+ * Get GameCube adapter state (HID class version - deprecated)
  * @param dev_addr USB device address
  * @return Pointer to adapter state (NULL if not found)
  */
 gc_adapter_t* gc_get_adapter(uint8_t dev_addr);
+
+/**
+ * Get GameCube adapter state (Vendor class version - current)
+ * @param dev_addr USB device address
+ * @return Pointer to adapter state (NULL if not found)
+ */
+gc_adapter_t* gc_get_adapter_vendor(uint8_t dev_addr);
+
+/**
+ * Poll GameCube vendor transfers (call from main loop)
+ * Monitors callback status and provides diagnostics
+ */
+void gc_vendor_poll(void);
 
 /**
  * Convert GameCube input to Atari joystick format
@@ -158,6 +171,13 @@ void gc_to_atari(const gc_adapter_t* gc, uint8_t joystick_num,
  * @param deadzone Deadzone value (0-127, default 35)
  */
 void gc_set_deadzone(uint8_t dev_addr, int16_t deadzone);
+
+/**
+ * Send initialization command to a specific instance
+ * @param dev_addr USB device address
+ * @param instance USB interface instance
+ */
+void gc_send_init(uint8_t dev_addr, uint8_t instance);
 
 /**
  * Mount callback

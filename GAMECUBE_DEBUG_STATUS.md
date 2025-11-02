@@ -2,8 +2,8 @@
 
 **Date:** October 31, 2025  
 **Branch:** gamecube-controller-usb-adapter-support  
-**Current Version:** 10.1.1  
-**Status:** 🔍 DEBUGGING - Detection works, reports not arriving
+**Current Version:** 10.1.3  
+**Status:** 🔍 DEBUGGING - Better timing, clearer debug screens
 
 ---
 
@@ -138,22 +138,84 @@ Byte 8: R Trigger (analog 0-255)
 
 ---
 
-## 🎯 Next Steps to Debug
+## 🔬 Testing Results (v10.1.1)
 
-### Option A: Check if reports go to different instance
-The "PC button" might activate instance 2, which might not be detected as GameCube.
+User tested v10.1.1 and confirmed:
 
-**Test:** With v10.1.1, you should see "GC VID Check" for BOTH instances. If instance 2 shows Match:0, that's the problem.
+1. **Instance 0 detected correctly:**
+   - VID:057E PID:0337 Match:1 Inst:0 Addr:1 Prot:0 ✅
 
-### Option B: Reports might be going to generic HID path
-If instance 2 is being parsed as generic HID (mouse), we need to ensure ALL instances are caught.
+2. **Instance 2 detected correctly after PC button:**
+   - VID:057E PID:0337 Match:1 Inst:2 Addr:3 Prot:0 ✅
 
-**Solution:** May need to track GameCube by device address, not instance.
+3. **Both instances recognized as GameCube!** 
+   - This rules out VID/PID detection as the problem
+   
+4. **But reports still not reaching `gc_process_report()`**
+   - "GC RPT CALLBACK!" never appears
+   - Mouse counter increments (indicates reports going to wrong path)
 
-### Option C: Initialization might need to be on specific instance
-Maybe the init command needs to go to instance 2 instead of 0?
+### 🧩 Problem Analysis
 
-**Test:** Try sending init to all instances.
+The issue must be in the **report callback flow**:
+
+1. Reports arrive at `tuh_hid_report_received_cb()`
+2. Device lookup with `find_device_by_inst(dev_addr, instance)` happens
+3. If device not found OR not mounted → **returns early** before GameCube check
+4. This would explain why "GC RPT CALLBACK!" never shows
+
+**Hypothesis:** Instance 2 reports might be:
+- Coming from a device that isn't in the device table
+- Coming from a device that isn't marked as mounted
+- Being intercepted before reaching the callback
+
+## 🔬 Testing Results (v10.1.2)
+
+User tested v10.1.2:
+- ✅ Sees "GC VID Check" (2 seconds) 
+- ❌ Does NOT see "GC MOUNT PATH"
+- ✅ Sees "Waiting....." from gc_mount_cb()
+
+**Analysis:** The debug screens were being shown too briefly (1.5 seconds) and getting immediately overwritten by the next screen. The mount code IS running (since gc_mount_cb() is being called), but the debug screens are invisible.
+
+## 🎯 v10.1.3 Debug Improvements
+
+**Problem:** Debug screens in v10.1.2 were too brief and hard to see.
+
+**Solution:** Improved timing and visibility:
+
+### Screen Timing Changes:
+- "GC VID Check": 5s → **2s** (faster)
+- ">>> GC MOUNT": 1.5s → **3s** (slower, large font)
+- "GC Inst 2": 1.5s → **3s** (slower, clearer text)
+- "GC Ready!": New screen, **2s** (confirms setup complete)
+- "RPT ARRIVE!": 2s → **3s** (shows first **5** reports instead of 3)
+
+### Visual Improvements:
+- **Large font (size 2)** for main titles
+- **Clearer labels:** ">>> GC MOUNT", "GC Inst 2", "RPT ARRIVE!"
+- **Better status info:** Shows mount/type more clearly
+- **"Dev:NULL! <PROBLEM"** if device lookup fails (key diagnostic)
+
+### Expected Screen Sequence:
+
+**On initial plug-in:**
+1. "GC VID Check" + v10.1.3 + match info (2s)
+2. **">>> GC MOUNT"** + "Addr:1 Inst:0" (3s) ← Should be visible now!
+3. GameCube splash screen
+4. "GC Init Sent / Waiting..." (5s)
+5. **"GC Ready! Inst:0 setup OK"** (2s) ← New!
+
+**After PC button:**
+1. "GC VID Check" + match info (2s)
+2. **">>> GC MOUNT"** + "Addr:3 Inst:2" (3s)
+3. **"GC Inst 2 / No mount CB"** (3s) ← Should be clear!
+4. **"GC Ready! Inst:2 setup OK"** (2s)
+
+**When controller input happens:**
+- **"RPT ARRIVE!"** with device lookup status (3s, first 5 reports)
+
+This will definitively show whether the mount path is working and where report processing fails.
 
 ---
 
@@ -240,15 +302,48 @@ Current firmware (v10.1.1) has extensive debug:
 
 **Current firmware:**
 - Branch: `gamecube-controller-usb-adapter-support`
-- Version: 10.1.1
-- RP2040: 344KB
-- RP2350: 327KB
-- Debug: Enabled
-- Location: `dist/atari_ikbd_pico.uf2` and `dist/atari_ikbd_pico2.uf2`
+- Version: **10.1.3**
+- RP2040: 346KB
+- Debug: Enabled (better visibility, longer display times)
+- Location: `dist/atari_ikbd_pico.uf2`
 
 **Compiled successfully:** Yes ✅
 
 ---
 
-**Status:** Waiting for user to test v10.1.1 and report what mount events appear on OLED.
+## 🚀 Next Testing Steps (v10.1.3)
+
+**Flash the new firmware** and watch for the improved debug screens:
+
+### What You Should See:
+
+**1. Initial Plug-in Sequence:**
+   - "GC VID Check" with v10.1.3 (2s)
+   - **">>> GC MOUNT"** in large font (3s) ← Key screen!
+   - GameCube splash "GCube USB Adapter"
+   - "GC Init Sent / Waiting..." (5s)
+   - **"GC Ready! Inst:0 setup OK"** (2s) ← New confirmation!
+
+**2. After Pressing PC Button:**
+   - "GC VID Check" (2s)
+   - **">>> GC MOUNT"** Addr:3 Inst:2 (3s)
+   - **"GC Inst 2"** explaining no mount callback (3s)
+   - **"GC Ready! Inst:2 setup OK"** (2s)
+
+**3. When You Press Buttons or Move Sticks:**
+   - **"RPT ARRIVE!"** (KEY DEBUG - 3s each, first 5 reports)
+   - Will show either:
+     - `Dev:OK M:1 T:2` (device found, mounted, type=joystick) ✅
+     - `Dev:NULL! <PROBLEM` (device lookup failed) ❌
+
+### Critical Question:
+
+When you press buttons/move the stick, **do you see "RPT ARRIVE!" screens?**
+
+- **If YES** → Check if it says "Dev:OK" or "Dev:NULL"
+- **If NO** → Reports aren't arriving at all (different problem)
+
+---
+
+**Status:** v10.1.3 ready - Much better screen timing, should see all mount steps clearly.
 

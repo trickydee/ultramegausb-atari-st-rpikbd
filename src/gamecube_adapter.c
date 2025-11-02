@@ -143,11 +143,14 @@ bool gc_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len) {
            sizeof(gc_adapter_report_t) : len);
     
     // Find first active/powered port if we haven't yet
+    // Linux driver: type is in bits 4-5 (0x10=normal, 0x20=wavebird)
+    // If type != 0, controller is connected
     if (adapter->active_port == 0xFF) {
         for (uint8_t port = 0; port < 4; port++) {
-            if (adapter->report.port[port].powered && adapter->report.port[port].type != 0) {
+            // Check type bits (1=normal, 2=wavebird)
+            if (adapter->report.port[port].type != 0) {
                 adapter->active_port = port;
-                printf("GC: Controller detected on port %d!\n", port + 1);
+                printf("GC: Controller detected on port %d (type=%d)!\n", port + 1, adapter->report.port[port].type);
                 break;
             }
         }
@@ -183,10 +186,12 @@ bool gc_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len) {
             ssd1306_draw_string(&disp, 0, 0, 1, line);
             
             // Show all 4 port statuses
+            // Type: 0=none, 1=normal (0x10), 2=wavebird (0x20)
             for (uint8_t p = 0; p < 4; p++) {
-                snprintf(line, sizeof(line), "P%d: Pwr:%d Type:%d", 
+                uint8_t status_byte = *((uint8_t*)&adapter->report.port[p]);
+                snprintf(line, sizeof(line), "P%d: S:%02X T:%d", 
                          p + 1, 
-                         adapter->report.port[p].powered,
+                         status_byte,
                          adapter->report.port[p].type);
                 ssd1306_draw_string(&disp, 0, 12 + p * 10, 1, line);
             }
@@ -205,7 +210,13 @@ gc_adapter_t* gc_get_adapter(uint8_t dev_addr) {
 
 void gc_to_atari(const gc_adapter_t* gc, uint8_t joystick_num,
                  uint8_t* direction, uint8_t* fire) {
+    static uint32_t debug_count = 0;
+    debug_count++;
+    
     if (!gc || !direction || !fire) {
+        if (debug_count <= 2) {
+            printf("GC: gc_to_atari() NULL pointer! gc=%p dir=%p fire=%p\n", gc, direction, fire);
+        }
         return;
     }
     
@@ -214,14 +225,28 @@ void gc_to_atari(const gc_adapter_t* gc, uint8_t joystick_num,
     
     // Check if we have an active controller
     if (gc->active_port == 0xFF || gc->active_port >= 4) {
+        if (debug_count <= 2) {
+            printf("GC: gc_to_atari() no active port (active_port=%d)\n", gc->active_port);
+        }
         return;
     }
     
     const gc_controller_input_t* ctrl = &gc->report.port[gc->active_port];
     
     // Check if controller is still connected
-    if (!ctrl->powered || ctrl->type == 0) {
+    // Type: 0=disconnected, 1=normal (0x10), 2=wavebird (0x20)
+    if (ctrl->type == 0) {
+        if (debug_count <= 2) {
+            printf("GC: gc_to_atari() controller type=0 (disconnected)\n");
+        }
         return;
+    }
+    
+    // Debug input data
+    if (debug_count <= 3) {
+        printf("GC: gc_to_atari() port=%d type=%d stick_x=%02X stick_y=%02X btns=%02X %02X\n",
+               gc->active_port, ctrl->type, ctrl->stick_x, ctrl->stick_y, 
+               ctrl->buttons1, ctrl->buttons2);
     }
     
     // Convert analog stick to directions (main stick)
@@ -260,6 +285,13 @@ void gc_to_atari(const gc_adapter_t* gc, uint8_t joystick_num,
     else if (ctrl->buttons1 & GC_BTN_B) {
         *fire = 1;
     }
+    
+    // Debug output values
+    if (debug_count <= 3 || (*direction != 0) || (*fire != 0)) {
+        if (debug_count <= 5 || (debug_count % 50) == 0) {
+            printf("GC: OUTPUT → direction=0x%02X fire=%d\n", *direction, *fire);
+        }
+    }
 }
 
 void gc_set_deadzone(uint8_t dev_addr, int16_t deadzone) {
@@ -267,6 +299,31 @@ void gc_set_deadzone(uint8_t dev_addr, int16_t deadzone) {
     if (adapter) {
         adapter->deadzone = deadzone;
         printf("GC: Deadzone set to %d for adapter %d\n", deadzone, dev_addr);
+    }
+}
+
+// Send initialization command to a specific instance
+void gc_send_init(uint8_t dev_addr, uint8_t instance) {
+    printf("GC: Sending init to addr=%d, inst=%d\n", dev_addr, instance);
+    
+    // GameCube adapter initialization command
+    // Based on gc-x and Dolphin: send 0x13 to start adapter
+    // This is NOT the rumble command (rumble is 0x11)
+    static const uint8_t gc_init_command[] = {
+        0x13  // Enable adapter / start sending reports
+    };
+    
+    // Send as output report to activate the adapter
+    bool result = tuh_hid_set_report(dev_addr, instance,
+                                      0,            // report_id (0 for single byte)
+                                      HID_REPORT_TYPE_OUTPUT,
+                                      (uint8_t*)gc_init_command, 
+                                      sizeof(gc_init_command));
+    
+    if (result) {
+        printf("GC: Init 0x13 sent to instance %d OK\n", instance);
+    } else {
+        printf("GC: WARNING - Init 0x13 to instance %d failed!\n", instance);
     }
 }
 
@@ -296,29 +353,10 @@ void gc_mount_cb(uint8_t dev_addr) {
     gc_adapter_t* adapter = allocate_adapter(dev_addr);
     if (adapter) {
         printf("GC: Adapter registered!\n");
-        printf("GC: Sending initialization command...\n");
+        printf("GC: Sending initialization command to instance 0...\n");
         
-        // GameCube adapter requires initialization via rumble command
-        // Send command 0x11 followed by 4 bytes (rumble state for each port)
-        // This activates the adapter and makes it start sending reports
-        static const uint8_t gc_init_command[] = {
-            0x11, 0x00, 0x00, 0x00, 0x00  // Enable adapter, no rumble
-        };
-        
-        // Send as output report to activate the adapter
-        bool result = tuh_hid_set_report(dev_addr, 0,  // instance 0
-                                          0x11,         // report_id
-                                          HID_REPORT_TYPE_OUTPUT,
-                                          (uint8_t*)gc_init_command, 
-                                          sizeof(gc_init_command));
-        
-        if (result) {
-            printf("GC: Initialization sent successfully!\n");
-            printf("GC: Adapter should start sending reports\n");
-        } else {
-            printf("GC: WARNING - Initialization send failed!\n");
-            printf("GC: Adapter may not send reports\n");
-        }
+        // Send init to instance 0
+        gc_send_init(dev_addr, 0);
         
         printf("GC: Adapter address: %d\n", dev_addr);
         printf("GC: Waiting for first report...\n");

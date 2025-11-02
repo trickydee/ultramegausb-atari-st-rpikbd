@@ -33,6 +33,7 @@
 #include "AtariSTMouse.h"
 #include "UserInterface.h"
 #include "xinput_host.h"  // Official tusb_xinput driver
+#include "gamecube_adapter.h"  // GameCube adapter support
 
 // Forward declarations
 extern "C" {
