@@ -2,6 +2,10 @@
 ################################################################################
 # Build Script for Atari ST USB Adapter
 # Builds firmware for both Raspberry Pi Pico (RP2040) and Pico 2 (RP2350)
+#
+# IMPORTANT: Build directories (build-pico, build-pico2) should NEVER be
+#            committed to git. They are automatically generated and cleaned
+#            by this script. Make sure .gitignore includes them!
 ################################################################################
 
 set -e  # Exit on error
@@ -12,21 +16,50 @@ DEBUG="${DEBUG:-1}"  # Set to 1 to enable debug displays
 
 echo "================================================================================"
 echo "  Atari ST USB Adapter - Dual Board Build"
-echo "  Version: 10.1.0-dev (GameCube USB Adapter Support)"
+echo "  Version: 11.2.0 (GameCube USB Adapter support is now working)"
 echo "  Language: ${LANGUAGE}"
 echo "  Debug Mode: ${DEBUG}"
 echo "================================================================================"
 echo ""
 
-# Initialize git submodules if needed (skip if pico-sdk exists)
-if [ ! -d "./pico-sdk/src" ]; then
-    echo ">>> Initializing git submodules..."
-    git submodule update --init --recursive || echo "Warning: Submodule init had issues, continuing..."
-    echo ""
-else
-    echo ">>> Pico SDK found, skipping submodule init"
-    echo ""
+################################################################################
+# Initialize git submodules
+################################################################################
+
+echo ">>> Checking Pico SDK..."
+
+# Check if pico-sdk exists and has actual content
+PICO_SDK_OK=false
+if [ -d "./pico-sdk/src" ] && [ -f "./pico-sdk/pico_sdk_init.cmake" ]; then
+    # Check if it's actually populated (has more than just error files)
+    if [ -d "./pico-sdk/src/rp2_common" ]; then
+        PICO_SDK_OK=true
+        echo "    ✅ Pico SDK is properly initialized"
+    fi
 fi
+
+# If pico-sdk is missing or incomplete, reinitialize it
+if [ "$PICO_SDK_OK" = false ]; then
+    echo "    ⚠️  Pico SDK missing or incomplete - reinitializing..."
+    
+    # Clean up any partial/broken pico-sdk directory
+    if [ -d "./pico-sdk" ]; then
+        echo "    Removing incomplete pico-sdk directory..."
+        rm -rf ./pico-sdk
+    fi
+    
+    # Initialize submodules
+    echo "    Cloning Pico SDK and dependencies (this may take a minute)..."
+    if ! git submodule update --init --recursive; then
+        echo "ERROR: Failed to initialize git submodules!"
+        echo "Please check your internet connection and try again."
+        exit 1
+    fi
+    
+    echo "    ✅ Pico SDK initialized successfully"
+fi
+
+echo ""
 
 # Apply patches
 echo ">>> Applying patches..."

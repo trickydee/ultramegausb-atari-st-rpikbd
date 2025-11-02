@@ -1,2 +1,26 @@
+# Build directories
 **/build
-.DS_STore
+build-pico/
+build-pico2/
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+*.swp
+*.swo
+*~
+
+# Compiled files
+*.o
+*.d
+*.elf
+*.bin
+*.hex
+*.map
+*.dis
+
+# Patches
+*.rej
+*.orig
