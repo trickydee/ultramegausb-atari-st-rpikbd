@@ -39,6 +39,8 @@ PowerA Fusion Wireless Arcade Stick for Nintendo Switch
 
 Google Stadia Controller
 
+Nintendo Switch / Wii U GameCube Controller USB Adapter (v11.0.0)
+
 
 ## Keyboard Shortcuts
 
@@ -193,10 +195,12 @@ The real ST keyboard has a single DB-9 socket which is shared between the mouse 
 The emulator supports multiple types of USB game controllers with reliable hot-swapping:
 
 - **Xbox Controllers**: Xbox 360 (wired/wireless), Xbox One, Xbox Series X|S, Original Xbox
+- **PS3 DualShock 3**: Full support via USB (wired) (v10.0.0)
 - **PS4 DualShock 4**: Full support via USB (wired)
 - **Nintendo Switch Pro Controller**: Full support with analog stick precision and no drift
 - **PowerA Fusion Wireless Arcade Stick**: Full support for Nintendo Switch arcade sticks (v8.0.0)
 - **Google Stadia Controller**: Full support for Stadia controllers (v8.0.0)
+- **Nintendo Switch / Wii U GameCube Adapter**: Full support for official Nintendo GameCube controller USB adapter (v11.0.0)
 - **Generic HID Joysticks**: Standard USB joysticks and gamepads
 
 
@@ -231,3 +235,5 @@ To create this ultramegausb build I also relied on the following projects for in
 - **[tusb_xinput](https://github.com/Ryzee119/tusb_xinput)** by Ryzee119 - TinyUSB XInput host driver used for Xbox controller support
 - **[BetterJoy](https://github.com/Davidobot/BetterJoy)** by Davidobot - Reference implementation for Nintendo Switch Pro Controller USB initialization and protocol handling
 - **[stadia-vigem](https://github.com/walkco/stadia-vigem)** by walkco - Complete USB HID report format and button mapping for Google Stadia Controller support
+- **[wii-u-gc-adapter](https://github.com/ToadKing/wii-u-gc-adapter)** by ToadKing - Linux driver for Wii U GameCube adapter, reference for USB protocol and report format
+- **[osx-wiiu-gcc-adapter](https://github.com/area/osx-wiiu-gcc-adapter)** by area - macOS userspace driver for GameCube adapter using async interrupts
