@@ -104,8 +104,9 @@ set(SOURCES
     src/ps4_controller.c
     src/ps3_controller.c
     src/gamecube_adapter.c
-    src/switch_controller.c  # Nintendo Switch controller support
-    src/stadia_controller.c  # Google Stadia controller support
+    # src/gamecube_vendor.c  # v11.1+: Disabled, using HID hijacking approach instead
+    src/switch_controller.c
+    src/stadia_controller.c
     ssd1306/ssd1306.c
     6301/6301.c
     hidparser/HIDParser.c

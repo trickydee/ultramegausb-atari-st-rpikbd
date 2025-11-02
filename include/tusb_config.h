@@ -62,6 +62,7 @@ extern "C" {
 #define CFG_TUH_HID                 8  // Number of HID interfaces (increased for multi-interface devices)
 #define CFG_TUH_MSC                 0
 #define CFG_TUH_CDC                 0
+// #define CFG_TUH_VENDOR              1  // Disabled - causes build errors with this TinyUSB version
 #define CFG_TUH_XINPUT              2  // Number of XInput controllers (Xbox)
 
 #define CFG_TUSB_HOST_DEVICE_MAX    (CFG_TUH_HUB ? 8 : 1) // Increased for multi-interface devices like Logitech Unifying
