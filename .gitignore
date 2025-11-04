@@ -2,6 +2,7 @@
 **/build
 build-pico/
 build-pico2/
+dist/
 
 # macOS
 .DS_Store

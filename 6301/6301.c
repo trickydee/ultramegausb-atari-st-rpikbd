@@ -135,8 +135,12 @@ hd6301_reset(int Cold) {
     mouse_y_counter=_rotl(mouse_y_counter,rnd);
     //TRACE("Mouse mask %X\n",mouse_x_counter); // 333... 666 999 CCC
   }
-  iram[TRCSR]=0x20;
+  // Clear serial state to prevent stale data from previous run
+  iram[TRCSR]=0x20;  // TDRE=1 (transmit ready), all flags clear
+  iram[RDR]=0x00;     // Clear receive data register
+  iram[TDR]=0x00;     // Clear transmit data register
   mem_putw (OCR, 0xFFFF);
+  TRACE("6301: Serial registers cleared (TRCSR=0x20, RDR=0x00, TDR=0x00)\n");
 }
 
 void hd6301_trigger_reset() {

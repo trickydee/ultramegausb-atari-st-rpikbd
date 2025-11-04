@@ -56,6 +56,13 @@ void SerialPort::open() {
     // Enable UART FIFO to buffer incoming bytes and prevent data loss
     // The RP2040 UART has 32-byte FIFOs which help with timing tolerance
     uart_set_fifo_enabled(UART_ID, true);
+    
+    // Set RX FIFO watermark to trigger earlier (1/8 full = 4 bytes)
+    // This gives us more time to read bytes before FIFO fills up
+    // Default is 1/2 (16 bytes) - we use 1/8 for ultra-low latency
+    hw_write_masked(&uart_get_hw(UART_ID)->ifls,
+                    0 << UART_UARTIFLS_RXIFLSEL_LSB,  // 1/8 full (4 bytes)
+                    UART_UARTIFLS_RXIFLSEL_BITS);
 }
 
 void SerialPort::set_ui(UserInterface& ui) {
@@ -74,7 +81,23 @@ void SerialPort::send(const unsigned char data) {
 
 bool SerialPort::recv(unsigned char& data) const {
     if (uart_is_readable(UART_ID)) {
-        data = uart_getc(UART_ID);
+        // Read data register which includes error flags
+        uint32_t dr = uart_get_hw(UART_ID)->dr;
+        
+        // Check for UART hardware errors
+        if (dr & (UART_UARTDR_OE_BITS | UART_UARTDR_BE_BITS | UART_UARTDR_PE_BITS | UART_UARTDR_FE_BITS)) {
+            static int hw_error_count = 0;
+            if ((++hw_error_count % 100) == 1) {
+                printf("UART HW ERROR: ");
+                if (dr & UART_UARTDR_OE_BITS) printf("OVERRUN ");
+                if (dr & UART_UARTDR_BE_BITS) printf("BREAK ");
+                if (dr & UART_UARTDR_PE_BITS) printf("PARITY ");
+                if (dr & UART_UARTDR_FE_BITS) printf("FRAMING ");
+                printf("(count: %d)\n", hw_error_count);
+            }
+        }
+        
+        data = dr & 0xFF;  // Extract actual data byte
         if (ui) {
             ui->serial(false, data);
         }

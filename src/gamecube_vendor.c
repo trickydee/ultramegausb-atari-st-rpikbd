@@ -335,12 +335,14 @@ void tuh_mount_cb(uint8_t dev_addr) {
         return;
     }
     
-    // Show splash screen
+#if ENABLE_CONTROLLER_DEBUG
+    // Show splash screen (debug mode only)
     ssd1306_clear(&disp);
     ssd1306_draw_string(&disp, 10, 10, 2, (char*)"GCube");
     ssd1306_draw_string(&disp, 5, 35, 1, (char*)"USB Adapter");
     ssd1306_show(&disp);
     sleep_ms(2000);
+#endif
     
     // Send initialization command 0x13
     printf("GC: Sending init 0x13...\n");
@@ -361,7 +363,8 @@ void tuh_mount_cb(uint8_t dev_addr) {
         printf("GC: WARNING - Init transfer queue failed!\n");
     }
     
-    // Show waiting screen
+#if ENABLE_CONTROLLER_DEBUG
+    // Show waiting screen (debug mode only)
     ssd1306_clear(&disp);
     ssd1306_draw_string(&disp, 0, 0, 1, (char*)"GC Init Sent");
     snprintf(line, sizeof(line), "Addr:%d", dev_addr);
@@ -371,14 +374,17 @@ void tuh_mount_cb(uint8_t dev_addr) {
     ssd1306_draw_string(&disp, 0, 48, 1, (char*)"Listening...");
     ssd1306_show(&disp);
     sleep_ms(2000);  // Reduced to 2 seconds
+#endif
     
-    // CHECKPOINT: Show we're continuing past "Listening..." screen
+#if ENABLE_CONTROLLER_DEBUG
+    // CHECKPOINT: Show we're continuing past "Listening..." screen (debug mode only)
     ssd1306_clear(&disp);
     ssd1306_draw_string(&disp, 0, 0, 2, (char*)"CHK 1:");
     ssd1306_draw_string(&disp, 0, 20, 1, (char*)"Past listen");
     ssd1306_draw_string(&disp, 0, 32, 1, (char*)"Queue IN xfer");
     ssd1306_show(&disp);
     sleep_ms(2000);
+#endif
     
     // Start receiving reports
     printf("GC: Queueing first IN transfer...\n");
@@ -396,25 +402,29 @@ void tuh_mount_cb(uint8_t dev_addr) {
     
     if (!xfer_ok) {
         printf("GC: ERROR - Failed to queue IN transfer!\n");
+#if ENABLE_CONTROLLER_DEBUG
         ssd1306_clear(&disp);
         ssd1306_draw_string(&disp, 0, 0, 2, (char*)"XFER FAIL");
         ssd1306_draw_string(&disp, 0, 20, 1, (char*)"Can't queue");
         ssd1306_draw_string(&disp, 0, 32, 1, (char*)"IN transfer!");
         ssd1306_show(&disp);
         sleep_ms(5000);
+#endif
         free_gc_device(dev_addr);
         return;
     }
     
     printf("GC: ✓ IN transfer queued successfully\n");
     
-    // Show success screen - IN transfer is queued!
+#if ENABLE_CONTROLLER_DEBUG
+    // Show success screen - IN transfer is queued! (debug mode only)
     ssd1306_clear(&disp);
     ssd1306_draw_string(&disp, 0, 0, 2, (char*)"QUEUED!");
     ssd1306_draw_string(&disp, 0, 20, 1, (char*)"IN xfer ready");
     ssd1306_draw_string(&disp, 0, 32, 1, (char*)"Notifying app");
     ssd1306_show(&disp);
     sleep_ms(2000);
+#endif
     
     printf("GC: Adapter fully initialized!\n");
     
@@ -424,7 +434,8 @@ void tuh_mount_cb(uint8_t dev_addr) {
     gc_notify_mount();
     printf("GC: Joystick counter incremented, UI notified\n");
     
-    // Final success screen
+#if ENABLE_CONTROLLER_DEBUG
+    // Final success screen (debug mode only)
     ssd1306_clear(&disp);
     ssd1306_draw_string(&disp, 0, 0, 2, (char*)"SETUP OK!");
     ssd1306_draw_string(&disp, 0, 20, 1, (char*)"Joy counter++");
@@ -432,6 +443,7 @@ void tuh_mount_cb(uint8_t dev_addr) {
     ssd1306_draw_string(&disp, 0, 44, 1, (char*)"to see count");
     ssd1306_show(&disp);
     sleep_ms(3000);
+#endif
     
     printf("GC: Mount complete!\n\n");
 }

@@ -41,32 +41,74 @@ extern "C" {
 }
 
 #define ROMBASE     256
-#define CYCLES_PER_LOOP 250  // Reduced from 1000 for better interrupt response (4x improvement)
+#define CYCLES_PER_LOOP 100  // Ultra-low latency for timing-sensitive demos (10x improvement over original)
 
 extern unsigned char rom_HD6301V1ST_img[];
 extern unsigned int rom_HD6301V1ST_img_len;
 
 
 /**
+ * Software receive queue to buffer bytes when 6301 RDR is busy
+ * Prevents byte loss during timing-critical periods
+ */
+#define RX_QUEUE_SIZE 32  // Buffer up to 32 bytes (matches UART FIFO size)
+static unsigned char rx_queue[RX_QUEUE_SIZE];
+static volatile int rx_queue_head = 0;
+static volatile int rx_queue_tail = 0;
+static volatile int rx_queue_count = 0;
+
+/**
+ * Clear the receive queue (called on reset to prevent stale data)
+ */
+static void clear_rx_queue() {
+    rx_queue_head = 0;
+    rx_queue_tail = 0;
+    rx_queue_count = 0;
+}
+
+/**
  * Read bytes from the physical serial port and pass them to the HD6301
- * Read ALL available bytes to prevent command parameter delays
+ * Uses software queue to buffer bytes when 6301 RDR is busy
  */
 static void handle_rx_from_st() {
-    // Keep reading while bytes are available AND the 6301 can accept them
-    // This ensures multi-byte commands (command + parameters) are received promptly
     unsigned char data;
-    int bytes_received = 0;
+    static int bytes_deferred_count = 0;
+    static int queue_full_count = 0;
     
+    // First, try to drain the software queue (feed buffered bytes to 6301)
+    while (rx_queue_count > 0 && !hd6301_sci_busy()) {
+        unsigned char queued_byte = rx_queue[rx_queue_tail];
+        hd6301_receive_byte(queued_byte);
+        rx_queue_tail = (rx_queue_tail + 1) % RX_QUEUE_SIZE;
+        rx_queue_count--;
+    }
+    
+    // Now read new bytes from UART and queue them if 6301 is busy
     while (SerialPort::instance().recv(data)) {
         if (!hd6301_sci_busy()) {
-            //printf("ST -> 6301 %X\n", data);
+            // 6301 RDR is available - send directly
             hd6301_receive_byte(data);
-            bytes_received++;
         } else {
-            // 6301 RDR is full - stop and let ROM process the current byte
-            // The UART FIFO will buffer this byte until next iteration
-            //printf("WARNING: 6301 RDR busy, deferring byte 0x%02X\n", data);
-            break;
+            // 6301 RDR is busy - queue the byte
+            if (rx_queue_count < RX_QUEUE_SIZE) {
+                // Add to queue
+                rx_queue[rx_queue_head] = data;
+                rx_queue_head = (rx_queue_head + 1) % RX_QUEUE_SIZE;
+                rx_queue_count++;
+            } else {
+                // Queue is full - this is very bad!
+                queue_full_count++;
+                if ((queue_full_count % 100) == 1) {
+                    printf("CRITICAL: RX queue FULL! Byte 0x%02X LOST! (count: %d)\n", 
+                           data, queue_full_count);
+                }
+                // Byte is lost - but at least we logged it
+            }
+            bytes_deferred_count++;
+            if ((bytes_deferred_count % 1000) == 1) {
+                printf("WARNING: 6301 RDR busy (deferred %d times, queue: %d/%d)\n", 
+                       bytes_deferred_count, rx_queue_count, RX_QUEUE_SIZE);
+            }
         }
     }
     
@@ -76,8 +118,15 @@ static void handle_rx_from_st() {
     if (iram[0x11] & 0x40) {  // TRCSR register, ORFE bit (Overrun/Framing Error)
         static int overrun_count = 0;
         if ((++overrun_count % 100) == 1) {  // Don't spam, report every 100th
-            printf("WARNING: Serial overrun error detected! (count: %d)\n", overrun_count);
+            printf("WARNING: Serial overrun detected! ROM reading too slow. Count: %d\n", overrun_count);
+            printf("  TRCSR=0x%02X (RDRF=%d ORFE=%d)\n", 
+                   iram[0x11], 
+                   (iram[0x11] & 0x80) ? 1 : 0,  // RDRF
+                   (iram[0x11] & 0x40) ? 1 : 0); // ORFE
         }
+        // Clear overrun flag to prevent continuous triggering
+        // Note: ROM should also clear this when reading RDR
+        iram[0x11] &= ~0x40;  // Clear ORFE bit
     }
 }
 
@@ -97,6 +146,7 @@ void core1_entry() {
     // Initialise the HD6301
     setup_hd6301();
     hd6301_reset(1);
+    // Note: RX queue is cleared at startup (automatically zero-initialized)
 
     unsigned long count = 0;
     absolute_time_t tm = get_absolute_time();

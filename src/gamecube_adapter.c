@@ -112,13 +112,14 @@ bool gc_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len) {
         return false;
     }
     
-    // Show first report with detailed debug - ALWAYS SHOW THIS
+    // Show first report with detailed debug
     if (first_report_ever) {
         first_report_ever = false;
         printf("GC: First report received (%d bytes)\n", len);
         printf("GC: Signal byte: 0x%02X\n", report[0]);
         
-        // Show raw bytes on OLED for debugging - ALWAYS IN DEBUG MODE
+#if ENABLE_CONTROLLER_DEBUG
+        // Show raw bytes on OLED for debugging
         ssd1306_clear(&disp);
         ssd1306_draw_string(&disp, 0, 0, 1, (char*)"GC First Rpt!");
         
@@ -136,6 +137,7 @@ bool gc_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len) {
         
         ssd1306_show(&disp);
         sleep_ms(5000);  // Show for 5 seconds
+#endif
     }
     
     // Parse the report (copy to adapter structure)
@@ -343,12 +345,14 @@ void gc_mount_cb(uint8_t dev_addr) {
     printf("═══════════════════════════════════════════════════════\n");
     printf("\n");
     
-    // Show on OLED - match other controller style
+#if ENABLE_CONTROLLER_DEBUG
+    // Show on OLED - match other controller style (debug mode only)
     ssd1306_clear(&disp);
     ssd1306_draw_string(&disp, 10, 10, 2, (char*)"GCube");
     ssd1306_draw_string(&disp, 5, 35, 1, (char*)"USB Adapter");
     ssd1306_show(&disp);
     sleep_ms(2000);
+#endif
     
     gc_adapter_t* adapter = allocate_adapter(dev_addr);
     if (adapter) {
@@ -361,7 +365,8 @@ void gc_mount_cb(uint8_t dev_addr) {
         printf("GC: Adapter address: %d\n", dev_addr);
         printf("GC: Waiting for first report...\n");
         
-        // Show diagnostic info on OLED
+#if ENABLE_CONTROLLER_DEBUG
+        // Show diagnostic info on OLED (debug mode only)
         ssd1306_clear(&disp);
         ssd1306_draw_string(&disp, 0, 0, 1, (char*)"GC Init Sent");
         
@@ -375,6 +380,7 @@ void gc_mount_cb(uint8_t dev_addr) {
         
         ssd1306_show(&disp);
         sleep_ms(5000);  // Wait 5 seconds to see this message
+#endif
     }
 }
 

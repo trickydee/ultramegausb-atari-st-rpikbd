@@ -50,12 +50,16 @@ instr_exec ()
   {
     /*
      * Check for interrupts in priority order
+     * Optimization: Read registers once and cache the values
      */
-    if ((ireg_getb (TCSR) & OCF) && (ireg_getb (TCSR) & EOCI)) {
+    u_char tcsr = ireg_getb (TCSR);
+    u_char trcsr = ireg_getb (TRCSR);
+    
+    if ((tcsr & OCF) && (tcsr & EOCI)) {
       int_addr (OCFVECTOR);
       interrupted = 1;
     } 
-    else if (serial_int ()) {
+    else if (((trcsr & RDRF) && (trcsr & RIE)) || ((trcsr & TDRE) && (trcsr & TIE))) {
       int_addr (SCIVECTOR);
       interrupted = 1;
     }
@@ -79,6 +83,8 @@ instr_exec ()
   }
   else
   {
+#ifdef TRACE_6301
+    // PC bounds check - only in debug mode for performance
     int pc=reg_getpc (); 
     if(!(pc>=0x80&&pc<0xFFFF)) // eg bad snapshot
     {
@@ -86,11 +92,11 @@ instr_exec ()
       crashed = 1;
       return -1;
     }
+#endif
 
     opptr = &opcodetab [mem_getb (reg_getpc ())];
     reg_incpc (1);
     (*opptr->op_func) ();
-//    ASSERT(iram[7]!=0xf0);
   }
   
   cpu_setncycles (cpu_getncycles () + opptr->op_n_cycles);

@@ -239,10 +239,11 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
   // Check for GameCube USB Adapter
   bool is_gamecube = gc_is_adapter(vid, pid);
   
-  // DEBUG: Always show this check
+  // DEBUG: Console logging (always enabled for troubleshooting)
   printf("GC Check: VID=0x%04X, PID=0x%04X, is_gamecube=%d\n", vid, pid, is_gamecube);
   
-  // Show on OLED for debugging (no console!) - ALWAYS SHOW, NOT BEHIND DEBUG FLAG
+#if ENABLE_CONTROLLER_DEBUG
+  // Show on OLED for debugging - only in debug builds
   // Only show Nintendo VID devices to avoid spam from other devices
   if (vid == 0x057E) {  // Nintendo VID
     extern ssd1306_t disp;
@@ -259,6 +260,7 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
     ssd1306_show(&disp);
     sleep_ms(2000);  // Reduced to 2 seconds
   }
+#endif
   
   if (is_gamecube) {
     printf("GameCube USB Adapter detected via HID: VID=0x%04X, PID=0x%04X, Instance=%d, Protocol=%d\n", 
@@ -270,7 +272,8 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
     extern ssd1306_t disp;
     char dbg[32];
     
-    // Show protocol info
+#if ENABLE_CONTROLLER_DEBUG
+    // Show protocol info (debug mode only)
     ssd1306_clear(&disp);
     ssd1306_draw_string(&disp, 0, 0, 1, (char*)"GC HID Mount");
     snprintf(dbg, sizeof(dbg), "Inst:%d Prot:%d", instance, protocol);
@@ -278,6 +281,7 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
     ssd1306_draw_string(&disp, 0, 24, 1, (char*)"Initializing...");
     ssd1306_show(&disp);
     sleep_ms(1500);
+#endif
     
     // Allocate device slot
     hidh_device_t* dev = alloc_device(dev_addr, instance);
@@ -293,12 +297,14 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
     
     // Only show splash and send init on instance 0
     if (instance == 0) {
-      // Show splash
+#if ENABLE_CONTROLLER_DEBUG
+      // Show splash (debug mode only)
       ssd1306_clear(&disp);
       ssd1306_draw_string(&disp, 10, 10, 2, (char*)"GCube");
       ssd1306_draw_string(&disp, 5, 35, 1, (char*)"USB Adapter");
       ssd1306_show(&disp);
       sleep_ms(2000);
+#endif
       
       // STEP 1: Control transfer for third-party adapter compatibility
       // Windows driver shows this is required: bmRequestType=0x21, bRequest=11, wValue=1, wIndex=0
@@ -333,6 +339,7 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
       sleep_ms(200);
       printf("GC: Control transfer result: %d\n", ctrl_result);
       
+#if ENABLE_CONTROLLER_DEBUG
       ssd1306_clear(&disp);
       ssd1306_draw_string(&disp, 0, 0, 1, (char*)"CTRL XFER");
       snprintf(dbg, sizeof(dbg), "Req:11 Val:1");
@@ -341,6 +348,7 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
       ssd1306_draw_string(&disp, 0, 24, 1, dbg);
       ssd1306_show(&disp);
       sleep_ms(1500);
+#endif
       
       // STEP 2: Send 0x13 init command via interrupt OUT endpoint
       // All reference drivers do this after control transfer
@@ -356,7 +364,8 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
         printf("GC: WARNING - Init 0x13 queue failed!\n");
       }
       
-      // Show status
+#if ENABLE_CONTROLLER_DEBUG
+      // Show status (debug mode only)
       ssd1306_clear(&disp);
       ssd1306_draw_string(&disp, 0, 0, 1, (char*)"GC Init 0x13");
       snprintf(dbg, sizeof(dbg), "Addr:%d Inst:%d", dev_addr, instance);
@@ -366,6 +375,7 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
       ssd1306_draw_string(&disp, 0, 48, 1, (char*)"Waiting...");
       ssd1306_show(&disp);
       sleep_ms(3000);
+#endif
       
       // Notify application layer
       extern void gc_notify_mount(void);
@@ -415,7 +425,8 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
     // Start receiving reports
     printf("GC: Calling tuh_hid_receive_report(addr=%d, inst=%d)...\n", dev_addr, instance);
     
-    // Show we're starting report reception
+#if ENABLE_CONTROLLER_DEBUG
+    // Show we're starting report reception (debug mode only)
     ssd1306_clear(&disp);
     ssd1306_draw_string(&disp, 0, 0, 2, (char*)"RCV START");
     snprintf(dbg, sizeof(dbg), "A:%d I:%d", dev_addr, instance);
@@ -423,10 +434,13 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
     ssd1306_draw_string(&disp, 0, 32, 1, (char*)"Queueing...");
     ssd1306_show(&disp);
     sleep_ms(1000);
+#endif
     
     bool recv_ok = tuh_hid_receive_report(dev_addr, instance);
     printf("GC: tuh_hid_receive_report result: %d\n", recv_ok);
     
+#if ENABLE_CONTROLLER_DEBUG
+    // Show status (debug mode only)
     ssd1306_clear(&disp);
     if (recv_ok) {
       ssd1306_draw_string(&disp, 0, 0, 2, (char*)"RCV OK!");
@@ -442,6 +456,16 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
     }
     ssd1306_show(&disp);
     sleep_ms(recv_ok ? 2000 : 5000);
+#else
+    // Production splash screen - show GameCube adapter detected (matching Xbox/PS style)
+    if (instance == 0) {  // Only show once for instance 0
+      ssd1306_clear(&disp);
+      ssd1306_draw_string(&disp, 0, 10, 2, (char*)"GAMECUBE!");
+      ssd1306_draw_string(&disp, 5, 35, 1, (char*)"USB Adapter");
+      ssd1306_show(&disp);
+      sleep_ms(2000);
+    }
+#endif
     
     return;
   }

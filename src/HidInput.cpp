@@ -38,6 +38,15 @@ extern ssd1306_t disp;  // External reference to display
 // Mouse toggle key is set to Ctrl+F12
 #define TOGGLE_MOUSE_MODE 0x45  // F12 key (69 decimal)
 
+// Ctrl+F5 sends 0x08 (SET RELATIVE MOUSE MODE)
+#define MOUSE_RELATIVE_KEY 0x3E  // F5 key (62 decimal)
+
+// Ctrl+F6 sends 0x09 (SET ABSOLUTE MOUSE MODE)
+#define MOUSE_ABSOLUTE_KEY 0x3F  // F6 key (63 decimal)
+
+// Ctrl+F7 sends 0x0A (SET MOUSE KEYCODE MODE)
+#define MOUSE_KEYCODE_KEY 0x40  // F7 key (64 decimal)
+
 // Ctrl+F8 sends 0x14 (SET JOYSTICK EVENT REPORTING)
 #define RESTORE_JOYSTICK_KEY 0x41  // F8 key (65 decimal)
 
@@ -336,6 +345,133 @@ void HidInput::handle_keyboard() {
                 last_minus_state = false;
             }
             
+            // Check for Ctrl+F5 to set relative mouse mode (send 0x08)
+            static bool last_mouse_rel_state = false;
+            bool f5_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == MOUSE_RELATIVE_KEY) {
+                    f5_pressed = true;
+                    break;
+                }
+            }
+            
+            if (ctrl_pressed && f5_pressed) {
+                if (!last_mouse_rel_state) {
+                    // Show visual feedback on OLED
+                    ssd1306_clear(&disp);
+                    ssd1306_draw_string(&disp, 20, 15, 2, (char*)"MOUSE");
+                    ssd1306_draw_string(&disp, 10, 35, 1, (char*)"Relative Mode");
+                    ssd1306_draw_string(&disp, 15, 50, 1, (char*)"Ctrl+F5");
+                    ssd1306_show(&disp);
+                    
+                    // First disable joystick reporting (0x1A = disable joystick)
+                    hd6301_receive_byte(0x1A);
+                    hd6301_receive_byte(0x00);  // Disable both joysticks
+                    
+                    // Enable mouse reporting (0x92 0x00 = enable mouse)
+                    hd6301_receive_byte(0x92);
+                    hd6301_receive_byte(0x00);  // Enable mouse
+                    
+                    // Then send 0x08 (SET RELATIVE MOUSE MODE) to HD6301
+                    hd6301_receive_byte(0x08);
+                    
+                    // Small delay so user can see the message
+                    sleep_ms(500);
+                    
+                    last_mouse_rel_state = true;
+                }
+            } else {
+                last_mouse_rel_state = false;
+            }
+            
+            // Check for Ctrl+F6 to set absolute mouse mode (send 0x09 + parameters)
+            static bool last_mouse_abs_state = false;
+            bool f6_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == MOUSE_ABSOLUTE_KEY) {
+                    f6_pressed = true;
+                    break;
+                }
+            }
+            
+            if (ctrl_pressed && f6_pressed) {
+                if (!last_mouse_abs_state) {
+                    // Show visual feedback on OLED
+                    ssd1306_clear(&disp);
+                    ssd1306_draw_string(&disp, 20, 15, 2, (char*)"MOUSE");
+                    ssd1306_draw_string(&disp, 10, 35, 1, (char*)"Absolute Mode");
+                    ssd1306_draw_string(&disp, 15, 50, 1, (char*)"Ctrl+F6");
+                    ssd1306_show(&disp);
+                    
+                    // First disable joystick reporting (0x1A = disable joystick)
+                    hd6301_receive_byte(0x1A);
+                    hd6301_receive_byte(0x00);  // Disable both joysticks
+                    
+                    // Enable mouse reporting (0x92 0x00 = enable mouse)
+                    hd6301_receive_byte(0x92);
+                    hd6301_receive_byte(0x00);  // Enable mouse
+                    
+                    // Then send 0x09 (SET ABSOLUTE MOUSE MODE) to HD6301
+                    // Format: 0x09 Xmax_MSB Xmax_LSB Ymax_MSB Ymax_LSB
+                    // Using standard ST high-res: 640x400
+                    hd6301_receive_byte(0x09);
+                    hd6301_receive_byte(0x02);  // Xmax MSB (640 = 0x0280)
+                    hd6301_receive_byte(0x80);  // Xmax LSB
+                    hd6301_receive_byte(0x01);  // Ymax MSB (400 = 0x0190)
+                    hd6301_receive_byte(0x90);  // Ymax LSB
+                    
+                    // Small delay so user can see the message
+                    sleep_ms(500);
+                    
+                    last_mouse_abs_state = true;
+                }
+            } else {
+                last_mouse_abs_state = false;
+            }
+            
+            // Check for Ctrl+F7 to set mouse keycode mode (send 0x0A + parameters)
+            static bool last_mouse_key_state = false;
+            bool f7_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == MOUSE_KEYCODE_KEY) {
+                    f7_pressed = true;
+                    break;
+                }
+            }
+            
+            if (ctrl_pressed && f7_pressed) {
+                if (!last_mouse_key_state) {
+                    // Show visual feedback on OLED
+                    ssd1306_clear(&disp);
+                    ssd1306_draw_string(&disp, 20, 15, 2, (char*)"MOUSE");
+                    ssd1306_draw_string(&disp, 10, 35, 1, (char*)"Keycode Mode");
+                    ssd1306_draw_string(&disp, 15, 50, 1, (char*)"Ctrl+F7");
+                    ssd1306_show(&disp);
+                    
+                    // First disable joystick reporting (0x1A = disable joystick)
+                    hd6301_receive_byte(0x1A);
+                    hd6301_receive_byte(0x00);  // Disable both joysticks
+                    
+                    // Enable mouse reporting (0x92 0x00 = enable mouse)
+                    hd6301_receive_byte(0x92);
+                    hd6301_receive_byte(0x00);  // Enable mouse
+                    
+                    // Then send 0x0A (SET MOUSE KEYCODE MODE) to HD6301
+                    // Format: 0x0A deltaX deltaY
+                    // Using 1,1 as reasonable defaults (1 pixel per keypress)
+                    hd6301_receive_byte(0x0A);
+                    hd6301_receive_byte(0x01);  // deltaX = 1
+                    hd6301_receive_byte(0x01);  // deltaY = 1
+                    
+                    // Small delay so user can see the message
+                    sleep_ms(500);
+                    
+                    last_mouse_key_state = true;
+                }
+            } else {
+                last_mouse_key_state = false;
+            }
+            
             // Check for Ctrl+F8 to restore joystick event reporting (send 0x14)
             static bool last_joy_restore_state = false;
             bool f8_pressed = false;
@@ -355,7 +491,10 @@ void HidInput::handle_keyboard() {
                     ssd1306_draw_string(&disp, 15, 50, 1, (char*)"Ctrl+F8");
                     ssd1306_show(&disp);
                     
-                    // Send 0x14 (SET JOYSTICK EVENT REPORTING) to HD6301
+                    // First disable mouse reporting (0x00 = disable mouse)
+                    hd6301_receive_byte(0x00);
+                    
+                    // Then send 0x14 (SET JOYSTICK EVENT REPORTING) to HD6301
                     hd6301_receive_byte(0x14);
                     
                     // Small delay so user can see the message
