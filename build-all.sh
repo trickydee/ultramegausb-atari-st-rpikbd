@@ -16,7 +16,7 @@ DEBUG="${DEBUG:-1}"  # Set to 1 to enable debug displays
 
 echo "================================================================================"
 echo "  Atari ST USB Adapter - Dual Board Build"
-echo "  Version: 11.2.0 (GameCube USB Adapter support is now working)"
+echo "  Version: 12.0.0 (Ultra-low latency serial optimizations)"
 echo "  Language: ${LANGUAGE}"
 echo "  Debug Mode: ${DEBUG}"
 echo "================================================================================"

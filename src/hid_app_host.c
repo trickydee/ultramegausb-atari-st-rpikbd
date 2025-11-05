@@ -249,7 +249,7 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
     extern ssd1306_t disp;
     ssd1306_clear(&disp);
     ssd1306_draw_string(&disp, 0, 0, 1, (char*)"GC VID Check");
-    ssd1306_draw_string(&disp, 0, 10, 1, (char*)"v11.2.0");
+    ssd1306_draw_string(&disp, 0, 10, 1, (char*)"v12.0.0");
     char line[32];
     snprintf(line, sizeof(line), "V:%04X P:%04X", vid, pid);
     ssd1306_draw_string(&disp, 0, 24, 1, line);
