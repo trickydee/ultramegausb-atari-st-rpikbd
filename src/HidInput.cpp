@@ -491,10 +491,7 @@ void HidInput::handle_keyboard() {
                     ssd1306_draw_string(&disp, 15, 50, 1, (char*)"Ctrl+F8");
                     ssd1306_show(&disp);
                     
-                    // First disable mouse reporting (0x00 = disable mouse)
-                    hd6301_receive_byte(0x00);
-                    
-                    // Then send 0x14 (SET JOYSTICK EVENT REPORTING) to HD6301
+                    // Send 0x14 (SET JOYSTICK EVENT REPORTING) to HD6301
                     hd6301_receive_byte(0x14);
                     
                     // Small delay so user can see the message
