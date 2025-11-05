@@ -5,6 +5,7 @@
 
 #include "tusb.h"
 #include "hid_app_host.h"
+#include "version.h"  // Project version number
 // xinput.h removed - using official xinput_host.h driver now
 #include "ps3_controller.h"
 #include "gamecube_adapter.h"
@@ -249,8 +250,9 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
     extern ssd1306_t disp;
     ssd1306_clear(&disp);
     ssd1306_draw_string(&disp, 0, 0, 1, (char*)"GC VID Check");
-    ssd1306_draw_string(&disp, 0, 10, 1, (char*)"v12.0.0");
     char line[32];
+    snprintf(line, sizeof(line), "v%s", PROJECT_VERSION_STRING);
+    ssd1306_draw_string(&disp, 0, 10, 1, line);
     snprintf(line, sizeof(line), "V:%04X P:%04X", vid, pid);
     ssd1306_draw_string(&disp, 0, 24, 1, line);
     snprintf(line, sizeof(line), "Match:%d Inst:%d", is_gamecube, instance);
