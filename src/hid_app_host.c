@@ -459,6 +459,7 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
     ssd1306_show(&disp);
     sleep_ms(recv_ok ? 2000 : 5000);
 #else
+  #if ENABLE_OLED_DISPLAY
     // Production splash screen - show GameCube adapter detected (matching Xbox/PS style)
     if (instance == 0) {  // Only show once for instance 0
       ssd1306_clear(&disp);
@@ -467,6 +468,7 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
       ssd1306_show(&disp);
       sleep_ms(2000);
     }
+  #endif
 #endif
     
     return;

@@ -87,6 +87,26 @@ else()
     message(STATUS "Debug mode: DISABLED (production)")
 endif()
 
+# OLED Display mode (0=disabled for speed, 1=enabled for standard)
+set(ENABLE_OLED_DISPLAY "1" CACHE STRING "Enable OLED display (0 or 1)")
+if(ENABLE_OLED_DISPLAY EQUAL "1")
+    add_definitions(-DENABLE_OLED_DISPLAY=1)
+    message(STATUS "OLED Display: ENABLED")
+else()
+    add_definitions(-DENABLE_OLED_DISPLAY=0)
+    message(STATUS "OLED Display: DISABLED (speed mode)")
+endif()
+
+# Serial logging mode (0=minimal, 1=verbose)
+set(ENABLE_SERIAL_LOGGING "1" CACHE STRING "Enable verbose serial logging (0 or 1)")
+if(ENABLE_SERIAL_LOGGING EQUAL "1")
+    add_definitions(-DENABLE_SERIAL_LOGGING=1)
+    message(STATUS "Serial Logging: VERBOSE")
+else()
+    add_definitions(-DENABLE_SERIAL_LOGGING=0)
+    message(STATUS "Serial Logging: MINIMAL (speed mode)")
+endif()
+
 set(SOURCES
     src/main.cpp
     src/HD6301V1ST.cpp

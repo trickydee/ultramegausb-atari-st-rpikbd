@@ -177,9 +177,11 @@ int main() {
         return -1;
     }
 
+#if ENABLE_OLED_DISPLAY
     UserInterface ui;
     ui.init();
     ui.update();
+#endif
 
     // Overclock the Pico for maximum performance
     if (!set_sys_clock_khz(DEFAULT_CPU_CLOCK_KHZ, false))
@@ -189,9 +191,13 @@ int main() {
 
     // Setup the UART and HID instance.
     SerialPort::instance().open();
+#if ENABLE_OLED_DISPLAY
     SerialPort::instance().set_ui(ui);
+#endif
     HidInput::instance().reset();
+#if ENABLE_OLED_DISPLAY
     HidInput::instance().set_ui(ui);
+#endif
 
     // The second CPU core is dedicated to the HD6301 emulation.
     multicore_launch_core1(core1_entry);
@@ -221,7 +227,9 @@ int main() {
             HidInput::instance().handle_keyboard();
             HidInput::instance().handle_mouse(cpu.ncycles);
             HidInput::instance().handle_joystick();
+#if ENABLE_OLED_DISPLAY
             ui.update();
+#endif
         }
     }
     return 0;
@@ -277,6 +285,7 @@ void tuh_xinput_mount_cb(uint8_t dev_addr, uint8_t instance, const xinputh_inter
     xinput_joy_count++;
     xinput_notify_ui_mount();
     
+#if ENABLE_OLED_DISPLAY
     // Show XBOX splash screen (reinstated with debug info)
     extern ssd1306_t disp;
     ssd1306_clear(&disp);
@@ -298,6 +307,7 @@ void tuh_xinput_mount_cb(uint8_t dev_addr, uint8_t instance, const xinputh_inter
     ssd1306_draw_string(&disp, 10, 50, 1, line);
     ssd1306_show(&disp);
     sleep_ms(3000);  // Extended to 3 seconds to read debug info
+#endif
     
     // For Xbox 360 Wireless, wait for connection before setting LEDs
     if (xinput_itf->type == XBOX360_WIRELESS && !xinput_itf->connected) {

@@ -82,7 +82,9 @@ bool ps4_is_dualshock4(uint16_t vid, uint16_t pid) {
 
 bool ps4_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len) {
     static bool first_report_ever = true;
+#if ENABLE_OLED_DISPLAY
     extern ssd1306_t disp;
+#endif
     
     ps4_controller_t* ctrl = find_controller_by_addr(dev_addr);
     if (!ctrl) {
@@ -233,7 +235,9 @@ void ps4_set_deadzone(uint8_t dev_addr, int16_t deadzone) {
 }
 
 void ps4_mount_cb(uint8_t dev_addr) {
+#if ENABLE_OLED_DISPLAY
     extern ssd1306_t disp;
+#endif
     
     printf("\n");
     printf("═══════════════════════════════════════════════════════\n");
@@ -251,6 +255,7 @@ void ps4_mount_cb(uint8_t dev_addr) {
     printf("═══════════════════════════════════════════════════════\n");
     printf("\n");
     
+#if ENABLE_OLED_DISPLAY
     // Show on OLED
     ssd1306_clear(&disp);
     ssd1306_draw_string(&disp, 25, 10, 2, (char*)"PS4");
@@ -262,7 +267,8 @@ void ps4_mount_cb(uint8_t dev_addr) {
     ssd1306_draw_string(&disp, 25, 50, 1, debug_line);
     
     ssd1306_show(&disp);
-    sleep_ms(2000);  // Extended to match Xbox timing
+    sleep_ms(2000);
+#endif  // Extended to match Xbox timing
     
     ps4_controller_t* ctrl = allocate_controller(dev_addr);
     if (ctrl) {

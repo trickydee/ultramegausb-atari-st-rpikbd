@@ -33,7 +33,9 @@
 #include "stadia_controller.h"
 #include <map>
 
+#if ENABLE_OLED_DISPLAY
 extern ssd1306_t disp;  // External reference to display
+#endif
 
 // Mouse toggle key is set to Ctrl+F12
 #define TOGGLE_MOUSE_MODE 0x45  // F12 key (69 decimal)
@@ -357,12 +359,14 @@ void HidInput::handle_keyboard() {
             
             if (ctrl_pressed && f5_pressed) {
                 if (!last_mouse_rel_state) {
+#if ENABLE_OLED_DISPLAY
                     // Show visual feedback on OLED
                     ssd1306_clear(&disp);
                     ssd1306_draw_string(&disp, 20, 15, 2, (char*)"MOUSE");
                     ssd1306_draw_string(&disp, 10, 35, 1, (char*)"Relative Mode");
                     ssd1306_draw_string(&disp, 15, 50, 1, (char*)"Ctrl+F5");
                     ssd1306_show(&disp);
+#endif
                     
                     // First disable joystick reporting (0x1A = disable joystick)
                     hd6301_receive_byte(0x1A);
@@ -375,8 +379,10 @@ void HidInput::handle_keyboard() {
                     // Then send 0x08 (SET RELATIVE MOUSE MODE) to HD6301
                     hd6301_receive_byte(0x08);
                     
+#if ENABLE_OLED_DISPLAY
                     // Small delay so user can see the message
                     sleep_ms(500);
+#endif
                     
                     last_mouse_rel_state = true;
                 }
@@ -396,12 +402,14 @@ void HidInput::handle_keyboard() {
             
             if (ctrl_pressed && f6_pressed) {
                 if (!last_mouse_abs_state) {
+#if ENABLE_OLED_DISPLAY
                     // Show visual feedback on OLED
                     ssd1306_clear(&disp);
                     ssd1306_draw_string(&disp, 20, 15, 2, (char*)"MOUSE");
                     ssd1306_draw_string(&disp, 10, 35, 1, (char*)"Absolute Mode");
                     ssd1306_draw_string(&disp, 15, 50, 1, (char*)"Ctrl+F6");
                     ssd1306_show(&disp);
+#endif
                     
                     // First disable joystick reporting (0x1A = disable joystick)
                     hd6301_receive_byte(0x1A);
@@ -420,8 +428,10 @@ void HidInput::handle_keyboard() {
                     hd6301_receive_byte(0x01);  // Ymax MSB (400 = 0x0190)
                     hd6301_receive_byte(0x90);  // Ymax LSB
                     
+#if ENABLE_OLED_DISPLAY
                     // Small delay so user can see the message
                     sleep_ms(500);
+#endif
                     
                     last_mouse_abs_state = true;
                 }
@@ -441,12 +451,14 @@ void HidInput::handle_keyboard() {
             
             if (ctrl_pressed && f7_pressed) {
                 if (!last_mouse_key_state) {
+#if ENABLE_OLED_DISPLAY
                     // Show visual feedback on OLED
                     ssd1306_clear(&disp);
                     ssd1306_draw_string(&disp, 20, 15, 2, (char*)"MOUSE");
                     ssd1306_draw_string(&disp, 10, 35, 1, (char*)"Keycode Mode");
                     ssd1306_draw_string(&disp, 15, 50, 1, (char*)"Ctrl+F7");
                     ssd1306_show(&disp);
+#endif
                     
                     // First disable joystick reporting (0x1A = disable joystick)
                     hd6301_receive_byte(0x1A);
@@ -463,8 +475,10 @@ void HidInput::handle_keyboard() {
                     hd6301_receive_byte(0x01);  // deltaX = 1
                     hd6301_receive_byte(0x01);  // deltaY = 1
                     
+#if ENABLE_OLED_DISPLAY
                     // Small delay so user can see the message
                     sleep_ms(500);
+#endif
                     
                     last_mouse_key_state = true;
                 }
@@ -484,18 +498,22 @@ void HidInput::handle_keyboard() {
             
             if (ctrl_pressed && f8_pressed) {
                 if (!last_joy_restore_state) {
+#if ENABLE_OLED_DISPLAY
                     // Show visual feedback on OLED
                     ssd1306_clear(&disp);
                     ssd1306_draw_string(&disp, 15, 15, 2, (char*)"JOYSTICK");
                     ssd1306_draw_string(&disp, 30, 35, 1, (char*)"MODE");
                     ssd1306_draw_string(&disp, 15, 50, 1, (char*)"Ctrl+F8");
                     ssd1306_show(&disp);
+#endif
                     
                     // Send 0x14 (SET JOYSTICK EVENT REPORTING) to HD6301
                     hd6301_receive_byte(0x14);
                     
+#if ENABLE_OLED_DISPLAY
                     // Small delay so user can see the message
                     sleep_ms(500);
+#endif
                     
                     last_joy_restore_state = true;
                 }
@@ -515,6 +533,7 @@ void HidInput::handle_keyboard() {
             
             if (ctrl_pressed && f11_pressed) {
                 if (!last_reset_state) {
+#if ENABLE_OLED_DISPLAY
                     // Show visual feedback on OLED
                     ssd1306_clear(&disp);
                     ssd1306_draw_string(&disp, 30, 20, 2, (char*)"RESET");
@@ -523,6 +542,7 @@ void HidInput::handle_keyboard() {
                     
                     // Small delay so user can see the message
                     sleep_ms(500);
+#endif
                     
                     // Trigger the reset
                     hd6301_trigger_reset();

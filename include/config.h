@@ -71,3 +71,22 @@
 
 // Stadia controller debug displays (OLED screens during detection)
 #define ENABLE_STADIA_DEBUG ENABLE_DEBUG
+
+// ============================================================================
+// SPEED MODE OPTIMIZATIONS
+// Can be overridden by CMake for custom builds
+// ============================================================================
+
+// OLED Display Toggle
+// Set to 0 to disable OLED display for maximum performance (speed mode)
+// Set to 1 to enable OLED display and UI (standard mode)
+#ifndef ENABLE_OLED_DISPLAY
+  #define ENABLE_OLED_DISPLAY 1
+#endif
+
+// Serial Debug Logging Toggle
+// Set to 0 to disable verbose logging for maximum performance
+// Set to 1 to enable detailed logging (helps with troubleshooting)
+#ifndef ENABLE_SERIAL_LOGGING
+  #define ENABLE_SERIAL_LOGGING 1
+#endif

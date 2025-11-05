@@ -13,12 +13,16 @@ set -e  # Exit on error
 # Configuration
 LANGUAGE="${LANGUAGE:-EN}"
 DEBUG="${DEBUG:-1}"  # Set to 1 to enable debug displays
+OLED="${OLED:-1}"    # Set to 0 to disable OLED for speed mode
+LOGGING="${LOGGING:-1}"  # Set to 0 to disable verbose logging
 
 echo "================================================================================"
-echo "  Atari ST USB Adapter - Dual Board Build"
+echo "  Atari ST USB Adapter - Multi-Variant Build"
 echo "  Version: 12.0.0 (Ultra-low latency serial optimizations)"
 echo "  Language: ${LANGUAGE}"
 echo "  Debug Mode: ${DEBUG}"
+echo "  OLED Display: ${OLED}"
+echo "  Serial Logging: ${LOGGING}"
 echo "================================================================================"
 echo ""
 
@@ -83,6 +87,8 @@ cmake -B ./build-pico -S . \
     -DPICO_BOARD=pico \
     -DLANGUAGE="${LANGUAGE}" \
     -DENABLE_DEBUG="${DEBUG}" \
+    -DENABLE_OLED_DISPLAY="${OLED}" \
+    -DENABLE_SERIAL_LOGGING="${LOGGING}" \
     > ./build-pico/cmake.log 2>&1
 
 if [ $? -ne 0 ]; then
@@ -122,6 +128,8 @@ cmake -B ./build-pico2 -S . \
     -DPICO_BOARD=pico2 \
     -DLANGUAGE="${LANGUAGE}" \
     -DENABLE_DEBUG="${DEBUG}" \
+    -DENABLE_OLED_DISPLAY="${OLED}" \
+    -DENABLE_SERIAL_LOGGING="${LOGGING}" \
     > ./build-pico2/cmake.log 2>&1
 
 if [ $? -ne 0 ]; then
@@ -145,28 +153,38 @@ echo "    ✅ RP2350 build complete!"
 echo ""
 
 ################################################################################
-# Copy firmware files to dist directory
+# Copy firmware files to dist directory with variant-specific names
 ################################################################################
 
 echo ">>> Collecting firmware files..."
 mkdir -p ./dist
 
+# Determine build variant suffix
+BUILD_VARIANT=""
+if [ "$OLED" = "0" ] && [ "$LOGGING" = "0" ]; then
+    BUILD_VARIANT="_speed"
+elif [ "$OLED" = "0" ]; then
+    BUILD_VARIANT="_nooled"
+elif [ "$LOGGING" = "0" ]; then
+    BUILD_VARIANT="_nolog"
+fi
+
 # Copy RP2040 firmware
 if [ -f "./build-pico/atari_ikbd_pico.uf2" ]; then
-    cp ./build-pico/atari_ikbd_pico.uf2 ./dist/
-    cp ./build-pico/atari_ikbd_pico.elf ./dist/ 2>/dev/null || true
-    cp ./build-pico/atari_ikbd_pico.bin ./dist/ 2>/dev/null || true
-    echo "    ✅ Copied atari_ikbd_pico.uf2"
+    cp ./build-pico/atari_ikbd_pico.uf2 ./dist/atari_ikbd_pico${BUILD_VARIANT}.uf2
+    cp ./build-pico/atari_ikbd_pico.elf ./dist/atari_ikbd_pico${BUILD_VARIANT}.elf 2>/dev/null || true
+    cp ./build-pico/atari_ikbd_pico.bin ./dist/atari_ikbd_pico${BUILD_VARIANT}.bin 2>/dev/null || true
+    echo "    ✅ Copied atari_ikbd_pico${BUILD_VARIANT}.uf2"
 else
     echo "    ⚠️  Warning: atari_ikbd_pico.uf2 not found!"
 fi
 
 # Copy RP2350 firmware
 if [ -f "./build-pico2/atari_ikbd_pico2.uf2" ]; then
-    cp ./build-pico2/atari_ikbd_pico2.uf2 ./dist/
-    cp ./build-pico2/atari_ikbd_pico2.elf ./dist/ 2>/dev/null || true
-    cp ./build-pico2/atari_ikbd_pico2.bin ./dist/ 2>/dev/null || true
-    echo "    ✅ Copied atari_ikbd_pico2.uf2"
+    cp ./build-pico2/atari_ikbd_pico2.uf2 ./dist/atari_ikbd_pico2${BUILD_VARIANT}.uf2
+    cp ./build-pico2/atari_ikbd_pico2.elf ./dist/atari_ikbd_pico2${BUILD_VARIANT}.elf 2>/dev/null || true
+    cp ./build-pico2/atari_ikbd_pico2.bin ./dist/atari_ikbd_pico2${BUILD_VARIANT}.bin 2>/dev/null || true
+    echo "    ✅ Copied atari_ikbd_pico2${BUILD_VARIANT}.uf2"
 else
     echo "    ⚠️  Warning: atari_ikbd_pico2.uf2 not found!"
 fi
@@ -184,14 +202,26 @@ echo ""
 echo "Firmware files available in: ./dist/"
 echo ""
 
-if [ -f "./dist/atari_ikbd_pico.uf2" ]; then
-    SIZE_PICO=$(ls -lh "./dist/atari_ikbd_pico.uf2" | awk '{print $5}')
-    echo "  📦 Raspberry Pi Pico (RP2040):  atari_ikbd_pico.uf2  (${SIZE_PICO})"
+# Display build variant info
+if [ "$OLED" = "0" ] && [ "$LOGGING" = "0" ]; then
+    echo "  Build Variant: SPEED MODE (no OLED, minimal logging)"
+elif [ "$OLED" = "0" ]; then
+    echo "  Build Variant: NO OLED (display disabled)"
+elif [ "$LOGGING" = "0" ]; then
+    echo "  Build Variant: NO LOGGING (minimal logging)"
+else
+    echo "  Build Variant: STANDARD (full features)"
+fi
+echo ""
+
+if [ -f "./dist/atari_ikbd_pico${BUILD_VARIANT}.uf2" ]; then
+    SIZE_PICO=$(ls -lh "./dist/atari_ikbd_pico${BUILD_VARIANT}.uf2" | awk '{print $5}')
+    echo "  📦 Raspberry Pi Pico (RP2040):  atari_ikbd_pico${BUILD_VARIANT}.uf2  (${SIZE_PICO})"
 fi
 
-if [ -f "./dist/atari_ikbd_pico2.uf2" ]; then
-    SIZE_PICO2=$(ls -lh "./dist/atari_ikbd_pico2.uf2" | awk '{print $5}')
-    echo "  📦 Raspberry Pi Pico 2 (RP2350): atari_ikbd_pico2.uf2 (${SIZE_PICO2})"
+if [ -f "./dist/atari_ikbd_pico2${BUILD_VARIANT}.uf2" ]; then
+    SIZE_PICO2=$(ls -lh "./dist/atari_ikbd_pico2${BUILD_VARIANT}.uf2" | awk '{print $5}')
+    echo "  📦 Raspberry Pi Pico 2 (RP2350): atari_ikbd_pico2${BUILD_VARIANT}.uf2 (${SIZE_PICO2})"
 fi
 
 echo ""

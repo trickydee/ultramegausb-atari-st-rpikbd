@@ -76,7 +76,9 @@ bool ps3_is_dualshock3(uint16_t vid, uint16_t pid) {
 
 bool ps3_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len) {
     static bool first_report_ever = true;
+#if ENABLE_OLED_DISPLAY
     extern ssd1306_t disp;
+#endif
     
     ps3_controller_t* ctrl = find_controller_by_addr(dev_addr);
     if (!ctrl) {
@@ -275,7 +277,9 @@ void ps3_set_deadzone(uint8_t dev_addr, int16_t deadzone) {
 }
 
 void ps3_mount_cb(uint8_t dev_addr) {
+#if ENABLE_OLED_DISPLAY
     extern ssd1306_t disp;
+#endif
     
     printf("\n");
     printf("═══════════════════════════════════════════════════════\n");
@@ -287,12 +291,14 @@ void ps3_mount_cb(uint8_t dev_addr) {
     printf("═══════════════════════════════════════════════════════\n");
     printf("\n");
     
+#if ENABLE_OLED_DISPLAY
     // Show on OLED - match Xbox/PS4/Switch style
     ssd1306_clear(&disp);
     ssd1306_draw_string(&disp, 25, 10, 2, (char*)"PS3");
     ssd1306_draw_string(&disp, 10, 35, 1, (char*)"DualShock 3");
     ssd1306_show(&disp);
     sleep_ms(2000);
+#endif
     
     ps3_controller_t* ctrl = allocate_controller(dev_addr);
     if (ctrl) {
