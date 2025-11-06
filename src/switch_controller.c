@@ -14,7 +14,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if ENABLE_OLED_DISPLAY
 extern ssd1306_t disp;
+#endif
 
 // Controller storage
 static switch_controller_t controllers[MAX_SWITCH_CONTROLLERS];
@@ -617,6 +619,7 @@ void switch_mount_cb(uint8_t dev_addr) {
     printf("Switch controller mount: %s (addr=%d, VID=0x%04X, PID=0x%04X)\n", 
            controller_name, dev_addr, vid, pid);
     
+#if ENABLE_OLED_DISPLAY
     // Show on OLED (matching PS4/Xbox splash screen style)
     ssd1306_clear(&disp);
     ssd1306_draw_string(&disp, 10, 10, 2, (char*)"SWITCH!");
@@ -637,6 +640,7 @@ void switch_mount_cb(uint8_t dev_addr) {
     
     ssd1306_show(&disp);
     sleep_ms(2000);  // Match PS4 timing for consistency
+#endif
     
     // Allocate controller first
     switch_controller_t* ctrl = allocate_controller(dev_addr);

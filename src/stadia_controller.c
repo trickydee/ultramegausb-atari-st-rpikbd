@@ -13,7 +13,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if ENABLE_OLED_DISPLAY
 extern ssd1306_t disp;
+#endif
 
 // Controller storage
 static stadia_controller_t controllers[MAX_STADIA_CONTROLLERS];
@@ -239,6 +241,7 @@ void stadia_mount_cb(uint8_t dev_addr) {
     printf("═══════════════════════════════════════════════════════\n");
     printf("\n");
     
+#if ENABLE_OLED_DISPLAY
     // Show on OLED (matching PS4/Xbox/Switch style)
     ssd1306_clear(&disp);
     ssd1306_draw_string(&disp, 15, 10, 2, (char*)"STADIA");
@@ -251,6 +254,7 @@ void stadia_mount_cb(uint8_t dev_addr) {
     
     ssd1306_show(&disp);
     sleep_ms(2000);
+#endif
     
     // Allocate controller
     stadia_controller_t* ctrl = allocate_controller(dev_addr);
