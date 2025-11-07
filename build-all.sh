@@ -18,7 +18,7 @@ LOGGING="${LOGGING:-1}"  # Set to 0 to disable verbose logging
 
 echo "================================================================================"
 echo "  Atari ST USB Adapter - Multi-Variant Build"
-echo "  Version: 12.0.0 (Ultra-low latency serial optimizations)"
+echo "  Version: 12.1.0 (Ultra-low latency serial optimizations)"
 echo "  Language: ${LANGUAGE}"
 echo "  Debug Mode: ${DEBUG}"
 echo "  OLED Display: ${OLED}"
@@ -232,4 +232,11 @@ echo "  3. Release BOOTSEL button"
 echo "  4. Copy the appropriate .uf2 file to the RPI-RP2 drive"
 echo ""
 echo "================================================================================"
+
+# Automatically build speed-mode variant after standard build (unless skipped)
+if [ "${SKIP_SPEED_BUILD:-0}" != "1" ] && [ "${OLED}" = "1" ] && [ "${LOGGING}" = "1" ]; then
+    echo ""
+    echo ">>> Auto-building speed mode variant (OLED=0, LOGGING=0)..."
+    OLED=0 LOGGING=0 SKIP_SPEED_BUILD=1 "$0"
+fi
 

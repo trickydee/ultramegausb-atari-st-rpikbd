@@ -90,3 +90,15 @@
 #ifndef ENABLE_SERIAL_LOGGING
   #define ENABLE_SERIAL_LOGGING 1
 #endif
+
+// If the OLED display is disabled, also disable all OLED-based debug displays
+#if !ENABLE_OLED_DISPLAY
+  #undef ENABLE_CONTROLLER_DEBUG
+  #define ENABLE_CONTROLLER_DEBUG 0
+
+  #undef ENABLE_SWITCH_DEBUG
+  #define ENABLE_SWITCH_DEBUG 0
+
+  #undef ENABLE_STADIA_DEBUG
+  #define ENABLE_STADIA_DEBUG 0
+#endif
