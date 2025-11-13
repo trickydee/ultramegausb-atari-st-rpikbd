@@ -54,6 +54,7 @@ I went out of my way to have TRACE working just like in the rest of Steem
 SSE.
 ---------------------------------------------------------------------------*/
 
+#include "config.h"
 #include "6301.h"
 
 #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
@@ -151,6 +152,7 @@ void hd6301_trigger_reset() {
 
  
 void hd6301_run_clocks(COUNTER_VAR clocks) {
+  clocks *= HD6301_OVERCLOCK_NUM;
   // Called by Steem to run some cycles (per scanline or to update before IO)
   int pc;
   COUNTER_VAR starting_cycles=cpu.ncycles;
