@@ -19,6 +19,8 @@ USB HID Mice
 
 USB HID XY Mice - Inc Microsoft Trackballs
 
+Mouse wheel scrolling mapped to GEM Desktop cursor controls (12.5.x)
+
 Logitech Unifying Adapter - Keyboard, Mice, Trackball
 
 Logitech Bolt Adapter - Keyboard, Mice, Trackball

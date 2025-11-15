@@ -32,6 +32,9 @@
 #include "switch_controller.h"
 #include "stadia_controller.h"
 #include <map>
+#include <deque>
+#include <algorithm>
+#include <bitset>
 
 #if ENABLE_OLED_DISPLAY
 extern ssd1306_t disp;  // External reference to display
@@ -67,6 +70,9 @@ extern ssd1306_t disp;  // External reference to display
 #define ATARI_RSHIFT 54
 #define ATARI_ALT    56
 #define ATARI_CTRL   29
+#define ATARI_CURSOR_UP   72
+#define ATARI_CURSOR_DOWN 80
+#define MAX_WHEEL_PULSES  32
 
 #define GET_I32_VALUE(item)     (int32_t)(item->Value | ((item->Value & (1 << (item->Attributes.BitSize-1))) ? ~((1 << item->Attributes.BitSize) - 1) : 0))
 #define JOY_GPIO_INIT(io)       gpio_init(io); gpio_set_dir(io, GPIO_IN); gpio_pull_up(io);
@@ -84,6 +90,26 @@ static uint32_t g_hid_joy_success = 0;
 static uint32_t g_ps4_success = 0;
 static uint32_t g_xbox_success = 0;
 static uint32_t g_switch_success = 0;
+
+static std::deque<uint8_t> wheel_pulses;
+static std::bitset<128> wheel_prev_mask;
+
+static void enqueue_wheel_pulses(int delta) {
+    if (delta == 0) {
+        return;
+    }
+
+    const uint8_t key = (delta > 0) ? ATARI_CURSOR_UP : ATARI_CURSOR_DOWN;
+    int steps = delta > 0 ? delta : -delta;
+    steps = std::min(steps, 8);  // Avoid bursts from high-resolution wheels
+
+    for (int i = 0; i < steps; ++i) {
+        if (wheel_pulses.size() >= MAX_WHEEL_PULSES) {
+            wheel_pulses.pop_front();
+        }
+        wheel_pulses.push_back(key);
+    }
+}
 
 
 extern "C" {
@@ -274,6 +300,17 @@ void HidInput::force_usb_mouse() {
 }
 
 void HidInput::handle_keyboard() {
+    std::bitset<128> wheel_press_mask;
+    while (!wheel_pulses.empty()) {
+        uint8_t pulse_key = wheel_pulses.front();
+        wheel_pulses.pop_front();
+        if (pulse_key < wheel_press_mask.size()) {
+            wheel_press_mask.set(pulse_key);
+        }
+    }
+
+    bool keyboard_handled = false;
+
     for (auto it : device) {
         if (tuh_hid_get_type(it.first) != HID_KEYBOARD) {
             continue;
@@ -694,6 +731,7 @@ void HidInput::handle_keyboard() {
             // Go through all ST keys and update their state
             for (int i = 1; i < key_states.size(); ++i) {
                 bool down = false;
+                bool pulse_active = wheel_press_mask.test(i);
                 
                 // Special handling for Caps Lock - send pulse only when toggling
                 if (i == ATARI_CAPSLOCK) {
@@ -708,6 +746,10 @@ void HidInput::handle_keyboard() {
                     }
                 }
                 
+                if (pulse_active) {
+                    down = true;
+                }
+                
                 key_states[i] = down ? 1 : 0;
             }
 
@@ -720,7 +762,31 @@ void HidInput::handle_keyboard() {
                                       (kb->modifier & KEYBOARD_MODIFIER_RIGHTALT)) ? 1 : 0;
             // Trigger the next report
             hid_app_request_report(it.first, it.second);
+            keyboard_handled = true;
         }
+    }
+
+    if (!keyboard_handled) {
+        // No keyboard present; apply wheel presses directly to key matrix
+        for (size_t idx = 0; idx < wheel_prev_mask.size(); ++idx) {
+            if (wheel_prev_mask.test(idx) && !wheel_press_mask.test(idx)) {
+                key_states[idx] = 0;
+            }
+        }
+        for (size_t idx = 0; idx < wheel_press_mask.size(); ++idx) {
+            if (wheel_press_mask.test(idx)) {
+                key_states[idx] = 1;
+            }
+        }
+        wheel_prev_mask = wheel_press_mask;
+    } else if (wheel_prev_mask.any()) {
+        // Clear any residual injections from a previous no-keyboard frame
+        for (size_t idx = 0; idx < wheel_prev_mask.size(); ++idx) {
+            if (wheel_prev_mask.test(idx) && !wheel_press_mask.test(idx)) {
+                key_states[idx] = 0;
+            }
+        }
+        wheel_prev_mask.reset();
     }
 }
 
@@ -801,6 +867,7 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
             // Check if this is a multi-interface mouse (Logitech Unifying)
             // These have key >= 128 AND are boot protocol mice (have simple 4-byte reports)
             bool is_multi_interface_mouse = (it.first >= 128);
+            int wheel_delta = 0;
             
             if (is_multi_interface_mouse) {
                 // For multi-interface mice (Logitech Unifying), HID parser fails
@@ -826,10 +893,16 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
                 // Update button state
                 mouse_state = (mouse_state & 0xfd) | ((buttons & 0x01) ? 2 : 0);  // Left button
                 mouse_state = (mouse_state & 0xfe) | ((buttons & 0x02) ? 1 : 0);  // Right button
+
+                if (mouse) {
+                    wheel_delta = mouse->wheel;
+                }
             }
             else if (info) {
                 // Standard HID parser for regular mice
                 int8_t buttons = 0;
+                int wheel_candidate = 0;
+                bool wheel_found = false;
 
                 for (uint8_t i = 0; i < info->TotalReportItems; ++i) {
                     HID_ReportItem_t* item = &info->ReportItems[i];
@@ -851,10 +924,35 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
                             y = GET_I32_VALUE(item);
                         }
                     }
+                    else if ((item->Attributes.Usage.Page == USAGE_PAGE_GENERIC_DCTRL) &&
+                             (item->Attributes.Usage.Usage == 0x38) &&
+                             (item->ItemType == HID_REPORT_ITEM_In)) {
+                        wheel_candidate = GET_I32_VALUE(item);
+                        wheel_found = true;
+                    }
+                    else if ((item->Attributes.Usage.Page == 0x0C) &&
+                             (item->Attributes.Usage.Usage == 0x0238) &&
+                             (item->ItemType == HID_REPORT_ITEM_In)) {
+                        // Consumer Control AC Pan can be used for wheels on some devices
+                        wheel_candidate = GET_I32_VALUE(item);
+                        wheel_found = true;
+                    }
                 }
                 // Update button state
                 mouse_state = (mouse_state & 0xfd) | ((buttons & MOUSE_BUTTON_LEFT) ? 2 : 0);
                 mouse_state = (mouse_state & 0xfe) | ((buttons & MOUSE_BUTTON_RIGHT) ? 1 : 0);
+
+                if (wheel_found) {
+                    wheel_delta = wheel_candidate;
+                } else if (mouse) {
+                    wheel_delta = mouse->wheel;
+                }
+            } else if (mouse) {
+                wheel_delta = mouse->wheel;
+            }
+
+            if (wheel_delta != 0) {
+                enqueue_wheel_pulses(wheel_delta);
             }
             // Trigger the next report (use device key, not actual_addr, for multi-interface devices)
             hid_app_request_report(it.first, it.second);
