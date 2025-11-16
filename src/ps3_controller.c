@@ -218,54 +218,67 @@ ps3_controller_t* ps3_get_controller(uint8_t dev_addr) {
     return find_controller_by_addr(dev_addr);
 }
 
+static void ps3_compute_axes(const ps3_controller_t* ps3,
+                             uint8_t* left_axis, uint8_t* fire,
+                             uint8_t* right_axis, uint8_t* joy0_fire) {
+    const ps3_report_t* input = &ps3->report;
+    
+    if (left_axis) {
+        *left_axis = 0;
+        int8_t stick_x = (int8_t)(input->lx - 128);
+        int8_t stick_y = (int8_t)(input->ly - 128);
+        
+        if (stick_x < -ps3->deadzone || stick_x > ps3->deadzone ||
+            stick_y < -ps3->deadzone || stick_y > ps3->deadzone) {
+            
+            if (stick_y < -ps3->deadzone) *left_axis |= 0x01;
+            if (stick_y > ps3->deadzone)  *left_axis |= 0x02;
+            if (stick_x < -ps3->deadzone) *left_axis |= 0x04;
+            if (stick_x > ps3->deadzone)  *left_axis |= 0x08;
+        }
+        
+        if (input->dpad != 8) {
+            *left_axis = 0;
+            switch (input->dpad) {
+                case 0: *left_axis = 0x01; break;
+                case 1: *left_axis = 0x09; break;
+                case 2: *left_axis = 0x08; break;
+                case 3: *left_axis = 0x0A; break;
+                case 4: *left_axis = 0x02; break;
+                case 5: *left_axis = 0x06; break;
+                case 6: *left_axis = 0x04; break;
+                case 7: *left_axis = 0x05; break;
+            }
+        }
+    }
+    
+    if (fire) {
+        *fire = (input->buttons[2] & 0x40) ? 1 : 0;
+    }
+    
+    if (right_axis) {
+        *right_axis = 0;
+        int8_t stick_rx = (int8_t)(input->rx - 128);
+        int8_t stick_ry = (int8_t)(input->ry - 128);
+        
+        if (stick_ry < -ps3->deadzone) *right_axis |= 0x01;
+        if (stick_ry > ps3->deadzone)  *right_axis |= 0x02;
+        if (stick_rx < -ps3->deadzone) *right_axis |= 0x04;
+        if (stick_rx > ps3->deadzone)  *right_axis |= 0x08;
+    }
+    
+    if (joy0_fire) {
+        *joy0_fire = (input->buttons[2] & 0x20) ? 1 : 0;  // Circle button
+    }
+}
+
 void ps3_to_atari(const ps3_controller_t* ps3, uint8_t joystick_num,
                   uint8_t* direction, uint8_t* fire) {
     if (!ps3 || !direction || !fire) {
         return;
     }
-    
-    const ps3_report_t* input = &ps3->report;
-    *direction = 0;
-    *fire = 0;
-    
-    // Convert analog stick to directions (left stick)
-    // PS3 sticks are 0-255 with 128/0x80 as center
-    int8_t stick_x = (int8_t)(input->lx - 128);
-    int8_t stick_y = (int8_t)(input->ly - 128);
-    
-    // Apply deadzone
-    if (stick_x < -ps3->deadzone || stick_x > ps3->deadzone ||
-        stick_y < -ps3->deadzone || stick_y > ps3->deadzone) {
-        
-        if (stick_y < -ps3->deadzone) *direction |= 0x01;  // Up
-        if (stick_y > ps3->deadzone)  *direction |= 0x02;  // Down
-        if (stick_x < -ps3->deadzone) *direction |= 0x04;  // Left
-        if (stick_x > ps3->deadzone)  *direction |= 0x08;  // Right
-    }
-    
-    // D-Pad takes priority if pressed (converted to hat switch format 0-7, 8=center)
-    if (input->dpad != 8) {
-        *direction = 0;
-        switch (input->dpad) {
-            case 0: *direction = 0x01; break;  // UP
-            case 1: *direction = 0x09; break;  // UP-RIGHT
-            case 2: *direction = 0x08; break;  // RIGHT
-            case 3: *direction = 0x0A; break;  // DOWN-RIGHT
-            case 4: *direction = 0x02; break;  // DOWN
-            case 5: *direction = 0x06; break;  // DOWN-LEFT
-            case 6: *direction = 0x04; break;  // LEFT
-            case 7: *direction = 0x05; break;  // UP-LEFT
-        }
-    }
-    
-    // Fire button mapping
-    // buttons[2] contains: L2=0x01, R2=0x02, L1=0x04, R1=0x08, 
-    //                      Triangle=0x10, Circle=0x20, X=0x40, Square=0x80
-    
-    // Fire: X button (Cross) only
-    if (input->buttons[2] & 0x40) {
-        *fire = 1;
-    }
+    uint8_t dummy;
+    ps3_compute_axes(ps3, direction, fire, &dummy, NULL);
 }
 
 void ps3_set_deadzone(uint8_t dev_addr, int16_t deadzone) {
@@ -334,5 +347,26 @@ void ps3_mount_cb(uint8_t dev_addr) {
 void ps3_unmount_cb(uint8_t dev_addr) {
     printf("PS3: Controller unmounted at address %d\n", dev_addr);
     free_controller(dev_addr);
+}
+
+uint8_t ps3_connected_count(void) {
+    uint8_t count = 0;
+    for (uint8_t i = 0; i < controller_count; i++) {
+        if (controllers[i].connected) {
+            count++;
+        }
+    }
+    return count;
+}
+
+bool ps3_llamatron_axes(uint8_t* joy1_axis, uint8_t* joy1_fire,
+                        uint8_t* joy0_axis, uint8_t* joy0_fire) {
+    for (uint8_t i = 0; i < controller_count; i++) {
+        if (controllers[i].connected) {
+            ps3_compute_axes(&controllers[i], joy1_axis, joy1_fire, joy0_axis, joy0_fire);
+            return true;
+        }
+    }
+    return false;
 }
 

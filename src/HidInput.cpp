@@ -31,10 +31,12 @@
 #include "gamecube_adapter.h"
 #include "switch_controller.h"
 #include "stadia_controller.h"
+#include "xinput.h"
 #include <map>
 #include <deque>
 #include <algorithm>
 #include <bitset>
+#include <cstring>
 
 #if ENABLE_OLED_DISPLAY
 extern ssd1306_t disp;  // External reference to display
@@ -90,6 +92,15 @@ static uint32_t g_hid_joy_success = 0;
 static uint32_t g_ps4_success = 0;
 static uint32_t g_xbox_success = 0;
 static uint32_t g_switch_success = 0;
+
+// Llamatron (dual-stick) mode state
+static bool g_llamatron_mode = false;
+static bool g_llamatron_active = false;
+static uint8_t g_llama_axis_joy1 = 0;
+static uint8_t g_llama_fire_joy1 = 0;
+static uint8_t g_llama_axis_joy0 = 0;
+static uint8_t g_llama_fire_joy0 = 0;
+static bool g_llamatron_restore_mouse = false;
 
 static std::deque<uint8_t> wheel_pulses;
 static std::bitset<128> wheel_prev_mask;
@@ -149,6 +160,73 @@ void gc_notify_mount() {
 void gc_notify_unmount() {
     joy_count--;
     xinput_notify_ui_unmount();
+}
+
+static uint8_t count_connected_usb_gamepads() {
+    uint8_t total = 0;
+    total += ps4_connected_count();
+    total += ps3_connected_count();
+    total += switch_connected_count();
+    total += stadia_connected_count();
+    total += xinput_connected_count();
+    return total;
+}
+
+static bool collect_llamatron_sample(uint8_t& joy1_axis, uint8_t& joy1_fire,
+                                     uint8_t& joy0_axis, uint8_t& joy0_fire) {
+    if (ps4_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
+    if (ps3_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
+    if (switch_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
+    if (stadia_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
+    if (xinput_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
+    return false;
+}
+
+#if ENABLE_OLED_DISPLAY
+static void draw_centered_text(const char* text, int y, int scale) {
+    if (!text || !*text) {
+        return;
+    }
+    size_t len = strlen(text);
+    if (len > 16) {
+        len = 16;
+    }
+    char buf[17];
+    memcpy(buf, text, len);
+    buf[len] = '\0';
+    int char_width = 6 * scale;
+    int width = static_cast<int>(len) * char_width;
+    int x = (SSD1306_WIDTH - width) / 2;
+    if (x < 0) {
+        x = 0;
+    }
+    ssd1306_draw_string(&disp, x, y, scale, buf);
+}
+#endif
+
+static void show_llamatron_status(const char* line1, const char* line2) {
+    if (line1 && *line1) {
+        printf("LLAMATRON: %s", line1);
+        if (line2 && *line2) {
+            printf(" - %s", line2);
+        }
+        printf("\n");
+    }
+#if ENABLE_OLED_DISPLAY
+    ssd1306_clear(&disp);
+    // Use smaller scale for the title lines to ensure they fit
+    draw_centered_text("LLAMATRON", 6, 1);
+    draw_centered_text("MODE", 24, 1);
+    if (line1 && *line1) {
+        // Emphasize the status line
+        draw_centered_text(line1, 44, 2);
+    }
+    if (line2 && *line2) {
+        draw_centered_text(line2, 58, 1);
+    }
+    ssd1306_show(&disp);
+    sleep_ms(1000);
+#endif
 }
 
 void tuh_hid_mounted_cb(uint8_t dev_addr) {
@@ -296,7 +374,9 @@ void HidInput::open(const std::string& kbdev, const std::string& mousedev, const
 }
 
 void HidInput::force_usb_mouse() {
-    ui_->set_mouse_enabled(true);
+    if (!g_llamatron_mode && ui_) {
+        ui_->set_mouse_enabled(true);
+    }
 }
 
 void HidInput::handle_keyboard() {
@@ -331,7 +411,11 @@ void HidInput::handle_keyboard() {
             if (ctrl_pressed && f12_pressed) {
                 // Toggle mouse mode on Ctrl+F12
                 if (!last_toggle_state) {
-                    ui_->set_mouse_enabled(!ui_->get_mouse_enabled());
+                    if (g_llamatron_mode) {
+                        show_llamatron_status("Mouse locked", "Disable Llamatron first");
+                    } else {
+                        ui_->set_mouse_enabled(!ui_->get_mouse_enabled());
+                    }
                     last_toggle_state = true;
                 }
             } else {
@@ -625,6 +709,54 @@ void HidInput::handle_keyboard() {
                 }
             } else {
                 last_joy1_state = false;
+            }
+
+            // Check for Ctrl+F4 to toggle Llamatron dual-stick mode
+            static bool last_llama_toggle = false;
+            bool f4_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb->keycode[i] == HID_KEY_F4) {
+                    f4_pressed = true;
+                    break;
+                }
+            }
+
+            if (ctrl_pressed && f4_pressed) {
+                if (!last_llama_toggle) {
+                    if (g_llamatron_mode) {
+                        g_llamatron_mode = false;
+                        g_llamatron_active = false;
+                        if (g_llamatron_restore_mouse && ui_) {
+                            ui_->set_mouse_enabled(true);
+                            g_llamatron_restore_mouse = false;
+                        }
+                        show_llamatron_status("DISABLED", nullptr);
+                    } else {
+                        uint8_t joy_setting = ui_->get_joystick();
+                        bool joy0_usb = !(joy_setting & 0x01);
+                        bool joy1_usb = !(joy_setting & 0x02);
+                        uint8_t pad_count = count_connected_usb_gamepads();
+                        if (!joy0_usb || !joy1_usb) {
+                            show_llamatron_status("USB joysticks only", "Set Joy0/Joy1 to USB");
+                        } else if (pad_count != 1) {
+                            show_llamatron_status("Requires single pad", "Connect only one gamepad");
+                        } else {
+                            g_llamatron_mode = true;
+                            if (ui_) {
+                                g_llamatron_restore_mouse = ui_->get_mouse_enabled();
+                                if (g_llamatron_restore_mouse) {
+                                    ui_->set_mouse_enabled(false);
+                                }
+                            } else {
+                                g_llamatron_restore_mouse = false;
+                            }
+                            show_llamatron_status("ACTIVE", nullptr);
+                        }
+                    }
+                    last_llama_toggle = true;
+                }
+            } else {
+                last_llama_toggle = false;
             }
             
             // Check for Alt+[ to send Atari keypad /
@@ -1223,6 +1355,48 @@ void HidInput::handle_joystick() {
         }
     }
 
+    bool llama_prev_active = g_llamatron_active;
+    if (g_llamatron_mode) {
+        uint8_t joy_setting = ui_->get_joystick();
+        bool usb0 = !(joy_setting & 0x01);
+        bool usb1 = !(joy_setting & 0x02);
+        uint8_t pad_count = count_connected_usb_gamepads();
+        uint8_t axis1 = 0, fire1 = 0, axis0 = 0, fire0 = 0;
+        bool have_sample = (pad_count == 1 && usb0 && usb1 &&
+                            collect_llamatron_sample(axis1, fire1, axis0, fire0));
+
+        if (have_sample) {
+            g_llamatron_active = true;
+            g_llama_axis_joy1 = axis1;
+            g_llama_fire_joy1 = fire1;
+            g_llama_axis_joy0 = axis0;
+            g_llama_fire_joy0 = fire0;
+
+        } else {
+            g_llamatron_active = false;
+            g_llama_axis_joy1 = 0;
+            g_llama_fire_joy1 = 0;
+            g_llama_axis_joy0 = 0;
+            g_llama_fire_joy0 = 0;
+
+
+            if (g_llamatron_mode && llama_prev_active) {
+                if (pad_count != 1) {
+                    show_llamatron_status("Suspended", "Need single USB pad");
+                } else if (!usb0 || !usb1) {
+                    show_llamatron_status("Suspended", "Joy0/Joy1 must use USB");
+                }
+            }
+        }
+    } else {
+        g_llamatron_active = false;
+        g_llama_axis_joy1 = 0;
+        g_llama_fire_joy1 = 0;
+        g_llama_axis_joy0 = 0;
+        g_llama_fire_joy0 = 0;
+
+    }
+
     // See if the joysticks are GPIO or USB
     for (int joystick = 1; joystick >= 0; --joystick) {
         // Initialize axis and button for each joystick separately to prevent state bleed
@@ -1258,9 +1432,21 @@ void HidInput::handle_joystick() {
             
             // Try all sources: USB HID joystick, then PS4, then Xbox
             bool got_input = false;
+
+            if (g_llamatron_active) {
+                if (joystick == 1) {
+                    axis = g_llama_axis_joy1;
+                    button = g_llama_fire_joy1;
+                    got_input = true;
+                } else if (joystick == 0) {
+                    axis = g_llama_axis_joy0;
+                    button = g_llama_fire_joy0;
+                    got_input = true;
+                }
+            }
             
             // First priority: USB HID joystick
-            if (next_joystick < joystick_addr.size()) {
+            if (!got_input && next_joystick < joystick_addr.size()) {
                 if (get_usb_joystick(joystick_addr[next_joystick], axis, button)) {
                     got_input = true;
                     g_hid_joy_success++;  // Track HID success

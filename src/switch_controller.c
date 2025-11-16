@@ -383,78 +383,68 @@ void switch_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len
     }
 }
 
+static void switch_compute_axes(const switch_controller_t* sw,
+                                uint8_t* left_axis, uint8_t* fire,
+                                uint8_t* right_axis, uint8_t* joy0_fire) {
+    if (left_axis) {
+        *left_axis = 0;
+        switch (sw->dpad) {
+            case SWITCH_DPAD_UP:         *left_axis |= 0x01; break;
+            case SWITCH_DPAD_UP_RIGHT:   *left_axis |= 0x01 | 0x08; break;
+            case SWITCH_DPAD_RIGHT:      *left_axis |= 0x08; break;
+            case SWITCH_DPAD_DOWN_RIGHT: *left_axis |= 0x02 | 0x08; break;
+            case SWITCH_DPAD_DOWN:       *left_axis |= 0x02; break;
+            case SWITCH_DPAD_DOWN_LEFT:  *left_axis |= 0x02 | 0x04; break;
+            case SWITCH_DPAD_LEFT:       *left_axis |= 0x04; break;
+            case SWITCH_DPAD_UP_LEFT:    *left_axis |= 0x01 | 0x04; break;
+        }
+        
+        if (*left_axis == 0) {
+            if (abs(sw->stick_left_x) > sw->deadzone || abs(sw->stick_left_y) > sw->deadzone) {
+                if (sw->stick_left_x < -sw->deadzone)  *left_axis |= 0x04;
+                if (sw->stick_left_x > sw->deadzone)   *left_axis |= 0x08;
+                if (sw->stick_left_y < -sw->deadzone)  *left_axis |= 0x01;
+                if (sw->stick_left_y > sw->deadzone)   *left_axis |= 0x02;
+            }
+        }
+    }
+    
+    if (fire) {
+        *fire = ((sw->buttons & SWITCH_BTN_B) ||
+                 (sw->buttons & SWITCH_BTN_A) ||
+                 (sw->buttons & SWITCH_BTN_ZR)) ? 1 : 0;
+    }
+    
+    if (right_axis) {
+        *right_axis = 0;
+        if (abs(sw->stick_right_x) > sw->deadzone || abs(sw->stick_right_y) > sw->deadzone) {
+            if (sw->stick_right_x < -sw->deadzone)  *right_axis |= 0x04;
+            if (sw->stick_right_x > sw->deadzone)   *right_axis |= 0x08;
+            if (sw->stick_right_y < -sw->deadzone)  *right_axis |= 0x01;
+            if (sw->stick_right_y > sw->deadzone)   *right_axis |= 0x02;
+        }
+    }
+    
+    if (joy0_fire) {
+        *joy0_fire = (sw->buttons & SWITCH_BTN_A) ? 1 : 0;
+    }
+}
+
 void switch_to_atari(const switch_controller_t* sw, uint8_t joystick_num, 
                      uint8_t* direction, uint8_t* fire) {
     if (!sw || !direction || !fire) {
         return;
     }
     
-    *direction = 0;
-    *fire = 0;
+    uint8_t right_dummy;
+    switch_compute_axes(sw, direction, fire, &right_dummy, NULL);
     
-    // Debug: Log conversion periodically
-    static uint32_t convert_count = 0;
-    convert_count++;
-    
-    // D-Pad has priority (arcade stick likely uses D-Pad)
-    switch (sw->dpad) {
-        case SWITCH_DPAD_UP:
-            *direction |= 0x01;
-            break;
-        case SWITCH_DPAD_UP_RIGHT:
-            *direction |= 0x01 | 0x08;
-            break;
-        case SWITCH_DPAD_RIGHT:
-            *direction |= 0x08;
-            break;
-        case SWITCH_DPAD_DOWN_RIGHT:
-            *direction |= 0x02 | 0x08;
-            break;
-        case SWITCH_DPAD_DOWN:
-            *direction |= 0x02;
-            break;
-        case SWITCH_DPAD_DOWN_LEFT:
-            *direction |= 0x02 | 0x04;
-            break;
-        case SWITCH_DPAD_LEFT:
-            *direction |= 0x04;
-            break;
-        case SWITCH_DPAD_UP_LEFT:
-            *direction |= 0x01 | 0x04;
-            break;
-    }
-    
-    // If D-Pad not used, check left analog stick (for Pro Controller)
-    if (*direction == 0) {
-        if (abs(sw->stick_left_x) > sw->deadzone || abs(sw->stick_left_y) > sw->deadzone) {
-            // Left stick
-            if (sw->stick_left_x < -sw->deadzone)  *direction |= 0x04;  // Left
-            if (sw->stick_left_x > sw->deadzone)   *direction |= 0x08;  // Right
-            
-            // Y axis
-            if (sw->stick_left_y < -sw->deadzone)  *direction |= 0x01;  // Up
-            if (sw->stick_left_y > sw->deadzone)   *direction |= 0x02;  // Down
-        }
-    }
-    
-    // Fire button mapping
-    // B button = primary (Nintendo B is like Xbox A position)
-    // A button = secondary
-    // ZR trigger = alternative
-    if (sw->buttons & SWITCH_BTN_B) {
-        *fire = 1;
-    } else if (sw->buttons & SWITCH_BTN_A) {
-        *fire = 1;
-    } else if (sw->buttons & SWITCH_BTN_ZR) {
-        *fire = 1;
-    }
-    
-    // Update Atari output for OLED display
     last_atari_dir = *direction;
     last_atari_fire = *fire;
     
 #if ENABLE_SWITCH_DEBUG
-    // Debug: Log every 100th conversion to see what's happening
+    static uint32_t convert_count = 0;
+    convert_count++;
     if (convert_count % 100 == 1) {
         printf("Switch->Atari #%lu: Btns=0x%04X DPad=%d LX=%d LY=%d => Dir=0x%02X Fire=%d\n",
                convert_count, sw->buttons, sw->dpad, sw->stick_left_x, sw->stick_left_y,
@@ -669,6 +659,27 @@ void switch_unmount_cb(uint8_t dev_addr) {
     }
     
     free_controller(dev_addr);
+}
+
+uint8_t switch_connected_count(void) {
+    uint8_t count = 0;
+    for (uint8_t i = 0; i < MAX_SWITCH_CONTROLLERS; i++) {
+        if (controllers[i].connected) {
+            count++;
+        }
+    }
+    return count;
+}
+
+bool switch_llamatron_axes(uint8_t* joy1_axis, uint8_t* joy1_fire,
+                           uint8_t* joy0_axis, uint8_t* joy0_fire) {
+    for (uint8_t i = 0; i < MAX_SWITCH_CONTROLLERS; i++) {
+        if (controllers[i].connected) {
+            switch_compute_axes(&controllers[i], joy1_axis, joy1_fire, joy0_axis, joy0_fire);
+            return true;
+        }
+    }
+    return false;
 }
 
 void switch_set_deadzone(uint8_t dev_addr, int16_t deadzone) {

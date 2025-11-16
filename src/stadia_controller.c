@@ -156,75 +156,61 @@ void stadia_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len
     }
 }
 
+static void stadia_compute_axes(const stadia_controller_t* stadia,
+                                uint8_t* left_axis, uint8_t* fire,
+                                uint8_t* right_axis, uint8_t* joy0_fire) {
+    if (left_axis) {
+        *left_axis = 0;
+        
+        switch (stadia->dpad) {
+            case STADIA_DPAD_UP:         *left_axis |= 0x01; break;
+            case STADIA_DPAD_UP_RIGHT:   *left_axis |= 0x01 | 0x08; break;
+            case STADIA_DPAD_RIGHT:      *left_axis |= 0x08; break;
+            case STADIA_DPAD_DOWN_RIGHT: *left_axis |= 0x02 | 0x08; break;
+            case STADIA_DPAD_DOWN:       *left_axis |= 0x02; break;
+            case STADIA_DPAD_DOWN_LEFT:  *left_axis |= 0x02 | 0x04; break;
+            case STADIA_DPAD_LEFT:       *left_axis |= 0x04; break;
+            case STADIA_DPAD_UP_LEFT:    *left_axis |= 0x01 | 0x04; break;
+        }
+        
+        if (*left_axis == 0) {
+            if (abs(stadia->stick_left_x) > stadia->deadzone || abs(stadia->stick_left_y) > stadia->deadzone) {
+                if (stadia->stick_left_x < -stadia->deadzone)  *left_axis |= 0x04;
+                if (stadia->stick_left_x > stadia->deadzone)   *left_axis |= 0x08;
+                if (stadia->stick_left_y < -stadia->deadzone)  *left_axis |= 0x01;
+                if (stadia->stick_left_y > stadia->deadzone)   *left_axis |= 0x02;
+            }
+        }
+    }
+    
+    if (fire) {
+        *fire = ((stadia->buttons & (STADIA_BTN_A | STADIA_BTN_B |
+                                     STADIA_BTN_X | STADIA_BTN_Y |
+                                     STADIA_BTN_R1 | STADIA_BTN_R2))) ? 1 : 0;
+    }
+    
+    if (right_axis) {
+        *right_axis = 0;
+        if (abs(stadia->stick_right_x) > stadia->deadzone || abs(stadia->stick_right_y) > stadia->deadzone) {
+            if (stadia->stick_right_x < -stadia->deadzone)  *right_axis |= 0x04;
+            if (stadia->stick_right_x > stadia->deadzone)   *right_axis |= 0x08;
+            if (stadia->stick_right_y < -stadia->deadzone)  *right_axis |= 0x01;
+            if (stadia->stick_right_y > stadia->deadzone)   *right_axis |= 0x02;
+        }
+    }
+    
+    if (joy0_fire) {
+        *joy0_fire = (stadia->buttons & STADIA_BTN_B) ? 1 : 0;
+    }
+}
+
 void stadia_to_atari(const stadia_controller_t* stadia, uint8_t joystick_num, 
                      uint8_t* direction, uint8_t* fire) {
     if (!stadia || !direction || !fire) {
         return;
     }
-    
-    *direction = 0;
-    *fire = 0;
-    
-    // D-Pad has priority
-    switch (stadia->dpad) {
-        case STADIA_DPAD_UP:
-            *direction |= 0x01;
-            break;
-        case STADIA_DPAD_UP_RIGHT:
-            *direction |= 0x01 | 0x08;
-            break;
-        case STADIA_DPAD_RIGHT:
-            *direction |= 0x08;
-            break;
-        case STADIA_DPAD_DOWN_RIGHT:
-            *direction |= 0x02 | 0x08;
-            break;
-        case STADIA_DPAD_DOWN:
-            *direction |= 0x02;
-            break;
-        case STADIA_DPAD_DOWN_LEFT:
-            *direction |= 0x02 | 0x04;
-            break;
-        case STADIA_DPAD_LEFT:
-            *direction |= 0x04;
-            break;
-        case STADIA_DPAD_UP_LEFT:
-            *direction |= 0x01 | 0x04;
-            break;
-    }
-    
-    // If D-Pad not used, check left analog stick
-    if (*direction == 0) {
-        if (abs(stadia->stick_left_x) > stadia->deadzone || abs(stadia->stick_left_y) > stadia->deadzone) {
-            // Left stick
-            if (stadia->stick_left_x < -stadia->deadzone)  *direction |= 0x04;  // Left
-            if (stadia->stick_left_x > stadia->deadzone)   *direction |= 0x08;  // Right
-            
-            // Y axis
-            if (stadia->stick_left_y < -stadia->deadzone)  *direction |= 0x01;  // Up
-            if (stadia->stick_left_y > stadia->deadzone)   *direction |= 0x02;  // Down
-        }
-    }
-    
-    // Fire button mapping
-    // A button = primary (bottom button on right side)
-    // B button = secondary (right button)
-    // X button = alternative (left button)
-    // Y button = alternative (top button)
-    // Triggers also work as fire
-    if (stadia->buttons & STADIA_BTN_A) {
-        *fire = 1;
-    } else if (stadia->buttons & STADIA_BTN_B) {
-        *fire = 1;
-    } else if (stadia->buttons & STADIA_BTN_X) {
-        *fire = 1;
-    } else if (stadia->buttons & STADIA_BTN_Y) {
-        *fire = 1;
-    } else if (stadia->buttons & STADIA_BTN_R1) {
-        *fire = 1;
-    } else if (stadia->buttons & STADIA_BTN_R2) {
-        *fire = 1;
-    }
+    uint8_t right_dummy;
+    stadia_compute_axes(stadia, direction, fire, &right_dummy, NULL);
 }
 
 void stadia_mount_cb(uint8_t dev_addr) {
@@ -275,5 +261,26 @@ void stadia_set_deadzone(uint8_t dev_addr, int16_t deadzone) {
     if (ctrl) {
         ctrl->deadzone = deadzone;
     }
+}
+
+uint8_t stadia_connected_count(void) {
+    uint8_t count = 0;
+    for (uint8_t i = 0; i < MAX_STADIA_CONTROLLERS; i++) {
+        if (controllers[i].connected) {
+            count++;
+        }
+    }
+    return count;
+}
+
+bool stadia_llamatron_axes(uint8_t* joy1_axis, uint8_t* joy1_fire,
+                           uint8_t* joy0_axis, uint8_t* joy0_fire) {
+    for (uint8_t i = 0; i < MAX_STADIA_CONTROLLERS; i++) {
+        if (controllers[i].connected) {
+            stadia_compute_axes(&controllers[i], joy1_axis, joy1_fire, joy0_axis, joy0_fire);
+            return true;
+        }
+    }
+    return false;
 }
 

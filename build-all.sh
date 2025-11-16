@@ -18,7 +18,7 @@ LOGGING="${LOGGING:-1}"  # Set to 0 to disable verbose logging
 
 echo "================================================================================"
 echo "  Atari ST USB Adapter - Multi-Variant Build"
-echo "  Version: 12.5.3 (Ultra-low latency serial optimizations)"
+echo "  Version: 12.5.7 (Ultra-low latency serial optimizations)"
 echo "  Language: ${LANGUAGE}"
 echo "  Debug Mode: ${DEBUG}"
 echo "  OLED Display: ${OLED}"

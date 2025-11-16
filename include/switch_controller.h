@@ -134,6 +134,21 @@ void switch_to_atari(const switch_controller_t* sw, uint8_t joystick_num,
                      uint8_t* direction, uint8_t* fire);
 
 /**
+ * Return number of connected Switch controllers
+ */
+uint8_t switch_connected_count(void);
+
+/**
+ * Retrieve dual-stick axes for Llamatron mode
+ * @param joy1_axis Output: left stick/D-pad axis bits
+ * @param joy1_fire Output: fire bit (B/A/ZR)
+ * @param joy0_axis Output: right stick axis bits
+ * @return true if controller data available
+ */
+bool switch_llamatron_axes(uint8_t* joy1_axis, uint8_t* joy1_fire,
+                           uint8_t* joy0_axis, uint8_t* joy0_fire);
+
+/**
  * Mount callback - called when Switch controller connected
  * @param dev_addr USB device address
  */
