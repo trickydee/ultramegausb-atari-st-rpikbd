@@ -74,6 +74,8 @@ extern ssd1306_t disp;  // External reference to display
 #define ATARI_CTRL   29
 #define ATARI_CURSOR_UP   72
 #define ATARI_CURSOR_DOWN 80
+#define ATARI_KEY_P       25  // Atari ST scancode for 'P'
+#define ATARI_KEY_O       24  // Atari ST scancode for 'O'
 #define MAX_WHEEL_PULSES  32
 
 #define GET_I32_VALUE(item)     (int32_t)(item->Value | ((item->Value & (1 << (item->Attributes.BitSize-1))) ? ~((1 << item->Attributes.BitSize) - 1) : 0))
@@ -101,6 +103,9 @@ static uint8_t g_llama_fire_joy1 = 0;
 static uint8_t g_llama_axis_joy0 = 0;
 static uint8_t g_llama_fire_joy0 = 0;
 static bool g_llamatron_restore_mouse = false;
+// Llamatron pause/unpause button state
+static bool g_llama_pause_button_prev = false;
+static bool g_llama_paused = false;  // Track pause state to toggle between P and O
 
 static std::deque<uint8_t> wheel_pulses;
 static std::bitset<128> wheel_prev_mask;
@@ -124,6 +129,9 @@ static void enqueue_wheel_pulses(int delta) {
 
 
 extern "C" {
+
+// Forward declaration for Xbox pause button check
+bool xinput_check_menu_or_start_button(void);
 
 // Xbox controller counter (extern, modified by main.cpp xinput callbacks)
 int xinput_joy_count = 0;
@@ -179,6 +187,49 @@ static bool collect_llamatron_sample(uint8_t& joy1_axis, uint8_t& joy1_fire,
     if (switch_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
     if (stadia_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
     if (xinput_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
+    return false;
+}
+
+// Check for menu/options/start button press across all controller types
+// Returns true if button is currently pressed
+static bool check_llamatron_pause_button() {
+    // Check PS4 controllers (Options button)
+    for (uint8_t i = 0; i < 255; i++) {
+        ps4_controller_t* ps4 = ps4_get_controller(i);
+        if (ps4 && ps4->connected && ps4->report.options) {
+            return true;
+        }
+    }
+    
+    // Check PS3 controllers (Start button)
+    for (uint8_t i = 0; i < 255; i++) {
+        ps3_controller_t* ps3 = ps3_get_controller(i);
+        if (ps3 && ps3->connected && (ps3->report.buttons[0] & (1 << PS3_BTN_START))) {
+            return true;
+        }
+    }
+    
+    // Check Xbox controllers (Menu button = BACK, Start button = START)
+    if (xinput_check_menu_or_start_button()) {
+        return true;
+    }
+    
+    // Check Switch controllers (Plus button = menu)
+    for (uint8_t i = 0; i < 255; i++) {
+        switch_controller_t* sw = switch_get_controller(i);
+        if (sw && sw->connected && (sw->buttons & SWITCH_BTN_PLUS)) {
+            return true;
+        }
+    }
+    
+    // Check Stadia controllers (Menu button)
+    for (uint8_t i = 0; i < 255; i++) {
+        stadia_controller_t* stadia = stadia_get_controller(i);
+        if (stadia && stadia->connected && (stadia->buttons & STADIA_BTN_START)) {
+            return true;
+        }
+    }
+    
     return false;
 }
 
@@ -726,6 +777,11 @@ void HidInput::handle_keyboard() {
                     if (g_llamatron_mode) {
                         g_llamatron_mode = false;
                         g_llamatron_active = false;
+                        // Reset pause state when disabling Llamatron mode
+                        g_llama_paused = false;
+                        g_llama_pause_button_prev = false;
+                        key_states[ATARI_KEY_P] = 0;
+                        key_states[ATARI_KEY_O] = 0;
                         if (g_llamatron_restore_mouse && ui_) {
                             ui_->set_mouse_enabled(true);
                             g_llamatron_restore_mouse = false;
@@ -1372,12 +1428,37 @@ void HidInput::handle_joystick() {
             g_llama_axis_joy0 = axis0;
             g_llama_fire_joy0 = fire0;
 
+            // Handle pause/unpause button in Llamatron mode
+            bool pause_button_pressed = check_llamatron_pause_button();
+            if (pause_button_pressed && !g_llama_pause_button_prev) {
+                // Button just pressed (edge detection)
+                // Toggle pause state and inject appropriate key
+                if (g_llama_paused) {
+                    // Currently paused, send 'O' to unpause
+                    key_states[ATARI_KEY_O] = 1;
+                    g_llama_paused = false;
+                } else {
+                    // Currently unpaused, send 'P' to pause
+                    key_states[ATARI_KEY_P] = 1;
+                    g_llama_paused = true;
+                }
+            } else if (!pause_button_pressed && g_llama_pause_button_prev) {
+                // Button just released, clear the key
+                key_states[ATARI_KEY_P] = 0;
+                key_states[ATARI_KEY_O] = 0;
+            }
+            g_llama_pause_button_prev = pause_button_pressed;
+
         } else {
             g_llamatron_active = false;
             g_llama_axis_joy1 = 0;
             g_llama_fire_joy1 = 0;
             g_llama_axis_joy0 = 0;
             g_llama_fire_joy0 = 0;
+            // Clear pause button state when Llamatron is inactive
+            g_llama_pause_button_prev = false;
+            key_states[ATARI_KEY_P] = 0;
+            key_states[ATARI_KEY_O] = 0;
 
 
             if (g_llamatron_mode && llama_prev_active) {

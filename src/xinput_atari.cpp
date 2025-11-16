@@ -249,5 +249,27 @@ extern "C" bool xinput_llamatron_axes(uint8_t* joy1_axis, uint8_t* joy1_fire,
     }
     return false;
 }
+
+// Get Xbox controller by device address (for pause button checking)
+extern "C" const xinputh_interface_t* xinput_get_controller(uint8_t dev_addr) {
+    if (dev_addr >= 1 && dev_addr < 8) {
+        return xbox_controllers[dev_addr];
+    }
+    return NULL;
+}
+
+// Check if any Xbox controller has menu/start button pressed (for pause button)
+extern "C" bool xinput_check_menu_or_start_button(void) {
+    for (uint8_t dev_addr = 1; dev_addr < 8; dev_addr++) {
+        const xinputh_interface_t* xbox = xbox_controllers[dev_addr];
+        if (xbox && xbox->connected) {
+            // Check BACK button (Menu) or START button
+            if ((xbox->pad.wButtons & 0x0020) || (xbox->pad.wButtons & 0x0010)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 }  // extern "C"
 
