@@ -430,8 +430,8 @@ void tuh_mount_cb(uint8_t dev_addr) {
     
     // Notify C++ layer that a joystick was mounted
     // Use helper function to increment joy_count (can't access C++ static directly from C)
-    extern void gc_notify_mount(void);  // Defined in HidInput.cpp
-    gc_notify_mount();
+    extern void gc_notify_mount(uint8_t dev_addr);  // Defined in HidInput.cpp
+    gc_notify_mount(dev_addr);
     printf("GC: Joystick counter incremented, UI notified\n");
     
 #if ENABLE_CONTROLLER_DEBUG
@@ -456,8 +456,8 @@ void tuh_umount_cb(uint8_t dev_addr) {
         gc_unmount_cb(dev_addr);
         
         // Notify C++ layer that joystick was unmounted
-        extern void gc_notify_unmount(void);
-        gc_notify_unmount();
+        extern void gc_notify_unmount(uint8_t dev_addr);
+        gc_notify_unmount(dev_addr);
         
         free_gc_device(dev_addr);
     }

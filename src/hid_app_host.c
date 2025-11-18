@@ -380,8 +380,8 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
 #endif
       
       // Notify application layer
-      extern void gc_notify_mount(void);
-      gc_notify_mount();
+      extern void gc_notify_mount(uint8_t dev_addr);
+      gc_notify_mount(dev_addr);
       
       // Call mounted callback
       tuh_hid_mounted_cb(dev_addr);
@@ -420,8 +420,8 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
       tuh_hid_send_report(dev_addr, instance, 0, &gc_init, 1);
       
       // Also notify for additional instances (causes joystick counter++)
-      extern void gc_notify_mount(void);
-      gc_notify_mount();
+      extern void gc_notify_mount(uint8_t dev_addr);
+      gc_notify_mount(dev_addr);
     }
     
     // Start receiving reports

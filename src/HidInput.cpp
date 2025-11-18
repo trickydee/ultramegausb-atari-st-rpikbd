@@ -33,6 +33,7 @@
 #include "stadia_controller.h"
 #include "xinput.h"
 #include <map>
+#include <set>
 #include <deque>
 #include <algorithm>
 #include <bitset>
@@ -86,6 +87,7 @@ static UserInterface* ui_ = nullptr;
 static int kb_count = 0;
 static int mouse_count = 0;
 static int joy_count = 0;  // HID joysticks (not Xbox)
+static std::set<uint8_t> gc_counted_devices;  // Track GameCube devices already counted
 
 // Debug: Path counters (file-level static, accessed via getters)
 static uint32_t g_gpio_path_count = 0;
@@ -160,14 +162,22 @@ void xinput_notify_ui_unmount() {
 }
 
 // GameCube adapter mount/unmount notifications (same pattern as Xbox)
-void gc_notify_mount() {
-    joy_count++;
-    xinput_notify_ui_mount();
+void gc_notify_mount(uint8_t dev_addr) {
+    // Check if already counted (prevent multi-interface duplicate counting)
+    if (gc_counted_devices.find(dev_addr) == gc_counted_devices.end()) {
+        gc_counted_devices.insert(dev_addr);
+        joy_count++;
+        xinput_notify_ui_mount();
+    }
 }
 
-void gc_notify_unmount() {
-    joy_count--;
-    xinput_notify_ui_unmount();
+void gc_notify_unmount(uint8_t dev_addr) {
+    // Remove from counted set and decrement counter
+    if (gc_counted_devices.find(dev_addr) != gc_counted_devices.end()) {
+        gc_counted_devices.erase(dev_addr);
+        joy_count--;
+        xinput_notify_ui_unmount();
+    }
 }
 
 static uint8_t count_connected_usb_gamepads() {
@@ -177,6 +187,7 @@ static uint8_t count_connected_usb_gamepads() {
     total += switch_connected_count();
     total += stadia_connected_count();
     total += xinput_connected_count();
+    total += gc_connected_count();
     return total;
 }
 
@@ -187,6 +198,7 @@ static bool collect_llamatron_sample(uint8_t& joy1_axis, uint8_t& joy1_fire,
     if (switch_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
     if (stadia_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
     if (xinput_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
+    if (gc_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
     return false;
 }
 
@@ -227,6 +239,17 @@ static bool check_llamatron_pause_button() {
         stadia_controller_t* stadia = stadia_get_controller(i);
         if (stadia && stadia->connected && (stadia->buttons & STADIA_BTN_START)) {
             return true;
+        }
+    }
+    
+    // Check GameCube controllers (Start button)
+    for (uint8_t dev_addr = 1; dev_addr < 8; dev_addr++) {
+        gc_adapter_t* gc = gc_get_adapter(dev_addr);
+        if (gc && gc->connected && gc->active_port != 0xFF) {
+            // Check if START button is pressed (buttons2 bit 0)
+            if (gc->report.port[gc->active_port].buttons2 & GC_BTN_START) {
+                return true;
+            }
         }
     }
     
@@ -345,13 +368,22 @@ void tuh_hid_mounted_cb(uint8_t dev_addr) {
         }
     }
     else if (tp == HID_JOYSTICK) {
-        device[actual_addr] = new uint8_t[tuh_hid_get_report_size(actual_addr)];
-        hid_app_request_report(actual_addr, device[actual_addr]);
-        ++joy_count;
-        
-        // Check if this is a Stadia controller and show splash screen
+        // Check if this is a GameCube adapter - if so, skip counting here
+        // (it's already counted via gc_notify_mount())
         uint16_t vid, pid;
         tuh_vid_pid_get(actual_addr, &vid, &pid);
+        extern bool gc_is_adapter(uint16_t vid, uint16_t pid);
+        bool is_gamecube = gc_is_adapter(vid, pid);
+        
+        // Check if already registered (prevent multi-interface duplicate counting)
+        // Also skip if it's a GameCube adapter (counted separately)
+        if (!is_gamecube && device.find(actual_addr) == device.end()) {
+            device[actual_addr] = new uint8_t[tuh_hid_get_report_size(actual_addr)];
+            hid_app_request_report(actual_addr, device[actual_addr]);
+            ++joy_count;
+        }
+        
+        // Check if this is a Stadia controller and show splash screen
         extern bool stadia_is_controller(uint16_t vid, uint16_t pid);
         if (stadia_is_controller(vid, pid)) {
             extern void stadia_mount_cb(uint8_t dev_addr);

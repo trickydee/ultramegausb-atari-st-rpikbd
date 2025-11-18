@@ -191,6 +191,22 @@ void gc_mount_cb(uint8_t dev_addr);
  */
 void gc_unmount_cb(uint8_t dev_addr);
 
+/**
+ * Return number of connected GameCube controllers
+ */
+uint8_t gc_connected_count(void);
+
+/**
+ * Retrieve combined left/right stick axes for Llamatron mode
+ * @param joy1_axis Output: standard left-stick/D-pad axis bits
+ * @param joy1_fire Output: primary fire bit (A button)
+ * @param joy0_axis Output: right-stick (C-stick) axis bits
+ * @param joy0_fire Output: Joy0 fire bit (X button)
+ * @return true if a controller was available
+ */
+bool gc_llamatron_axes(uint8_t* joy1_axis, uint8_t* joy1_fire,
+                       uint8_t* joy0_axis, uint8_t* joy0_fire);
+
 #ifdef __cplusplus
 }
 #endif
