@@ -1350,27 +1350,33 @@ bool HidInput::get_gamecube_joystick(int joystick_num, uint8_t& axis, uint8_t& b
         if (gc && gc->connected && gc->active_port != 0xFF) {
             // Found a connected GameCube controller!
             
+#if ENABLE_SERIAL_LOGGING
             // Debug first few calls
             if (debug_count <= 3) {
                 printf("GC: get_gamecube_joystick() - FOUND adapter at addr=%d, port=%d\n", 
                        dev_addr, gc->active_port);
             }
+#endif
             
             gc_to_atari(gc, joystick_num, &axis, &button);
             
+#if ENABLE_SERIAL_LOGGING
             // Debug conversion result
             if (debug_count <= 3) {
                 printf("GC: gc_to_atari() returned axis=0x%02X, button=%d\n", axis, button);
             }
+#endif
             
             return true;
         }
     }
     
+#if ENABLE_SERIAL_LOGGING
     // Debug if not found
     if (debug_count == 1) {
         printf("GC: get_gamecube_joystick() - NO adapter found\n");
     }
+#endif
     
     return false;
 }

@@ -37,7 +37,9 @@ static gc_adapter_t* find_adapter_by_addr(uint8_t dev_addr) {
 
 static gc_adapter_t* allocate_adapter(uint8_t dev_addr) {
     if (adapter_count >= MAX_GC_ADAPTERS) {
+#if ENABLE_SERIAL_LOGGING
         printf("GC: Max adapters reached\n");
+#endif
         return NULL;
     }
     
@@ -84,40 +86,49 @@ bool gc_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len) {
     
     gc_adapter_t* adapter = find_adapter_by_addr(dev_addr);
     if (!adapter) {
+#if ENABLE_SERIAL_LOGGING
         printf("GC: Adapter %d not found, allocating...\n", dev_addr);
+#endif
         adapter = allocate_adapter(dev_addr);
         if (!adapter) {
             return false;
         }
     }
     
-    // Show we're getting reports
-    if ((total_reports % 100) == 0) {
-        printf("GC: Received %lu reports, len=%d\n", total_reports, len);
-    }
+    // Show we're getting reports (disabled for performance)
+    // #if ENABLE_SERIAL_LOGGING
+    // if ((total_reports % 100) == 0) {
+    //     printf("GC: Received %lu reports, len=%d\n", total_reports, len);
+    // }
+    // #endif
     
     // GameCube adapter reports should be 37 bytes
     if (len < 37) {
+#if ENABLE_SERIAL_LOGGING
         if ((total_reports % 100) == 0) {
             printf("GC: Report too short (%d bytes, expected 37)\n", len);
         }
+#endif
         return false;
     }
     
     // Check signal byte (should be 0x21)
     if (report[0] != 0x21) {
+#if ENABLE_SERIAL_LOGGING
         if ((total_reports % 100) == 0) {
             printf("GC: Invalid signal byte: 0x%02X (expected 0x21)\n", report[0]);
         }
+#endif
         return false;
     }
     
     // Show first report with detailed debug
     if (first_report_ever) {
         first_report_ever = false;
+#if ENABLE_SERIAL_LOGGING
         printf("GC: First report received (%d bytes)\n", len);
         printf("GC: Signal byte: 0x%02X\n", report[0]);
-        
+#endif
 // Debug splash screen removed - no longer needed
     }
     
@@ -133,7 +144,9 @@ bool gc_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len) {
             // Check type bits (1=normal, 2=wavebird)
             if (adapter->report.port[port].type != 0) {
                 adapter->active_port = port;
+#if ENABLE_SERIAL_LOGGING
                 printf("GC: Controller detected on port %d (type=%d)!\n", port + 1, adapter->report.port[port].type);
+#endif
                 break;
             }
         }
@@ -154,9 +167,11 @@ void gc_to_atari(const gc_adapter_t* gc, uint8_t joystick_num,
     debug_count++;
     
     if (!gc || !direction || !fire) {
+#if ENABLE_SERIAL_LOGGING
         if (debug_count <= 2) {
             printf("GC: gc_to_atari() NULL pointer! gc=%p dir=%p fire=%p\n", gc, direction, fire);
         }
+#endif
         return;
     }
     
@@ -165,9 +180,11 @@ void gc_to_atari(const gc_adapter_t* gc, uint8_t joystick_num,
     
     // Check if we have an active controller
     if (gc->active_port == 0xFF || gc->active_port >= 4) {
+#if ENABLE_SERIAL_LOGGING
         if (debug_count <= 2) {
             printf("GC: gc_to_atari() no active port (active_port=%d)\n", gc->active_port);
         }
+#endif
         return;
     }
     
@@ -176,18 +193,22 @@ void gc_to_atari(const gc_adapter_t* gc, uint8_t joystick_num,
     // Check if controller is still connected
     // Type: 0=disconnected, 1=normal (0x10), 2=wavebird (0x20)
     if (ctrl->type == 0) {
+#if ENABLE_SERIAL_LOGGING
         if (debug_count <= 2) {
             printf("GC: gc_to_atari() controller type=0 (disconnected)\n");
         }
+#endif
         return;
     }
     
     // Debug input data
+#if ENABLE_SERIAL_LOGGING
     if (debug_count <= 3) {
         printf("GC: gc_to_atari() port=%d type=%d stick_x=%02X stick_y=%02X btns=%02X %02X\n",
                gc->active_port, ctrl->type, ctrl->stick_x, ctrl->stick_y, 
                ctrl->buttons1, ctrl->buttons2);
     }
+#endif
     
     // Convert analog stick to directions (main stick)
     // GameCube sticks are 0-255 with 127 as center
@@ -226,12 +247,14 @@ void gc_to_atari(const gc_adapter_t* gc, uint8_t joystick_num,
         *fire = 1;
     }
     
-    // Debug output values
-    if (debug_count <= 3 || (*direction != 0) || (*fire != 0)) {
-        if (debug_count <= 5 || (debug_count % 50) == 0) {
-            printf("GC: OUTPUT → direction=0x%02X fire=%d\n", *direction, *fire);
-        }
-    }
+    // Debug output values (disabled for performance)
+    // #if ENABLE_SERIAL_LOGGING
+    // if (debug_count <= 3 || (*direction != 0) || (*fire != 0)) {
+    //     if (debug_count <= 5 || (debug_count % 50) == 0) {
+    //         printf("GC: OUTPUT → direction=0x%02X fire=%d\n", *direction, *fire);
+    //     }
+    // }
+    // #endif
 }
 
 // Compute axes for Llamatron mode (dual-stick support)
@@ -331,13 +354,17 @@ void gc_set_deadzone(uint8_t dev_addr, int16_t deadzone) {
     gc_adapter_t* adapter = find_adapter_by_addr(dev_addr);
     if (adapter) {
         adapter->deadzone = deadzone;
+#if ENABLE_SERIAL_LOGGING
         printf("GC: Deadzone set to %d for adapter %d\n", deadzone, dev_addr);
+#endif
     }
 }
 
 // Send initialization command to a specific instance
 void gc_send_init(uint8_t dev_addr, uint8_t instance) {
+#if ENABLE_SERIAL_LOGGING
     printf("GC: Sending init to addr=%d, inst=%d\n", dev_addr, instance);
+#endif
     
     // GameCube adapter initialization command
     // Based on gc-x and Dolphin: send 0x13 to start adapter
@@ -353,16 +380,19 @@ void gc_send_init(uint8_t dev_addr, uint8_t instance) {
                                       (uint8_t*)gc_init_command, 
                                       sizeof(gc_init_command));
     
+#if ENABLE_SERIAL_LOGGING
     if (result) {
         printf("GC: Init 0x13 sent to instance %d OK\n", instance);
     } else {
         printf("GC: WARNING - Init 0x13 to instance %d failed!\n", instance);
     }
+#endif
 }
 
 void gc_mount_cb(uint8_t dev_addr) {
     extern ssd1306_t disp;
     
+#if ENABLE_SERIAL_LOGGING
     printf("\n");
     printf("═══════════════════════════════════════════════════════\n");
     printf("  🎮 GAMECUBE CONTROLLER ADAPTER DETECTED!\n");
@@ -375,6 +405,7 @@ void gc_mount_cb(uint8_t dev_addr) {
     printf("  \n");
     printf("═══════════════════════════════════════════════════════\n");
     printf("\n");
+#endif
     
 #if ENABLE_CONTROLLER_DEBUG
     // Show on OLED - match other controller style (debug mode only)
@@ -387,14 +418,18 @@ void gc_mount_cb(uint8_t dev_addr) {
     
     gc_adapter_t* adapter = allocate_adapter(dev_addr);
     if (adapter) {
+#if ENABLE_SERIAL_LOGGING
         printf("GC: Adapter registered!\n");
         printf("GC: Sending initialization command to instance 0...\n");
+#endif
         
         // Send init to instance 0
         gc_send_init(dev_addr, 0);
         
+#if ENABLE_SERIAL_LOGGING
         printf("GC: Adapter address: %d\n", dev_addr);
         printf("GC: Waiting for first report...\n");
+#endif
         
 #if ENABLE_CONTROLLER_DEBUG
         // Show diagnostic info on OLED (debug mode only)
@@ -416,7 +451,9 @@ void gc_mount_cb(uint8_t dev_addr) {
 }
 
 void gc_unmount_cb(uint8_t dev_addr) {
+#if ENABLE_SERIAL_LOGGING
     printf("GC: Adapter unmounted at address %d\n", dev_addr);
+#endif
     free_adapter(dev_addr);
 }
 

@@ -240,8 +240,10 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
   // Check for GameCube USB Adapter
   bool is_gamecube = gc_is_adapter(vid, pid);
   
-  // DEBUG: Console logging (always enabled for troubleshooting)
+  // DEBUG: Console logging
+#if ENABLE_SERIAL_LOGGING
   printf("GC Check: VID=0x%04X, PID=0x%04X, is_gamecube=%d\n", vid, pid, is_gamecube);
+#endif
   
 #if ENABLE_CONTROLLER_DEBUG
   // Show on OLED for debugging - only in debug builds
@@ -265,8 +267,10 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
 #endif
   
   if (is_gamecube) {
+#if ENABLE_SERIAL_LOGGING
     printf("GameCube USB Adapter detected via HID: VID=0x%04X, PID=0x%04X, Instance=%d, Protocol=%d\n", 
            vid, pid, instance, protocol);
+#endif
     
     // v11.1.3: HID Hijacking approach - let HID claim it, we handle the non-standard protocol
     // The adapter uses raw 37-byte reports with 0x21 signal byte
@@ -288,7 +292,9 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
     // Allocate device slot
     hidh_device_t* dev = alloc_device(dev_addr, instance);
     if (!dev) {
+#if ENABLE_SERIAL_LOGGING
       printf("GC: ERROR - Cannot allocate device\n");
+#endif
       return;
     }
     
@@ -310,7 +316,9 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
       
       // STEP 1: Control transfer for third-party adapter compatibility
       // Windows driver shows this is required: bmRequestType=0x21, bRequest=11, wValue=1, wIndex=0
+#if ENABLE_SERIAL_LOGGING
       printf("GC: Sending control transfer (request 11, value 1)...\n");
+#endif
       tusb_control_request_t ctrl_req = {
         .bmRequestType_bit = {
           .recipient = TUSB_REQ_RCPT_INTERFACE,
@@ -335,11 +343,15 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
       };
       
       bool ctrl_ok = tuh_control_xfer(&ctrl_xfer);
+#if ENABLE_SERIAL_LOGGING
       printf("GC: Control transfer queued: %d\n", ctrl_ok);
+#endif
       
       // Small delay for control transfer to complete
       sleep_ms(200);
+#if ENABLE_SERIAL_LOGGING
       printf("GC: Control transfer result: %d\n", ctrl_result);
+#endif
       
 #if ENABLE_CONTROLLER_DEBUG
       ssd1306_clear(&disp);
@@ -354,17 +366,21 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
       
       // STEP 2: Send 0x13 init command via interrupt OUT endpoint
       // All reference drivers do this after control transfer
+#if ENABLE_SERIAL_LOGGING
       printf("GC: Sending 0x13 init to interrupt OUT endpoint...\n");
+#endif
       static const uint8_t gc_init = 0x13;
       
       // Use tuh_hid_send_report() to send to interrupt OUT endpoint 0x02
       bool send_ok = tuh_hid_send_report(dev_addr, instance, 0, &gc_init, 1);
       
+#if ENABLE_SERIAL_LOGGING
       if (send_ok) {
         printf("GC: Init 0x13 queued to endpoint 0x02\n");
       } else {
         printf("GC: WARNING - Init 0x13 queue failed!\n");
       }
+#endif
       
 #if ENABLE_CONTROLLER_DEBUG
       // Show status (debug mode only)
@@ -386,10 +402,12 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
       // Call mounted callback
       tuh_hid_mounted_cb(dev_addr);
     } else {
+#if ENABLE_SERIAL_LOGGING
       printf("GC: Additional interface %d registered\n", instance);
       
       // Send init to additional instances too (might be needed for PC mode)
       printf("GC: Sending control transfer to instance %d...\n", instance);
+#endif
       tusb_control_request_t ctrl_req = {
         .bmRequestType_bit = {
           .recipient = TUSB_REQ_RCPT_INTERFACE,
@@ -425,7 +443,9 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
     }
     
     // Start receiving reports
+#if ENABLE_SERIAL_LOGGING
     printf("GC: Calling tuh_hid_receive_report(addr=%d, inst=%d)...\n", dev_addr, instance);
+#endif
     
 #if ENABLE_CONTROLLER_DEBUG
     // Show we're starting report reception (debug mode only)
@@ -439,7 +459,9 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
 #endif
     
     bool recv_ok = tuh_hid_receive_report(dev_addr, instance);
+#if ENABLE_SERIAL_LOGGING
     printf("GC: tuh_hid_receive_report result: %d\n", recv_ok);
+#endif
     
 #if ENABLE_CONTROLLER_DEBUG
     // Show status (debug mode only)
@@ -842,10 +864,12 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
     static uint32_t gc_raw_count = 0;
     gc_raw_count++;
     
-    // Only log to console, no OLED spam
-    if ((gc_raw_count % 100) == 1) {
-      printf("GC: Report #%lu addr=%d inst=%d len=%d\n", gc_raw_count, dev_addr, instance, len);
-    }
+    // Only log to console, no OLED spam (disabled for performance)
+    // #if ENABLE_SERIAL_LOGGING
+    // if ((gc_raw_count % 100) == 1) {
+    //   printf("GC: Report #%lu addr=%d inst=%d len=%d\n", gc_raw_count, dev_addr, instance, len);
+    // }
+    // #endif
   }
   
   // Safety checks
@@ -860,10 +884,12 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
   if (vid == 0x057E && pid == 0x0337) {
     gc_vid_count++;
     
-    // Console logging only
-    if ((gc_vid_count % 100) == 1) {
-      printf("GC: Report callback #%lu addr=%d inst=%d len=%d\n", gc_vid_count, dev_addr, instance, len);
-    }
+    // Console logging only (disabled for performance)
+    // #if ENABLE_SERIAL_LOGGING
+    // if ((gc_vid_count % 100) == 1) {
+    //   printf("GC: Report callback #%lu addr=%d inst=%d len=%d\n", gc_vid_count, dev_addr, instance, len);
+    // }
+    // #endif
   }
 
   // Stadia: If reports arrive before the normal mount flow triggers callback,
@@ -930,9 +956,12 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
     static uint32_t gc_callback_count = 0;
     gc_callback_count++;
     
-    if ((gc_callback_count % 100) == 1) {
-      printf("GC: Report callback #%lu, len=%d\n", gc_callback_count, len);
-    }
+    // Disabled for performance
+    // #if ENABLE_SERIAL_LOGGING
+    // if ((gc_callback_count % 100) == 1) {
+    //   printf("GC: Report callback #%lu, len=%d\n", gc_callback_count, len);
+    // }
+    // #endif
     
     gc_process_report(dev_addr, report, len);
     
