@@ -124,6 +124,17 @@ void stadia_to_atari(const stadia_controller_t* stadia, uint8_t joystick_num,
                      uint8_t* direction, uint8_t* fire);
 
 /**
+ * Return number of connected Stadia controllers
+ */
+uint8_t stadia_connected_count(void);
+
+/**
+ * Retrieve dual-stick axes for Llamatron mode
+ */
+bool stadia_llamatron_axes(uint8_t* joy1_axis, uint8_t* joy1_fire,
+                           uint8_t* joy0_axis, uint8_t* joy0_fire);
+
+/**
  * Mount callback - called when Stadia controller connected
  * @param dev_addr USB device address
  */

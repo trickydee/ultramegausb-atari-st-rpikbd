@@ -142,6 +142,21 @@ void ps3_to_atari(const ps3_controller_t* ps3, uint8_t joystick_num,
                   uint8_t* direction, uint8_t* fire);
 
 /**
+ * Return number of connected PS3 controllers
+ */
+uint8_t ps3_connected_count(void);
+
+/**
+ * Retrieve left/right stick axes for Llamatron mode
+ * @param joy1_axis Output: left stick axis bits (with D-Pad priority)
+ * @param joy1_fire Output: fire bit (Cross button)
+ * @param joy0_axis Output: right stick axis bits
+ * @return true if controller data available
+ */
+bool ps3_llamatron_axes(uint8_t* joy1_axis, uint8_t* joy1_fire,
+                        uint8_t* joy0_axis, uint8_t* joy0_fire);
+
+/**
  * Set stick deadzone
  * @param dev_addr USB device address
  * @param deadzone Deadzone value (0-127, default 50)

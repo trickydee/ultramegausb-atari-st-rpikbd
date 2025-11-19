@@ -23,6 +23,8 @@
 #include "pico/stdlib.h"
 #include "pico/multicore.h"
 #include "hardware/clocks.h"
+#include "hardware/uart.h"
+#include "pico/stdio_uart.h"
 #include "config.h"
 #include "6301.h"
 #include "cpu.h"
@@ -170,6 +172,16 @@ void core1_entry() {
 
 
 int main() {
+    // Bring up UART0 (GP0/GP1) for serial diagnostics without touching USB
+    stdio_uart_init_full(uart0, 115200,
+                         PICO_DEFAULT_UART_TX_PIN,
+                         PICO_DEFAULT_UART_RX_PIN);
+    uart_set_hw_flow(uart0, false, false);
+    uart_set_format(uart0, 8, 1, UART_PARITY_NONE);
+    uint actual_console_baud = uart_set_baudrate(uart0, 115200);
+    printf("Console UART configured: requested 115200, actual %u baud\n", actual_console_baud);
+    uart_puts(uart0, "UART0 console ready (115200 8N1)\r\n");
+
     // Note: stdio_init_all() not called as it may interfere with SerialPort UART setup
     if (!tusb_init()) {
         // TinyUSB initialization failed

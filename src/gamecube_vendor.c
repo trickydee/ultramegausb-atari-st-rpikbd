@@ -107,23 +107,37 @@ static void gc_in_xfer_cb(tuh_xfer_t* xfer) {
         sleep_ms(2000);
     }
     
-    printf("GC: IN callback #%lu: result=%d, len=%lu\n", 
-           callback_count, xfer->result, xfer->actual_len);
+#if ENABLE_SERIAL_LOGGING
+    if ((callback_count % 100) == 0) {
+        printf("GC: IN callback #%lu: result=%d, len=%lu\n", 
+               callback_count, xfer->result, xfer->actual_len);
+    }
+#endif
     
     gc_usbh_device_t* gc_dev = find_gc_device(xfer->daddr);
     if (!gc_dev) {
+#if ENABLE_SERIAL_LOGGING
         printf("GC: ERROR - Device not found in callback!\n");
+#endif
         return;
     }
     
     if (xfer->result == XFER_RESULT_SUCCESS && xfer->actual_len == GC_REPORT_SIZE) {
         // Process the report
-        printf("GC: Processing report...\n");
+#if ENABLE_SERIAL_LOGGING
+        if ((callback_count % 100) == 0) {
+            printf("GC: Processing report...\n");
+        }
+#endif
         gc_process_report(xfer->daddr, gc_dev->report_buffer, GC_REPORT_SIZE);
-    } else if (xfer->result != XFER_RESULT_SUCCESS) {
-        printf("GC: IN transfer failed: result=%d\n", xfer->result);
-    } else if (xfer->actual_len != GC_REPORT_SIZE) {
-        printf("GC: Wrong size: got %lu, expected %d\n", xfer->actual_len, GC_REPORT_SIZE);
+    } else {
+#if ENABLE_SERIAL_LOGGING
+        if (xfer->result != XFER_RESULT_SUCCESS) {
+            printf("GC: IN transfer failed: result=%d\n", xfer->result);
+        } else if (xfer->actual_len != GC_REPORT_SIZE) {
+            printf("GC: Wrong size: got %lu, expected %d\n", xfer->actual_len, GC_REPORT_SIZE);
+        }
+#endif
     }
     
     // Queue next report read (continuous polling)
@@ -138,7 +152,9 @@ static void gc_in_xfer_cb(tuh_xfer_t* xfer) {
     
     bool requeue_ok = tuh_edpt_xfer(&in_xfer);
     if (!requeue_ok) {
+#if ENABLE_SERIAL_LOGGING
         printf("GC: ERROR - Failed to requeue IN transfer!\n");
+#endif
     }
 }
 
@@ -147,10 +163,14 @@ static void gc_out_xfer_cb(tuh_xfer_t* xfer) {
     g_gc_out_callbacks++;
     extern ssd1306_t disp;
     
+#if ENABLE_SERIAL_LOGGING
     printf("GC: OUT callback: result=%d, len=%lu\n", xfer->result, xfer->actual_len);
+#endif
     
     if (xfer->result == XFER_RESULT_SUCCESS) {
+#if ENABLE_SERIAL_LOGGING
         printf("GC: ✓ Init command sent successfully\n");
+#endif
         
         ssd1306_clear(&disp);
         ssd1306_draw_string(&disp, 0, 0, 2, (char*)"INIT OK!");
@@ -159,7 +179,9 @@ static void gc_out_xfer_cb(tuh_xfer_t* xfer) {
         ssd1306_show(&disp);
         sleep_ms(2000);
     } else {
+#if ENABLE_SERIAL_LOGGING
         printf("GC: ✗ Init command failed: result=%d\n", xfer->result);
+#endif
         
         ssd1306_clear(&disp);
         ssd1306_draw_string(&disp, 0, 0, 2, (char*)"INIT FAIL!");
@@ -430,8 +452,8 @@ void tuh_mount_cb(uint8_t dev_addr) {
     
     // Notify C++ layer that a joystick was mounted
     // Use helper function to increment joy_count (can't access C++ static directly from C)
-    extern void gc_notify_mount(void);  // Defined in HidInput.cpp
-    gc_notify_mount();
+    extern void gc_notify_mount(uint8_t dev_addr);  // Defined in HidInput.cpp
+    gc_notify_mount(dev_addr);
     printf("GC: Joystick counter incremented, UI notified\n");
     
 #if ENABLE_CONTROLLER_DEBUG
@@ -456,8 +478,8 @@ void tuh_umount_cb(uint8_t dev_addr) {
         gc_unmount_cb(dev_addr);
         
         // Notify C++ layer that joystick was unmounted
-        extern void gc_notify_unmount(void);
-        gc_notify_unmount();
+        extern void gc_notify_unmount(uint8_t dev_addr);
+        gc_notify_unmount(dev_addr);
         
         free_gc_device(dev_addr);
     }

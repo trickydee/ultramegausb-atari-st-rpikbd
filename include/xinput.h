@@ -184,6 +184,17 @@ void xinput_mount_cb(uint8_t dev_addr);
  */
 void xinput_unmount_cb(uint8_t dev_addr);
 
+/**
+ * Return number of connected Xbox controllers
+ */
+uint8_t xinput_connected_count(void);
+
+/**
+ * Retrieve dual-stick axes for Llamatron mode
+ */
+bool xinput_llamatron_axes(uint8_t* joy1_axis, uint8_t* joy1_fire,
+                           uint8_t* joy0_axis, uint8_t* joy0_fire);
+
 #ifdef __cplusplus
 }
 #endif

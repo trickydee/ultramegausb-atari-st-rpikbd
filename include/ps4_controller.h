@@ -127,6 +127,21 @@ void ps4_to_atari(const ps4_controller_t* ps4, uint8_t joystick_num,
                   uint8_t* direction, uint8_t* fire);
 
 /**
+ * Return number of connected PS4 controllers
+ */
+uint8_t ps4_connected_count(void);
+
+/**
+ * Retrieve combined left/right stick axes for Llamatron mode
+ * @param joy1_axis Output: standard left-stick/D-pad axis bits
+ * @param joy1_fire Output: primary fire bit
+ * @param joy0_axis Output: right-stick axis bits (no fire)
+ * @return true if a controller was available
+ */
+bool ps4_llamatron_axes(uint8_t* joy1_axis, uint8_t* joy1_fire,
+                        uint8_t* joy0_axis, uint8_t* joy0_fire);
+
+/**
  * Set stick deadzone
  * @param dev_addr USB device address
  * @param deadzone Deadzone value (0-127, default 32)

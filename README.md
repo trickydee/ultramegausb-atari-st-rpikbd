@@ -19,6 +19,8 @@ USB HID Mice
 
 USB HID XY Mice - Inc Microsoft Trackballs
 
+Mouse wheel scrolling mapped to GEM Desktop cursor controls (12.5.x)
+
 Logitech Unifying Adapter - Keyboard, Mice, Trackball
 
 Logitech Bolt Adapter - Keyboard, Mice, Trackball
@@ -53,11 +55,29 @@ The emulator supports several keyboard shortcuts for convenient control:
 | **Ctrl+F10** | Toggle Joystick 1 | Switches Joystick 1 between D-SUB and USB |
 | **Ctrl+F9** | Toggle Joystick 0 | Switches Joystick 0 between D-SUB and USB |
 | **Ctrl+F8** | Restore Joystick Mode | Sends 0x14 to restore joystick event reporting (useful after reconnect) |
+| **Ctrl+F4** | Llamatron Dual-Stick Mode | Share a single dual-stick USB pad across Joystick 0 & 1 (requires exactly one USB pad, both ST ports set to USB) |
 | **Alt+/** | INSERT Key | Sends Atari ST INSERT key (useful for sending mouse click on Logitech Mac USB keyboards) |
 | **Alt+[** | Keypad /** | Sends Atari ST keypad divide key |
 | **Alt+]** | Keypad *** | Sends Atari ST keypad multiply key |
 | **Alt+Plus** | Set 270MHz | Overclocks RP2040 to 270MHz for maximum performance |
 | **Alt+Minus** | Set 150MHz | Sets RP2040 to 150MHz for stability |
+### IKBD Command Macros
+
+For reference, these shortcut keys emit the following HD6301/IKBD command sequences:
+
+| Shortcut | Command Sequence | Effect |
+| --- | --- | --- |
+| `Ctrl+F5` | `0x1A 0x00`, `0x92 0x00`, `0x08` | Disable joystick reporting, enable mouse, enter relative mode |
+| `Ctrl+F6` | `0x1A 0x00`, `0x92 0x00`, `0x09 0x02 0x80 0x01 0x90` | Disable joystick, enable mouse, enter absolute mode (640×400) |
+| `Ctrl+F7` | `0x1A 0x00`, `0x92 0x00`, `0x0A 0x01 0x01` | Disable joystick, enable mouse, set mouse keycode mode |
+| `Ctrl+F8` | `0x14` | Restore joystick event reporting |
+| `Ctrl+F11` | `XRESET` line | Full IKBD reset pulse |
+| `Alt+/`, `[`, `]` | `0x52`, `0x65`, `0x66` | Insert / keypad divide / keypad multiply |
+
+### Llamatron Dual-Stick Mode
+
+`Ctrl+F4` enables “Llamatron” mode: if exactly one USB gamepad with two thumbsticks is connected (and both Atari joystick ports are set to USB), the left stick + face buttons continue to drive Joystick 1, the right stick transparently emulates Joystick 0 movement, and the east/right face button (Circle on PlayStation, B on Xbox, A on Switch, B on Stadia) becomes Joystick 0 fire. This is handy for twin-stick shooters like *Llamatron* that expect two physical joysticks. The mode automatically suspends itself if a second pad is attached or either ST port is switched back to the DB‑9 connector.
+
 
 
 The emulator displays a simple user interface on an OLED display. This is entirely optional and you can build a working version without it but

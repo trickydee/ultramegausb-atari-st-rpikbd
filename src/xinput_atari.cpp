@@ -17,6 +17,7 @@ extern "C" {
 #define XINPUT_GAMEPAD_DPAD_LEFT 0x0004
 #define XINPUT_GAMEPAD_DPAD_RIGHT 0x0008
 #define XINPUT_GAMEPAD_A 0x1000
+#define XINPUT_GAMEPAD_B 0x2000
 
 #define CFG_TUH_XINPUT_EPIN_BUFSIZE 64
 #define CFG_TUH_XINPUT_EPOUT_BUFSIZE 64
@@ -123,6 +124,43 @@ extern "C" {
     void sleep_ms(uint32_t ms);
 }
 
+static void xinput_compute_axes(const xinput_gamepad_t* pad,
+                                uint8_t* left_axis, uint8_t* fire,
+                                uint8_t* right_axis, uint8_t* joy0_fire) {
+    const int DEADZONE = 8000;
+    
+    if (left_axis) {
+        *left_axis = 0;
+        if (pad->wButtons & XINPUT_GAMEPAD_DPAD_UP)    *left_axis |= 0x01;
+        if (pad->wButtons & XINPUT_GAMEPAD_DPAD_DOWN)  *left_axis |= 0x02;
+        if (pad->wButtons & XINPUT_GAMEPAD_DPAD_LEFT)  *left_axis |= 0x04;
+        if (pad->wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) *left_axis |= 0x08;
+        
+        if (*left_axis == 0) {
+            if (pad->sThumbLX < -DEADZONE)  *left_axis |= 0x04;
+            if (pad->sThumbLX > DEADZONE)   *left_axis |= 0x08;
+            if (pad->sThumbLY > DEADZONE)   *left_axis |= 0x01;  // Note: Y inverted
+            if (pad->sThumbLY < -DEADZONE)  *left_axis |= 0x02;
+        }
+    }
+    
+    if (fire) {
+        *fire = (pad->wButtons & XINPUT_GAMEPAD_A) || (pad->bRightTrigger > 128) ? 1 : 0;
+    }
+    
+    if (right_axis) {
+        *right_axis = 0;
+        if (pad->sThumbRX < -DEADZONE)  *right_axis |= 0x04;
+        if (pad->sThumbRX > DEADZONE)   *right_axis |= 0x08;
+        if (pad->sThumbRY > DEADZONE)   *right_axis |= 0x01;
+        if (pad->sThumbRY < -DEADZONE)  *right_axis |= 0x02;
+    }
+    
+    if (joy0_fire) {
+        *joy0_fire = (pad->wButtons & XINPUT_GAMEPAD_B) ? 1 : 0;
+    }
+}
+
 // Convert Xbox controller data to Atari joystick format
 bool xinput_to_atari_joystick(int joystick_num, uint8_t* axis, uint8_t* button) {
     // Debug to track data flow issues
@@ -160,36 +198,7 @@ bool xinput_to_atari_joystick(int joystick_num, uint8_t* axis, uint8_t* button) 
         // Get pad data - if pointer exists, use it regardless of flags
         const xinput_gamepad_t* pad = &xbox->pad;
         
-        *axis = 0;
-        *button = 0;
-            
-        // D-Pad mapping (takes priority)
-        if (pad->wButtons & XINPUT_GAMEPAD_DPAD_UP)    *axis |= 0x01;
-        if (pad->wButtons & XINPUT_GAMEPAD_DPAD_DOWN)  *axis |= 0x02;
-        if (pad->wButtons & XINPUT_GAMEPAD_DPAD_LEFT)  *axis |= 0x04;
-        if (pad->wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) *axis |= 0x08;
-        
-        // Left stick as fallback (if D-Pad not pressed)
-        if (*axis == 0) {
-            const int DEADZONE = 8000;  // ~25% deadzone
-            
-            // Left stick X axis
-            if (pad->sThumbLX < -DEADZONE)  *axis |= 0x04;  // Left
-            if (pad->sThumbLX > DEADZONE)   *axis |= 0x08;  // Right
-            
-            // Left stick Y axis (inverted - Xbox Y is opposite of Atari)
-            if (pad->sThumbLY > DEADZONE)   *axis |= 0x01;  // Up
-            if (pad->sThumbLY < -DEADZONE)  *axis |= 0x02;  // Down
-        }
-        
-        // Fire button mapping
-        // Primary: A button (most common in games)
-        // Alternative: Right trigger (if pressed > 50%)
-        if (pad->wButtons & XINPUT_GAMEPAD_A) {
-            *button = 1;
-        } else if (pad->bRightTrigger > 128) {
-            *button = 1;
-        }
+        xinput_compute_axes(pad, axis, button, nullptr, nullptr);
         
         // Debug disabled for performance
         #if 0
@@ -218,5 +227,49 @@ bool xinput_to_atari_joystick(int joystick_num, uint8_t* axis, uint8_t* button) 
     return false;
 }
 
+extern "C" uint8_t xinput_connected_count(void) {
+    uint8_t count = 0;
+    for (uint8_t dev_addr = 1; dev_addr < 8; dev_addr++) {
+        const xinputh_interface_t* xbox = xbox_controllers[dev_addr];
+        if (xbox && xbox->connected) {
+            count++;
+        }
+    }
+    return count;
+}
+
+extern "C" bool xinput_llamatron_axes(uint8_t* joy1_axis, uint8_t* joy1_fire,
+                                      uint8_t* joy0_axis, uint8_t* joy0_fire) {
+    for (uint8_t dev_addr = 1; dev_addr < 8; dev_addr++) {
+        const xinputh_interface_t* xbox = xbox_controllers[dev_addr];
+        if (xbox && xbox->connected) {
+            xinput_compute_axes(&xbox->pad, joy1_axis, joy1_fire, joy0_axis, joy0_fire);
+            return true;
+        }
+    }
+    return false;
+}
+
+// Get Xbox controller by device address (for pause button checking)
+extern "C" const xinputh_interface_t* xinput_get_controller(uint8_t dev_addr) {
+    if (dev_addr >= 1 && dev_addr < 8) {
+        return xbox_controllers[dev_addr];
+    }
+    return NULL;
+}
+
+// Check if any Xbox controller has menu/start button pressed (for pause button)
+extern "C" bool xinput_check_menu_or_start_button(void) {
+    for (uint8_t dev_addr = 1; dev_addr < 8; dev_addr++) {
+        const xinputh_interface_t* xbox = xbox_controllers[dev_addr];
+        if (xbox && xbox->connected) {
+            // Check BACK button (Menu) or START button
+            if ((xbox->pad.wButtons & 0x0020) || (xbox->pad.wButtons & 0x0010)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 }  // extern "C"
 

@@ -18,7 +18,7 @@ LOGGING="${LOGGING:-1}"  # Set to 0 to disable verbose logging
 
 echo "================================================================================"
 echo "  Atari ST USB Adapter - Multi-Variant Build"
-echo "  Version: 12.1.0 (Ultra-low latency serial optimizations)"
+echo "  Version: 14.0.4 (Ultra-low latency serial optimizations)"
 echo "  Language: ${LANGUAGE}"
 echo "  Debug Mode: ${DEBUG}"
 echo "  OLED Display: ${OLED}"
@@ -71,47 +71,6 @@ echo ">>> Applying patches..."
 echo ""
 
 ################################################################################
-# Build for Raspberry Pi Pico (RP2040)
-################################################################################
-
-echo ">>> Building for Raspberry Pi Pico (RP2040)..."
-echo ""
-
-# Clean and create build directory
-rm -rf ./build-pico
-mkdir -p ./build-pico
-
-# Configure
-echo "    Configuring CMake for RP2040..."
-cmake -B ./build-pico -S . \
-    -DPICO_BOARD=pico \
-    -DLANGUAGE="${LANGUAGE}" \
-    -DENABLE_DEBUG="${DEBUG}" \
-    -DENABLE_OLED_DISPLAY="${OLED}" \
-    -DENABLE_SERIAL_LOGGING="${LOGGING}" \
-    > ./build-pico/cmake.log 2>&1
-
-if [ $? -ne 0 ]; then
-    echo "ERROR: CMake configuration failed for RP2040!"
-    tail -20 ./build-pico/cmake.log
-    exit 1
-fi
-
-# Build
-echo "    Compiling firmware for RP2040..."
-cmake --build ./build-pico -j$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4) \
-    > ./build-pico/build.log 2>&1
-
-if [ $? -ne 0 ]; then
-    echo "ERROR: Build failed for RP2040!"
-    tail -30 ./build-pico/build.log
-    exit 1
-fi
-
-echo "    ✅ RP2040 build complete!"
-echo ""
-
-################################################################################
 # Build for Raspberry Pi Pico 2 (RP2350)
 ################################################################################
 
@@ -150,6 +109,47 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "    ✅ RP2350 build complete!"
+echo ""
+
+################################################################################
+# Build for Raspberry Pi Pico (RP2040)
+################################################################################
+
+echo ">>> Building for Raspberry Pi Pico (RP2040)..."
+echo ""
+
+# Clean and create build directory
+rm -rf ./build-pico
+mkdir -p ./build-pico
+
+# Configure
+echo "    Configuring CMake for RP2040..."
+cmake -B ./build-pico -S . \
+    -DPICO_BOARD=pico \
+    -DLANGUAGE="${LANGUAGE}" \
+    -DENABLE_DEBUG="${DEBUG}" \
+    -DENABLE_OLED_DISPLAY="${OLED}" \
+    -DENABLE_SERIAL_LOGGING="${LOGGING}" \
+    > ./build-pico/cmake.log 2>&1
+
+if [ $? -ne 0 ]; then
+    echo "ERROR: CMake configuration failed for RP2040!"
+    tail -20 ./build-pico/cmake.log
+    exit 1
+fi
+
+# Build
+echo "    Compiling firmware for RP2040..."
+cmake --build ./build-pico -j$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4) \
+    > ./build-pico/build.log 2>&1
+
+if [ $? -ne 0 ]; then
+    echo "ERROR: Build failed for RP2040!"
+    tail -30 ./build-pico/build.log
+    exit 1
+fi
+
+echo "    ✅ RP2040 build complete!"
 echo ""
 
 ################################################################################

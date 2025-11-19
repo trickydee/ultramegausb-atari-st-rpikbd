@@ -175,55 +175,67 @@ ps4_controller_t* ps4_get_controller(uint8_t dev_addr) {
     return find_controller_by_addr(dev_addr);
 }
 
+static void ps4_compute_axes(const ps4_controller_t* ps4,
+                             uint8_t* left_axis, uint8_t* fire,
+                             uint8_t* right_axis, uint8_t* joy0_fire) {
+    const ps4_report_t* input = &ps4->report;
+    
+    if (left_axis) {
+        *left_axis = 0;
+        
+        int8_t stick_x = (int8_t)(input->x - 128);
+        int8_t stick_y = (int8_t)(input->y - 128);
+        
+        if (stick_x < -ps4->deadzone || stick_x > ps4->deadzone ||
+            stick_y < -ps4->deadzone || stick_y > ps4->deadzone) {
+            
+            if (stick_y < -ps4->deadzone) *left_axis |= 0x01;
+            if (stick_y > ps4->deadzone)  *left_axis |= 0x02;
+            if (stick_x < -ps4->deadzone) *left_axis |= 0x04;
+            if (stick_x > ps4->deadzone)  *left_axis |= 0x08;
+        }
+        
+        if (input->dpad != PS4_DPAD_CENTER) {
+            switch (input->dpad) {
+                case PS4_DPAD_UP:         *left_axis = 0x01; break;
+                case PS4_DPAD_UP_RIGHT:   *left_axis = 0x09; break;
+                case PS4_DPAD_RIGHT:      *left_axis = 0x08; break;
+                case PS4_DPAD_DOWN_RIGHT: *left_axis = 0x0A; break;
+                case PS4_DPAD_DOWN:       *left_axis = 0x02; break;
+                case PS4_DPAD_DOWN_LEFT:  *left_axis = 0x06; break;
+                case PS4_DPAD_LEFT:       *left_axis = 0x04; break;
+                case PS4_DPAD_UP_LEFT:    *left_axis = 0x05; break;
+            }
+        }
+    }
+    
+    if (fire) {
+        *fire = (input->cross || input->r2_trigger > 128) ? 1 : 0;
+    }
+    
+    if (right_axis) {
+        *right_axis = 0;
+        int8_t stick_rx = (int8_t)(input->z - 128);
+        int8_t stick_ry = (int8_t)(input->rz - 128);
+        
+        if (stick_ry < -ps4->deadzone) *right_axis |= 0x01;
+        if (stick_ry > ps4->deadzone)  *right_axis |= 0x02;
+        if (stick_rx < -ps4->deadzone) *right_axis |= 0x04;
+        if (stick_rx > ps4->deadzone)  *right_axis |= 0x08;
+    }
+    
+    if (joy0_fire) {
+        *joy0_fire = input->circle ? 1 : 0;
+    }
+}
+
 void ps4_to_atari(const ps4_controller_t* ps4, uint8_t joystick_num,
                   uint8_t* direction, uint8_t* fire) {
     if (!ps4 || !direction || !fire) {
         return;
     }
-    
-    const ps4_report_t* input = &ps4->report;
-    *direction = 0;
-    *fire = 0;
-    
-    // Convert analog stick to directions (left stick)
-    // PS4 sticks are 0-255 with 128 as center
-    int8_t stick_x = (int8_t)(input->x - 128);
-    int8_t stick_y = (int8_t)(input->y - 128);
-    
-    // Apply deadzone
-    if (stick_x < -ps4->deadzone || stick_x > ps4->deadzone ||
-        stick_y < -ps4->deadzone || stick_y > ps4->deadzone) {
-        
-        if (stick_y < -ps4->deadzone) *direction |= 0x01;  // Up
-        if (stick_y > ps4->deadzone)  *direction |= 0x02;  // Down
-        if (stick_x < -ps4->deadzone) *direction |= 0x04;  // Left
-        if (stick_x > ps4->deadzone)  *direction |= 0x08;  // Right
-    }
-    
-    // D-Pad takes priority (if not centered)
-    if (input->dpad != PS4_DPAD_CENTER) {
-        switch (input->dpad) {
-            case PS4_DPAD_UP:         *direction = 0x01; break;
-            case PS4_DPAD_UP_RIGHT:   *direction = 0x09; break;  // Up + Right
-            case PS4_DPAD_RIGHT:      *direction = 0x08; break;
-            case PS4_DPAD_DOWN_RIGHT: *direction = 0x0A; break;  // Down + Right
-            case PS4_DPAD_DOWN:       *direction = 0x02; break;
-            case PS4_DPAD_DOWN_LEFT:  *direction = 0x06; break;  // Down + Left
-            case PS4_DPAD_LEFT:       *direction = 0x04; break;
-            case PS4_DPAD_UP_LEFT:    *direction = 0x05; break;  // Up + Left
-        }
-    }
-    
-    // Fire button mapping
-    // Primary: Cross (X) button (most common in games)
-    // Alternative: R2 trigger (if pressed > 50%)
-    if (input->cross) {
-        *fire = 1;
-    } else if (input->r2_trigger > 128) {
-        *fire = 1;
-    }
-    
-    // Could also use Circle, Square, or R1 as fire
+    uint8_t right_dummy;
+    ps4_compute_axes(ps4, direction, fire, &right_dummy, NULL);
 }
 
 void ps4_set_deadzone(uint8_t dev_addr, int16_t deadzone) {
@@ -279,5 +291,26 @@ void ps4_mount_cb(uint8_t dev_addr) {
 void ps4_unmount_cb(uint8_t dev_addr) {
     printf("PS4: Controller unmounted at address %d\n", dev_addr);
     free_controller(dev_addr);
+}
+
+uint8_t ps4_connected_count(void) {
+    uint8_t count = 0;
+    for (uint8_t i = 0; i < controller_count; i++) {
+        if (controllers[i].connected) {
+            count++;
+        }
+    }
+    return count;
+}
+
+bool ps4_llamatron_axes(uint8_t* joy1_axis, uint8_t* joy1_fire,
+                        uint8_t* joy0_axis, uint8_t* joy0_fire) {
+    for (uint8_t i = 0; i < controller_count; i++) {
+        if (controllers[i].connected) {
+            ps4_compute_axes(&controllers[i], joy1_axis, joy1_fire, joy0_axis, joy0_fire);
+            return true;
+        }
+    }
+    return false;
 }
 

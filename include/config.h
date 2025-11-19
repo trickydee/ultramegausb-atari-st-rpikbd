@@ -62,6 +62,11 @@
   #define ENABLE_DEBUG 0
 #endif
 
+// HD6301 emulation speed multiplier (1 = stock timing)
+#ifndef HD6301_OVERCLOCK_NUM
+  #define HD6301_OVERCLOCK_NUM 1
+#endif
+
 // Enables detailed Xbox/PS4/HID diagnostic counters on USB Debug page
 #define ENABLE_CONTROLLER_DEBUG ENABLE_DEBUG
 
