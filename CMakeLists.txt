@@ -107,6 +107,18 @@ else()
     message(STATUS "Serial Logging: MINIMAL (speed mode)")
 endif()
 
+# Bluepad32 Bluetooth support (Pico W only)
+# Note: Pico W (pico_w) doesn't have enough RAM - using Pico 2 W only
+if(PICO_BOARD STREQUAL "pico2_w")
+    set(ENABLE_BLUEPAD32 ON)
+    add_definitions(-DENABLE_BLUEPAD32=1)
+    message(STATUS "Bluepad32: ENABLED (Pico 2 W detected)")
+else()
+    set(ENABLE_BLUEPAD32 OFF)
+    add_definitions(-DENABLE_BLUEPAD32=0)
+    message(STATUS "Bluepad32: DISABLED (Not Pico 2 W)")
+endif()
+
 set(SOURCES
     src/main.cpp
     src/HD6301V1ST.cpp
@@ -131,6 +143,15 @@ set(SOURCES
     6301/6301.c
     hidparser/HIDParser.c
 )
+
+# Add Bluepad32 source files if enabled
+if(ENABLE_BLUEPAD32)
+    list(APPEND SOURCES
+        src/bluepad32_platform.c
+        src/bluepad32_atari.cpp
+        src/bluepad32_init.c
+    )
+endif()
 set(INCLUDES
     include
 )
@@ -147,6 +168,17 @@ target_include_directories(
     ${INCLUDES}
 )
 
+# Add Bluepad32 include directories if enabled
+if(ENABLE_BLUEPAD32)
+    target_include_directories(
+        atari_ikbd PRIVATE
+        ${CMAKE_SOURCE_DIR}/bluepad32/src/components/bluepad32/include
+        ${CMAKE_SOURCE_DIR}/src # For btstack_config.h and sdkconfig.h
+        ${CMAKE_SOURCE_DIR}/include # For bluepad32_init.h
+        ${PICO_SDK_PATH}/lib/btstack/src # For btstack headers
+    )
+endif()
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-implicit-int")
 
 #add_definitions(-DUNIX -DPICO -DTRACE_6301 -DPICO_DEOPTIMIZED_DEBUG=1 -DLOG=2 -DDEBUG)
@@ -154,12 +186,41 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-implicit-int")
 add_definitions(-DUNIX -DPICO)
 
 target_link_libraries(atari_ikbd pico_stdlib pico_multicore hardware_i2c hardware_flash hardware_sync tinyusb_host)
+
+# Add Bluepad32 libraries if enabled
+if(ENABLE_BLUEPAD32)
+    # Add bluepad32 subdirectory first
+    add_subdirectory(${CMAKE_SOURCE_DIR}/bluepad32/src/components/bluepad32 libbluepad32)
+    
+    # Add include directory for btstack_config.h to bluepad32 library
+    target_include_directories(bluepad32 PRIVATE ${CMAKE_SOURCE_DIR}/src)
+    
+    target_link_libraries(atari_ikbd
+        pico_cyw43_arch_none
+        pico_btstack_classic
+        pico_btstack_cyw43
+        pico_async_context_poll  # For async_context_poll_init_with_defaults
+        bluepad32
+    )
+endif()
+
 pico_enable_stdio_uart(atari_ikbd 1)
 pico_add_extra_outputs(atari_ikbd)
-pico_set_binary_type(atari_ikbd copy_to_ram)
+
+# Set binary type based on board
+if(ENABLE_BLUEPAD32)
+    pico_set_binary_type(atari_ikbd default) # Use default (XIP) for Bluetooth builds
+    message(STATUS "Binary type: default (Pico 2 W with Bluetooth)")
+else()
+    pico_set_binary_type(atari_ikbd copy_to_ram) # Use copy_to_ram for standard builds
+    message(STATUS "Binary type: copy_to_ram (standard)")
+endif()
 
 # Set output name based on board type for clarity
-if(PICO_BOARD STREQUAL "pico2")
+if(PICO_BOARD STREQUAL "pico2_w")
+    set_target_properties(atari_ikbd PROPERTIES OUTPUT_NAME "atari_ikbd_pico2_w")
+    message(STATUS "Output files will be named: atari_ikbd_pico2_w.*")
+elseif(PICO_BOARD STREQUAL "pico2")
     set_target_properties(atari_ikbd PROPERTIES OUTPUT_NAME "atari_ikbd_pico2")
     message(STATUS "Output files will be named: atari_ikbd_pico2.*")
 else()

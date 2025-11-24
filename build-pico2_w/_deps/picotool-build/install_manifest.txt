@@ -1,0 +1,7 @@
+/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/_deps/picotool/picotool
+/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/_deps/picotool/picotoolTargets.cmake
+/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/_deps/picotool/picotoolTargets-release.cmake
+/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/_deps/picotool/picotoolConfig.cmake
+/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/_deps/picotool/picotoolConfigVersion.cmake
+/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/_deps/picotool/enc_bootloader.elf
+/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/_deps/picotool/enc_bootloader_mbedtls.elf

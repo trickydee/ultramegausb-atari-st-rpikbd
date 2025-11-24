@@ -37,6 +37,11 @@
 #include "xinput_host.h"  // Official tusb_xinput driver
 #include "gamecube_adapter.h"  // GameCube adapter support
 
+#ifdef ENABLE_BLUEPAD32
+// Use separate initialization file to avoid HID type conflicts between TinyUSB and btstack
+#include "bluepad32_init.h"
+#endif
+
 // Forward declarations
 extern "C" {
     void switch_check_delayed_init(void);
@@ -189,17 +194,39 @@ int main() {
         return -1;
     }
 
+    // Overclock the Pico for maximum performance
+    // For Bluetooth builds, use lower clock speed for CYW43 stability
+    // CYW43 chip has issues at high clock speeds (270MHz causes STALL timeouts)
+    #ifdef ENABLE_BLUEPAD32
+    uint32_t clock_khz = 150000;  // 150 MHz for Bluetooth stability
+    printf("Bluetooth build: Using 150 MHz for CYW43 stability\n");
+    #else
+    uint32_t clock_khz = DEFAULT_CPU_CLOCK_KHZ;
+    #endif
+    
+    if (!set_sys_clock_khz(clock_khz, false))
+      printf("system clock %d MHz failed\n", clock_khz / 1000);
+    else
+      printf("system clock now %d MHz\n", clock_khz / 1000);
+
+#ifdef ENABLE_BLUEPAD32
+    // CRITICAL: Initialize CYW43/Bluepad32 BEFORE any I2C/SPI peripherals
+    // Forum reports show I2C/SPI initialization can interfere with CYW43 pin configuration
+    // See: https://forums.pimoroni.com/t/plasma-2350-w-wifi-problems/26810
+    if (!bluepad32_init()) {
+        printf("Failed to initialize Bluepad32\n");
+        return -1;
+    }
+    printf("Bluepad32 initialized - scanning for Bluetooth gamepads...\n");
+#endif
+
 #if ENABLE_OLED_DISPLAY
+    // Initialize OLED display AFTER CYW43 to avoid pin conflicts
+    // I2C initialization before CYW43 can put wireless pins in wrong state
     UserInterface ui;
     ui.init();
     ui.update();
 #endif
-
-    // Overclock the Pico for maximum performance
-    if (!set_sys_clock_khz(DEFAULT_CPU_CLOCK_KHZ, false))
-      printf("system clock %d MHz failed\n", DEFAULT_CPU_CLOCK_KHZ / 1000);
-    else
-      printf("system clock now %d MHz\n", DEFAULT_CPU_CLOCK_KHZ / 1000);
 
     // Setup the UART and HID instance.
     SerialPort::instance().open();
@@ -232,6 +259,11 @@ int main() {
             ten_ms = tm;
 
             tuh_task();
+            
+#ifdef ENABLE_BLUEPAD32
+            // Poll Bluepad32 async_context (non-blocking, must be called regularly)
+            bluepad32_poll();
+#endif
             
             // Check for Switch Pro Controller delayed initialization
             switch_check_delayed_init();

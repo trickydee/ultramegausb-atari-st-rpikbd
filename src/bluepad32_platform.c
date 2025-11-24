@@ -4,6 +4,7 @@
  */
 
 #include <stddef.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <pico/cyw43_arch.h>
@@ -49,29 +50,44 @@ static void my_platform_init(int argc, const char** argv) {
 static void my_platform_on_init_complete(void) {
     logi("bluepad32_platform: on_init_complete()\n");
 
-    // Start scanning and autoconnect to supported controllers
-    uni_bt_start_scanning_and_autoconnect_unsafe();
-
     // Clear stored BT keys on each boot (can be changed if you want to remember devices)
+    logi("Clearing stored Bluetooth keys...\n");
     uni_bt_del_keys_unsafe();
+
+    // Wait a bit for HCI to be ready (the "HCI not ready" messages suggest it needs time)
+    logi("Waiting for HCI to be ready...\n");
+    sleep_ms(2000);  // Give HCI 2 seconds to initialize
+
+    // Start scanning and autoconnect to supported controllers
+    logi("Starting Bluetooth scanning and autoconnect...\n");
+    uni_bt_start_scanning_and_autoconnect_unsafe();
+    logi("Bluetooth scanning started - waiting for devices...\n");
+    logi("Put your controller in pairing mode now!\n");
 
     // Turn off LED once init is done
     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 0);
 }
 
 static uni_error_t my_platform_on_device_discovered(bd_addr_t addr, const char* name, uint16_t cod, uint8_t rssi) {
-    ARG_UNUSED(addr);
-    ARG_UNUSED(name);
-    ARG_UNUSED(rssi);
+    // Log all discovered devices for debugging
+    char addr_str[18];
+    snprintf(addr_str, sizeof(addr_str), "%02X:%02X:%02X:%02X:%02X:%02X",
+             addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
+    
+    logi("BT Device discovered: addr=%s, name='%s', COD=0x%04X, RSSI=%d\n",
+         addr_str, name ? name : "(null)", cod, rssi);
     
     // Filter out keyboards and mice - we only want gamepads for now
     if (((cod & UNI_BT_COD_MINOR_MASK) & UNI_BT_COD_MINOR_KEYBOARD) == UNI_BT_COD_MINOR_KEYBOARD) {
+        logi("  -> Ignoring keyboard\n");
         return UNI_ERROR_IGNORE_DEVICE;
     }
     if (((cod & UNI_BT_COD_MINOR_MASK) & UNI_BT_COD_MINOR_MICE) == UNI_BT_COD_MINOR_MICE) {
+        logi("  -> Ignoring mouse\n");
         return UNI_ERROR_IGNORE_DEVICE;
     }
 
+    logi("  -> Accepting device (will attempt connection)\n");
     return UNI_ERROR_SUCCESS;
 }
 
