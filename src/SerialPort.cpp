@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 #include "SerialPort.h"
-#include "pico/stdlib.h"
+#include "pico.h"  // Includes all platform definitions including __not_in_flash_func
 #include "hardware/uart.h"
 #include "config.h"
 
@@ -32,6 +32,10 @@
 // provides a small queue that optimises the serial port performance. Important for
 // smooth mouse handling.
 #define BUFFER_SIZE 8
+
+// Cached UART hardware pointer - set at initialization, used in critical path
+// This avoids calling uart_get_hw() which might access flash
+static uart_hw_t* g_uart_hw = nullptr;
 
 SerialPort::~SerialPort() {
     close();
@@ -63,6 +67,24 @@ void SerialPort::open() {
     hw_write_masked(&uart_get_hw(UART_ID)->ifls,
                     0 << UART_UARTIFLS_RXIFLSEL_LSB,  // 1/8 full (4 bytes)
                     UART_UARTIFLS_RXIFLSEL_BITS);
+    
+    // Cache the UART hardware pointer for use in critical path (RAM functions)
+    // This avoids calling uart_get_hw() which might access flash
+    g_uart_hw = uart_get_hw(UART_ID);
+    
+    // Verify UART is enabled for transmission
+    // UARTEN (bit 0) and TXE (bit 8) must be set in UARTCR register
+    if (g_uart_hw) {
+        uint32_t cr = g_uart_hw->cr;
+        if (!(cr & UART_UARTCR_UARTEN_BITS)) {
+            // UART not enabled - this shouldn't happen if uart_init() worked
+            printf("WARNING: UART not enabled! CR=0x%08lx\n", cr);
+        }
+        if (!(cr & UART_UARTCR_TXE_BITS)) {
+            // TX not enabled - enable it using direct register write
+            g_uart_hw->cr |= UART_UARTCR_TXE_BITS;
+        }
+    }
 }
 
 void SerialPort::set_ui(UserInterface& ui) {
@@ -113,6 +135,51 @@ bool SerialPort::send_buf_empty() const {
     return uart_is_writable(UART_ID);
 }
 
-void serial_send(unsigned char data) {
-    SerialPort::instance().send(data);
+// C wrapper functions marked for RAM - called from 6301 emulator
+// These bypass the C++ SerialPort class AND Pico SDK functions to avoid flash latency
+// Using direct hardware register access for maximum speed
+extern "C" {
+void __not_in_flash_func(serial_send)(unsigned char data) {
+    // Direct hardware register access - CRITICAL: bypasses all SDK functions in flash
+    // Use cached hardware pointer to avoid any flash access
+    if (!g_uart_hw) {
+        // Fallback if not initialized (shouldn't happen, but be safe)
+        return;
+    }
+    
+    // Verify UART is enabled before sending
+    if (!(g_uart_hw->cr & UART_UARTCR_UARTEN_BITS)) {
+        // UART not enabled - can't send
+        return;
+    }
+    if (!(g_uart_hw->cr & UART_UARTCR_TXE_BITS)) {
+        // TX not enabled - enable it
+        g_uart_hw->cr |= UART_UARTCR_TXE_BITS;
+    }
+    
+    // Wait for TX FIFO to have space (should be very fast, usually immediate)
+    // TXFF bit is 1 when FIFO is full, 0 when there's space
+    // BUSY bit is 1 when UART is transmitting, but we can still write to FIFO
+    while (g_uart_hw->fr & UART_UARTFR_TXFF_BITS) {
+        // FIFO full, wait (should be rare with 32-byte FIFO)
+        // This is a tight loop in RAM, so it's fast
+    }
+    
+    // Write byte to data register - this starts transmission
+    // The UART hardware will automatically transmit when data is written to DR
+    g_uart_hw->dr = data;
+    
+    // Note: UI update removed from critical path - can be done elsewhere if needed
+    // The byte is now in the UART FIFO and will be transmitted automatically
+}
+
+int __not_in_flash_func(serial_send_buf_empty)(void) {
+    // Direct hardware register access - CRITICAL: bypasses all SDK functions in flash
+    // Check UARTFR register TXFF (Transmit FIFO Full) bit - if not set, we can write
+    // Use cached hardware pointer to avoid any flash access
+    if (!g_uart_hw) {
+        return 0;  // Not initialized, assume not ready
+    }
+    return (g_uart_hw->fr & UART_UARTFR_TXFF_BITS) ? 0 : 1;
+}
 }

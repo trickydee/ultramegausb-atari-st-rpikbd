@@ -9,7 +9,7 @@
 
 
 extern int reset P_((void));
-extern int instr_exec P_((void));
+extern void instr_exec P_((void));
 extern int instr_print P_((u_short addr));
 
 #undef P_

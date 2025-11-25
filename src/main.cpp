@@ -31,6 +31,7 @@
 #include "util.h"
 #include "tusb.h"
 #include "HidInput.h"
+#include "hardware/uart.h"  // For uart_puts on Core 1
 #include "SerialPort.h"
 #include "AtariSTMouse.h"
 #include "UserInterface.h"
@@ -77,7 +78,7 @@ static void clear_rx_queue() {
  * Read bytes from the physical serial port and pass them to the HD6301
  * Uses software queue to buffer bytes when 6301 RDR is busy
  */
-static void handle_rx_from_st() {
+static void __not_in_flash_func(handle_rx_from_st)() {
     unsigned char data;
     static int bytes_deferred_count = 0;
     static int queue_full_count = 0;
@@ -140,35 +141,45 @@ static void handle_rx_from_st() {
 /**
  * Prepare the HD6301 and load the ROM file
  */
-void setup_hd6301() {
+void __not_in_flash_func(setup_hd6301)() {
     BYTE* pram = hd6301_init();
     if (!pram) {
-        printf("Failed to initialise HD6301\n");
-        exit(-1);
+        // Can't use printf/uart_puts reliably here if init failed
+        // Just hang - this is a fatal error
+        while(1) { tight_loop_contents(); }
     }
+    
+    // Copy ROM to RAM for XIP builds (improves performance)
     memcpy(pram + ROMBASE, rom_HD6301V1ST_img, rom_HD6301V1ST_img_len);
 }
 
-void core1_entry() {
+void __not_in_flash_func(core1_entry)() {
+    // Wait for Core 0 to finish initializing UART0 and other peripherals
+    // This is critical for XIP builds where initialization timing matters
+    sleep_ms(200);
+    
     // Initialise the HD6301
     setup_hd6301();
+    
     hd6301_reset(1);
     // Note: RX queue is cleared at startup (automatically zero-initialized)
-
     unsigned long count = 0;
     absolute_time_t tm = get_absolute_time();
     while (true) {
         count += CYCLES_PER_LOOP;
         
         // Update the tx serial port status based on actual buffer state
-        hd6301_tx_empty(SerialPort::instance().send_buf_empty() ? 1 : 0);
+        // Use C wrapper function that's in RAM for better performance
+        hd6301_tx_empty(serial_send_buf_empty());
 
         hd6301_run_clocks(CYCLES_PER_LOOP);
 
-        if ((count % 1000000) == 0) {
-            //printf("Cycles = %lu\n", count);
-            //printf("CPU cycles = %llu\n", cpu.ncycles);
-        }
+        // Debug output removed for production
+        // if ((count % 1000000) == 0) {
+        //     char buf[128];
+        //     snprintf(buf, sizeof(buf), "Core 1: Cycles = %lu, CPU cycles = %llu\n", count, cpu.ncycles);
+        //     uart_puts(uart0, buf);
+        // }
 
         tm = delayed_by_us(tm, CYCLES_PER_LOOP);
         sleep_until(tm);

@@ -317,7 +317,7 @@ u_char (*ireg_getb_func[NIREGS]) P_((u_int offs)) = {
 /*
  *  Pointers to functions to be called for writing internal registers
 */
-int (*ireg_putb_func[NIREGS]) P_((u_int offs, u_char val)) = {
+void (*ireg_putb_func[NIREGS]) P_((u_int offs, u_char val)) = {
 /* 0x00 */
   0,          0,          port_putb,   port_putb,
   0,          0,          port_putb,   port_putb,

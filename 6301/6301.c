@@ -107,20 +107,23 @@ int crashed = 0;
 // Global flag for external reset trigger (e.g. from keyboard shortcut)
 static volatile int pending_reset = 0;
 
-BYTE* hd6301_init() {
+#include "pico/platform.h"
+
+BYTE* __not_in_flash_func(hd6301_init)() {
   return mem_init();
 }
 
 
-hd6301_destroy() {
+int __not_in_flash_func(hd6301_destroy)() {
   TRACE("6301: destroy object\n");
   if(ram) 
     free(ram);
   ram=NULL;
+  return 0;
 }
 
 
-hd6301_reset(int Cold) {
+int __not_in_flash_func(hd6301_reset)(int Cold) {
   TRACE("6301 emu cpu reset (cold %d)\n",Cold);
   crashed = 0;
   cpu_reset();
@@ -144,14 +147,14 @@ hd6301_reset(int Cold) {
   TRACE("6301: Serial registers cleared (TRCSR=0x20, RDR=0x00, TDR=0x00)\n");
 }
 
-void hd6301_trigger_reset() {
+void __not_in_flash_func(hd6301_trigger_reset)() {
   // Called from external source (e.g. keyboard handler) to trigger a reset
   TRACE("6301: Reset triggered externally\n");
   pending_reset = 1;
 }
 
  
-void hd6301_run_clocks(COUNTER_VAR clocks) {
+void __not_in_flash_func(hd6301_run_clocks)(COUNTER_VAR clocks) {
   clocks *= HD6301_OVERCLOCK_NUM;
   // Called by Steem to run some cycles (per scanline or to update before IO)
   int pc;
@@ -184,11 +187,11 @@ void hd6301_run_clocks(COUNTER_VAR clocks) {
   }
 }
 
-hd6301_receive_byte(u_char byte_in) {
+int __not_in_flash_func(hd6301_receive_byte)(u_char byte_in) {
   return sci_in(&byte_in,1);
 }
 
-void hd6301_tx_empty(int empty) {
+void __not_in_flash_func(hd6301_tx_empty)(int empty) {
   // Once our serial port TX buffer has space then set the register
   // to show the CPU another byte can be sent
   if (empty) {
@@ -196,6 +199,6 @@ void hd6301_tx_empty(int empty) {
   }
 }
 
-int hd6301_sci_busy() {
+int __not_in_flash_func(hd6301_sci_busy)() {
   return (iram[TRCSR] & RDRF) ? 1 : 0;
 }

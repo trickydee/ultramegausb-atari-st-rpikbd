@@ -75,7 +75,7 @@ ireg_install (offs, getb, putb)
  *  Pointers to functions to be called for reading internal registers
  */
 extern u_char (*ireg_getb_func[]) P_((u_int offs));
-extern int (*ireg_putb_func[]) P_((u_int offs, u_char val));
+extern void (*ireg_putb_func[]) P_((u_int offs, u_char val));
 
 #undef P_
 #endif /* IREG_H */
