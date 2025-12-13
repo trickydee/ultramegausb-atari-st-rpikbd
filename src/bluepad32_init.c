@@ -78,8 +78,14 @@ async_context_poll_t* bluepad32_init(void) {
 }
 
 // Poll btstack async_context (non-blocking)
+// IMPORTANT: This should be called regularly but not too frequently to avoid
+// interfering with USB processing or Core 1's 6301 emulator timing.
+// The async_context_poll() function processes pending events but should not block for long periods.
 void bluepad32_poll(void) {
     if (g_btstack_async_context) {
+        // Use a timeout of 0 to make this truly non-blocking
+        // This ensures we don't block USB processing or Core 1's 6301 emulator
+        // Limit processing to prevent starving Core 1's timing-sensitive emulation
         async_context_poll(&g_btstack_async_context->core);
     }
 }

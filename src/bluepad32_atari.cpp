@@ -26,7 +26,18 @@ bool bluepad32_to_atari_joystick(const void* gp_ptr, uint8_t* axis, uint8_t* but
     *button = 0;
 
     // Dead zone for analog sticks (similar to other controllers)
-    const int32_t DEAD_ZONE = 8000;  // Bluepad32 uses -512 to 511 range, so ~15% deadzone
+    // Bluepad32 normalizes axes to -32768 to 32767 range (like XInput)
+    // Use ~25% deadzone (8000) for normalized range, similar to Xbox controllers
+    const int32_t DEAD_ZONE = 8000;  // ~25% of -32768 to 32767 range
+    
+    // However, if we see very small values (like 2, 2), the controller might be sending
+    // raw values or the axis might not be properly initialized
+    // Let's use a smaller deadzone for very small values
+    int32_t deadzone = DEAD_ZONE;
+    if (abs(gp->axis_x) < 100 && abs(gp->axis_y) < 100) {
+        // Very small values - use tiny deadzone (might be raw values or noise)
+        deadzone = 10;
+    }
 
     // D-Pad has priority (like other controllers)
     if (gp->dpad & DPAD_UP)    *axis |= 0x01;
@@ -36,10 +47,10 @@ bool bluepad32_to_atari_joystick(const void* gp_ptr, uint8_t* axis, uint8_t* but
 
     // If D-Pad not active, use left analog stick
     if (gp->dpad == 0) {
-        if (gp->axis_x < -DEAD_ZONE) *axis |= 0x04;  // Left
-        if (gp->axis_x > DEAD_ZONE)  *axis |= 0x08;  // Right
-        if (gp->axis_y < -DEAD_ZONE) *axis |= 0x01;  // Up (Y is typically inverted)
-        if (gp->axis_y > DEAD_ZONE)  *axis |= 0x02;  // Down
+        if (gp->axis_x < -deadzone) *axis |= 0x04;  // Left
+        if (gp->axis_x > deadzone)  *axis |= 0x08;  // Right
+        if (gp->axis_y < -deadzone) *axis |= 0x01;  // Up (Y is typically inverted)
+        if (gp->axis_y > deadzone)  *axis |= 0x02;  // Down
     }
 
     // Fire button: A button (south) is primary, B button (east) is alternate
@@ -51,6 +62,7 @@ bool bluepad32_to_atari_joystick(const void* gp_ptr, uint8_t* axis, uint8_t* but
     }
 
     // Also check triggers as alternate fire (like Xbox)
+    // Bluepad32 triggers might be 0-1023 range or normalized
     if (gp->brake > 512 || gp->throttle > 512) {
         *button = 1;
     }

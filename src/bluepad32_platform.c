@@ -111,10 +111,21 @@ static void my_platform_on_device_disconnected(uni_hid_device_t* d) {
         storage->updated = false;
         memset(&storage->gamepad, 0, sizeof(storage->gamepad));
     }
+    
+    // Notify HidInput that a Bluetooth gamepad has disconnected
+    // This decrements the joystick counter and updates the UI
+    extern void bluepad32_notify_unmount(void);
+    bluepad32_notify_unmount();
 }
 
 static uni_error_t my_platform_on_device_ready(uni_hid_device_t* d) {
     logi("bluepad32_platform: device ready: %p\n", d);
+    
+    // Notify HidInput that a Bluetooth gamepad has connected
+    // This increments the joystick counter and updates the UI
+    extern void bluepad32_notify_mount(void);
+    bluepad32_notify_mount();
+    
     return UNI_ERROR_SUCCESS;
 }
 

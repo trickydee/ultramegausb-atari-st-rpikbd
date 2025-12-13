@@ -153,10 +153,15 @@ void __not_in_flash_func(setup_hd6301)() {
     memcpy(pram + ROMBASE, rom_HD6301V1ST_img, rom_HD6301V1ST_img_len);
 }
 
+// Global flag to track Core 1 activity (updated by Core 1, read by Core 0)
+static volatile uint32_t g_core1_heartbeat_counter = 0;
+static volatile uint32_t g_core1_cycle_count = 0;
+
 void __not_in_flash_func(core1_entry)() {
     // Wait for Core 0 to finish initializing UART0 and other peripherals
     // This is critical for XIP builds where initialization timing matters
-    sleep_ms(200);
+    // Use busy_wait instead of sleep_ms to avoid timer dependency
+    busy_wait_us(200000);  // 200ms delay
     
     // Initialise the HD6301
     setup_hd6301();
@@ -164,9 +169,22 @@ void __not_in_flash_func(core1_entry)() {
     hd6301_reset(1);
     // Note: RX queue is cleared at startup (automatically zero-initialized)
     unsigned long count = 0;
-    absolute_time_t tm = get_absolute_time();
+    
+    printf("Core 1: 6301 emulator started\n");
+    
+    // Use a simple counter-based timing instead of absolute_time_t to avoid Bluetooth interrupt blocking
+    // This makes Core 1's timing completely independent of the timer system
+    uint32_t loop_count = 0;
+    uint32_t last_heartbeat_loop = 0;
+    
+    // Calculate delay loop iterations for ~100us delay at 150MHz
+    // At 150MHz: 1 cycle = 6.67ns, so 100us = 15000 cycles
+    // Use a simple tight loop instead of busy_wait_us() to avoid any potential blocking
+    const uint32_t DELAY_LOOPS = 15000;  // ~100us at 150MHz
+    
     while (true) {
         count += CYCLES_PER_LOOP;
+        g_core1_cycle_count = count;  // Update global counter (non-blocking)
         
         // Update the tx serial port status based on actual buffer state
         // Use C wrapper function that's in RAM for better performance
@@ -174,15 +192,20 @@ void __not_in_flash_func(core1_entry)() {
 
         hd6301_run_clocks(CYCLES_PER_LOOP);
 
-        // Debug output removed for production
-        // if ((count % 1000000) == 0) {
-        //     char buf[128];
-        //     snprintf(buf, sizeof(buf), "Core 1: Cycles = %lu, CPU cycles = %llu\n", count, cpu.ncycles);
-        //     uart_puts(uart0, buf);
-        // }
+        loop_count++;
+        
+        // Heartbeat every ~5 seconds (approximately 50000 loops at 10kHz = 5 seconds)
+        // Use loop counter instead of absolute_time to avoid Bluetooth blocking
+        if (loop_count - last_heartbeat_loop >= 50000) {
+            last_heartbeat_loop = loop_count;
+            g_core1_heartbeat_counter++;  // Increment counter (non-blocking atomic operation)
+        }
 
-        tm = delayed_by_us(tm, CYCLES_PER_LOOP);
-        sleep_until(tm);
+        // Simple tight loop delay - completely independent of timer system and interrupts
+        // This avoids any potential blocking from busy_wait_us() or timer calls
+        for (volatile uint32_t i = 0; i < DELAY_LOOPS; i++) {
+            __asm__("nop");  // No-op to prevent loop optimization
+        }
     }
 }
 
@@ -199,11 +222,19 @@ int main() {
     uart_puts(uart0, "UART0 console ready (115200 8N1)\r\n");
 
     // Note: stdio_init_all() not called as it may interfere with SerialPort UART setup
+#ifdef ENABLE_BLUEPAD32
+    // When Bluetooth is enabled, disable USB to avoid resource conflicts
+    // Bluetooth and USB cannot run concurrently on Pico W due to interrupt/timing conflicts
+    printf("USB disabled - Bluetooth mode active\n");
+#else
+    // USB mode: Initialize TinyUSB for USB HID device support
     if (!tusb_init()) {
         // TinyUSB initialization failed
-        // Can't print error since stdio not initialized
+        printf("TinyUSB initialization failed\n");
         return -1;
     }
+    printf("USB initialized - USB mode active\n");
+#endif
 
     // Overclock the Pico for maximum performance
     // For Bluetooth builds, use lower clock speed for CYW43 stability
@@ -256,8 +287,18 @@ int main() {
     HidInput::instance().force_usb_mouse();
 
     absolute_time_t ten_ms = get_absolute_time();
+    absolute_time_t one_ms = get_absolute_time();  // For more frequent USB polling
+    absolute_time_t bt_poll_ms = get_absolute_time();  // For less frequent BT polling
+    absolute_time_t heartbeat_ms = get_absolute_time();  // For heartbeat debug
+    static uint32_t loop_count = 0;
+    static uint32_t usb_poll_count = 0;
+    static uint32_t bt_poll_count = 0;
+    
+    printf("Main loop: Starting...\n");
+    
     while (true) {
         absolute_time_t tm = get_absolute_time();
+        loop_count++;
 
         // HIGH PRIORITY: Check for serial data from ST every loop iteration
         // At 7812 baud, bytes arrive every ~1.28ms - must not miss them!
@@ -265,26 +306,65 @@ int main() {
 
         AtariSTMouse::instance().update();
 
+#ifndef ENABLE_BLUEPAD32
+        // CRITICAL: Call tuh_task() more frequently (every 1ms) to ensure USB doesn't stall
+        // USB requires regular polling - if we only call it every 10ms, devices can timeout
+        // USB is disabled when Bluetooth is enabled to avoid resource conflicts
+        if (absolute_time_diff_us(one_ms, tm) >= 1000) {
+            one_ms = tm;
+            usb_poll_count++;
+            tuh_task();  // Process USB events frequently
+        }
+#endif
+
         // 10ms handler for less time-critical tasks
         if (absolute_time_diff_us(ten_ms, tm) >= 10000) {
             ten_ms = tm;
-
-            tuh_task();
             
-#ifdef ENABLE_BLUEPAD32
-            // Poll Bluepad32 async_context (non-blocking, must be called regularly)
-            bluepad32_poll();
-#endif
-            
+#ifndef ENABLE_BLUEPAD32
+            // USB mode: Handle USB HID devices
             // Check for Switch Pro Controller delayed initialization
             switch_check_delayed_init();
             
             HidInput::instance().handle_keyboard();
             HidInput::instance().handle_mouse(cpu.ncycles);
+#endif
+            // Joystick handler runs in both modes (handles GPIO and Bluetooth)
             HidInput::instance().handle_joystick();
+            
+#ifdef ENABLE_BLUEPAD32
+            // Check if Bluetooth UI update is needed (deferred from BT callbacks)
+            // This prevents blocking in Bluetooth interrupt context
+            bluepad32_check_ui_update();
+#endif
+            
 #if ENABLE_OLED_DISPLAY
             ui.update();
 #endif
+        }
+        
+        // Poll Bluetooth less frequently (every 100ms) to avoid starving Core 1's 6301 emulator
+        // Core 1's timing-sensitive 6301 emulator must get regular CPU time
+        // CRITICAL: Further reduced frequency to give Core 1 more CPU time
+#ifdef ENABLE_BLUEPAD32
+        if (absolute_time_diff_us(bt_poll_ms, tm) >= 100000) {
+            bt_poll_ms = tm;
+            bt_poll_count++;
+            // Process Bluetooth events with a limit to prevent blocking
+            bluepad32_poll();
+            // Yield to ensure Core 1 gets CPU time
+            __wfe();  // Wait for event (yields to other cores/interrupts)
+        }
+#endif
+        
+        // Heartbeat: Print every 1 second to show main loop is still running
+        // Note: This printf may be necessary for Bluetooth stack stability
+        if (absolute_time_diff_us(heartbeat_ms, tm) >= 1000000) {
+            heartbeat_ms = tm;
+            uint32_t core1_heartbeat = g_core1_heartbeat_counter;
+            uint32_t core1_cycles = g_core1_cycle_count;
+            printf("Main loop: HEARTBEAT - loops=%lu, USB polls=%lu, BT polls=%lu, Core1: hb=%lu cycles=%lu\n", 
+                   loop_count, usb_poll_count, bt_poll_count, core1_heartbeat, core1_cycles);
         }
     }
     return 0;

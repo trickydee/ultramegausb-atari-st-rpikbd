@@ -180,6 +180,56 @@ void gc_notify_unmount(uint8_t dev_addr) {
     }
 }
 
+#ifdef ENABLE_BLUEPAD32
+// Functions for Bluetooth gamepad to notify UI of mount/unmount
+extern "C" {
+    // Forward declaration - implemented in bluepad32_platform.c
+    int bluepad32_get_connected_count(void);
+    bool bluepad32_get_gamepad(int idx, void* out_gamepad);
+    bool bluepad32_to_atari_joystick(const void* gp_ptr, uint8_t* axis, uint8_t* button);
+}
+
+// Track Bluetooth gamepad count separately to avoid double-counting
+static int bt_joy_count = 0;
+
+// Flag to indicate UI needs updating (set by BT callbacks, cleared by main loop)
+static volatile bool g_bt_ui_update_needed = false;
+
+void bluepad32_notify_ui_update() {
+    // Defer UI update to main loop to avoid blocking Bluetooth callbacks
+    // This prevents Core 1 from being starved during pairing/connection
+    g_bt_ui_update_needed = true;
+}
+
+// Called from bluepad32_platform.c when a Bluetooth gamepad connects
+extern "C" void bluepad32_notify_mount() {
+    bt_joy_count++;
+    // Note: We don't disable mouse mode anymore - Bluetooth joysticks are assigned to
+    // joystick 1 first (matching USB behavior), so mouse can still work with joystick 1
+    // Defer UI update to avoid blocking in Bluetooth callback
+    bluepad32_notify_ui_update();
+}
+
+// Called from bluepad32_platform.c when a Bluetooth gamepad disconnects
+extern "C" void bluepad32_notify_unmount() {
+    if (bt_joy_count > 0) {
+        bt_joy_count--;
+        // Defer UI update to avoid blocking in Bluetooth callback
+        bluepad32_notify_ui_update();
+    }
+}
+
+// Check if UI update is needed and perform it (called from main loop)
+void bluepad32_check_ui_update() {
+    if (g_bt_ui_update_needed) {
+        g_bt_ui_update_needed = false;
+        if (ui_) {
+            ui_->usb_connect_state(kb_count, mouse_count, joy_count + xinput_joy_count + bt_joy_count);
+        }
+    }
+}
+#endif
+
 static uint8_t count_connected_usb_gamepads() {
     uint8_t total = 0;
     total += ps4_connected_count();
@@ -335,7 +385,11 @@ void tuh_hid_mounted_cb(uint8_t dev_addr) {
     ssd1306_draw_string(&disp, 5, 30, 1, line2);
     
     char line3[20];
+#ifdef ENABLE_BLUEPAD32
+    snprintf(line3, sizeof(line3), "KB:%d M:%d J:%d BT:%d", kb_count, mouse_count, joy_count + xinput_joy_count, bt_joy_count);
+#else
     snprintf(line3, sizeof(line3), "KB:%d M:%d J:%d", kb_count, mouse_count, joy_count);
+#endif
     ssd1306_draw_string(&disp, 5, 45, 1, line3);
     
     ssd1306_show(&disp);
@@ -1440,16 +1494,30 @@ bool HidInput::get_stadia_joystick(int joystick_num, uint8_t& axis, uint8_t& but
 }
 
 void HidInput::handle_joystick() {
-    // Find the joystick addresses
+    // Find the joystick addresses (USB mode only)
     std::vector<int> joystick_addr;
     int next_joystick = 0;
+#ifndef ENABLE_BLUEPAD32
+    // USB mode: Scan for USB HID joysticks
     for (auto it : device) {
         if (tuh_hid_get_type(it.first) == HID_JOYSTICK) {
             joystick_addr.push_back(it.first);
         }
     }
+#endif
 
     bool llama_prev_active = g_llamatron_active;
+#ifdef ENABLE_BLUEPAD32
+    // Bluetooth mode: Llamatron mode not supported (requires USB gamepads)
+    if (g_llamatron_mode) {
+        g_llamatron_active = false;
+        g_llama_axis_joy1 = 0;
+        g_llama_fire_joy1 = 0;
+        g_llama_axis_joy0 = 0;
+        g_llama_fire_joy0 = 0;
+    }
+#else
+    // USB mode: Llamatron mode supported
     if (g_llamatron_mode) {
         uint8_t joy_setting = ui_->get_joystick();
         bool usb0 = !(joy_setting & 0x01);
@@ -1513,8 +1581,8 @@ void HidInput::handle_joystick() {
         g_llama_fire_joy1 = 0;
         g_llama_axis_joy0 = 0;
         g_llama_fire_joy0 = 0;
-
     }
+#endif
 
     // See if the joysticks are GPIO or USB
     for (int joystick = 1; joystick >= 0; --joystick) {
@@ -1564,6 +1632,35 @@ void HidInput::handle_joystick() {
                 }
             }
             
+#ifdef ENABLE_BLUEPAD32
+            // Bluetooth mode: Only check Bluetooth gamepads (USB disabled)
+            // Match USB behavior: assign to joystick 1 first, then joystick 0
+            // This allows mouse to work with joystick 1 (joystick 0 conflicts with mouse)
+            if (!got_input) {
+                int bt_count = bluepad32_get_connected_count();
+                if (bt_count > 0) {
+                    // Map joystick number: joystick 1 -> bt_index 0, joystick 0 -> bt_index 1
+                    // This matches USB behavior where first USB joystick goes to joystick 1
+                    int bt_index = (joystick == 1) ? 0 : 1;
+                    if (bt_index < bt_count) {
+                        // Define a local struct matching uni_gamepad_t layout to avoid header conflicts
+                        struct {
+                            uint32_t buttons;
+                            int32_t axis_x, axis_y, axis_rx, axis_ry;
+                            int32_t brake, throttle;
+                            uint8_t dpad;
+                        } bt_gamepad;
+                        
+                        if (bluepad32_get_gamepad(bt_index, &bt_gamepad)) {
+                            if (bluepad32_to_atari_joystick(&bt_gamepad, &axis, &button)) {
+                                got_input = true;
+                            }
+                        }
+                    }
+                }
+            }
+#else
+            // USB mode: Check USB HID joystick and USB-specific controllers
             // First priority: USB HID joystick
             if (!got_input && next_joystick < joystick_addr.size()) {
                 if (get_usb_joystick(joystick_addr[next_joystick], axis, button)) {
@@ -1605,6 +1702,7 @@ void HidInput::handle_joystick() {
                 got_input = true;
                 g_xbox_success++;  // Track Xbox success
             }
+#endif
             
             // Update joystick state if we got input from either source
             if (got_input) {

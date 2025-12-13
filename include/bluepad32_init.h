@@ -20,6 +20,10 @@ async_context_poll_t* bluepad32_init(void);
 // Poll btstack async_context (non-blocking, call from main loop)
 void bluepad32_poll(void);
 
+// Check if UI update is needed and perform it (called from main loop)
+// This defers UI updates from Bluetooth callbacks to prevent blocking
+void bluepad32_check_ui_update(void);
+
 #ifdef __cplusplus
 }
 #endif
