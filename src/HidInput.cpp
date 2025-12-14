@@ -1632,34 +1632,7 @@ void HidInput::handle_joystick() {
                 }
             }
             
-#ifdef ENABLE_BLUEPAD32
-            // Bluetooth mode: Only check Bluetooth gamepads (USB disabled)
-            // Match USB behavior: assign to joystick 1 first, then joystick 0
-            // This allows mouse to work with joystick 1 (joystick 0 conflicts with mouse)
-            if (!got_input) {
-                int bt_count = bluepad32_get_connected_count();
-                if (bt_count > 0) {
-                    // Map joystick number: joystick 1 -> bt_index 0, joystick 0 -> bt_index 1
-                    // This matches USB behavior where first USB joystick goes to joystick 1
-                    int bt_index = (joystick == 1) ? 0 : 1;
-                    if (bt_index < bt_count) {
-                        // Define a local struct matching uni_gamepad_t layout to avoid header conflicts
-                        struct {
-                            uint32_t buttons;
-                            int32_t axis_x, axis_y, axis_rx, axis_ry;
-                            int32_t brake, throttle;
-                            uint8_t dpad;
-                        } bt_gamepad;
-                        
-                        if (bluepad32_get_gamepad(bt_index, &bt_gamepad)) {
-                            if (bluepad32_to_atari_joystick(&bt_gamepad, &axis, &button)) {
-                                got_input = true;
-                            }
-                        }
-                    }
-                }
-            }
-#else
+            // EXPERIMENTAL: Support both USB and Bluetooth simultaneously
             // USB mode: Check USB HID joystick and USB-specific controllers
             // First priority: USB HID joystick
             if (!got_input && next_joystick < joystick_addr.size()) {
@@ -1701,6 +1674,34 @@ void HidInput::handle_joystick() {
             if (!got_input && get_xbox_joystick(joystick, axis, button)) {
                 got_input = true;
                 g_xbox_success++;  // Track Xbox success
+            }
+            
+#ifdef ENABLE_BLUEPAD32
+            // EXPERIMENTAL: Also check Bluetooth gamepads (USB + Bluetooth mode)
+            // Match USB behavior: assign to joystick 1 first, then joystick 0
+            // This allows mouse to work with joystick 1 (joystick 0 conflicts with mouse)
+            if (!got_input) {
+                int bt_count = bluepad32_get_connected_count();
+                if (bt_count > 0) {
+                    // Map joystick number: joystick 1 -> bt_index 0, joystick 0 -> bt_index 1
+                    // This matches USB behavior where first USB joystick goes to joystick 1
+                    int bt_index = (joystick == 1) ? 0 : 1;
+                    if (bt_index < bt_count) {
+                        // Define a local struct matching uni_gamepad_t layout to avoid header conflicts
+                        struct {
+                            uint32_t buttons;
+                            int32_t axis_x, axis_y, axis_rx, axis_ry;
+                            int32_t brake, throttle;
+                            uint8_t dpad;
+                        } bt_gamepad;
+                        
+                        if (bluepad32_get_gamepad(bt_index, &bt_gamepad)) {
+                            if (bluepad32_to_atari_joystick(&bt_gamepad, &axis, &button)) {
+                                got_input = true;
+                            }
+                        }
+                    }
+                }
             }
 #endif
             
