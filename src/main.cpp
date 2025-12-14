@@ -177,10 +177,11 @@ void __not_in_flash_func(core1_entry)() {
     uint32_t loop_count = 0;
     uint32_t last_heartbeat_loop = 0;
     
-    // Calculate delay loop iterations for ~100us delay at 150MHz
-    // At 150MHz: 1 cycle = 6.67ns, so 100us = 15000 cycles
-    // Use a simple tight loop instead of busy_wait_us() to avoid any potential blocking
-    const uint32_t DELAY_LOOPS = 15000;  // ~100us at 150MHz
+    // Calculate delay loop iterations for ~100us delay at 250MHz (matching original USB-only timing)
+    // At 250MHz: 1 cycle = 4ns, so 100us = 25000 cycles
+    // Original USB-only build used sleep_until() with CYCLES_PER_LOOP=100 (100us delay)
+    // Use a simple tight loop instead of sleep_until() to avoid Bluetooth timer blocking
+    const uint32_t DELAY_LOOPS = 25000;  // ~100us at 250MHz (matches original timing)
     
     while (true) {
         count += CYCLES_PER_LOOP;
@@ -222,26 +223,25 @@ int main() {
     uart_puts(uart0, "UART0 console ready (115200 8N1)\r\n");
 
     // Note: stdio_init_all() not called as it may interfere with SerialPort UART setup
-#ifdef ENABLE_BLUEPAD32
-    // When Bluetooth is enabled, disable USB to avoid resource conflicts
-    // Bluetooth and USB cannot run concurrently on Pico W due to interrupt/timing conflicts
-    printf("USB disabled - Bluetooth mode active\n");
-#else
+    // EXPERIMENTAL: Re-enable USB alongside Bluetooth
     // USB mode: Initialize TinyUSB for USB HID device support
     if (!tusb_init()) {
         // TinyUSB initialization failed
         printf("TinyUSB initialization failed\n");
         return -1;
     }
+#ifdef ENABLE_BLUEPAD32
+    printf("USB initialized - Bluetooth + USB mode active (experimental)\n");
+#else
     printf("USB initialized - USB mode active\n");
 #endif
 
     // Overclock the Pico for maximum performance
-    // For Bluetooth builds, use lower clock speed for CYW43 stability
-    // CYW43 chip has issues at high clock speeds (270MHz causes STALL timeouts)
+    // For Bluetooth builds, use 250MHz (testing if higher speed improves USB response)
+    // CYW43 chip has issues at very high clock speeds (270MHz causes STALL timeouts)
     #ifdef ENABLE_BLUEPAD32
-    uint32_t clock_khz = 150000;  // 150 MHz for Bluetooth stability
-    printf("Bluetooth build: Using 150 MHz for CYW43 stability\n");
+    uint32_t clock_khz = 250000;  // 250 MHz for Bluetooth builds (testing)
+    printf("Bluetooth build: Using 250 MHz\n");
     #else
     uint32_t clock_khz = DEFAULT_CPU_CLOCK_KHZ;
     #endif
@@ -288,6 +288,7 @@ int main() {
 
     absolute_time_t ten_ms = get_absolute_time();
     absolute_time_t one_ms = get_absolute_time();  // For more frequent USB polling
+    absolute_time_t usb_hid_ms = get_absolute_time();  // For USB HID device handling (separate from tuh_task)
     absolute_time_t bt_poll_ms = get_absolute_time();  // For less frequent BT polling
     absolute_time_t heartbeat_ms = get_absolute_time();  // For heartbeat debug
     static uint32_t loop_count = 0;
@@ -306,30 +307,28 @@ int main() {
 
         AtariSTMouse::instance().update();
 
-#ifndef ENABLE_BLUEPAD32
+        // EXPERIMENTAL: Re-enable USB alongside Bluetooth
         // CRITICAL: Call tuh_task() more frequently (every 1ms) to ensure USB doesn't stall
         // USB requires regular polling - if we only call it every 10ms, devices can timeout
-        // USB is disabled when Bluetooth is enabled to avoid resource conflicts
         if (absolute_time_diff_us(one_ms, tm) >= 1000) {
             one_ms = tm;
             usb_poll_count++;
             tuh_task();  // Process USB events frequently
         }
-#endif
 
-        // 10ms handler for less time-critical tasks
+        // 10ms handler for USB HID devices and other tasks
         if (absolute_time_diff_us(ten_ms, tm) >= 10000) {
             ten_ms = tm;
             
-#ifndef ENABLE_BLUEPAD32
+            // EXPERIMENTAL: Re-enable USB alongside Bluetooth
             // USB mode: Handle USB HID devices
             // Check for Switch Pro Controller delayed initialization
             switch_check_delayed_init();
             
             HidInput::instance().handle_keyboard();
             HidInput::instance().handle_mouse(cpu.ncycles);
-#endif
-            // Joystick handler runs in both modes (handles GPIO and Bluetooth)
+            
+            // Joystick handler runs in both modes (handles GPIO, USB, and Bluetooth)
             HidInput::instance().handle_joystick();
             
 #ifdef ENABLE_BLUEPAD32
