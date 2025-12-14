@@ -10,6 +10,14 @@ The "ultramegausb" title is intended to highlight the massively enhanced USB com
 This project is opensource and I am happy to recieve PR's and issues to further improve capabilies.
 Lookout for a published roadmap of new features and an easy to build hardware device you can self manufacture.
 
+## Bluetooth Support (Experimental - Pico 2 W only)
+
+**Note:** This test build (feature/bluetooth-test branch) includes experimental Bluetooth gamepad support for Pico 2 W devices. Bluetooth and USB devices can now work simultaneously:
+- USB devices (keyboard, mouse, joysticks) continue to work as before
+- Bluetooth gamepads can be paired and used alongside USB devices
+- Joystick priority: USB devices are checked first, then Bluetooth as fallback
+- Requires Pico 2 W (not regular Pico or Pico 2) due to CYW43 chip requirement
+
 
 
 ## USB Support
