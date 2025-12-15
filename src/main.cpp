@@ -22,6 +22,7 @@
 #include <string.h>
 #include "pico/stdlib.h"
 #include "pico/multicore.h"
+#include "pico/flash.h"  // For flash_safe_execute_core_init() - required for Bluetooth flash coordination
 #include "hardware/clocks.h"
 #include "hardware/uart.h"
 #include "pico/stdio_uart.h"
@@ -43,13 +44,15 @@
 #include "bluepad32_init.h"
 #endif
 
+#include "runtime_toggle.h"  // Runtime USB/Bluetooth toggle control
+
 // Forward declarations
 extern "C" {
     void switch_check_delayed_init(void);
 }
 
 #define ROMBASE     256
-#define CYCLES_PER_LOOP 100  // Ultra-low latency for timing-sensitive demos (10x improvement over original)
+#define CYCLES_PER_LOOP 1000  // Match logronoid's value - proper 6301 emulation timing (~1MHz)
 
 extern unsigned char rom_HD6301V1ST_img[];
 extern unsigned int rom_HD6301V1ST_img_len;
@@ -156,8 +159,15 @@ void __not_in_flash_func(setup_hd6301)() {
 // Global flag to track Core 1 activity (updated by Core 1, read by Core 0)
 static volatile uint32_t g_core1_heartbeat_counter = 0;
 static volatile uint32_t g_core1_cycle_count = 0;
+static volatile uint32_t g_core1_loop_counter = 0;  // Simple loop counter to detect if Core 1 is running
 
 void __not_in_flash_func(core1_entry)() {
+    // CRITICAL: Initialize flash-safe execution FIRST
+    // This allows Core 0 to coordinate with Core 1 when Bluetooth writes to flash (TLV storage)
+    // Without this, Core 1 can freeze when Bluetooth tries to access flash
+    // This matches logronoid's implementation and is required for proper flash coordination
+    flash_safe_execute_core_init();
+    
     // Wait for Core 0 to finish initializing UART0 and other peripherals
     // This is critical for XIP builds where initialization timing matters
     // Use busy_wait instead of sleep_ms to avoid timer dependency
@@ -170,20 +180,21 @@ void __not_in_flash_func(core1_entry)() {
     // Note: RX queue is cleared at startup (automatically zero-initialized)
     unsigned long count = 0;
     
-    printf("Core 1: 6301 emulator started\n");
+    // CRITICAL: Don't use printf here - it can block if UART0 is locked by Bluetooth
+    // Instead, set a flag that Core 0 can check
+    g_core1_heartbeat_counter = 0xFFFFFFFF;  // Magic value to indicate Core 1 started
     
-    // Use a simple counter-based timing instead of absolute_time_t to avoid Bluetooth interrupt blocking
-    // This makes Core 1's timing completely independent of the timer system
+    // Pure tight loop - NO DELAYS (matching logronoid's implementation)
+    // This makes Core 1 completely independent of timer system and Core 0's USB/Bluetooth operations
+    // Core 1 runs at maximum speed, only limited by CPU clock
     uint32_t loop_count = 0;
     uint32_t last_heartbeat_loop = 0;
     
-    // Calculate delay loop iterations for ~100us delay at 250MHz (matching original USB-only timing)
-    // At 250MHz: 1 cycle = 4ns, so 100us = 25000 cycles
-    // Original USB-only build used sleep_until() with CYCLES_PER_LOOP=100 (100us delay)
-    // Use a simple tight loop instead of sleep_until() to avoid Bluetooth timer blocking
-    const uint32_t DELAY_LOOPS = 25000;  // ~100us at 250MHz (matches original timing)
-    
     while (true) {
+        // CRITICAL: Update loop counter FIRST to detect if Core 1 is frozen
+        // This counter increments every loop, independent of emulator state
+        g_core1_loop_counter++;  // Simple increment - if this stops, Core 1 is truly frozen
+        
         count += CYCLES_PER_LOOP;
         g_core1_cycle_count = count;  // Update global counter (non-blocking)
         
@@ -202,11 +213,9 @@ void __not_in_flash_func(core1_entry)() {
             g_core1_heartbeat_counter++;  // Increment counter (non-blocking atomic operation)
         }
 
-        // Simple tight loop delay - completely independent of timer system and interrupts
-        // This avoids any potential blocking from busy_wait_us() or timer calls
-        for (volatile uint32_t i = 0; i < DELAY_LOOPS; i++) {
-            __asm__("nop");  // No-op to prevent loop optimization
-        }
+        // NO DELAY - pure tight loop (matching logronoid's approach)
+        // Core 1 runs continuously without yielding, making it completely independent
+        // of Core 0's USB/Bluetooth operations and timer interrupts
     }
 }
 
@@ -223,25 +232,25 @@ int main() {
     uart_puts(uart0, "UART0 console ready (115200 8N1)\r\n");
 
     // Note: stdio_init_all() not called as it may interfere with SerialPort UART setup
-    // EXPERIMENTAL: Re-enable USB alongside Bluetooth
-    // USB mode: Initialize TinyUSB for USB HID device support
+    // Initialize TinyUSB for USB HID device support (concurrent with Bluetooth)
     if (!tusb_init()) {
         // TinyUSB initialization failed
         printf("TinyUSB initialization failed\n");
         return -1;
     }
 #ifdef ENABLE_BLUEPAD32
-    printf("USB initialized - Bluetooth + USB mode active (experimental)\n");
+    printf("USB initialized - Bluetooth + USB mode active\n");
 #else
     printf("USB initialized - USB mode active\n");
 #endif
 
-    // Overclock the Pico for maximum performance
-    // For Bluetooth builds, use 250MHz (testing if higher speed improves USB response)
+    // Clock speed configuration
+    // For Bluetooth builds, use 225MHz (matching logronoid's stable configuration)
     // CYW43 chip has issues at very high clock speeds (270MHz causes STALL timeouts)
+    // 225MHz provides good balance between performance and stability
     #ifdef ENABLE_BLUEPAD32
-    uint32_t clock_khz = 250000;  // 250 MHz for Bluetooth builds (testing)
-    printf("Bluetooth build: Using 250 MHz\n");
+    uint32_t clock_khz = 225000;  // 225 MHz for Bluetooth builds (matching logronoid)
+    printf("Bluetooth build: Using 225 MHz (matching logronoid's config)\n");
     #else
     uint32_t clock_khz = DEFAULT_CPU_CLOCK_KHZ;
     #endif
@@ -286,14 +295,31 @@ int main() {
     // Force mouse enabled at startup
     HidInput::instance().force_usb_mouse();
 
+    // Runtime state: USB and Bluetooth can be toggled on/off at runtime
+    // Both start enabled by default (when ENABLE_BLUEPAD32 is defined, both are available)
+    // State is managed by runtime_toggle functions
+    printf("Runtime toggle available: USB and Bluetooth can be toggled at runtime\n");
+#ifdef ENABLE_BLUEPAD32
+    // If Bluetooth failed to initialize, disable it
+    if (!bluepad32_is_enabled()) {
+        bt_runtime_disable();
+        printf("Bluetooth disabled (initialization failed)\n");
+    }
+    printf("Current state: USB=%s, BT=%s\n", 
+           usb_runtime_is_enabled() ? "ON" : "OFF",
+           bt_runtime_is_enabled() ? "ON" : "OFF");
+#endif
+
     absolute_time_t ten_ms = get_absolute_time();
-    absolute_time_t one_ms = get_absolute_time();  // For more frequent USB polling
-    absolute_time_t usb_hid_ms = get_absolute_time();  // For USB HID device handling (separate from tuh_task)
-    absolute_time_t bt_poll_ms = get_absolute_time();  // For less frequent BT polling
+    absolute_time_t one_ms = get_absolute_time();  // For USB polling (5ms interval)
+    absolute_time_t mouse_poll_ms = get_absolute_time();  // For mouse polling (750μs interval)
     absolute_time_t heartbeat_ms = get_absolute_time();  // For heartbeat debug
+#ifdef ENABLE_BLUEPAD32
+    absolute_time_t bt_poll_ms = get_absolute_time();  // For Bluetooth polling (1ms interval)
+    static uint32_t bt_poll_count = 0;
+#endif
     static uint32_t loop_count = 0;
     static uint32_t usb_poll_count = 0;
-    static uint32_t bt_poll_count = 0;
     
     printf("Main loop: Starting...\n");
     
@@ -307,34 +333,42 @@ int main() {
 
         AtariSTMouse::instance().update();
 
-        // EXPERIMENTAL: Re-enable USB alongside Bluetooth
-        // CRITICAL: Call tuh_task() more frequently (every 1ms) to ensure USB doesn't stall
-        // USB requires regular polling - if we only call it every 10ms, devices can timeout
-        if (absolute_time_diff_us(one_ms, tm) >= 1000) {
+        // USB polling at 5ms (reduced from 1ms to reduce overhead, matching logronoid's approach)
+        // Only poll if USB is enabled at runtime
+        if (usb_runtime_is_enabled() && absolute_time_diff_us(one_ms, tm) >= 5000) {
             one_ms = tm;
             usb_poll_count++;
-            tuh_task();  // Process USB events frequently
+            tuh_task();  // Process USB events
+        }
+
+        // Mouse polling at 750μs (0.75ms) - matching logronoid's USB mode timing
+        // Only poll mouse if USB is enabled (mouse comes from USB)
+        if (usb_runtime_is_enabled() && absolute_time_diff_us(mouse_poll_ms, tm) >= 750) {
+            mouse_poll_ms = tm;
+            HidInput::instance().handle_mouse(cpu.ncycles);
         }
 
         // 10ms handler for USB HID devices and other tasks
         if (absolute_time_diff_us(ten_ms, tm) >= 10000) {
             ten_ms = tm;
             
-            // EXPERIMENTAL: Re-enable USB alongside Bluetooth
-            // USB mode: Handle USB HID devices
-            // Check for Switch Pro Controller delayed initialization
-            switch_check_delayed_init();
+            // Only handle USB devices if USB is enabled
+            if (usb_runtime_is_enabled()) {
+                // Check for Switch Pro Controller delayed initialization
+                switch_check_delayed_init();
+                
+                HidInput::instance().handle_keyboard();
+            }
             
-            HidInput::instance().handle_keyboard();
-            HidInput::instance().handle_mouse(cpu.ncycles);
-            
-            // Joystick handler runs in both modes (handles GPIO, USB, and Bluetooth)
+            // Joystick handler (handles GPIO, USB, and Bluetooth)
             HidInput::instance().handle_joystick();
             
 #ifdef ENABLE_BLUEPAD32
             // Check if Bluetooth UI update is needed (deferred from BT callbacks)
-            // This prevents blocking in Bluetooth interrupt context
-            bluepad32_check_ui_update();
+            // Only if Bluetooth is enabled
+            if (bt_runtime_is_enabled()) {
+                bluepad32_check_ui_update();
+            }
 #endif
             
 #if ENABLE_OLED_DISPLAY
@@ -342,17 +376,18 @@ int main() {
 #endif
         }
         
-        // Poll Bluetooth less frequently (every 100ms) to avoid starving Core 1's 6301 emulator
-        // Core 1's timing-sensitive 6301 emulator must get regular CPU time
-        // CRITICAL: Further reduced frequency to give Core 1 more CPU time
 #ifdef ENABLE_BLUEPAD32
-        if (absolute_time_diff_us(bt_poll_ms, tm) >= 100000) {
+        // Poll Bluetooth frequently (every 1ms) for responsive controller input
+        // Matching logronoid's approach of frequent Bluetooth polling
+        // Only poll if Bluetooth is enabled at runtime
+        if (bt_runtime_is_enabled() && bluepad32_is_enabled() && absolute_time_diff_us(bt_poll_ms, tm) >= 1000) {
             bt_poll_ms = tm;
             bt_poll_count++;
-            // Process Bluetooth events with a limit to prevent blocking
-            bluepad32_poll();
-            // Yield to ensure Core 1 gets CPU time
-            __wfe();  // Wait for event (yields to other cores/interrupts)
+            bluepad32_poll();  // Process Bluetooth events
+            // Immediately poll USB after Bluetooth to prevent USB starvation (if USB enabled)
+            if (usb_runtime_is_enabled()) {
+                tuh_task();
+            }
         }
 #endif
         
@@ -362,8 +397,24 @@ int main() {
             heartbeat_ms = tm;
             uint32_t core1_heartbeat = g_core1_heartbeat_counter;
             uint32_t core1_cycles = g_core1_cycle_count;
-            printf("Main loop: HEARTBEAT - loops=%lu, USB polls=%lu, BT polls=%lu, Core1: hb=%lu cycles=%lu\n", 
-                   loop_count, usb_poll_count, bt_poll_count, core1_heartbeat, core1_cycles);
+            uint32_t core1_loops = g_core1_loop_counter;
+            static uint32_t last_core1_cycles = 0;
+            static uint32_t last_core1_loops = 0;
+            bool core1_frozen = (core1_cycles == last_core1_cycles && core1_cycles > 0);
+            bool core1_loops_frozen = (core1_loops == last_core1_loops && core1_loops > 0);
+            last_core1_cycles = core1_cycles;
+            last_core1_loops = core1_loops;
+#ifdef ENABLE_BLUEPAD32
+            printf("Main loop: HEARTBEAT - loops=%lu, USB polls=%lu, BT polls=%lu, Core1: hb=%lu cycles=%lu loops=%lu%s%s\n", 
+                   loop_count, usb_poll_count, bt_poll_count, core1_heartbeat, core1_cycles, core1_loops,
+                   core1_frozen ? " [CYCLES_FROZEN!]" : "",
+                   core1_loops_frozen ? " [LOOPS_FROZEN!]" : "");
+#else
+            printf("Main loop: HEARTBEAT - loops=%lu, USB polls=%lu, Core1: hb=%lu cycles=%lu loops=%lu%s%s\n", 
+                   loop_count, usb_poll_count, core1_heartbeat, core1_cycles, core1_loops,
+                   core1_frozen ? " [CYCLES_FROZEN!]" : "",
+                   core1_loops_frozen ? " [LOOPS_FROZEN!]" : "");
+#endif
         }
     }
     return 0;

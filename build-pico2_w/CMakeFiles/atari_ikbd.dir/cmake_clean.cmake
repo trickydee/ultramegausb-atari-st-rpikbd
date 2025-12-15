@@ -409,6 +409,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/atari_ikbd.dir/src/ps3_controller.c.o.d"
   "CMakeFiles/atari_ikbd.dir/src/ps4_controller.c.o"
   "CMakeFiles/atari_ikbd.dir/src/ps4_controller.c.o.d"
+  "CMakeFiles/atari_ikbd.dir/src/runtime_toggle.c.o"
+  "CMakeFiles/atari_ikbd.dir/src/runtime_toggle.c.o.d"
   "CMakeFiles/atari_ikbd.dir/src/st_key_lookup_hid_gb.cpp.o"
   "CMakeFiles/atari_ikbd.dir/src/st_key_lookup_hid_gb.cpp.o.d"
   "CMakeFiles/atari_ikbd.dir/src/stadia_controller.c.o"

@@ -61,8 +61,14 @@ public:
      * Attempt to receive data from the Atari ST over the serial port.
      * This function does not block.
      * Returns true if a byte was received, otherwise returns false
+     * Uses IRQ-based ring buffer - bytes are captured immediately by ISR
      */
     bool recv(unsigned char& data) const;
+    
+    /**
+     * Get number of bytes available in RX ring buffer
+     */
+    uint16_t rx_available() const;
 
     /**
      * Query whether the transmit buffer is empty.

@@ -152,6 +152,11 @@ if(ENABLE_BLUEPAD32)
         src/bluepad32_init.c
     )
 endif()
+
+# Add runtime toggle source (always included for runtime USB/Bluetooth control)
+list(APPEND SOURCES
+    src/runtime_toggle.c
+)
 set(INCLUDES
     include
 )

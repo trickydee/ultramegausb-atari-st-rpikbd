@@ -163,7 +163,7 @@ static void xinput_compute_axes(const xinput_gamepad_t* pad,
 
 // Convert Xbox controller data to Atari joystick format
 bool xinput_to_atari_joystick(int joystick_num, uint8_t* axis, uint8_t* button) {
-    // Debug to track data flow issues
+    // Debug counters for UI
     static uint32_t call_count = 0;
     static uint32_t last_found_addr = 0;
     static uint32_t not_found_count = 0;
@@ -199,17 +199,6 @@ bool xinput_to_atari_joystick(int joystick_num, uint8_t* axis, uint8_t* button) 
         const xinput_gamepad_t* pad = &xbox->pad;
         
         xinput_compute_axes(pad, axis, button, nullptr, nullptr);
-        
-        // Debug disabled for performance
-        #if 0
-        static uint32_t found_count = 0;
-        if ((found_count++ % 50) == 0) {
-            char result[25];
-            snprintf(result, sizeof(result), "=>A:%02X F:%d", *axis, *button);
-            ssd1306_draw_string(&disp, 0, 20, 1, result);
-            ssd1306_show(&disp);
-        }
-        #endif
         
         return true;
     }

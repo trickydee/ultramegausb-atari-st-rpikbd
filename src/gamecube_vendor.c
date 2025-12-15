@@ -109,8 +109,8 @@ static void gc_in_xfer_cb(tuh_xfer_t* xfer) {
     
 #if ENABLE_SERIAL_LOGGING
     if ((callback_count % 100) == 0) {
-        printf("GC: IN callback #%lu: result=%d, len=%lu\n", 
-               callback_count, xfer->result, xfer->actual_len);
+    printf("GC: IN callback #%lu: result=%d, len=%lu\n", 
+           callback_count, xfer->result, xfer->actual_len);
     }
 #endif
     
@@ -126,16 +126,16 @@ static void gc_in_xfer_cb(tuh_xfer_t* xfer) {
         // Process the report
 #if ENABLE_SERIAL_LOGGING
         if ((callback_count % 100) == 0) {
-            printf("GC: Processing report...\n");
+        printf("GC: Processing report...\n");
         }
 #endif
         gc_process_report(xfer->daddr, gc_dev->report_buffer, GC_REPORT_SIZE);
     } else {
 #if ENABLE_SERIAL_LOGGING
         if (xfer->result != XFER_RESULT_SUCCESS) {
-            printf("GC: IN transfer failed: result=%d\n", xfer->result);
-        } else if (xfer->actual_len != GC_REPORT_SIZE) {
-            printf("GC: Wrong size: got %lu, expected %d\n", xfer->actual_len, GC_REPORT_SIZE);
+        printf("GC: IN transfer failed: result=%d\n", xfer->result);
+    } else if (xfer->actual_len != GC_REPORT_SIZE) {
+        printf("GC: Wrong size: got %lu, expected %d\n", xfer->actual_len, GC_REPORT_SIZE);
         }
 #endif
     }

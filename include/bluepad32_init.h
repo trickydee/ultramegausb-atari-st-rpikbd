@@ -24,6 +24,11 @@ void bluepad32_poll(void);
 // This defers UI updates from Bluetooth callbacks to prevent blocking
 void bluepad32_check_ui_update(void);
 
+// Runtime control functions
+void bluepad32_enable(void);
+void bluepad32_disable(void);
+bool bluepad32_is_enabled(void);
+
 #ifdef __cplusplus
 }
 #endif

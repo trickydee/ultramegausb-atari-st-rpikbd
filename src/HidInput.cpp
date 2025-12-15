@@ -32,6 +32,7 @@
 #include "switch_controller.h"
 #include "stadia_controller.h"
 #include "xinput.h"
+#include "runtime_toggle.h"  // For usb_runtime_is_enabled() and bt_runtime_is_enabled()
 #include <map>
 #include <set>
 #include <deque>
@@ -1437,23 +1438,30 @@ bool HidInput::get_gamecube_joystick(int joystick_num, uint8_t& axis, uint8_t& b
 
 bool HidInput::get_ps4_joystick(int joystick_num, uint8_t& axis, uint8_t& button) {
     // Get PS4 controller state
+    static uint32_t call_count = 0;
+    static uint32_t success_count = 0;
+    call_count++;
+    
     for (uint8_t dev_addr = 1; dev_addr < 8; dev_addr++) {
         ps4_controller_t* ps4 = ps4_get_controller(dev_addr);
         if (ps4 && ps4->connected) {
             // Found a connected PS4 controller!
             ps4_to_atari(ps4, joystick_num, &axis, &button);
             
-            // Debug disabled for performance
-            // (Enable only for troubleshooting)
-            #if 0
-            static uint32_t debug_count = 0;
-            if ((debug_count++ % 500) == 0) {
-                printf("PS4->Atari: Joy%d axis=0x%02X fire=%d\n", joystick_num, axis, button);
+            success_count++;
+            // Debug: Show input detection (throttled to avoid spam)
+            if ((call_count % 100) == 0 || (success_count <= 5)) {
+                printf("PS4 Joy%d: INPUT DETECTED - axis=0x%02X button=%d (calls=%lu success=%lu)\n", 
+                       joystick_num, axis, button, call_count, success_count);
             }
-            #endif
             
             return true;
         }
+    }
+    
+    // Debug: Show when no input found (only first few times)
+    if (call_count <= 5) {
+        printf("PS4 Joy%d: NO INPUT (call %lu)\n", joystick_num, call_count);
     }
     
     return false;
@@ -1497,14 +1505,15 @@ void HidInput::handle_joystick() {
     // Find the joystick addresses (USB mode only)
     std::vector<int> joystick_addr;
     int next_joystick = 0;
-#ifndef ENABLE_BLUEPAD32
-    // USB mode: Scan for USB HID joysticks
-    for (auto it : device) {
-        if (tuh_hid_get_type(it.first) == HID_JOYSTICK) {
-            joystick_addr.push_back(it.first);
+    // Scan for USB HID joysticks if USB is enabled at runtime
+    // (Works even when Bluetooth is compiled in)
+    if (usb_runtime_is_enabled()) {
+        for (auto it : device) {
+            if (tuh_hid_get_type(it.first) == HID_JOYSTICK) {
+                joystick_addr.push_back(it.first);
+            }
         }
     }
-#endif
 
     bool llama_prev_active = g_llamatron_active;
 #ifdef ENABLE_BLUEPAD32
@@ -1632,75 +1641,106 @@ void HidInput::handle_joystick() {
                 }
             }
             
+            // Check USB controllers if USB is enabled at runtime
+            // (Works even when Bluetooth is compiled in)
+            if (usb_runtime_is_enabled()) {
+                // USB mode: Check USB HID joystick and USB-specific controllers
+                // First priority: USB HID joystick
+                if (!got_input && next_joystick < joystick_addr.size()) {
+                    if (get_usb_joystick(joystick_addr[next_joystick], axis, button)) {
+                        got_input = true;
+                        g_hid_joy_success++;  // Track HID success
+                    }
+                    ++next_joystick;
+                }
+                
+                // Second priority: PS4 controller (always check, even if HID exists)
+                // FIX: PS4 and Xbox were being skipped if ANY HID entry existed, even disconnected ones
+                if (!got_input && get_ps4_joystick(joystick, axis, button)) {
+                    got_input = true;
+                    g_ps4_success++;  // Track PS4 success
+                }
+                
+                // PS3 controller (check after PS4)
+                if (!got_input && get_ps3_joystick(joystick, axis, button)) {
+                    got_input = true;
+                }
+                
+                // GameCube adapter (check after PS3)
+                if (!got_input && get_gamecube_joystick(joystick, axis, button)) {
+                    got_input = true;
+                }
+                
+                // Third priority: Switch controller
+                if (!got_input && get_switch_joystick(joystick, axis, button)) {
+                    got_input = true;
+                    g_switch_success++;  // Track Switch success
+                }
+                
+                // Fourth priority: Stadia controller - NOW USES GENERIC HID PATH
+                // (Stadia is detected as standard HID joystick, handled above)
+                
+                // Fifth priority: Xbox controller (always check as final fallback)
+                // FIX: This ensures Xbox is checked even if stale HID entries exist
+                if (!got_input && get_xbox_joystick(joystick, axis, button)) {
+                    got_input = true;
+                    g_xbox_success++;  // Track Xbox success
+                }
+            }
+            
 #ifdef ENABLE_BLUEPAD32
-            // Bluetooth mode: Only check Bluetooth gamepads (USB disabled)
+            // Check Bluetooth controllers if Bluetooth is enabled at runtime
             // Match USB behavior: assign to joystick 1 first, then joystick 0
             // This allows mouse to work with joystick 1 (joystick 0 conflicts with mouse)
-            if (!got_input) {
+            if (!got_input && bt_runtime_is_enabled()) {
                 int bt_count = bluepad32_get_connected_count();
                 if (bt_count > 0) {
                     // Map joystick number: joystick 1 -> bt_index 0, joystick 0 -> bt_index 1
                     // This matches USB behavior where first USB joystick goes to joystick 1
                     int bt_index = (joystick == 1) ? 0 : 1;
                     if (bt_index < bt_count) {
-                        // Define a local struct matching uni_gamepad_t layout to avoid header conflicts
+                        // Local struct with layout matching uni_gamepad_t exactly.
+                        // See bluepad32's uni_gamepad_t definition.
                         struct {
-                            uint32_t buttons;
-                            int32_t axis_x, axis_y, axis_rx, axis_ry;
-                            int32_t brake, throttle;
-                            uint8_t dpad;
+                            uint8_t  dpad;
+                            int32_t  axis_x;
+                            int32_t  axis_y;
+                            int32_t  axis_rx;
+                            int32_t  axis_ry;
+                            int32_t  brake;
+                            int32_t  throttle;
+                            uint16_t buttons;
+                            uint8_t  misc_buttons;
+                            int32_t  gyro[3];
+                            int32_t  accel[3];
                         } bt_gamepad;
                         
                         if (bluepad32_get_gamepad(bt_index, &bt_gamepad)) {
-                            if (bluepad32_to_atari_joystick(&bt_gamepad, &axis, &button)) {
+                            uint8_t bt_axis = 0;
+                            uint8_t bt_button = 0;
+                            if (bluepad32_to_atari_joystick(&bt_gamepad, &bt_axis, &bt_button)) {
+                                axis = bt_axis;
+                                button = bt_button;
                                 got_input = true;
+
+                                // Debug: log first few Bluetooth samples per joystick (low volume)
+                                static uint32_t bt_sample_count[2] = {0, 0};
+                                uint32_t* sample_counter = &bt_sample_count[joystick];
+                                if (*sample_counter < 10) {
+                                    (*sample_counter)++;
+                                    printf("BT Joy%d: axis=0x%02X button=%d (buttons=0x%04X dpad=0x%02X ax=%ld ay=%ld)\n",
+                                           joystick,
+                                           bt_axis,
+                                           bt_button,
+                                           (unsigned int)bt_gamepad.buttons,
+                                           bt_gamepad.dpad,
+                                           (long)bt_gamepad.axis_x,
+                                           (long)bt_gamepad.axis_y);
+                                }
                             }
                         }
                     }
                 }
-            }
-#else
-            // USB mode: Check USB HID joystick and USB-specific controllers
-            // First priority: USB HID joystick
-            if (!got_input && next_joystick < joystick_addr.size()) {
-                if (get_usb_joystick(joystick_addr[next_joystick], axis, button)) {
-                    got_input = true;
-                    g_hid_joy_success++;  // Track HID success
-                }
-                ++next_joystick;
-            }
-            
-            // Second priority: PS4 controller (always check, even if HID exists)
-            // FIX: PS4 and Xbox were being skipped if ANY HID entry existed, even disconnected ones
-            if (!got_input && get_ps4_joystick(joystick, axis, button)) {
-                got_input = true;
-                g_ps4_success++;  // Track PS4 success
-            }
-            
-            // PS3 controller (check after PS4)
-            if (!got_input && get_ps3_joystick(joystick, axis, button)) {
-                got_input = true;
-            }
-            
-            // GameCube adapter (check after PS3)
-            if (!got_input && get_gamecube_joystick(joystick, axis, button)) {
-                got_input = true;
-            }
-            
-            // Third priority: Switch controller
-            if (!got_input && get_switch_joystick(joystick, axis, button)) {
-                got_input = true;
-                g_switch_success++;  // Track Switch success
-            }
-            
-            // Fourth priority: Stadia controller - NOW USES GENERIC HID PATH
-            // (Stadia is detected as standard HID joystick, handled above)
-            
-            // Fifth priority: Xbox controller (always check as final fallback)
-            // FIX: This ensures Xbox is checked even if stale HID entries exist
-            if (!got_input && get_xbox_joystick(joystick, axis, button)) {
-                got_input = true;
-                g_xbox_success++;  // Track Xbox success
             }
 #endif
             
@@ -1717,6 +1757,19 @@ void HidInput::handle_joystick() {
                     mouse_state = (mouse_state & 0xfe) | (button ? 1 : 0);
                     joystick_state &= ~(0xf << 4);
                     joystick_state |= (axis << 4);
+
+#ifdef ENABLE_BLUEPAD32
+                    // Special-case for Bluetooth-only mode:
+                    // Many Atari games read Joy0 as the primary joystick.
+                    // When running in pure Bluetooth mode (USB disabled), mirror
+                    // joystick 1 input into joystick 0 as long as mouse is not enabled.
+                    if (!usb_runtime_is_enabled() && bt_runtime_is_enabled() && !ui_->get_mouse_enabled()) {
+                        joystick_state &= ~0xf;
+                        joystick_state |= axis;
+                        // Note: we intentionally do NOT mirror the mouse_state buttons here
+                        // to avoid interfering with Atari mouse emulation on Joy0.
+                    }
+#endif
                 }
             }
         }

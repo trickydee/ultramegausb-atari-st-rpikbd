@@ -25,18 +25,32 @@ bool bluepad32_to_atari_joystick(const void* gp_ptr, uint8_t* axis, uint8_t* but
     *axis = 0;
     *button = 0;
 
-    // Dead zone for analog sticks (similar to other controllers)
-    // Bluepad32 normalizes axes to -32768 to 32767 range (like XInput)
-    // Use ~25% deadzone (8000) for normalized range, similar to Xbox controllers
-    const int32_t DEAD_ZONE = 8000;  // ~25% of -32768 to 32767 range
-    
-    // However, if we see very small values (like 2, 2), the controller might be sending
-    // raw values or the axis might not be properly initialized
-    // Let's use a smaller deadzone for very small values
-    int32_t deadzone = DEAD_ZONE;
-    if (abs(gp->axis_x) < 100 && abs(gp->axis_y) < 100) {
-        // Very small values - use tiny deadzone (might be raw values or noise)
-        deadzone = 10;
+    // Dead zone for analog sticks.
+    //
+    // NOTE: In practice, some Bluetooth gamepads (notably Xbox over Bluetooth)
+    // report a much smaller axis range (roughly -512..+511) instead of the
+    // documented -32768..+32767 range. A large deadzone (e.g. 8000) would
+    // therefore swallow all movement.
+    //
+    // Heuristic:
+    // - If the maximum absolute axis value is small (<= 1000), assume a
+    //   "small-range" device and use a tiny deadzone (~80 units).
+    // - Otherwise fall back to a larger deadzone (~8000) for full-range axes.
+    int32_t ax = gp->axis_x;
+    int32_t ay = gp->axis_y;
+    int32_t max_abs = ax;
+    if (abs(ay) > abs(max_abs)) {
+        max_abs = ay;
+    }
+    max_abs = abs(max_abs);
+
+    int32_t deadzone;
+    if (max_abs <= 1000) {
+        // Small-range stick (e.g. -512..+511): use small deadzone
+        deadzone = 80;
+    } else {
+        // Full-range stick: use ~25% deadzone (similar to our USB/XInput mapping)
+        deadzone = 8000;
     }
 
     // D-Pad has priority (like other controllers)
@@ -47,24 +61,35 @@ bool bluepad32_to_atari_joystick(const void* gp_ptr, uint8_t* axis, uint8_t* but
 
     // If D-Pad not active, use left analog stick
     if (gp->dpad == 0) {
-        if (gp->axis_x < -deadzone) *axis |= 0x04;  // Left
-        if (gp->axis_x > deadzone)  *axis |= 0x08;  // Right
-        if (gp->axis_y < -deadzone) *axis |= 0x01;  // Up (Y is typically inverted)
-        if (gp->axis_y > deadzone)  *axis |= 0x02;  // Down
+        if (ax < -deadzone) *axis |= 0x04;  // Left
+        if (ax > deadzone)  *axis |= 0x08;  // Right
+        if (ay < -deadzone) *axis |= 0x01;  // Up (Y is typically inverted)
+        if (ay > deadzone)  *axis |= 0x02;  // Down
     }
 
     // Fire button: A button (south) is primary, B button (east) is alternate
     // This matches Xbox/PS4 pattern
+    // Debug: Log button state for first few calls
+    static uint32_t debug_count = 0;
+    if (debug_count < 10) {
+        debug_count++;
+        printf("bluepad32_to_atari: buttons=0x%04X, BUTTON_A=0x%04X, BUTTON_B=0x%04X, brake=%ld, throttle=%ld\n",
+               gp->buttons, BUTTON_A, BUTTON_B, gp->brake, gp->throttle);
+    }
+    
     if (gp->buttons & BUTTON_A) {
         *button = 1;
+        if (debug_count <= 10) printf("  -> BUTTON_A detected!\n");
     } else if (gp->buttons & BUTTON_B) {
         *button = 1;
+        if (debug_count <= 10) printf("  -> BUTTON_B detected!\n");
     }
 
     // Also check triggers as alternate fire (like Xbox)
     // Bluepad32 triggers might be 0-1023 range or normalized
     if (gp->brake > 512 || gp->throttle > 512) {
         *button = 1;
+        if (debug_count <= 10) printf("  -> Trigger detected (brake=%ld throttle=%ld)!\n", gp->brake, gp->throttle);
     }
 
     return true;

@@ -18,8 +18,15 @@
 // Global async context for btstack (accessed from main.cpp)
 async_context_poll_t* g_btstack_async_context = NULL;
 
+// Runtime state: Bluetooth enabled/disabled
+static bool g_bluetooth_enabled = false;
+
 // Initialize Bluepad32 and return the async context
 async_context_poll_t* bluepad32_init(void) {
+    if (g_bluetooth_enabled) {
+        printf("Bluetooth already initialized\n");
+        return g_btstack_async_context;
+    }
     static async_context_poll_t btstack_async_context;
     
     // Initialize async_context for btstack
@@ -74,7 +81,53 @@ async_context_poll_t* bluepad32_init(void) {
     uni_init(0, NULL);
 
     g_btstack_async_context = &btstack_async_context;
+    g_bluetooth_enabled = true;
     return &btstack_async_context;
+}
+
+// Deinitialize Bluepad32
+void bluepad32_deinit(void) {
+    if (!g_bluetooth_enabled) {
+        return;  // Already disabled
+    }
+    
+    printf("Deinitializing Bluetooth...\n");
+    
+    // Disconnect all Bluetooth devices
+    // Note: uni_bt_disconnect_all() or similar would be ideal, but may not exist
+    // For now, we'll just deinitialize the stack
+    
+    // Deinitialize CYW43
+    if (g_btstack_async_context) {
+        cyw43_arch_deinit();
+        async_context_deinit(&g_btstack_async_context->core);
+        g_btstack_async_context = NULL;
+    }
+    
+    g_bluetooth_enabled = false;
+    printf("Bluetooth deinitialized\n");
+}
+
+// Runtime control functions
+void bluepad32_enable(void) {
+    if (g_bluetooth_enabled) {
+        printf("Bluetooth already enabled\n");
+        return;
+    }
+    printf("Enabling Bluetooth...\n");
+    bluepad32_init();
+}
+
+void bluepad32_disable(void) {
+    if (!g_bluetooth_enabled) {
+        printf("Bluetooth already disabled\n");
+        return;
+    }
+    bluepad32_deinit();
+}
+
+bool bluepad32_is_enabled(void) {
+    return g_bluetooth_enabled;
 }
 
 // Poll btstack async_context (non-blocking)

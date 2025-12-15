@@ -5087,6 +5087,30 @@ src/ps4_controller.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/atari_ikbd.dir/build.make CMakeFiles/atari_ikbd.dir/src/ps4_controller.c.s
 .PHONY : src/ps4_controller.c.s
 
+src/runtime_toggle.o: src/runtime_toggle.c.o
+.PHONY : src/runtime_toggle.o
+
+# target to build an object file
+src/runtime_toggle.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/atari_ikbd.dir/build.make CMakeFiles/atari_ikbd.dir/src/runtime_toggle.c.o
+.PHONY : src/runtime_toggle.c.o
+
+src/runtime_toggle.i: src/runtime_toggle.c.i
+.PHONY : src/runtime_toggle.i
+
+# target to preprocess a source file
+src/runtime_toggle.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/atari_ikbd.dir/build.make CMakeFiles/atari_ikbd.dir/src/runtime_toggle.c.i
+.PHONY : src/runtime_toggle.c.i
+
+src/runtime_toggle.s: src/runtime_toggle.c.s
+.PHONY : src/runtime_toggle.s
+
+# target to generate assembly for a file
+src/runtime_toggle.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/atari_ikbd.dir/build.make CMakeFiles/atari_ikbd.dir/src/runtime_toggle.c.s
+.PHONY : src/runtime_toggle.c.s
+
 src/st_key_lookup_hid_gb.o: src/st_key_lookup_hid_gb.cpp.o
 .PHONY : src/st_key_lookup_hid_gb.o
 
@@ -5880,6 +5904,9 @@ help:
 	@echo "... src/ps4_controller.o"
 	@echo "... src/ps4_controller.i"
 	@echo "... src/ps4_controller.s"
+	@echo "... src/runtime_toggle.o"
+	@echo "... src/runtime_toggle.i"
+	@echo "... src/runtime_toggle.s"
 	@echo "... src/st_key_lookup_hid_gb.o"
 	@echo "... src/st_key_lookup_hid_gb.i"
 	@echo "... src/st_key_lookup_hid_gb.s"

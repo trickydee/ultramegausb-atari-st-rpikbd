@@ -22,6 +22,9 @@
 #include "hid_app_host.h"
 #include "config.h"
 #include "hardware/clocks.h"
+#ifdef ENABLE_BLUEPAD32
+#include "runtime_toggle.h"  // Runtime USB/Bluetooth toggle control
+#endif
 
 // Forward declare Xbox debug counters (defined in main.cpp and xinput_atari.cpp)
 extern "C" {
@@ -176,6 +179,32 @@ void UserInterface::update_splash() {
     
     // Version number at bottom
     ssd1306_draw_string(&disp, 45, 55, 1, (char*)"v" PROJECT_VERSION_STRING);
+    
+#ifdef ENABLE_BLUEPAD32
+    // Show USB/Bluetooth status on splash screen
+    char mode_buf[32];
+    bool usb_enabled = usb_runtime_is_enabled();
+    bool bt_enabled = bt_runtime_is_enabled();
+    
+    if (usb_enabled && bt_enabled) {
+        sprintf(mode_buf, "USB+BT");
+    }
+    else if (usb_enabled) {
+        sprintf(mode_buf, "USB");
+    }
+    else if (bt_enabled) {
+        sprintf(mode_buf, "BT");
+    }
+    else {
+        sprintf(mode_buf, "OFF");
+    }
+    
+    // Show mode in small text at top right
+    ssd1306_draw_string(&disp, 90, 0, 1, mode_buf);
+    
+    // Show hint for left button toggle
+    ssd1306_draw_string(&disp, 0, 55, 1, (char*)"L:Toggle");
+#endif
 }
 
 void UserInterface::update_pro_init() {
@@ -399,7 +428,42 @@ void UserInterface::on_button_down(int i) {
         dirty = true;
     }
     else if (i == BUTTON_LEFT) {
-        if (page == PAGE_MOUSE) {
+        if (page == PAGE_SPLASH) {
+            // On ATARI splash screen, toggle USB/Bluetooth modes
+#ifdef ENABLE_BLUEPAD32
+            // Cycle through: Both -> USB only -> BT only -> Both
+            bool usb_enabled = usb_runtime_is_enabled();
+            bool bt_enabled = bt_runtime_is_enabled();
+            
+            if (usb_enabled && bt_enabled) {
+                // Both enabled -> USB only
+                bt_runtime_disable();
+                printf("Toggled to USB only mode\n");
+            }
+            else if (usb_enabled && !bt_enabled) {
+                // USB only -> BT only
+                usb_runtime_disable();
+                bt_runtime_enable();
+                printf("Toggled to Bluetooth only mode\n");
+            }
+            else if (!usb_enabled && bt_enabled) {
+                // BT only -> Both
+                usb_runtime_enable();
+                printf("Toggled to USB + Bluetooth mode\n");
+            }
+            else {
+                // Both disabled -> Both enabled (shouldn't happen, but handle it)
+                usb_runtime_enable();
+                bt_runtime_enable();
+                printf("Toggled to USB + Bluetooth mode\n");
+            }
+            dirty = true;
+#else
+            // No Bluetooth support - just toggle USB (though this shouldn't be useful)
+            printf("Bluetooth not available in this build\n");
+#endif
+        }
+        else if (page == PAGE_MOUSE) {
             if (settings.get_settings().mouse_speed > MOUSE_MIN) {
                 --settings.get_settings().mouse_speed;
                 settings.write();
