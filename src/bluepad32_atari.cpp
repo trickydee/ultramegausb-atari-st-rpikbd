@@ -69,27 +69,16 @@ bool bluepad32_to_atari_joystick(const void* gp_ptr, uint8_t* axis, uint8_t* but
 
     // Fire button: A button (south) is primary, B button (east) is alternate
     // This matches Xbox/PS4 pattern
-    // Debug: Log button state for first few calls
-    static uint32_t debug_count = 0;
-    if (debug_count < 10) {
-        debug_count++;
-        printf("bluepad32_to_atari: buttons=0x%04X, BUTTON_A=0x%04X, BUTTON_B=0x%04X, brake=%ld, throttle=%ld\n",
-               gp->buttons, BUTTON_A, BUTTON_B, gp->brake, gp->throttle);
-    }
-    
     if (gp->buttons & BUTTON_A) {
         *button = 1;
-        if (debug_count <= 10) printf("  -> BUTTON_A detected!\n");
     } else if (gp->buttons & BUTTON_B) {
         *button = 1;
-        if (debug_count <= 10) printf("  -> BUTTON_B detected!\n");
     }
 
     // Also check triggers as alternate fire (like Xbox)
     // Bluepad32 triggers might be 0-1023 range or normalized
     if (gp->brake > 512 || gp->throttle > 512) {
         *button = 1;
-        if (debug_count <= 10) printf("  -> Trigger detected (brake=%ld throttle=%ld)!\n", gp->brake, gp->throttle);
     }
 
     return true;

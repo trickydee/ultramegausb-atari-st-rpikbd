@@ -1,9 +1,9 @@
 # Bluepad32 Bluetooth Gamepad Integration
 
-## Status: ✅ Bluetooth Pairing Working! (v18.0.1-blu)
+## Status: ✅ Fully Working! (v18.0.1-blu)
 
 ### Major Success! 🎉
-**Bluetooth gamepad pairing is now working!** Xbox controllers can be detected and paired successfully.
+**Bluetooth support is fully working!** Gamepads, keyboards, and mice can all be paired and used successfully. Xbox controllers, keyboards, and mice have been tested and confirmed working.
 
 ### Completed ✅
 1. ✅ Added Bluepad32 as git submodule
@@ -20,6 +20,10 @@
 12. ✅ **Critical Fix: Initialization Order** - CYW43 initialized BEFORE I2C/SPI peripherals
 13. ✅ **Clock Speed Reduction** - 150 MHz for Bluetooth builds (improves CYW43 stability)
 14. ✅ **CYW43 Reset Sequence** - Power cycle before initialization
+15. ✅ **XIP/USB Serial Issue Resolved** - Serial communication from Pico to ST now working properly
+16. ✅ **Joystick Indicator Fixed** - Bluetooth gamepad count now properly displayed on OLED
+17. ✅ **Keyboard Support** - Bluetooth keyboards fully integrated and working
+18. ✅ **Mouse Support** - Bluetooth mice fully integrated and working
 
 ### Key Fix That Made It Work
 
@@ -32,17 +36,18 @@
 
 This matches the issue reported in: https://forums.pimoroni.com/t/plasma-2350-w-wifi-problems/26810
 
-### Current Issues ⚠️
+### Current Status ✅
 
 **Version:** 18.0.1-blu (Pico 2 W build)
 
-**Major Issues:**
-1. **XIP causing USB/serial link issues**: With XIP enabled, serial communication from Pico to ST is not working properly. Can see ST→Pico messages but not Pico→ST. This was seen in previous XIP test builds. May need to switch to `copy_to_ram` or use hybrid approach.
+**All Major Features Working:**
+- ✅ Bluetooth gamepad pairing and input
+- ✅ Bluetooth keyboard support
+- ✅ Bluetooth mouse support
+- ✅ XIP/USB serial communication
+- ✅ Joystick count display on OLED
 
-**Minor Issues:**
-2. **Joystick indicator not incrementing**: When Bluetooth gamepad is detected and paired, the joystick count on the OLED display doesn't increment. Need to wire up `bluepad32_get_connected_count()` to the UI update logic.
-
-**Non-Critical:**
+**Non-Critical (Known but not blocking):**
 - CLM firmware warnings still appear but don't block functionality
 - Some CYW43 STALL timeouts may still occur but don't prevent pairing
 
@@ -115,11 +120,10 @@ bluepad32_platform: device ready: 0x200093f8
 
 ### Next Steps
 
-1. **Fix XIP/USB serial issue** - Consider switching to `copy_to_ram` or hybrid approach
-2. **Wire up joystick count** - Add `bluepad32_get_connected_count()` to UI update logic
-3. **Test other controllers** - PS5, Switch Pro, etc.
-4. **Verify gamepad input** - Test in actual games
-5. **Performance testing** - Verify 6301 emulator performance with XIP
+1. **Fine-tuning and optimization** - Various improvements and refinements
+2. **Test other controllers** - PS5, Switch Pro, etc.
+3. **Verify gamepad input** - Test in actual games
+4. **Performance testing** - Verify 6301 emulator performance with XIP
 
 ### References
 

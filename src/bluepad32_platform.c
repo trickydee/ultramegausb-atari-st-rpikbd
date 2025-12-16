@@ -20,6 +20,9 @@
 
 // Maximum number of Bluetooth gamepads we can track
 #define MAX_BT_GAMEPADS 4
+// Maximum number of Bluetooth keyboards and mice
+#define MAX_BT_KEYBOARDS 2
+#define MAX_BT_MICE 2
 
 // Storage for Bluetooth gamepad data
 typedef struct {
@@ -28,13 +31,78 @@ typedef struct {
     bool updated;  // Set to true when new data arrives
 } bt_gamepad_storage_t;
 
-static bt_gamepad_storage_t bt_gamepads[MAX_BT_GAMEPADS] = {0};
+// Storage for Bluetooth keyboard data
+typedef struct {
+    uni_keyboard_t keyboard;
+    bool connected;
+    bool updated;  // Set to true when new data arrives
+} bt_keyboard_storage_t;
 
-// Get the storage slot for a device
+// Storage for Bluetooth mouse data
+typedef struct {
+    uni_mouse_t mouse;
+    bool connected;
+    bool updated;  // Set to true when new data arrives
+} bt_mouse_storage_t;
+
+static bt_gamepad_storage_t bt_gamepads[MAX_BT_GAMEPADS] = {0};
+static bt_keyboard_storage_t bt_keyboards[MAX_BT_KEYBOARDS] = {0};
+static bt_mouse_storage_t bt_mice[MAX_BT_MICE] = {0};
+
+// Store device pointer to slot mapping for each device type
+static uni_hid_device_t* gamepad_device_map[MAX_BT_GAMEPADS] = {0};
+static uni_hid_device_t* keyboard_device_map[MAX_BT_KEYBOARDS] = {0};
+static uni_hid_device_t* mouse_device_map[MAX_BT_MICE] = {0};
+
+// Find the first available slot for a device type, or find existing slot if device already mapped
+static int find_slot(uni_hid_device_t* d, uni_hid_device_t** device_map, int max_slots) {
+    // First, check if device is already mapped
+    for (int i = 0; i < max_slots; i++) {
+        if (device_map[i] == d) {
+            return i;
+        }
+    }
+    // Find first free slot
+    for (int i = 0; i < max_slots; i++) {
+        if (device_map[i] == NULL) {
+            device_map[i] = d;
+            return i;
+        }
+    }
+    return -1;  // No free slot
+}
+
+// Clear slot when device disconnects
+static void clear_slot(uni_hid_device_t* d, uni_hid_device_t** device_map, int max_slots) {
+    for (int i = 0; i < max_slots; i++) {
+        if (device_map[i] == d) {
+            device_map[i] = NULL;
+            break;
+        }
+    }
+}
+
+// Get the storage slot for a device based on its controller class
 static bt_gamepad_storage_t* get_gamepad_storage(uni_hid_device_t* d) {
-    int idx = uni_hid_device_get_idx_for_instance(d);
-    if (idx >= 0 && idx < MAX_BT_GAMEPADS) {
+    int idx = find_slot(d, gamepad_device_map, MAX_BT_GAMEPADS);
+    if (idx >= 0) {
         return &bt_gamepads[idx];
+    }
+    return NULL;
+}
+
+static bt_keyboard_storage_t* get_keyboard_storage(uni_hid_device_t* d) {
+    int idx = find_slot(d, keyboard_device_map, MAX_BT_KEYBOARDS);
+    if (idx >= 0) {
+        return &bt_keyboards[idx];
+    }
+    return NULL;
+}
+
+static bt_mouse_storage_t* get_mouse_storage(uni_hid_device_t* d) {
+    int idx = find_slot(d, mouse_device_map, MAX_BT_MICE);
+    if (idx >= 0) {
+        return &bt_mice[idx];
     }
     return NULL;
 }
@@ -77,16 +145,7 @@ static uni_error_t my_platform_on_device_discovered(bd_addr_t addr, const char* 
     logi("BT Device discovered: addr=%s, name='%s', COD=0x%04X, RSSI=%d\n",
          addr_str, name ? name : "(null)", cod, rssi);
     
-    // Filter out keyboards and mice - we only want gamepads for now
-    if (((cod & UNI_BT_COD_MINOR_MASK) & UNI_BT_COD_MINOR_KEYBOARD) == UNI_BT_COD_MINOR_KEYBOARD) {
-        logi("  -> Ignoring keyboard\n");
-        return UNI_ERROR_IGNORE_DEVICE;
-    }
-    if (((cod & UNI_BT_COD_MINOR_MASK) & UNI_BT_COD_MINOR_MICE) == UNI_BT_COD_MINOR_MICE) {
-        logi("  -> Ignoring mouse\n");
-        return UNI_ERROR_IGNORE_DEVICE;
-    }
-
+    // Accept all HID devices: gamepads, keyboards, and mice
     logi("  -> Accepting device (will attempt connection)\n");
     return UNI_ERROR_SUCCESS;
 }
@@ -94,51 +153,149 @@ static uni_error_t my_platform_on_device_discovered(bd_addr_t addr, const char* 
 static void my_platform_on_device_connected(uni_hid_device_t* d) {
     logi("bluepad32_platform: device connected: %p\n", d);
     
-    bt_gamepad_storage_t* storage = get_gamepad_storage(d);
-    if (storage) {
-        storage->connected = true;
-        storage->updated = false;
-        memset(&storage->gamepad, 0, sizeof(storage->gamepad));
-    }
+    // Device type will be determined in on_device_ready()
+    // Storage will be allocated when device type is known
 }
 
 static void my_platform_on_device_disconnected(uni_hid_device_t* d) {
     logi("bluepad32_platform: device disconnected: %p\n", d);
     
-    bt_gamepad_storage_t* storage = get_gamepad_storage(d);
-    if (storage) {
-        storage->connected = false;
-        storage->updated = false;
-        memset(&storage->gamepad, 0, sizeof(storage->gamepad));
+    // Clear storage for all device types (device might have been any type)
+    bt_gamepad_storage_t* gp_storage = get_gamepad_storage(d);
+    if (gp_storage) {
+        gp_storage->connected = false;
+        gp_storage->updated = false;
+        memset(&gp_storage->gamepad, 0, sizeof(gp_storage->gamepad));
+        clear_slot(d, gamepad_device_map, MAX_BT_GAMEPADS);
+        // Only notify unmount if it was actually a gamepad
+        extern void bluepad32_notify_unmount(void);
+        bluepad32_notify_unmount();
     }
     
-    // Notify HidInput that a Bluetooth gamepad has disconnected
-    // This decrements the joystick counter and updates the UI
-    extern void bluepad32_notify_unmount(void);
-    bluepad32_notify_unmount();
+    bt_keyboard_storage_t* kb_storage = get_keyboard_storage(d);
+    if (kb_storage && kb_storage->connected) {
+        kb_storage->connected = false;
+        kb_storage->updated = false;
+        memset(&kb_storage->keyboard, 0, sizeof(kb_storage->keyboard));
+        clear_slot(d, keyboard_device_map, MAX_BT_KEYBOARDS);
+        extern void bluepad32_notify_keyboard_unmount(void);
+        bluepad32_notify_keyboard_unmount();
+    }
+    
+    bt_mouse_storage_t* mouse_storage = get_mouse_storage(d);
+    if (mouse_storage && mouse_storage->connected) {
+        mouse_storage->connected = false;
+        mouse_storage->updated = false;
+        memset(&mouse_storage->mouse, 0, sizeof(mouse_storage->mouse));
+        clear_slot(d, mouse_device_map, MAX_BT_MICE);
+        extern void bluepad32_notify_mouse_unmount(void);
+        bluepad32_notify_mouse_unmount();
+    }
 }
 
 static uni_error_t my_platform_on_device_ready(uni_hid_device_t* d) {
     logi("bluepad32_platform: device ready: %p\n", d);
     
-    // Notify HidInput that a Bluetooth gamepad has connected
-    // This increments the joystick counter and updates the UI
-    extern void bluepad32_notify_mount(void);
-    bluepad32_notify_mount();
+    // Determine device type and mark appropriate storage as connected
+    // Only call bluepad32_notify_mount() for gamepads (not keyboards/mice)
+    if (uni_hid_device_is_gamepad(d)) {
+        // Gamepad - notify HidInput and mark as connected
+        bt_gamepad_storage_t* storage = get_gamepad_storage(d);
+        if (storage) {
+            storage->connected = true;
+            storage->updated = false;
+        }
+        extern void bluepad32_notify_mount(void);
+        bluepad32_notify_mount();
+        logi("bluepad32_platform: gamepad ready\n");
+    } else if (uni_hid_device_is_keyboard(d)) {
+        // Keyboard - mark as connected and notify UI
+        bt_keyboard_storage_t* storage = get_keyboard_storage(d);
+        if (storage) {
+            storage->connected = true;
+            storage->updated = false;
+        }
+        extern void bluepad32_notify_keyboard_mount(void);
+        bluepad32_notify_keyboard_mount();
+        logi("bluepad32_platform: keyboard ready\n");
+    } else if (uni_hid_device_is_mouse(d)) {
+        // Mouse - mark as connected and notify UI
+        bt_mouse_storage_t* storage = get_mouse_storage(d);
+        if (storage) {
+            storage->connected = true;
+            storage->updated = false;
+        }
+        extern void bluepad32_notify_mouse_mount(void);
+        bluepad32_notify_mouse_mount();
+        logi("bluepad32_platform: mouse ready\n");
+    } else {
+        logi("bluepad32_platform: unknown device type ready\n");
+    }
     
     return UNI_ERROR_SUCCESS;
 }
 
 static void my_platform_on_controller_data(uni_hid_device_t* d, uni_controller_t* ctl) {
-    if (ctl->klass != UNI_CONTROLLER_CLASS_GAMEPAD) {
-        return;  // Only handle gamepads for now
-    }
-
-    bt_gamepad_storage_t* storage = get_gamepad_storage(d);
-    if (storage) {
-        // Copy gamepad data
-        storage->gamepad = ctl->gamepad;
-        storage->updated = true;
+    switch (ctl->klass) {
+        case UNI_CONTROLLER_CLASS_GAMEPAD: {
+            bt_gamepad_storage_t* storage = get_gamepad_storage(d);
+            if (storage && storage->connected) {  // Only update if already marked as connected
+                // Copy gamepad data
+                storage->gamepad = ctl->gamepad;
+                storage->updated = true;
+            }
+            break;
+        }
+        
+        case UNI_CONTROLLER_CLASS_KEYBOARD: {
+            bt_keyboard_storage_t* storage = get_keyboard_storage(d);
+            if (storage) {
+                if (!storage->connected) {
+                    // First keyboard data - mark as connected
+                    storage->connected = true;
+                    logi("bluepad32_platform: keyboard data received (first time)\n");
+                }
+                // Copy keyboard data
+                storage->keyboard = ctl->keyboard;
+                storage->updated = true;
+                // Debug: log first few keyboard samples
+                static uint32_t kb_sample_count = 0;
+                if (kb_sample_count < 5) {
+                    kb_sample_count++;
+                    logi("bluepad32_platform: keyboard data - modifiers=0x%02X, keys[0]=0x%02X\n",
+                         ctl->keyboard.modifiers, 
+                         ctl->keyboard.pressed_keys[0]);
+                }
+            }
+            break;
+        }
+        
+        case UNI_CONTROLLER_CLASS_MOUSE: {
+            bt_mouse_storage_t* storage = get_mouse_storage(d);
+            if (storage) {
+                if (!storage->connected) {
+                    // First mouse data - mark as connected
+                    storage->connected = true;
+                    logi("bluepad32_platform: mouse data received (first time)\n");
+                }
+                // Copy mouse data
+                storage->mouse = ctl->mouse;
+                storage->updated = true;
+                // Debug: log first few mouse samples
+                static uint32_t mouse_sample_count = 0;
+                if (mouse_sample_count < 5) {
+                    mouse_sample_count++;
+                    logi("bluepad32_platform: mouse data - dx=%d, dy=%d, buttons=0x%02X\n",
+                         ctl->mouse.delta_x, ctl->mouse.delta_y, ctl->mouse.buttons);
+                }
+            }
+            break;
+        }
+        
+        default:
+            // Ignore other controller types
+            logi("bluepad32_platform: unknown controller class: %d\n", ctl->klass);
+            break;
     }
 }
 
@@ -200,6 +357,80 @@ int bluepad32_get_connected_count(void) {
     int count = 0;
     for (int i = 0; i < MAX_BT_GAMEPADS; i++) {
         if (bt_gamepads[i].connected) {
+            count++;
+        }
+    }
+    return count;
+}
+
+// Public API to get Bluetooth keyboard data
+// Returns true if keyboard is connected and has data
+bool bluepad32_get_keyboard(int idx, void* out_keyboard) {
+    if (idx < 0 || idx >= MAX_BT_KEYBOARDS || !out_keyboard) {
+        return false;
+    }
+    
+    if (bt_keyboards[idx].connected && bt_keyboards[idx].updated) {
+        // Copy the keyboard data (caller's struct must match uni_keyboard_t layout)
+        uni_keyboard_t* kb = (uni_keyboard_t*)out_keyboard;
+        *kb = bt_keyboards[idx].keyboard;
+        bt_keyboards[idx].updated = false;  // Mark as read
+        return true;
+    }
+    
+    return false;
+}
+
+// Peek at keyboard data without marking as read (for shortcuts that need to check state)
+bool bluepad32_peek_keyboard(int idx, void* out_keyboard) {
+    if (idx < 0 || idx >= MAX_BT_KEYBOARDS || !out_keyboard) {
+        return false;
+    }
+    
+    if (bt_keyboards[idx].connected) {
+        // Copy the keyboard data without clearing the updated flag
+        uni_keyboard_t* kb = (uni_keyboard_t*)out_keyboard;
+        *kb = bt_keyboards[idx].keyboard;
+        return true;
+    }
+    
+    return false;
+}
+
+// Public API to get Bluetooth mouse data
+// Returns true if mouse is connected and has data
+bool bluepad32_get_mouse(int idx, void* out_mouse) {
+    if (idx < 0 || idx >= MAX_BT_MICE || !out_mouse) {
+        return false;
+    }
+    
+    if (bt_mice[idx].connected && bt_mice[idx].updated) {
+        // Copy the mouse data (caller's struct must match uni_mouse_t layout)
+        uni_mouse_t* ms = (uni_mouse_t*)out_mouse;
+        *ms = bt_mice[idx].mouse;
+        bt_mice[idx].updated = false;  // Mark as read
+        return true;
+    }
+    
+    return false;
+}
+
+// Get count of connected Bluetooth keyboards
+int bluepad32_get_keyboard_count(void) {
+    int count = 0;
+    for (int i = 0; i < MAX_BT_KEYBOARDS; i++) {
+        if (bt_keyboards[i].connected) {
+            count++;
+        }
+    }
+    return count;
+}
+
+// Get count of connected Bluetooth mice
+int bluepad32_get_mouse_count(void) {
+    int count = 0;
+    for (int i = 0; i < MAX_BT_MICE; i++) {
+        if (bt_mice[i].connected) {
             count++;
         }
     }

@@ -22,6 +22,28 @@ bool bluepad32_get_gamepad(int idx, void* out_gamepad);
 // Get count of connected Bluetooth gamepads
 int bluepad32_get_connected_count(void);
 
+// Get keyboard data for a specific index (0-1)
+// Returns true if keyboard is connected and has data
+// out_keyboard must point to a struct matching uni_keyboard_t layout
+// Marks data as read (clears updated flag)
+bool bluepad32_get_keyboard(int idx, void* out_keyboard);
+
+// Peek at keyboard data without marking as read (for shortcuts)
+// Returns true if keyboard is connected
+// out_keyboard must point to a struct matching uni_keyboard_t layout
+bool bluepad32_peek_keyboard(int idx, void* out_keyboard);
+
+// Get mouse data for a specific index (0-1)
+// Returns true if mouse is connected and has data
+// out_mouse must point to a struct matching uni_mouse_t layout
+bool bluepad32_get_mouse(int idx, void* out_mouse);
+
+// Get count of connected Bluetooth keyboards
+int bluepad32_get_keyboard_count(void);
+
+// Get count of connected Bluetooth mice
+int bluepad32_get_mouse_count(void);
+
 #ifdef __cplusplus
 }
 #endif

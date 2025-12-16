@@ -14,7 +14,7 @@
 // Runtime state variables (global so they can be accessed from anywhere)
 static bool g_usb_enabled = true;
 #ifdef ENABLE_BLUEPAD32
-static bool g_bt_enabled = false;  // Default to USB only (Bluetooth disabled)
+static bool g_bt_enabled = true;  // Default to USB + Bluetooth mode (both enabled)
 #endif
 
 // USB runtime control

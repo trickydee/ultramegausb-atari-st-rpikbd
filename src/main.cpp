@@ -300,8 +300,11 @@ int main() {
     // State is managed by runtime_toggle functions
     printf("Runtime toggle available: USB and Bluetooth can be toggled at runtime\n");
 #ifdef ENABLE_BLUEPAD32
-    // If Bluetooth failed to initialize, disable it
-    if (!bluepad32_is_enabled()) {
+    // Enable Bluetooth by default if initialization succeeded
+    if (bluepad32_is_enabled()) {
+        bt_runtime_enable();  // Ensure Bluetooth is enabled at startup
+        printf("Bluetooth enabled at startup\n");
+    } else {
         bt_runtime_disable();
         printf("Bluetooth disabled (initialization failed)\n");
     }
@@ -342,8 +345,8 @@ int main() {
         }
 
         // Mouse polling at 750μs (0.75ms) - matching logronoid's USB mode timing
-        // Only poll mouse if USB is enabled (mouse comes from USB)
-        if (usb_runtime_is_enabled() && absolute_time_diff_us(mouse_poll_ms, tm) >= 750) {
+        // Poll mouse if USB or Bluetooth is enabled (mouse can come from either)
+        if ((usb_runtime_is_enabled() || bt_runtime_is_enabled()) && absolute_time_diff_us(mouse_poll_ms, tm) >= 750) {
             mouse_poll_ms = tm;
             HidInput::instance().handle_mouse(cpu.ncycles);
         }
@@ -352,11 +355,17 @@ int main() {
         if (absolute_time_diff_us(ten_ms, tm) >= 10000) {
             ten_ms = tm;
             
-            // Only handle USB devices if USB is enabled
+            // Handle USB devices if USB is enabled
             if (usb_runtime_is_enabled()) {
                 // Check for Switch Pro Controller delayed initialization
                 switch_check_delayed_init();
                 
+                HidInput::instance().handle_keyboard();
+            }
+            
+            // Handle Bluetooth keyboard/mouse if Bluetooth is enabled
+            // (Bluetooth keyboard/mouse handling is integrated into handle_keyboard/handle_mouse)
+            if (bt_runtime_is_enabled()) {
                 HidInput::instance().handle_keyboard();
             }
             
