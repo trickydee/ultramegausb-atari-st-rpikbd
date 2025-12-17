@@ -20,6 +20,8 @@
 #include "NVSettings.h"
 #include <hardware/sync.h>
 #include <string.h>
+#include "pico.h"  // For PICO_OK
+#include "pico/flash.h"  // For flash_safe_execute() - required to coordinate with Core 1
 
 // The PICO has 2Mb of flash storage. We will assume the code will not be taking
 // all of this and carve 4K out near the end
@@ -40,11 +42,26 @@ Settings& NVSettings::get_settings() {
     return storage.settings;
 }
 
-void NVSettings::write() {
-    uint32_t ints = save_and_disable_interrupts();
+// Flash write callback - executed safely with Core 1 paused
+static void flash_write_callback(void* param) {
+    (void)param;  // Unused
     flash_range_erase(FLASH_LOCATION, FLASH_SECTOR_SIZE);
     flash_range_program(FLASH_LOCATION, &storage.raw[0], FLASH_PAGE_SIZE);
-    restore_interrupts (ints);
+}
+
+void NVSettings::write() {
+    // Use flash_safe_execute() to coordinate with Core 1
+    // This ensures Core 1 pauses execution during flash operations, preventing freezes
+    // Timeout of 100ms should be sufficient for flash erase/program operations
+    int result = flash_safe_execute(flash_write_callback, nullptr, 100);
+    if (result != PICO_OK) {
+        // If flash_safe_execute fails, fall back to old method (but this may cause Core 1 freeze)
+        // This should only happen if Core 1 hasn't called flash_safe_execute_core_init()
+        uint32_t ints = save_and_disable_interrupts();
+        flash_range_erase(FLASH_LOCATION, FLASH_SECTOR_SIZE);
+        flash_range_program(FLASH_LOCATION, &storage.raw[0], FLASH_PAGE_SIZE);
+        restore_interrupts(ints);
+    }
 }
 
 void NVSettings::read() {

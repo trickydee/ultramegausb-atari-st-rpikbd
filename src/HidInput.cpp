@@ -1548,11 +1548,10 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
         
         // Process first connected Bluetooth mouse
         if (bt_mouse_count > 0 && bluepad32_get_mouse(0, &bt_mouse)) {
-            // Extract movement deltas (already int32_t, no conversion needed)
-            // Bluepad32 clamps mouse deltas to -127 to 127, which is smaller than USB mouse deltas
-            // Multiply by 2 to compensate for the smaller range and make movement faster
-            int32_t bt_x = bt_mouse.delta_x * 2;
-            int32_t bt_y = bt_mouse.delta_y * 2;
+            // Extract movement deltas (Bluepad32 clamps to -127 to 127)
+            // Use deltas directly (matching Logronoid's approach) - acceleration will be applied later
+            int32_t bt_x = bt_mouse.delta_x;
+            int32_t bt_y = bt_mouse.delta_y;
             
             // Accumulate with USB mouse movement
             x += bt_x;
@@ -1578,9 +1577,9 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
 #endif
     
     // Handle the mouse acceleration/deceleration configured in the UI.
-    // Increased base multiplier from 1.0 to 3.0 for faster default mouse movement
-    // (Bluetooth mouse deltas are already multiplied by 2, so this gives 6x base speed)
-    double accel = 3.0 + ((double)ui_->get_mouse_speed() * 0.1);
+    // Base multiplier of 1.0 with speed adjustment (0.0-9.0) adds 0.0-0.9
+    // This gives a range of 1.0x to 1.9x acceleration
+    double accel = 1.0 + ((double)ui_->get_mouse_speed() * 0.1);
     AtariSTMouse::instance().set_speed((int)((double)x * accel), (int)((double)y * accel));
 }
 
