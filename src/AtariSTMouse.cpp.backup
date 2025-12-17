@@ -81,17 +81,30 @@ void AtariSTMouse::set_speed(int x, int y) {
 }
 
 void AtariSTMouse::set_speed_internal(int speed, int& period) {
+    // Apply deadzone to reduce jitter and oscillation (matching Logronoid's approach)
+    // Values between -1 and +1 are treated as zero to avoid small movements causing oscillation
+    const int DEADZONE_SPEED = 1;
+    if (speed >= -DEADZONE_SPEED && speed <= DEADZONE_SPEED) {
+        speed = 0;
+    }
+    
     if (speed == 0) {
         period = 0;
     }
     else {
-        period = (int)((MAX_SPEED / speed) * 1.0);
-        if ((speed > 0) && (period < MIN_SPEED)) {
+        // Calculate period magnitude (always positive)
+        int speed_mag = (speed < 0) ? -speed : speed;
+        period = (int)(MAX_SPEED / (double)speed_mag);
+        
+        // Clamp to minimum speed
+        if (period < MIN_SPEED) {
             period = MIN_SPEED;
         }
-        else if ((speed < 0) && (period > -MIN_SPEED)) {
-            period = -MIN_SPEED;
-        }
+        
+        // Apply sign based on original speed direction
+        period = (speed > 0) ? period : -period;
+        
+        // Stop if period is too long (prevents very slow residual movement)
     }
 }
 
