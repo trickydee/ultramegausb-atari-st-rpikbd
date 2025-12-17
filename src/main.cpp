@@ -314,15 +314,12 @@ int main() {
 #endif
 
     absolute_time_t ten_ms = get_absolute_time();
-    absolute_time_t one_ms = get_absolute_time();  // For USB polling (5ms interval)
-    absolute_time_t mouse_poll_ms = get_absolute_time();  // For mouse polling (750μs interval)
     absolute_time_t heartbeat_ms = get_absolute_time();  // For heartbeat debug
 #ifdef ENABLE_BLUEPAD32
     absolute_time_t bt_poll_ms = get_absolute_time();  // For Bluetooth polling (1ms interval)
     static uint32_t bt_poll_count = 0;
 #endif
     static uint32_t loop_count = 0;
-    static uint32_t usb_poll_count = 0;
     
     printf("Main loop: Starting...\n");
     
@@ -336,24 +333,14 @@ int main() {
 
         AtariSTMouse::instance().update();
 
-        // USB polling at 5ms (reduced from 1ms to reduce overhead, matching logronoid's approach)
-        // Only poll if USB is enabled at runtime
-        if (usb_runtime_is_enabled() && absolute_time_diff_us(one_ms, tm) >= 5000) {
-            one_ms = tm;
-            usb_poll_count++;
-            tuh_task();  // Process USB events
-        }
-
-        // Mouse polling at 750μs (0.75ms) - matching logronoid's USB mode timing
-        // Poll mouse if USB or Bluetooth is enabled (mouse can come from either)
-        if ((usb_runtime_is_enabled() || bt_runtime_is_enabled()) && absolute_time_diff_us(mouse_poll_ms, tm) >= 750) {
-            mouse_poll_ms = tm;
-            HidInput::instance().handle_mouse(cpu.ncycles);
-        }
-
-        // 10ms handler for USB HID devices and other tasks
+        // 10ms handler for USB HID devices and other tasks (matching main branch approach)
         if (absolute_time_diff_us(ten_ms, tm) >= 10000) {
             ten_ms = tm;
+
+            // USB task processing (moved from separate 5ms handler to 10ms handler)
+            if (usb_runtime_is_enabled()) {
+                tuh_task();
+            }
             
             // Handle USB devices if USB is enabled
             if (usb_runtime_is_enabled()) {
@@ -367,6 +354,12 @@ int main() {
             // (Bluetooth keyboard/mouse handling is integrated into handle_keyboard/handle_mouse)
             if (bt_runtime_is_enabled()) {
                 HidInput::instance().handle_keyboard();
+            }
+            
+            // Mouse handling (moved from separate 750μs handler to 10ms handler to match main branch)
+            // Poll mouse if USB or Bluetooth is enabled (mouse can come from either)
+            if (usb_runtime_is_enabled() || bt_runtime_is_enabled()) {
+                HidInput::instance().handle_mouse(cpu.ncycles);
             }
             
             // Joystick handler (handles GPIO, USB, and Bluetooth)
@@ -414,13 +407,13 @@ int main() {
             last_core1_cycles = core1_cycles;
             last_core1_loops = core1_loops;
 #ifdef ENABLE_BLUEPAD32
-            printf("Main loop: HEARTBEAT - loops=%lu, USB polls=%lu, BT polls=%lu, Core1: hb=%lu cycles=%lu loops=%lu%s%s\n", 
-                   loop_count, usb_poll_count, bt_poll_count, core1_heartbeat, core1_cycles, core1_loops,
+            printf("Main loop: HEARTBEAT - loops=%lu, BT polls=%lu, Core1: hb=%lu cycles=%lu loops=%lu%s%s\n", 
+                   loop_count, bt_poll_count, core1_heartbeat, core1_cycles, core1_loops,
                    core1_frozen ? " [CYCLES_FROZEN!]" : "",
                    core1_loops_frozen ? " [LOOPS_FROZEN!]" : "");
 #else
-            printf("Main loop: HEARTBEAT - loops=%lu, USB polls=%lu, Core1: hb=%lu cycles=%lu loops=%lu%s%s\n", 
-                   loop_count, usb_poll_count, core1_heartbeat, core1_cycles, core1_loops,
+            printf("Main loop: HEARTBEAT - loops=%lu, Core1: hb=%lu cycles=%lu loops=%lu%s%s\n", 
+                   loop_count, core1_heartbeat, core1_cycles, core1_loops,
                    core1_frozen ? " [CYCLES_FROZEN!]" : "",
                    core1_loops_frozen ? " [LOOPS_FROZEN!]" : "");
 #endif
