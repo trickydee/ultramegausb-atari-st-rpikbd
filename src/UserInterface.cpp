@@ -22,7 +22,7 @@
 #include "hid_app_host.h"
 #include "config.h"
 #include "hardware/clocks.h"
-#ifdef ENABLE_BLUEPAD32
+#if ENABLE_BLUEPAD32
 #include "runtime_toggle.h"  // Runtime USB/Bluetooth toggle control
 #endif
 
@@ -180,7 +180,7 @@ void UserInterface::update_splash() {
     // Move version up one line from the original bottom position
     ssd1306_draw_string(&disp, 40, 40, 1, (char*)"v" PROJECT_VERSION_STRING);
     
-#ifdef ENABLE_BLUEPAD32
+#if ENABLE_BLUEPAD32
     // Show USB/Bluetooth status on splash screen (bottom row)
     char mode_buf[32];
     bool usb_enabled = usb_runtime_is_enabled();
@@ -435,7 +435,7 @@ void UserInterface::on_button_down(int i) {
     else if (i == BUTTON_LEFT) {
         if (page == PAGE_SPLASH) {
             // On ATARI splash screen, toggle USB/Bluetooth modes
-#ifdef ENABLE_BLUEPAD32
+#if ENABLE_BLUEPAD32
             // Cycle through: Both -> USB only -> BT only -> Both
             bool usb_enabled = usb_runtime_is_enabled();
             bool bt_enabled = bt_runtime_is_enabled();

@@ -181,7 +181,7 @@ void gc_notify_unmount(uint8_t dev_addr) {
     }
 }
 
-#ifdef ENABLE_BLUEPAD32
+#if ENABLE_BLUEPAD32
 // Functions for Bluetooth gamepad to notify UI of mount/unmount
 extern "C" {
     // Forward declaration - implemented in bluepad32_platform.c
@@ -427,7 +427,7 @@ void tuh_hid_mounted_cb(uint8_t dev_addr) {
     ssd1306_draw_string(&disp, 5, 30, 1, line2);
     
     char line3[20];
-#ifdef ENABLE_BLUEPAD32
+#if ENABLE_BLUEPAD32
     snprintf(line3, sizeof(line3), "KB:%d M:%d J:%d BT:%d", kb_count, mouse_count, joy_count + xinput_joy_count, bt_joy_count);
 #else
     snprintf(line3, sizeof(line3), "KB:%d M:%d J:%d", kb_count, mouse_count, joy_count);
@@ -1106,7 +1106,7 @@ void HidInput::handle_keyboard() {
     }
     
     // Handle Bluetooth keyboards
-#ifdef ENABLE_BLUEPAD32
+#if ENABLE_BLUEPAD32
     if (bt_runtime_is_enabled()) {
         // Get Bluepad32 keyboard structure (matches uni_keyboard_t)
         // UNI_KEYBOARD_PRESSED_KEYS_MAX is 10, but HID standard is 6 keys
@@ -1530,7 +1530,7 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
         }
     }
     // Handle Bluetooth mice
-#ifdef ENABLE_BLUEPAD32
+#if ENABLE_BLUEPAD32
     if (bt_runtime_is_enabled()) {
         // Use uni_mouse_t structure exactly as defined in bluepad32
         // Structure: int32_t delta_x, int32_t delta_y, uint16_t buttons, int8_t scroll_wheel, uint8_t misc_buttons
@@ -1861,7 +1861,7 @@ void HidInput::handle_joystick() {
     }
 
     bool llama_prev_active = g_llamatron_active;
-#ifdef ENABLE_BLUEPAD32
+#if ENABLE_BLUEPAD32
     // Bluetooth mode: Llamatron mode not supported (requires USB gamepads)
     if (g_llamatron_mode) {
         g_llamatron_active = false;
@@ -2033,7 +2033,7 @@ void HidInput::handle_joystick() {
                 }
             }
             
-#ifdef ENABLE_BLUEPAD32
+#if ENABLE_BLUEPAD32
             // Check Bluetooth controllers if Bluetooth is enabled at runtime
             // Match USB behavior: assign to joystick 1 first, then joystick 0
             // This allows mouse to work with joystick 1 (joystick 0 conflicts with mouse)
@@ -2088,7 +2088,7 @@ void HidInput::handle_joystick() {
                     joystick_state &= ~(0xf << 4);
                     joystick_state |= (axis << 4);
 
-#ifdef ENABLE_BLUEPAD32
+#if ENABLE_BLUEPAD32
                     // Special-case for Bluetooth-only mode:
                     // Many Atari games read Joy0 as the primary joystick.
                     // When running in pure Bluetooth mode (USB disabled), mirror

@@ -39,7 +39,7 @@
 #include "xinput_host.h"  // Official tusb_xinput driver
 #include "gamecube_adapter.h"  // GameCube adapter support
 
-#ifdef ENABLE_BLUEPAD32
+#if ENABLE_BLUEPAD32
 // Use separate initialization file to avoid HID type conflicts between TinyUSB and btstack
 #include "bluepad32_init.h"
 #endif
@@ -238,7 +238,7 @@ int main() {
         printf("TinyUSB initialization failed\n");
         return -1;
     }
-#ifdef ENABLE_BLUEPAD32
+#if ENABLE_BLUEPAD32
     printf("USB initialized - Bluetooth + USB mode active\n");
 #else
     printf("USB initialized - USB mode active\n");
@@ -248,7 +248,7 @@ int main() {
     // For Bluetooth builds, use 225MHz (matching logronoid's stable configuration)
     // CYW43 chip has issues at very high clock speeds (270MHz causes STALL timeouts)
     // 225MHz provides good balance between performance and stability
-    #ifdef ENABLE_BLUEPAD32
+    #if ENABLE_BLUEPAD32
     uint32_t clock_khz = 225000;  // 225 MHz for Bluetooth builds (matching logronoid)
     printf("Bluetooth build: Using 225 MHz (matching logronoid's config)\n");
     #else
@@ -260,7 +260,7 @@ int main() {
     else
       printf("system clock now %d MHz\n", clock_khz / 1000);
 
-#ifdef ENABLE_BLUEPAD32
+#if ENABLE_BLUEPAD32
     // CRITICAL: Initialize CYW43/Bluepad32 BEFORE any I2C/SPI peripherals
     // Forum reports show I2C/SPI initialization can interfere with CYW43 pin configuration
     // See: https://forums.pimoroni.com/t/plasma-2350-w-wifi-problems/26810
@@ -299,7 +299,7 @@ int main() {
     // Both start enabled by default (when ENABLE_BLUEPAD32 is defined, both are available)
     // State is managed by runtime_toggle functions
     printf("Runtime toggle available: USB and Bluetooth can be toggled at runtime\n");
-#ifdef ENABLE_BLUEPAD32
+#if ENABLE_BLUEPAD32
     // Enable Bluetooth by default if initialization succeeded
     if (bluepad32_is_enabled()) {
         bt_runtime_enable();  // Ensure Bluetooth is enabled at startup
@@ -315,7 +315,7 @@ int main() {
 
     absolute_time_t ten_ms = get_absolute_time();
     absolute_time_t heartbeat_ms = get_absolute_time();  // For heartbeat debug
-#ifdef ENABLE_BLUEPAD32
+#if ENABLE_BLUEPAD32
     absolute_time_t bt_poll_ms = get_absolute_time();  // For Bluetooth polling (1ms interval)
     static uint32_t bt_poll_count = 0;
 #endif
@@ -352,20 +352,28 @@ int main() {
             
             // Handle Bluetooth keyboard/mouse if Bluetooth is enabled
             // (Bluetooth keyboard/mouse handling is integrated into handle_keyboard/handle_mouse)
+#if ENABLE_BLUEPAD32
             if (bt_runtime_is_enabled()) {
                 HidInput::instance().handle_keyboard();
             }
+#endif
             
             // Mouse handling (moved from separate 750μs handler to 10ms handler to match main branch)
             // Poll mouse if USB or Bluetooth is enabled (mouse can come from either)
+#if ENABLE_BLUEPAD32
             if (usb_runtime_is_enabled() || bt_runtime_is_enabled()) {
                 HidInput::instance().handle_mouse(cpu.ncycles);
             }
+#else
+            if (usb_runtime_is_enabled()) {
+                HidInput::instance().handle_mouse(cpu.ncycles);
+            }
+#endif
             
             // Joystick handler (handles GPIO, USB, and Bluetooth)
             HidInput::instance().handle_joystick();
             
-#ifdef ENABLE_BLUEPAD32
+#if ENABLE_BLUEPAD32
             // Check if Bluetooth UI update is needed (deferred from BT callbacks)
             // Only if Bluetooth is enabled
             if (bt_runtime_is_enabled()) {
@@ -378,7 +386,7 @@ int main() {
 #endif
         }
         
-#ifdef ENABLE_BLUEPAD32
+#if ENABLE_BLUEPAD32
         // Poll Bluetooth frequently (every 1ms) for responsive controller input
         // Matching logronoid's approach of frequent Bluetooth polling
         // Only poll if Bluetooth is enabled at runtime
@@ -393,9 +401,10 @@ int main() {
         }
 #endif
         
-        // Heartbeat: Print every 1 second to show main loop is still running
+        // Heartbeat: Print less frequently to reduce log spam but still show liveness
         // Note: This printf may be necessary for Bluetooth stack stability
-        if (absolute_time_diff_us(heartbeat_ms, tm) >= 1000000) {
+        // 10 seconds interval
+        if (absolute_time_diff_us(heartbeat_ms, tm) >= 10000000) {
             heartbeat_ms = tm;
             uint32_t core1_heartbeat = g_core1_heartbeat_counter;
             uint32_t core1_cycles = g_core1_cycle_count;
@@ -406,7 +415,7 @@ int main() {
             bool core1_loops_frozen = (core1_loops == last_core1_loops && core1_loops > 0);
             last_core1_cycles = core1_cycles;
             last_core1_loops = core1_loops;
-#ifdef ENABLE_BLUEPAD32
+#if ENABLE_BLUEPAD32
             printf("Main loop: HEARTBEAT - loops=%lu, BT polls=%lu, Core1: hb=%lu cycles=%lu loops=%lu%s%s\n", 
                    loop_count, bt_poll_count, core1_heartbeat, core1_cycles, core1_loops,
                    core1_frozen ? " [CYCLES_FROZEN!]" : "",

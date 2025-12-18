@@ -3,7 +3,7 @@
  * Separated from main.cpp to avoid HID type conflicts between TinyUSB and btstack
  */
 
-#ifdef ENABLE_BLUEPAD32
+#if ENABLE_BLUEPAD32
 
 #include <stdio.h>
 #include <pico/cyw43_arch.h>

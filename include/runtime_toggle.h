@@ -18,7 +18,7 @@ void usb_runtime_enable(void);
 void usb_runtime_disable(void);
 bool usb_runtime_is_enabled(void);
 
-#ifdef ENABLE_BLUEPAD32
+#if ENABLE_BLUEPAD32
 void bt_runtime_enable(void);
 void bt_runtime_disable(void);
 bool bt_runtime_is_enabled(void);

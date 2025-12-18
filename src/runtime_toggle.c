@@ -7,13 +7,13 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#ifdef ENABLE_BLUEPAD32
+#if ENABLE_BLUEPAD32
 #include "bluepad32_init.h"
 #endif
 
 // Runtime state variables (global so they can be accessed from anywhere)
 static bool g_usb_enabled = true;
-#ifdef ENABLE_BLUEPAD32
+#if ENABLE_BLUEPAD32
 static bool g_bt_enabled = true;  // Default to USB + Bluetooth mode (both enabled)
 #endif
 
@@ -38,7 +38,7 @@ bool usb_runtime_is_enabled(void) {
     return g_usb_enabled;
 }
 
-#ifdef ENABLE_BLUEPAD32
+#if ENABLE_BLUEPAD32
 // Bluetooth runtime control
 void bt_runtime_enable(void) {
     if (g_bt_enabled) {

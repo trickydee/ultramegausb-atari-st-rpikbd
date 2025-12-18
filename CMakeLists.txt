@@ -107,16 +107,17 @@ else()
     message(STATUS "Serial Logging: MINIMAL (speed mode)")
 endif()
 
-# Bluepad32 Bluetooth support (Pico W only)
-# Note: Pico W (pico_w) doesn't have enough RAM - using Pico 2 W only
-if(PICO_BOARD STREQUAL "pico2_w")
+# Bluepad32 Bluetooth support (wireless boards only)
+# Pico W (pico_w) and Pico 2 W (pico2_w) both have CYW43, but RAM is tight on Pico W.
+# Enable at your own risk on Pico W.
+if(PICO_BOARD STREQUAL "pico2_w" OR PICO_BOARD STREQUAL "pico_w")
     set(ENABLE_BLUEPAD32 ON)
     add_definitions(-DENABLE_BLUEPAD32=1)
-    message(STATUS "Bluepad32: ENABLED (Pico 2 W detected)")
+    message(STATUS "Bluepad32: ENABLED (${PICO_BOARD} detected)")
 else()
     set(ENABLE_BLUEPAD32 OFF)
     add_definitions(-DENABLE_BLUEPAD32=0)
-    message(STATUS "Bluepad32: DISABLED (Not Pico 2 W)")
+    message(STATUS "Bluepad32: DISABLED (non-wireless board ${PICO_BOARD})")
 endif()
 
 set(SOURCES

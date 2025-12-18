@@ -6,9 +6,11 @@
 #ifndef BLUEPAD32_INIT_H
 #define BLUEPAD32_INIT_H
 
-#include <pico/async_context_poll.h>
+// Only include async_context_poll when Bluetooth support is enabled.
+// ENABLE_BLUEPAD32 is defined as 0 or 1 via CMake.
+#if ENABLE_BLUEPAD32
 
-#ifdef ENABLE_BLUEPAD32
+#include <pico/async_context_poll.h>
 
 #ifdef __cplusplus
 extern "C" {
