@@ -163,6 +163,8 @@ mkdir -p ./dist
 BUILD_VARIANT=""
 if [ "$OLED" = "0" ] && [ "$LOGGING" = "0" ]; then
     BUILD_VARIANT="_speed"
+elif [ "$OLED" = "1" ] && [ "$LOGGING" = "0" ]; then
+    BUILD_VARIANT="_production"
 elif [ "$OLED" = "0" ]; then
     BUILD_VARIANT="_nooled"
 elif [ "$LOGGING" = "0" ]; then
@@ -233,8 +235,11 @@ echo "  4. Copy the appropriate .uf2 file to the RPI-RP2 drive"
 echo ""
 echo "================================================================================"
 
-# Automatically build speed-mode variant after standard build (unless skipped)
+# Automatically build production & speed variants after standard build (unless skipped)
 if [ "${SKIP_SPEED_BUILD:-0}" != "1" ] && [ "${OLED}" = "1" ] && [ "${LOGGING}" = "1" ]; then
+    echo ""
+    echo ">>> Auto-building production variant (OLED=1, LOGGING=0)..."
+    OLED=1 LOGGING=0 SKIP_SPEED_BUILD=1 "$0"
     echo ""
     echo ">>> Auto-building speed mode variant (OLED=0, LOGGING=0)..."
     OLED=0 LOGGING=0 SKIP_SPEED_BUILD=1 "$0"
