@@ -24,6 +24,7 @@
 #include "hardware/clocks.h"
 #if ENABLE_BLUEPAD32
 #include "runtime_toggle.h"  // Runtime USB/Bluetooth toggle control
+#include "bluepad32_platform.h"  // For bluepad32_delete_pairing_keys()
 #endif
 
 // Forward declare Xbox debug counters (defined in main.cpp and xinput_atari.cpp)
@@ -203,6 +204,12 @@ void UserInterface::update_splash() {
     char mode_line[32];
     sprintf(mode_line, "Mode %s", mode_buf);
     ssd1306_draw_string(&disp, 0, 55, 1, mode_line);
+    
+    // Show button label on splash screen
+    // Right button: RST (Reset Bluetooth keys) - only show if BT is enabled
+    if (bt_enabled) {
+        ssd1306_draw_string(&disp, 100, 55, 1, (char*)"RST");
+    }
 #endif
 }
 
@@ -482,7 +489,21 @@ void UserInterface::on_button_down(int i) {
         }
     }
     else if (i == BUTTON_RIGHT) {
-        if (page == PAGE_MOUSE) {
+        if (page == PAGE_SPLASH) {
+            // On ATARI splash screen, delete stored Bluetooth pairing keys
+#if ENABLE_BLUEPAD32
+            if (bt_runtime_is_enabled()) {
+                bluepad32_delete_pairing_keys();
+                printf("Bluetooth pairing keys deleted\n");
+            } else {
+                printf("Bluetooth not enabled\n");
+            }
+            dirty = true;
+#else
+            printf("Bluetooth not available in this build\n");
+#endif
+        }
+        else if (page == PAGE_MOUSE) {
             if (settings.get_settings().mouse_speed < MOUSE_MAX) {
                 ++settings.get_settings().mouse_speed;
                 settings.write();

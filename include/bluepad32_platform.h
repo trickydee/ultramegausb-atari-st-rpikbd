@@ -44,6 +44,9 @@ int bluepad32_get_keyboard_count(void);
 // Get count of connected Bluetooth mice
 int bluepad32_get_mouse_count(void);
 
+// Delete all stored Bluetooth pairing keys
+void bluepad32_delete_pairing_keys(void);
+
 #ifdef __cplusplus
 }
 #endif

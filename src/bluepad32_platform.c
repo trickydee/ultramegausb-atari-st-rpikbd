@@ -122,9 +122,11 @@ static void my_platform_init(int argc, const char** argv) {
 static void my_platform_on_init_complete(void) {
     logi("bluepad32_platform: on_init_complete()\n");
 
-    // Clear stored BT keys on each boot (can be changed if you want to remember devices)
-    logi("Clearing stored Bluetooth keys...\n");
-    uni_bt_del_keys_unsafe();
+    // Bluetooth keys are now managed manually via the RST button on the splash screen
+    // Keys will persist across reboots (if using TLV/flash persistence)
+    // For in-memory databases, keys don't persist anyway, so deletion is unnecessary
+    // logi("Clearing stored Bluetooth keys...\n");
+    // uni_bt_del_keys_unsafe();
 
     // Wait a bit for HCI to be ready (the "HCI not ready" messages suggest it needs time)
     logi("Waiting for HCI to be ready...\n");
@@ -485,5 +487,10 @@ int bluepad32_get_mouse_count(void) {
         }
     }
     return count;
+}
+
+// Delete all stored Bluetooth pairing keys
+void bluepad32_delete_pairing_keys(void) {
+    uni_bt_del_keys_unsafe();
 }
 
