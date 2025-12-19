@@ -160,6 +160,16 @@ void __not_in_flash_func(setup_hd6301)() {
 static volatile uint32_t g_core1_heartbeat_counter = 0;
 static volatile uint32_t g_core1_cycle_count = 0;
 static volatile uint32_t g_core1_loop_counter = 0;  // Simple loop counter to detect if Core 1 is running
+static volatile bool g_core1_paused = false;  // Flag to pause Core 1 during BT enumeration
+
+// Functions to pause/resume Core 1 (called from BT callbacks)
+extern "C" void core1_pause_for_bt_enumeration(void) {
+    g_core1_paused = true;
+}
+
+extern "C" void core1_resume_after_bt_enumeration(void) {
+    g_core1_paused = false;
+}
 
 void __not_in_flash_func(core1_entry)() {
     // CRITICAL: Initialize flash-safe execution FIRST
@@ -194,6 +204,14 @@ void __not_in_flash_func(core1_entry)() {
         // CRITICAL: Update loop counter FIRST to detect if Core 1 is frozen
         // This counter increments every loop, independent of emulator state
         g_core1_loop_counter++;  // Simple increment - if this stops, Core 1 is truly frozen
+        
+        // Check if Core 1 should be paused (during BT gamepad enumeration)
+        if (g_core1_paused) {
+            // Pause Core 1 to avoid flash access conflicts during BT enumeration
+            // Use busy_wait_us for short delays to avoid timer dependency
+            busy_wait_us(1000);  // 1ms delay - short enough to resume quickly
+            continue;  // Skip emulation loop while paused
+        }
         
         count += CYCLES_PER_LOOP;
         g_core1_cycle_count = count;  // Update global counter (non-blocking)

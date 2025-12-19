@@ -24,6 +24,10 @@
 #define MAX_BT_KEYBOARDS 2
 #define MAX_BT_MICE 2
 
+// Forward declarations for Core 1 pause/resume functions
+extern void core1_pause_for_bt_enumeration(void);
+extern void core1_resume_after_bt_enumeration(void);
+
 // Storage for Bluetooth gamepad data
 typedef struct {
     uni_gamepad_t gamepad;
@@ -145,6 +149,20 @@ static uni_error_t my_platform_on_device_discovered(bd_addr_t addr, const char* 
     logi("BT Device discovered: addr=%s, name='%s', COD=0x%04X, RSSI=%d\n",
          addr_str, name ? name : "(null)", cod, rssi);
     
+    // Check if this might be a gamepad by COD or name
+    // COD 0x0508 = Gamepad/Joystick
+    // Pause Core 1 immediately when any gamepad is discovered to prevent freeze during GATT service discovery
+    bool might_be_gamepad = (cod == 0x0508) ||  // Gamepad COD
+                            (name != NULL && (strstr(name, "Stadia") != NULL || 
+                                              strstr(name, "Xbox") != NULL ||
+                                              strstr(name, "XBOX") != NULL));
+    
+    if (might_be_gamepad) {
+        logi("[DIAG] Pausing Core 1 immediately for gamepad device discovery (COD=0x%04X, name='%s')\n", 
+             cod, name ? name : "(null)");
+        core1_pause_for_bt_enumeration();
+    }
+    
     // Accept all HID devices: gamepads, keyboards, and mice
     logi("  -> Accepting device (will attempt connection)\n");
     return UNI_ERROR_SUCCESS;
@@ -153,12 +171,29 @@ static uni_error_t my_platform_on_device_discovered(bd_addr_t addr, const char* 
 static void my_platform_on_device_connected(uni_hid_device_t* d) {
     logi("bluepad32_platform: device connected: %p\n", d);
     
+    // Check if this is an Xbox or Stadia gamepad and ensure Core 1 is paused
+    // We check vendor/product ID if available
+    uint16_t vendor_id = uni_hid_device_get_vendor_id(d);
+    bool is_xbox_stadia = (vendor_id == 0x045E) ||  // Microsoft (Xbox)
+                          (vendor_id == 0x18D1);    // Google (Stadia)
+    
+    // Ensure Core 1 is paused (may have been paused earlier during discovery)
+    // The freeze happens during GATT service discovery which occurs here
+    if (is_xbox_stadia) {
+        logi("[DIAG] Ensuring Core 1 is paused for Xbox/Stadia device connection\n");
+        core1_pause_for_bt_enumeration();
+    }
+    
     // Device type will be determined in on_device_ready()
     // Storage will be allocated when device type is known
 }
 
 static void my_platform_on_device_disconnected(uni_hid_device_t* d) {
     logi("bluepad32_platform: device disconnected: %p\n", d);
+    
+    // Ensure Core 1 is resumed if device disconnects during enumeration
+    // (safety check in case resume wasn't called)
+    core1_resume_after_bt_enumeration();
     
     // Clear storage for all device types (device might have been any type)
     bt_gamepad_storage_t* gp_storage = get_gamepad_storage(d);
@@ -199,6 +234,12 @@ static uni_error_t my_platform_on_device_ready(uni_hid_device_t* d) {
     // Determine device type and mark appropriate storage as connected
     // Only call bluepad32_notify_mount() for gamepads (not keyboards/mice)
     if (uni_hid_device_is_gamepad(d)) {
+        // Check if this is an Xbox or Stadia gamepad (known to cause Core 1 freeze)
+        uint16_t vendor_id = uni_hid_device_get_vendor_id(d);
+        uint16_t product_id = uni_hid_device_get_product_id(d);
+        bool is_xbox_stadia = (vendor_id == 0x045E) ||  // Microsoft (Xbox)
+                              (vendor_id == 0x18D1 && product_id == 0x9400);  // Google (Stadia)
+        
         // Gamepad - notify HidInput and mark as connected
         bt_gamepad_storage_t* storage = get_gamepad_storage(d);
         if (storage) {
@@ -208,6 +249,15 @@ static uni_error_t my_platform_on_device_ready(uni_hid_device_t* d) {
         extern void bluepad32_notify_mount(void);
         bluepad32_notify_mount();
         logi("bluepad32_platform: gamepad ready\n");
+        
+        // Resume Core 1 after a short delay to ensure enumeration completes
+        // Note: Core 1 should already be paused from device_discovered/device_connected
+        if (is_xbox_stadia) {
+            logi("[DIAG] Waiting 10ms before resuming Core 1 (already paused from discovery)...\n");
+            sleep_ms(10);  // 10ms delay - minimal pause
+            logi("[DIAG] Resuming Core 1 after Xbox/Stadia enumeration\n");
+            core1_resume_after_bt_enumeration();
+        }
     } else if (uni_hid_device_is_keyboard(d)) {
         // Keyboard - mark as connected and notify UI
         bt_keyboard_storage_t* storage = get_keyboard_storage(d);
