@@ -36,6 +36,12 @@ static volatile uint8_t rx_buffer[RX_BUFFER_SIZE];
 static volatile uint16_t rx_head = 0;
 static volatile uint16_t rx_tail = 0;
 
+// Non-critical path TX buffer for UI monitoring (outside critical path)
+#define TX_LOG_BUFFER_SIZE 64
+static volatile uint8_t tx_log_buffer[TX_LOG_BUFFER_SIZE];
+static volatile uint16_t tx_log_head = 0;
+static volatile uint16_t tx_log_tail = 0;
+
 // Cached UART hardware pointer - set at initialization, used in critical path
 // This avoids calling uart_get_hw() which might access flash
 static uart_hw_t* g_uart_hw = nullptr;
@@ -63,6 +69,26 @@ static bool rx_buffer_get(uint8_t* data) {
 // Get number of bytes available in buffer
 static uint16_t rx_buffer_available(void) {
     return (rx_head - rx_tail) & 0xFF;
+}
+
+// Put byte into TX log buffer (non-critical path, called from critical path)
+static inline void tx_log_buffer_put(uint8_t data) {
+    uint16_t next_head = (tx_log_head + 1) & (TX_LOG_BUFFER_SIZE - 1);
+    if (next_head != tx_log_tail) {  // Buffer not full
+        tx_log_buffer[tx_log_head] = data;
+        tx_log_head = next_head;
+    }
+    // If buffer is full, byte is silently dropped (non-critical)
+}
+
+// Get byte from TX log buffer (called from main loop)
+static bool tx_log_buffer_get(uint8_t* data) {
+    if (tx_log_head == tx_log_tail) {
+        return false;  // Buffer empty
+    }
+    *data = tx_log_buffer[tx_log_tail];
+    tx_log_tail = (tx_log_tail + 1) & (TX_LOG_BUFFER_SIZE - 1);
+    return true;
 }
 
 // ISR for UART receive (IRQ handler)
@@ -164,9 +190,8 @@ void SerialPort::close() {
 
 void SerialPort::send(const unsigned char data) {
     uart_putc(UART_ID, data);
-    if (ui) {
-        ui->serial(true, data);
-    }
+    // Buffer TX data for non-critical path processing (UI update)
+    tx_log_buffer_put(data);
 }
 
 bool SerialPort::recv(unsigned char& data) const {
@@ -190,6 +215,16 @@ bool SerialPort::send_buf_empty() const {
 
 uint16_t SerialPort::rx_available() const {
     return rx_buffer_available();
+}
+
+void SerialPort::drain_tx_log() {
+    // Process buffered TX data for UI display (non-critical path)
+    uint8_t data;
+    while (tx_log_buffer_get(&data)) {
+        if (ui) {
+            ui->serial(true, data);
+        }
+    }
 }
 
 // C wrapper functions marked for RAM - called from 6301 emulator
@@ -226,8 +261,9 @@ void __not_in_flash_func(serial_send)(unsigned char data) {
     // The UART hardware will automatically transmit when data is written to DR
     g_uart_hw->dr = data;
     
-    // Note: UI update removed from critical path - can be done elsewhere if needed
-    // The byte is now in the UART FIFO and will be transmitted automatically
+    // Buffer TX data for non-critical path processing (UI update)
+    // This is safe to call from critical path as it's just a simple buffer write
+    tx_log_buffer_put(data);
 }
 
 int __not_in_flash_func(serial_send_buf_empty)(void) {

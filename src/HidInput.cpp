@@ -118,9 +118,12 @@ static void enqueue_wheel_pulses(int delta) {
         return;
     }
 
-    const uint8_t key = (delta > 0) ? ATARI_CURSOR_UP : ATARI_CURSOR_DOWN;
+    // Positive delta = scroll down = cursor DOWN key
+    // Negative delta = scroll up = cursor UP key
+    const uint8_t key = (delta > 0) ? ATARI_CURSOR_DOWN : ATARI_CURSOR_UP;
     int steps = delta > 0 ? delta : -delta;
     steps = std::min(steps, 8);  // Avoid bursts from high-resolution wheels
+
 
     for (int i = 0; i < steps; ++i) {
         if (wheel_pulses.size() >= MAX_WHEEL_PULSES) {
@@ -283,6 +286,16 @@ static uint8_t count_connected_usb_gamepads() {
     return total;
 }
 
+static uint8_t count_connected_gamepads() {
+    uint8_t total = count_connected_usb_gamepads();
+#if ENABLE_BLUEPAD32
+    if (bt_runtime_is_enabled()) {
+        total += bluepad32_get_connected_count();
+    }
+#endif
+    return total;
+}
+
 static bool collect_llamatron_sample(uint8_t& joy1_axis, uint8_t& joy1_fire,
                                      uint8_t& joy0_axis, uint8_t& joy0_fire) {
     if (ps4_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
@@ -291,6 +304,11 @@ static bool collect_llamatron_sample(uint8_t& joy1_axis, uint8_t& joy1_fire,
     if (stadia_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
     if (xinput_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
     if (gc_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
+#if ENABLE_BLUEPAD32
+    extern bool bluepad32_llamatron_axes(uint8_t* joy1_axis, uint8_t* joy1_fire,
+                                         uint8_t* joy0_axis, uint8_t* joy0_fire);
+    if (bluepad32_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
+#endif
     return false;
 }
 
@@ -919,7 +937,7 @@ void HidInput::handle_keyboard() {
                         uint8_t joy_setting = ui_->get_joystick();
                         bool joy0_usb = !(joy_setting & 0x01);
                         bool joy1_usb = !(joy_setting & 0x02);
-                        uint8_t pad_count = count_connected_usb_gamepads();
+                        uint8_t pad_count = count_connected_gamepads();
                         if (!joy0_usb || !joy1_usb) {
                             show_llamatron_status("USB joysticks only", "Set Joy0/Joy1 to USB");
                         } else if (pad_count != 1) {
@@ -1048,6 +1066,7 @@ void HidInput::handle_keyboard() {
             for (int i = 1; i < key_states.size(); ++i) {
                 bool down = false;
                 bool pulse_active = wheel_press_mask.test(i);
+                bool prev_pulse_active = wheel_prev_mask.test(i);
                 
                 // Special handling for Caps Lock - send pulse only when toggling
                 if (i == ATARI_CAPSLOCK) {
@@ -1062,13 +1081,15 @@ void HidInput::handle_keyboard() {
                     }
                 }
                 
+                // Apply wheel pulses (momentary press)
+                // Wheel pulses override keyboard state - if wheel is active, key is pressed
                 if (pulse_active) {
                     down = true;
                 }
                 
                 key_states[i] = down ? 1 : 0;
             }
-
+            
             // Handle modifier keys
             key_states[ATARI_LSHIFT] = (kb->modifier & KEYBOARD_MODIFIER_LEFTSHIFT) ? 1 : 0;
             key_states[ATARI_RSHIFT] = (kb->modifier & KEYBOARD_MODIFIER_RIGHTSHIFT) ? 1 : 0;
@@ -1084,16 +1105,20 @@ void HidInput::handle_keyboard() {
 
     if (!keyboard_handled) {
         // No keyboard present; apply wheel presses directly to key matrix
-        for (size_t idx = 0; idx < wheel_prev_mask.size(); ++idx) {
-            if (wheel_prev_mask.test(idx) && !wheel_press_mask.test(idx)) {
-                key_states[idx] = 0;
-            }
-        }
+        // First, set keys that are in the current mask
         for (size_t idx = 0; idx < wheel_press_mask.size(); ++idx) {
             if (wheel_press_mask.test(idx)) {
                 key_states[idx] = 1;
             }
         }
+        // Then, clear keys that were in previous mask but not in current mask
+        // (only clear if they're not being set in this frame)
+        for (size_t idx = 0; idx < wheel_prev_mask.size(); ++idx) {
+            if (wheel_prev_mask.test(idx) && !wheel_press_mask.test(idx)) {
+                key_states[idx] = 0;
+            }
+        }
+        // Update wheel_prev_mask AFTER processing (so keys persist for at least one frame)
         wheel_prev_mask = wheel_press_mask;
     } else if (wheel_prev_mask.any()) {
         // Clear any residual injections from a previous no-keyboard frame
@@ -1102,8 +1127,10 @@ void HidInput::handle_keyboard() {
                 key_states[idx] = 0;
             }
         }
-        wheel_prev_mask.reset();
     }
+    
+    // Update wheel_prev_mask for next frame (after all processing)
+    wheel_prev_mask = wheel_press_mask;
     
     // Handle Bluetooth keyboards
 #if ENABLE_BLUEPAD32
@@ -1157,6 +1184,10 @@ void HidInput::handle_keyboard() {
                 bool f5_pressed = false;
                 bool f6_pressed = false;
                 bool f7_pressed = false;
+                bool f9_pressed = false;
+                bool f10_pressed = false;
+                bool f11_pressed = false;
+                bool f4_pressed = false;
                 
                 for (int i = 0; i < 6; ++i) {
                     if (kb_report.keycode[i] == TOGGLE_MOUSE_MODE) {
@@ -1170,6 +1201,18 @@ void HidInput::handle_keyboard() {
                     }
                     if (kb_report.keycode[i] == MOUSE_KEYCODE_KEY) {
                         f7_pressed = true;
+                    }
+                    if (kb_report.keycode[i] == HID_KEY_F9) {
+                        f9_pressed = true;
+                    }
+                    if (kb_report.keycode[i] == HID_KEY_F10) {
+                        f10_pressed = true;
+                    }
+                    if (kb_report.keycode[i] == XRESET_KEY) {
+                        f11_pressed = true;
+                    }
+                    if (kb_report.keycode[i] == HID_KEY_F4) {
+                        f4_pressed = true;
                     }
                 }
             if (ctrl_pressed && f12_pressed) {
@@ -1303,9 +1346,135 @@ void HidInput::handle_keyboard() {
                 last_bt_mouse_key_state = false;
             }
             
+            // Check for Ctrl+F11 to trigger XRESET (HD6301 hardware reset)
+            static bool last_bt_reset_state = false;
+            if (ctrl_pressed && f11_pressed) {
+                if (!last_bt_reset_state) {
+#if ENABLE_OLED_DISPLAY
+                    // Show visual feedback on OLED
+                    ssd1306_clear(&disp);
+                    ssd1306_draw_string(&disp, 30, 20, 2, (char*)"RESET");
+                    ssd1306_draw_string(&disp, 20, 45, 1, (char*)"Ctrl+F11");
+                    ssd1306_show(&disp);
+                    
+                    // Small delay so user can see the message
+                    sleep_ms(500);
+#endif
+                    
+                    // Trigger the reset
+                    hd6301_trigger_reset();
+                    last_bt_reset_state = true;
+                }
+            } else {
+                last_bt_reset_state = false;
+            }
+            
+            // Check for Ctrl+F9 to toggle Joystick 0 (D-SUB <-> USB)
+            static bool last_bt_joy0_state = false;
+            if (ctrl_pressed && f9_pressed) {
+                if (!last_bt_joy0_state) {
+                    ui_->toggle_joystick_source(0);  // Toggle Joystick 0
+                    last_bt_joy0_state = true;
+                }
+            } else {
+                last_bt_joy0_state = false;
+            }
+            
+            // Check for Ctrl+F10 to toggle Joystick 1 (D-SUB <-> USB)
+            static bool last_bt_joy1_state = false;
+            if (ctrl_pressed && f10_pressed) {
+                if (!last_bt_joy1_state) {
+                    ui_->toggle_joystick_source(1);  // Toggle Joystick 1
+                    last_bt_joy1_state = true;
+                }
+            } else {
+                last_bt_joy1_state = false;
+            }
+            
+            // Check for Ctrl+F4 to toggle Llamatron dual-stick mode
+            static bool last_bt_llama_toggle = false;
+            if (ctrl_pressed && f4_pressed) {
+                if (!last_bt_llama_toggle) {
+                    if (g_llamatron_mode) {
+                        g_llamatron_mode = false;
+                        g_llamatron_active = false;
+                        // Reset pause state when disabling Llamatron mode
+                        g_llama_paused = false;
+                        g_llama_pause_button_prev = false;
+                        key_states[ATARI_KEY_P] = 0;
+                        key_states[ATARI_KEY_O] = 0;
+                        if (g_llamatron_restore_mouse && ui_) {
+                            ui_->set_mouse_enabled(true);
+                            g_llamatron_restore_mouse = false;
+                        }
+                        show_llamatron_status("DISABLED", nullptr);
+                    } else {
+                        uint8_t joy_setting = ui_->get_joystick();
+                        bool joy0_usb = !(joy_setting & 0x01);
+                        bool joy1_usb = !(joy_setting & 0x02);
+                        uint8_t pad_count = count_connected_gamepads();
+                        if (!joy0_usb || !joy1_usb) {
+                            show_llamatron_status("USB joysticks only", "Set Joy0/Joy1 to USB");
+                        } else if (pad_count != 1) {
+                            show_llamatron_status("Requires single pad", "Connect only one gamepad");
+                        } else {
+                            g_llamatron_mode = true;
+                            if (ui_) {
+                                g_llamatron_restore_mouse = ui_->get_mouse_enabled();
+                                if (g_llamatron_restore_mouse) {
+                                    ui_->set_mouse_enabled(false);
+                                }
+                            } else {
+                                g_llamatron_restore_mouse = false;
+                            }
+                            show_llamatron_status("ACTIVE", nullptr);
+                        }
+                    }
+                    last_bt_llama_toggle = true;
+                }
+            } else {
+                last_bt_llama_toggle = false;
+            }
+            
             // Check for Alt modifier (needed for ALT + /, ALT + [, ALT + ] shortcuts)
             bool alt_pressed = (kb_report.modifier & KEYBOARD_MODIFIER_LEFTALT) || 
                               (kb_report.modifier & KEYBOARD_MODIFIER_RIGHTALT);
+            
+            // Check for Alt + Plus to set 270MHz
+            static bool last_bt_plus_state = false;
+            bool plus_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb_report.keycode[i] == HID_KEY_EQUAL) {
+                    plus_pressed = true;
+                    break;
+                }
+            }
+            if (alt_pressed && plus_pressed) {
+                if (!last_bt_plus_state) {
+                    set_sys_clock_khz(270000, false);
+                    last_bt_plus_state = true;
+                }
+            } else {
+                last_bt_plus_state = false;
+            }
+            
+            // Check for Alt + Minus to set 150MHz
+            static bool last_bt_minus_state = false;
+            bool minus_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb_report.keycode[i] == HID_KEY_MINUS) {
+                    minus_pressed = true;
+                    break;
+                }
+            }
+            if (alt_pressed && minus_pressed) {
+                if (!last_bt_minus_state) {
+                    set_sys_clock_khz(150000, false);
+                    last_bt_minus_state = true;
+                }
+            } else {
+                last_bt_minus_state = false;
+            }
             
             // Convert to Atari ST keycodes and update key_states
             unsigned char st_keys[6] = {0};
@@ -1325,6 +1494,18 @@ void HidInput::handle_keyboard() {
                     }
                     // If Alt + Plus or Alt + Minus, don't send to Atari (used for clock control)
                     else if (alt_pressed && (kb_report.keycode[i] == HID_KEY_EQUAL || kb_report.keycode[i] == HID_KEY_MINUS)) {
+                        st_keys[i] = 0;
+                    }
+                    // If Ctrl+F11, don't send to Atari (used for XRESET)
+                    else if (ctrl_pressed && kb_report.keycode[i] == XRESET_KEY) {
+                        st_keys[i] = 0;
+                    }
+                    // If Ctrl+F10, don't send to Atari (used for Joy1 toggle)
+                    else if (ctrl_pressed && kb_report.keycode[i] == HID_KEY_F10) {
+                        st_keys[i] = 0;
+                    }
+                    // If Ctrl+F9, don't send to Atari (used for Joy0 toggle)
+                    else if (ctrl_pressed && kb_report.keycode[i] == HID_KEY_F9) {
                         st_keys[i] = 0;
                     }
                     // All other keys (including cursor keys) work normally with ALT
@@ -1569,6 +1750,8 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
             mouse_state = (mouse_state & 0xfe) | (right_down ? 1 : 0);  // Right button
             
             // Handle scroll wheel (matching USB mouse behavior)
+            // Note: scroll_wheel is int8_t, so values are -128 to 127
+            // Positive = scroll down, negative = scroll up
             if (bt_mouse.scroll_wheel != 0) {
                 enqueue_wheel_pulses(bt_mouse.scroll_wheel);
             }
@@ -1861,22 +2044,12 @@ void HidInput::handle_joystick() {
     }
 
     bool llama_prev_active = g_llamatron_active;
-#if ENABLE_BLUEPAD32
-    // Bluetooth mode: Llamatron mode not supported (requires USB gamepads)
-    if (g_llamatron_mode) {
-        g_llamatron_active = false;
-        g_llama_axis_joy1 = 0;
-        g_llama_fire_joy1 = 0;
-        g_llama_axis_joy0 = 0;
-        g_llama_fire_joy0 = 0;
-    }
-#else
-    // USB mode: Llamatron mode supported
+    // Llamatron mode supported for both USB and Bluetooth gamepads
     if (g_llamatron_mode) {
         uint8_t joy_setting = ui_->get_joystick();
         bool usb0 = !(joy_setting & 0x01);
         bool usb1 = !(joy_setting & 0x02);
-        uint8_t pad_count = count_connected_usb_gamepads();
+        uint8_t pad_count = count_connected_gamepads();
         uint8_t axis1 = 0, fire1 = 0, axis0 = 0, fire0 = 0;
         bool have_sample = (pad_count == 1 && usb0 && usb1 &&
                             collect_llamatron_sample(axis1, fire1, axis0, fire0));
@@ -1923,7 +2096,7 @@ void HidInput::handle_joystick() {
 
             if (g_llamatron_mode && llama_prev_active) {
                 if (pad_count != 1) {
-                    show_llamatron_status("Suspended", "Need single USB pad");
+                    show_llamatron_status("Suspended", "Need single pad");
                 } else if (!usb0 || !usb1) {
                     show_llamatron_status("Suspended", "Joy0/Joy1 must use USB");
                 }
@@ -1936,7 +2109,6 @@ void HidInput::handle_joystick() {
         g_llama_axis_joy0 = 0;
         g_llama_fire_joy0 = 0;
     }
-#endif
 
     // See if the joysticks are GPIO or USB
     for (int joystick = 1; joystick >= 0; --joystick) {
@@ -2150,3 +2322,4 @@ void update_joystick_state() {
     // Provides on-demand joystick updates for better timing accuracy
     HidInput::instance().handle_joystick();
 }
+

@@ -44,6 +44,11 @@ int bluepad32_get_keyboard_count(void);
 // Get count of connected Bluetooth mice
 int bluepad32_get_mouse_count(void);
 
+// Extract Llamatron dual-stick axes from Bluepad32 gamepad
+// Returns true if gamepad data was successfully extracted
+bool bluepad32_llamatron_axes(uint8_t* joy1_axis, uint8_t* joy1_fire,
+                               uint8_t* joy0_axis, uint8_t* joy0_fire);
+
 // Delete all stored Bluetooth pairing keys
 void bluepad32_delete_pairing_keys(void);
 

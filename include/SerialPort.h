@@ -77,6 +77,12 @@ public:
      * data is queued no fast than it can be sent.
      */
     bool send_buf_empty() const;
+    
+    /**
+     * Drain TX log buffer and update UI (non-critical path)
+     * Call this from main loop to process buffered TX data for UI display
+     */
+    void drain_tx_log();
 
 private:
     void configure();

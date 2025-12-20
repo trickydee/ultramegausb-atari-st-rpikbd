@@ -348,6 +348,9 @@ int main() {
         // HIGH PRIORITY: Check for serial data from ST every loop iteration
         // At 7812 baud, bytes arrive every ~1.28ms - must not miss them!
         handle_rx_from_st();
+        
+        // Drain TX log buffer for UI display (non-critical path)
+        SerialPort::instance().drain_tx_log();
 
         AtariSTMouse::instance().update();
 
@@ -359,6 +362,19 @@ int main() {
             if (usb_runtime_is_enabled()) {
                 tuh_task();
             }
+            
+            // Mouse handling MUST come before keyboard handling
+            // This ensures wheel pulses are enqueued before they're consumed
+            // Poll mouse if USB or Bluetooth is enabled (mouse can come from either)
+#if ENABLE_BLUEPAD32
+            if (usb_runtime_is_enabled() || bt_runtime_is_enabled()) {
+                HidInput::instance().handle_mouse(cpu.ncycles);
+            }
+#else
+            if (usb_runtime_is_enabled()) {
+                HidInput::instance().handle_mouse(cpu.ncycles);
+            }
+#endif
             
             // Handle USB devices if USB is enabled
             if (usb_runtime_is_enabled()) {
@@ -373,18 +389,6 @@ int main() {
 #if ENABLE_BLUEPAD32
             if (bt_runtime_is_enabled()) {
                 HidInput::instance().handle_keyboard();
-            }
-#endif
-            
-            // Mouse handling (moved from separate 750μs handler to 10ms handler to match main branch)
-            // Poll mouse if USB or Bluetooth is enabled (mouse can come from either)
-#if ENABLE_BLUEPAD32
-            if (usb_runtime_is_enabled() || bt_runtime_is_enabled()) {
-                HidInput::instance().handle_mouse(cpu.ncycles);
-            }
-#else
-            if (usb_runtime_is_enabled()) {
-                HidInput::instance().handle_mouse(cpu.ncycles);
             }
 #endif
             
