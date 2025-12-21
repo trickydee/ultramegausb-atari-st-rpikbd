@@ -1,7 +1,7 @@
 # Atari ST RP2040/RP2350 IKBD Emulator
 
 This project allows you to use a RP2040 or RP2350 microcontroller (Raspberry Pi Pico or Pico 2) to emulate the HD6301 controller that is used as the intelligent keyboard controller for the Atari ST/STe/TT series of computers. 
-This is useful if for example you have a Mega ST that is missing its keyboard. The emulator provides the ability to use a USB keyboard, mouse and joysticks with the ST.
+This is useful if for example you have a Mega ST that is missing its keyboard. The emulator provides the ability to use a USB or Bluetooth (RP2350 only) keyboard, mouse and joystick / gamepads with the ST. You can also use original 9 pin Dsub 'Atari' Joysticks.
 
 The original project was initially created by fieldofcows in 2020 https://github.com/fieldofcows/atari-st-rpikb. This project builds on this great foundation to improve compatability, stability and add support for many modern game controllers either Wired or Bluetooth connected.
 
@@ -10,7 +10,7 @@ The "ultramegausb" title is intended to highlight the massively enhanced USB com
 This project is opensource and I am happy to recieve PR's and issues to further improve capabilies.
 Lookout for a published roadmap of new features and an easy to build hardware device you can self manufacture.
 
-
+With a RP2350 Pico 2 W device It is possible to Mix and Match any combination of USB, Bluetooth or 9Pin Atari Joystick peripherals.
 
 ## USB Support
 USB HID Keyboards
@@ -133,7 +133,7 @@ The Atari ST keyboard contains an HD6301 microcontroller that can be programmed 
 
 Instead of writing code to handle the serial protocol between the Atari and the keyboard, this project provides a full emulation of the HD6301 microcontroller and the hardware connected to it. This means that it appears to the Atari as a real keyboard, and can be customised and programmed by software like a real keyboard, providing maximum compatibility.
 
-The RP2040 USB host port is used to connect a keyboard, mouse and joysticks using a USB hub. These are translated into an emulation of the relevant device and fed into the emulated HD6301 control registers, allowing the HD6301 to determine how to communicate this with the Atari.
+The RP2040/RP2350 USB host port or RP2350 Bluetooth is used to connect a keyboard, mouse and joysticks using a USB hub. These are translated into an emulation of the relevant device and fed into the emulated HD6301 control registers, allowing the HD6301 to determine how to communicate this with the Atari.
 
 ## Building the emulator
 The emulator is configured as per the schematic below.
