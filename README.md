@@ -1,4 +1,4 @@
-# Atari ST RP2040/RP2350 IKBD Emulator
+# Atari ST RP2040/RP2350 IKBD Emulator With USB and Bluetooth support
 
 This project allows you to use a RP2040 or RP2350 microcontroller (Raspberry Pi Pico or Pico 2) to emulate the HD6301 controller that is used as the intelligent keyboard controller for the Atari ST/STe/TT series of computers. 
 This is useful if for example you have a Mega ST that is missing its keyboard. The emulator provides the ability to use a USB or Bluetooth (RP2350 only) keyboard, mouse and joystick / gamepads with the ST. You can also use original 9 pin Dsub 'Atari' Joysticks.
@@ -90,7 +90,7 @@ The emulator supports several keyboard shortcuts for convenient control:
 | **Ctrl+F10** | Toggle Joystick 1 | Switches Joystick 1 between D-SUB and USB |
 | **Ctrl+F9** | Toggle Joystick 0 | Switches Joystick 0 between D-SUB and USB |
 | **Ctrl+F8** | Restore Joystick Mode | Sends 0x14 to restore joystick event reporting (useful after reconnect) |
-| **Ctrl+F4** | Llamatron Dual-Stick Mode | Share a single dual-stick USB pad across Joystick 0 & 1 (requires exactly one USB pad, both ST ports set to USB) |
+| **Ctrl+F4** | Llamatron Dual-Stick Mode | Share a single dual-stick gamepad (USB or Bluetooth) across Joystick 0 & 1 (requires exactly one gamepad, both ST ports set to USB) |
 | **Alt+/** | INSERT Key | Sends Atari ST INSERT key (useful for sending mouse click on Logitech Mac USB keyboards) |
 | **Alt+[** | Keypad /** | Sends Atari ST keypad divide key |
 | **Alt+]** | Keypad *** | Sends Atari ST keypad multiply key |
@@ -111,7 +111,23 @@ For reference, these shortcut keys emit the following HD6301/IKBD command sequen
 
 ### Llamatron Dual-Stick Mode
 
-`Ctrl+F4` enables “Llamatron” mode: if exactly one USB gamepad with two thumbsticks is connected (and both Atari joystick ports are set to USB), the left stick + face buttons continue to drive Joystick 1, the right stick transparently emulates Joystick 0 movement, and the east/right face button (Circle on PlayStation, B on Xbox, A on Switch, B on Stadia) becomes Joystick 0 fire. This is handy for twin-stick shooters like *Llamatron* that expect two physical joysticks. The mode automatically suspends itself if a second pad is attached or either ST port is switched back to the DB‑9 connector.
+`Ctrl+F4` enables “Llamatron” mode: if exactly one gamepad (USB or Bluetooth) with two thumbsticks is connected (and both Atari joystick ports are set to USB), the left stick + face buttons continue to drive Joystick 1, the right stick transparently emulates Joystick 0 movement, and the east/right face button (Circle on PlayStation, B on Xbox, A on Switch, B on Stadia) becomes Joystick 0 fire. **How it works:**
+- **Left stick** + face buttons control **Joystick 1** (movement and fire)
+- **Right stick** controls **Joystick 0** movement
+- **Right face button** (Circle on PlayStation, B on Xbox, A on Switch, B on Stadia) becomes **Joystick 0 fire**
+
+**Requirements:**
+- Exactly one gamepad connected (USB or Bluetooth)
+- Both Atari ST joystick ports must be set to USB mode (via the OLED interface or keyboard shortcuts)
+- The gamepad must have two analog thumbsticks
+
+**Automatic deactivation:**
+The mode automatically suspends itself if:
+- A second gamepad is connected
+- Either ST port is switched back to the DB‑9 connector
+- The gamepad is disconnected
+
+This feature works seamlessly with both USB and Bluetooth gamepads, allowing you to enjoy twin-stick shooters wirelessly on your Atari ST.
 
 
 
@@ -276,22 +292,21 @@ This build also fixes the following bugs in the original build:
 * Added 6301 buffer reporting.
 * Enabled UART FIFO for RX and TX (32X buffer)
 
-irectly to the Pico and not plugged into another hub.
-
 ## Acknowledgements
 This project is based on the amazing work of many people. Especially fieldofcows (https://github.com/fieldofcows/atari-st-rpikb) who created this project.
+
 In turn the project was pieced together from code extracted from [Steem SSE](https://sourceforge.net/projects/steemsse/). All of the work of wiring up the keyboard functions to the HD6301 CPU is credited to Steem SSE. This project contains a stripped-down version of this interface, connecting it to the Raspberry Pi's serial port.
 
 Steem itself uses the HD6301 emulator provided by sim68xx developed by Arne Riiber. The original website for this seems to have gone but an archive can be found [here](http://www.oocities.org/thetropics/harbor/8707/simulator/sim68xx/).
 
 The code to handle the OLED display is Copyright (c) 2021 David Schramm and taken from https://github.com/daschr/pico-ssd1306.
 
+Bluetooth support is provided by the Bluepad32 project by Ricardo Quesada https://github.com/ricardoquesada/bluepad32.
+
 Mult language support was added by Klyde https://github.com/klyde2278/atari-st-rpikb who also sells a nice kit and device to run this firmware on.
 
-## Credits
 To create this ultramegausb build I also relied on the following projects for inspiration and reference implementations:
 
-- **[Bluepad32](https://github.com/ricardoquesada/bluepad32)** by Ricardo Quesada - Bluetooth HID gamepad library providing support for DualSense, DualShock 4, Switch Pro, Xbox Wireless, and other Bluetooth gamepads
 - **[tusb_xinput](https://github.com/Ryzee119/tusb_xinput)** by Ryzee119 - TinyUSB XInput host driver used for Xbox controller support
 - **[BetterJoy](https://github.com/Davidobot/BetterJoy)** by Davidobot - Reference implementation for Nintendo Switch Pro Controller USB initialization and protocol handling
 - **[stadia-vigem](https://github.com/walkco/stadia-vigem)** by walkco - Complete USB HID report format and button mapping for Google Stadia Controller support
