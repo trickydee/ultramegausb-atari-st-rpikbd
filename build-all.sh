@@ -7,9 +7,14 @@
 #   - Raspberry Pi Pico 2 W (RP2350 with WiFi/Bluetooth)
 #   - Raspberry Pi Pico W (RP2040 with WiFi)
 #
-# IMPORTANT: Build directories (build-pico, build-pico2, build-picow) should
-#            NEVER be committed to git. They are automatically generated and
-#            cleaned by this script. Make sure .gitignore includes them!
+# Build Variants:
+#   - debug: OLED=1, LOGGING=1 (full features, debug enabled)
+#   - production: OLED=1, LOGGING=0 (OLED enabled, minimal logging)
+#   - speed: OLED=0, LOGGING=0 (no OLED, minimal logging)
+#
+# IMPORTANT: Build directories (build-pico, build-pico2, build-picow, build-pico2_w)
+#            should NEVER be committed to git. They are automatically generated
+#            and cleaned by this script. Make sure .gitignore includes them!
 ################################################################################
 
 set -e  # Exit on error
@@ -17,12 +22,28 @@ set -e  # Exit on error
 # Configuration
 LANGUAGE="${LANGUAGE:-EN}"
 DEBUG="${DEBUG:-1}"  # Set to 1 to enable debug displays
-OLED="${OLED:-1}"    # Set to 0 to disable OLED for speed mode
-LOGGING="${LOGGING:-1}"  # Set to 0 to disable verbose logging
+BUILD_VARIANT="${BUILD_VARIANT:-debug}"  # debug, production, or speed
+
+# Map build variant to OLED and LOGGING settings
+case "$BUILD_VARIANT" in
+    "production")
+        OLED="${OLED:-1}"
+        LOGGING="${LOGGING:-0}"
+        ;;
+    "speed")
+        OLED="${OLED:-0}"
+        LOGGING="${LOGGING:-0}"
+        ;;
+    "debug"|*)
+        OLED="${OLED:-1}"
+        LOGGING="${LOGGING:-1}"
+        BUILD_VARIANT="debug"
+        ;;
+esac
 
 echo "================================================================================"
 echo "  Atari ST USB Adapter - Multi-Variant Build"
-echo "  Version: 14.0.4 (Ultra-low latency serial optimizations)"
+echo "  Build Variant: ${BUILD_VARIANT}"
 echo "  Language: ${LANGUAGE}"
 echo "  Debug Mode: ${DEBUG}"
 echo "  OLED Display: ${OLED}"
@@ -262,59 +283,40 @@ echo ""
 echo ">>> Collecting firmware files..."
 mkdir -p ./dist
 
-# Determine build variant suffix
-BUILD_VARIANT=""
-if [ "$OLED" = "0" ] && [ "$LOGGING" = "0" ]; then
-    BUILD_VARIANT="_speed"
-elif [ "$OLED" = "1" ] && [ "$LOGGING" = "0" ]; then
-    BUILD_VARIANT="_production"
-elif [ "$OLED" = "0" ]; then
-    BUILD_VARIANT="_nooled"
-elif [ "$LOGGING" = "0" ]; then
-    BUILD_VARIANT="_nolog"
-fi
+# Build variant suffix
+VARIANT_SUFFIX="_${BUILD_VARIANT}"
 
 # Copy RP2040 firmware
 if [ -f "./build-pico/atari_ikbd_pico.uf2" ]; then
-    cp ./build-pico/atari_ikbd_pico.uf2 ./dist/atari_ikbd_pico${BUILD_VARIANT}.uf2
-    cp ./build-pico/atari_ikbd_pico.elf ./dist/atari_ikbd_pico${BUILD_VARIANT}.elf 2>/dev/null || true
-    cp ./build-pico/atari_ikbd_pico.bin ./dist/atari_ikbd_pico${BUILD_VARIANT}.bin 2>/dev/null || true
-    echo "    ✅ Copied atari_ikbd_pico${BUILD_VARIANT}.uf2"
+    cp ./build-pico/atari_ikbd_pico.uf2 ./dist/atari_ikbd_pico${VARIANT_SUFFIX}.uf2
+    echo "    ✅ Copied atari_ikbd_pico${VARIANT_SUFFIX}.uf2"
 else
     echo "    ⚠️  Warning: atari_ikbd_pico.uf2 not found!"
 fi
 
 # Copy RP2040 WiFi (Pico W) firmware
 if [ -f "./build-picow/atari_ikbd_pico.uf2" ]; then
-    cp ./build-picow/atari_ikbd_pico.uf2 ./dist/atari_ikbd_picow${BUILD_VARIANT}.uf2
-    cp ./build-picow/atari_ikbd_pico.elf ./dist/atari_ikbd_picow${BUILD_VARIANT}.elf 2>/dev/null || true
-    cp ./build-picow/atari_ikbd_pico.bin ./dist/atari_ikbd_picow${BUILD_VARIANT}.bin 2>/dev/null || true
-    echo "    ✅ Copied atari_ikbd_picow${BUILD_VARIANT}.uf2"
+    cp ./build-picow/atari_ikbd_pico.uf2 ./dist/atari_ikbd_pico_w${VARIANT_SUFFIX}.uf2
+    echo "    ✅ Copied atari_ikbd_pico_w${VARIANT_SUFFIX}.uf2"
 else
     echo "    ⚠️  Warning: atari_ikbd_pico.uf2 for Pico W (pico_w) not found!"
 fi
 
 # Copy RP2350 firmware
 if [ -f "./build-pico2/atari_ikbd_pico2.uf2" ]; then
-    cp ./build-pico2/atari_ikbd_pico2.uf2 ./dist/atari_ikbd_pico2${BUILD_VARIANT}.uf2
-    cp ./build-pico2/atari_ikbd_pico2.elf ./dist/atari_ikbd_pico2${BUILD_VARIANT}.elf 2>/dev/null || true
-    cp ./build-pico2/atari_ikbd_pico2.bin ./dist/atari_ikbd_pico2${BUILD_VARIANT}.bin 2>/dev/null || true
-    echo "    ✅ Copied atari_ikbd_pico2${BUILD_VARIANT}.uf2"
+    cp ./build-pico2/atari_ikbd_pico2.uf2 ./dist/atari_ikbd_pico2${VARIANT_SUFFIX}.uf2
+    echo "    ✅ Copied atari_ikbd_pico2${VARIANT_SUFFIX}.uf2"
 else
     echo "    ⚠️  Warning: atari_ikbd_pico2.uf2 not found!"
 fi
 
 # Copy RP2350 WiFi/Bluetooth (Pico 2 W) firmware
 if [ -f "./build-pico2_w/atari_ikbd_pico2_w.uf2" ]; then
-    cp ./build-pico2_w/atari_ikbd_pico2_w.uf2 ./dist/atari_ikbd_pico2_w${BUILD_VARIANT}_wireless.uf2
-    cp ./build-pico2_w/atari_ikbd_pico2_w.elf ./dist/atari_ikbd_pico2_w${BUILD_VARIANT}_wireless.elf 2>/dev/null || true
-    cp ./build-pico2_w/atari_ikbd_pico2_w.bin ./dist/atari_ikbd_pico2_w${BUILD_VARIANT}_wireless.bin 2>/dev/null || true
-    echo "    ✅ Copied atari_ikbd_pico2_w${BUILD_VARIANT}_wireless.uf2"
+    cp ./build-pico2_w/atari_ikbd_pico2_w.uf2 ./dist/atari_ikbd_pico2_w${VARIANT_SUFFIX}.uf2
+    echo "    ✅ Copied atari_ikbd_pico2_w${VARIANT_SUFFIX}.uf2"
 elif [ -f "./build-pico2_w/atari_ikbd_pico2.uf2" ]; then
-    cp ./build-pico2_w/atari_ikbd_pico2.uf2 ./dist/atari_ikbd_pico2_w${BUILD_VARIANT}_wireless.uf2
-    cp ./build-pico2_w/atari_ikbd_pico2.elf ./dist/atari_ikbd_pico2_w${BUILD_VARIANT}_wireless.elf 2>/dev/null || true
-    cp ./build-pico2_w/atari_ikbd_pico2.bin ./dist/atari_ikbd_pico2_w${BUILD_VARIANT}_wireless.bin 2>/dev/null || true
-    echo "    ✅ Copied atari_ikbd_pico2_w${BUILD_VARIANT}_wireless.uf2"
+    cp ./build-pico2_w/atari_ikbd_pico2.uf2 ./dist/atari_ikbd_pico2_w${VARIANT_SUFFIX}.uf2
+    echo "    ✅ Copied atari_ikbd_pico2_w${VARIANT_SUFFIX}.uf2"
 fi
 
 echo ""
@@ -329,37 +331,29 @@ echo "==========================================================================
 echo ""
 echo "Firmware files available in: ./dist/"
 echo ""
-
-# Display build variant info
-if [ "$OLED" = "0" ] && [ "$LOGGING" = "0" ]; then
-    echo "  Build Variant: SPEED MODE (no OLED, minimal logging)"
-elif [ "$OLED" = "0" ]; then
-    echo "  Build Variant: NO OLED (display disabled)"
-elif [ "$LOGGING" = "0" ]; then
-    echo "  Build Variant: NO LOGGING (minimal logging)"
-else
-    echo "  Build Variant: STANDARD (full features)"
-fi
+echo "  Build Variant: ${BUILD_VARIANT}"
+echo "  - OLED Display: ${OLED}"
+echo "  - Serial Logging: ${LOGGING}"
 echo ""
 
-if [ -f "./dist/atari_ikbd_pico${BUILD_VARIANT}.uf2" ]; then
-    SIZE_PICO=$(ls -lh "./dist/atari_ikbd_pico${BUILD_VARIANT}.uf2" | awk '{print $5}')
-    echo "  📦 Raspberry Pi Pico (RP2040):  atari_ikbd_pico${BUILD_VARIANT}.uf2  (${SIZE_PICO})"
+if [ -f "./dist/atari_ikbd_pico${VARIANT_SUFFIX}.uf2" ]; then
+    SIZE_PICO=$(ls -lh "./dist/atari_ikbd_pico${VARIANT_SUFFIX}.uf2" | awk '{print $5}')
+    echo "  📦 Raspberry Pi Pico (RP2040):  atari_ikbd_pico${VARIANT_SUFFIX}.uf2  (${SIZE_PICO})"
 fi
 
-if [ -f "./dist/atari_ikbd_pico2${BUILD_VARIANT}.uf2" ]; then
-    SIZE_PICO2=$(ls -lh "./dist/atari_ikbd_pico2${BUILD_VARIANT}.uf2" | awk '{print $5}')
-    echo "  📦 Raspberry Pi Pico 2 (RP2350): atari_ikbd_pico2${BUILD_VARIANT}.uf2 (${SIZE_PICO2})"
+if [ -f "./dist/atari_ikbd_pico2${VARIANT_SUFFIX}.uf2" ]; then
+    SIZE_PICO2=$(ls -lh "./dist/atari_ikbd_pico2${VARIANT_SUFFIX}.uf2" | awk '{print $5}')
+    echo "  📦 Raspberry Pi Pico 2 (RP2350): atari_ikbd_pico2${VARIANT_SUFFIX}.uf2 (${SIZE_PICO2})"
 fi
 
-if [ -f "./dist/atari_ikbd_pico2_w${BUILD_VARIANT}_wireless.uf2" ]; then
-    SIZE_PICO2_W=$(ls -lh "./dist/atari_ikbd_pico2_w${BUILD_VARIANT}_wireless.uf2" | awk '{print $5}')
-    echo "  📦 Raspberry Pi Pico 2 W (RP2350 + Bluetooth): atari_ikbd_pico2_w${BUILD_VARIANT}_wireless.uf2 (${SIZE_PICO2_W})"
+if [ -f "./dist/atari_ikbd_pico2_w${VARIANT_SUFFIX}.uf2" ]; then
+    SIZE_PICO2_W=$(ls -lh "./dist/atari_ikbd_pico2_w${VARIANT_SUFFIX}.uf2" | awk '{print $5}')
+    echo "  📦 Raspberry Pi Pico 2 W (RP2350 + Bluetooth): atari_ikbd_pico2_w${VARIANT_SUFFIX}.uf2 (${SIZE_PICO2_W})"
 fi
 
-if [ -f "./dist/atari_ikbd_picow${BUILD_VARIANT}.uf2" ]; then
-    SIZE_PICOW=$(ls -lh "./dist/atari_ikbd_picow${BUILD_VARIANT}.uf2" | awk '{print $5}')
-    echo "  📦 Raspberry Pi Pico W (RP2040 WiFi): atari_ikbd_picow${BUILD_VARIANT}.uf2 (${SIZE_PICOW})"
+if [ -f "./dist/atari_ikbd_pico_w${VARIANT_SUFFIX}.uf2" ]; then
+    SIZE_PICOW=$(ls -lh "./dist/atari_ikbd_pico_w${VARIANT_SUFFIX}.uf2" | awk '{print $5}')
+    echo "  📦 Raspberry Pi Pico W (RP2040 WiFi): atari_ikbd_pico_w${VARIANT_SUFFIX}.uf2 (${SIZE_PICOW})"
 fi
 
 echo ""
@@ -371,13 +365,12 @@ echo "  4. Copy the appropriate .uf2 file to the RPI-RP2 drive"
 echo ""
 echo "================================================================================"
 
-# Automatically build production & speed variants after standard build (unless skipped)
-if [ "${SKIP_SPEED_BUILD:-0}" != "1" ] && [ "${OLED}" = "1" ] && [ "${LOGGING}" = "1" ]; then
+# Automatically build production & speed variants after debug build (unless skipped)
+if [ "${SKIP_VARIANTS:-0}" != "1" ] && [ "${BUILD_VARIANT}" = "debug" ]; then
     echo ""
     echo ">>> Auto-building production variant (OLED=1, LOGGING=0)..."
-    OLED=1 LOGGING=0 SKIP_SPEED_BUILD=1 "$0"
+    BUILD_VARIANT=production SKIP_VARIANTS=1 "$0"
     echo ""
-    echo ">>> Auto-building speed mode variant (OLED=0, LOGGING=0)..."
-    OLED=0 LOGGING=0 SKIP_SPEED_BUILD=1 "$0"
+    echo ">>> Auto-building speed variant (OLED=0, LOGGING=0)..."
+    BUILD_VARIANT=speed SKIP_VARIANTS=1 "$0"
 fi
-
