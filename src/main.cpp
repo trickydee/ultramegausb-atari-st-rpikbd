@@ -424,7 +424,8 @@ int main() {
 #endif
         
         // Heartbeat: Print less frequently to reduce log spam but still show liveness
-        // 10 seconds interval
+        // 10 seconds interval (only in debug builds with serial logging enabled)
+#if ENABLE_SERIAL_LOGGING
         if (absolute_time_diff_us(heartbeat_ms, tm) >= 10000000) {
             heartbeat_ms = tm;
             uint32_t core1_heartbeat = g_core1_heartbeat_counter;
@@ -448,6 +449,7 @@ int main() {
                    core1_loops_frozen ? " [LOOPS_FROZEN!]" : "");
 #endif
         }
+#endif
     }
     return 0;
 }

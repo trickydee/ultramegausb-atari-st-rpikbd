@@ -304,18 +304,10 @@ static void my_platform_on_controller_data(uni_hid_device_t* d, uni_controller_t
                 if (!storage->connected) {
                     // First keyboard data - mark as connected
                     storage->connected = true;
-                    logi("bluepad32_platform: keyboard data received (first time)\n");
                 }
                 // Copy keyboard data
                 storage->keyboard = ctl->keyboard;
                 storage->updated = true;
-                static uint32_t kb_sample_count = 0;
-                if (kb_sample_count < 5) {
-                    kb_sample_count++;
-                    logi("bluepad32_platform: keyboard data - modifiers=0x%02X, keys[0]=0x%02X\n",
-                         ctl->keyboard.modifiers, 
-                         ctl->keyboard.pressed_keys[0]);
-                }
             }
             break;
         }
@@ -326,17 +318,10 @@ static void my_platform_on_controller_data(uni_hid_device_t* d, uni_controller_t
                 if (!storage->connected) {
                     // First mouse data - mark as connected
                     storage->connected = true;
-                    logi("bluepad32_platform: mouse data received (first time)\n");
                 }
                 // Copy mouse data
                 storage->mouse = ctl->mouse;
                 storage->updated = true;
-                static uint32_t mouse_sample_count = 0;
-                if (mouse_sample_count < 5) {
-                    mouse_sample_count++;
-                    logi("bluepad32_platform: mouse data - dx=%d, dy=%d, buttons=0x%02X\n",
-                         ctl->mouse.delta_x, ctl->mouse.delta_y, ctl->mouse.buttons);
-                }
             }
             break;
         }
