@@ -61,8 +61,14 @@ public:
      * Attempt to receive data from the Atari ST over the serial port.
      * This function does not block.
      * Returns true if a byte was received, otherwise returns false
+     * Uses IRQ-based ring buffer - bytes are captured immediately by ISR
      */
     bool recv(unsigned char& data) const;
+    
+    /**
+     * Get number of bytes available in RX ring buffer
+     */
+    uint16_t rx_available() const;
 
     /**
      * Query whether the transmit buffer is empty.
@@ -71,6 +77,12 @@ public:
      * data is queued no fast than it can be sent.
      */
     bool send_buf_empty() const;
+    
+    /**
+     * Drain TX log buffer and update UI (non-critical path)
+     * Call this from main loop to process buffered TX data for UI display
+     */
+    void drain_tx_log();
 
 private:
     void configure();
@@ -82,6 +94,7 @@ extern "C" {
 #endif
 
 void serial_send(unsigned char data);
+int serial_send_buf_empty(void);
 
 #ifdef __cplusplus
 }

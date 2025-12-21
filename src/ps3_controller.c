@@ -89,11 +89,10 @@ bool ps3_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len) {
         }
     }
     
-    // Store raw report for debugging
+    // Store raw report
     ctrl->raw_len = len < sizeof(ctrl->raw_report) ? len : sizeof(ctrl->raw_report);
     memcpy(ctrl->raw_report, report, ctrl->raw_len);
     
-    // Show first report with detailed debug
     if (first_report_ever) {
         first_report_ever = false;
         printf("PS3: First report received (%d bytes)\n", len);

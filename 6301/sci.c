@@ -10,6 +10,7 @@
 #include "ireg.h"
 #include "sci.h"
 #include <SerialPort.h>
+#include "pico/platform.h"
 
 /*
 This part of the emu deals with serial I/O between the 6301 and its CPU, in
@@ -35,10 +36,7 @@ $0013    | B | TDR   | Transmit Data Register                         | W0
  * increment number of outstanding rx interrupts
  */
 
-sci_in(s, nbytes)
-    u_char *s;
-int nbytes;
-{
+int __not_in_flash_func(sci_in)(u_char *s, int nbytes) {
   // detect OVR condition, set flag at once (unlike ACIA)
   if (iram[TRCSR] & RDRF)
   {
@@ -85,9 +83,7 @@ reads or writes the status/control register $11 (often).
  * trcsr_getb - always return Transmit Data Reg. Empty = 1
  */
 
-u_char trcsr_getb(offs)
-    u_int offs;
-{
+u_char __not_in_flash_func(trcsr_getb)(u_int offs) {
   unsigned char rv;
   rv = ireg_getb(TRCSR);
   return rv;
@@ -99,10 +95,7 @@ u_char trcsr_getb(offs)
  *  Sets global interrupt flag if tx interrupt is enabled
  *  so main loop can execute interrupt vector
  */
-trcsr_putb(offs, value)
-    u_int offs;
-u_char value;
-{
+void __not_in_flash_func(trcsr_putb)(u_int offs, u_char value) {
 
   //  ASSERT(value&RE); // Receive is never disabled by program
   if (value & 1)
@@ -121,9 +114,7 @@ u_char value;
  * decrement number of outstanding rx interrupts
  * Assume RIE is enabled.
  */
-u_char rdr_getb(offs)
-    u_int offs;
-{
+u_char __not_in_flash_func(rdr_getb)(u_int offs) {
   if (cpu_isrunning())
   {
     /*
@@ -153,10 +144,7 @@ u_char rdr_getb(offs)
  * to signalize main loop to execute sci interrupt vector
  */
 
-tdr_putb(offs, value)
-    u_int offs;
-u_char value;
-{
+void __not_in_flash_func(tdr_putb)(u_int offs, u_char value) {
   u_char trcsr;
 
   ireg_putb(TDR, value);

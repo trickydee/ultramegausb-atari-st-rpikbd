@@ -129,7 +129,6 @@ bool gc_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len) {
         printf("GC: First report received (%d bytes)\n", len);
         printf("GC: Signal byte: 0x%02X\n", report[0]);
 #endif
-// Debug splash screen removed - no longer needed
     }
     
     // Parse the report (copy to adapter structure)
@@ -152,7 +151,6 @@ bool gc_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len) {
         }
     }
     
-// GameCube debug screen removed - no longer needed in production
     
     return true;
 }
@@ -247,14 +245,6 @@ void gc_to_atari(const gc_adapter_t* gc, uint8_t joystick_num,
         *fire = 1;
     }
     
-    // Debug output values (disabled for performance)
-    // #if ENABLE_SERIAL_LOGGING
-    // if (debug_count <= 3 || (*direction != 0) || (*fire != 0)) {
-    //     if (debug_count <= 5 || (debug_count % 50) == 0) {
-    //         printf("GC: OUTPUT → direction=0x%02X fire=%d\n", *direction, *fire);
-    //     }
-    // }
-    // #endif
 }
 
 // Compute axes for Llamatron mode (dual-stick support)

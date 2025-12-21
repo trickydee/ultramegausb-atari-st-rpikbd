@@ -22,6 +22,7 @@
 #include <string.h>
 #include "pico/stdlib.h"
 #include "pico/multicore.h"
+#include "pico/flash.h"  // For flash_safe_execute_core_init() - required for Bluetooth flash coordination
 #include "hardware/clocks.h"
 #include "hardware/uart.h"
 #include "pico/stdio_uart.h"
@@ -31,11 +32,19 @@
 #include "util.h"
 #include "tusb.h"
 #include "HidInput.h"
+#include "hardware/uart.h"  // For uart_puts on Core 1
 #include "SerialPort.h"
 #include "AtariSTMouse.h"
 #include "UserInterface.h"
 #include "xinput_host.h"  // Official tusb_xinput driver
 #include "gamecube_adapter.h"  // GameCube adapter support
+
+#if ENABLE_BLUEPAD32
+// Use separate initialization file to avoid HID type conflicts between TinyUSB and btstack
+#include "bluepad32_init.h"
+#endif
+
+#include "runtime_toggle.h"  // Runtime USB/Bluetooth toggle control
 
 // Forward declarations
 extern "C" {
@@ -43,7 +52,7 @@ extern "C" {
 }
 
 #define ROMBASE     256
-#define CYCLES_PER_LOOP 100  // Ultra-low latency for timing-sensitive demos (10x improvement over original)
+#define CYCLES_PER_LOOP 1000  // Match logronoid's value - proper 6301 emulation timing (~1MHz)
 
 extern unsigned char rom_HD6301V1ST_img[];
 extern unsigned int rom_HD6301V1ST_img_len;
@@ -72,7 +81,7 @@ static void clear_rx_queue() {
  * Read bytes from the physical serial port and pass them to the HD6301
  * Uses software queue to buffer bytes when 6301 RDR is busy
  */
-static void handle_rx_from_st() {
+static void __not_in_flash_func(handle_rx_from_st)() {
     unsigned char data;
     static int bytes_deferred_count = 0;
     static int queue_full_count = 0;
@@ -135,38 +144,96 @@ static void handle_rx_from_st() {
 /**
  * Prepare the HD6301 and load the ROM file
  */
-void setup_hd6301() {
+void __not_in_flash_func(setup_hd6301)() {
     BYTE* pram = hd6301_init();
     if (!pram) {
-        printf("Failed to initialise HD6301\n");
-        exit(-1);
+        // Can't use printf/uart_puts reliably here if init failed
+        // Just hang - this is a fatal error
+        while(1) { tight_loop_contents(); }
     }
+    
+    // Copy ROM to RAM for XIP builds (improves performance)
     memcpy(pram + ROMBASE, rom_HD6301V1ST_img, rom_HD6301V1ST_img_len);
 }
 
-void core1_entry() {
+// Global flag to track Core 1 activity (updated by Core 1, read by Core 0)
+static volatile uint32_t g_core1_heartbeat_counter = 0;
+static volatile uint32_t g_core1_cycle_count = 0;
+static volatile uint32_t g_core1_loop_counter = 0;  // Simple loop counter to detect if Core 1 is running
+static volatile bool g_core1_paused = false;  // Flag to pause Core 1 during BT enumeration
+
+// Functions to pause/resume Core 1 (called from BT callbacks)
+extern "C" void core1_pause_for_bt_enumeration(void) {
+    g_core1_paused = true;
+}
+
+extern "C" void core1_resume_after_bt_enumeration(void) {
+    g_core1_paused = false;
+}
+
+void __not_in_flash_func(core1_entry)() {
+    // CRITICAL: Initialize flash-safe execution FIRST
+    // This allows Core 0 to coordinate with Core 1 when Bluetooth writes to flash (TLV storage)
+    // Without this, Core 1 can freeze when Bluetooth tries to access flash
+    // This matches logronoid's implementation and is required for proper flash coordination
+    flash_safe_execute_core_init();
+    
+    // Wait for Core 0 to finish initializing UART0 and other peripherals
+    // This is critical for XIP builds where initialization timing matters
+    // Use busy_wait instead of sleep_ms to avoid timer dependency
+    busy_wait_us(200000);  // 200ms delay
+    
     // Initialise the HD6301
     setup_hd6301();
+    
     hd6301_reset(1);
     // Note: RX queue is cleared at startup (automatically zero-initialized)
-
     unsigned long count = 0;
-    absolute_time_t tm = get_absolute_time();
+    
+    // CRITICAL: Don't use printf here - it can block if UART0 is locked by Bluetooth
+    // Instead, set a flag that Core 0 can check
+    g_core1_heartbeat_counter = 0xFFFFFFFF;  // Magic value to indicate Core 1 started
+    
+    // Pure tight loop - NO DELAYS (matching logronoid's implementation)
+    // This makes Core 1 completely independent of timer system and Core 0's USB/Bluetooth operations
+    // Core 1 runs at maximum speed, only limited by CPU clock
+    uint32_t loop_count = 0;
+    uint32_t last_heartbeat_loop = 0;
+    
     while (true) {
+        // CRITICAL: Update loop counter FIRST to detect if Core 1 is frozen
+        // This counter increments every loop, independent of emulator state
+        g_core1_loop_counter++;  // Simple increment - if this stops, Core 1 is truly frozen
+        
+        // Check if Core 1 should be paused (during BT gamepad enumeration)
+        if (g_core1_paused) {
+            // Pause Core 1 to avoid flash access conflicts during BT enumeration
+            // Use busy_wait_us for short delays to avoid timer dependency
+            busy_wait_us(1000);  // 1ms delay - short enough to resume quickly
+            continue;  // Skip emulation loop while paused
+        }
+        
         count += CYCLES_PER_LOOP;
+        g_core1_cycle_count = count;  // Update global counter (non-blocking)
         
         // Update the tx serial port status based on actual buffer state
-        hd6301_tx_empty(SerialPort::instance().send_buf_empty() ? 1 : 0);
+        // Use C wrapper function that's in RAM for better performance
+        hd6301_tx_empty(serial_send_buf_empty());
 
         hd6301_run_clocks(CYCLES_PER_LOOP);
 
-        if ((count % 1000000) == 0) {
-            //printf("Cycles = %lu\n", count);
-            //printf("CPU cycles = %llu\n", cpu.ncycles);
+        loop_count++;
+        
+        // Heartbeat every ~5 seconds (approximately 50000 loops at 10kHz = 5 seconds)
+        // Use loop counter instead of absolute_time to avoid Bluetooth blocking
+        if (loop_count - last_heartbeat_loop >= 50000) {
+            last_heartbeat_loop = loop_count;
+            g_core1_heartbeat_counter++;  // Increment counter (non-blocking atomic operation)
         }
 
-        tm = delayed_by_us(tm, CYCLES_PER_LOOP);
-        sleep_until(tm);
+        // NO DELAY - pure tight loop (matching logronoid's approach)
+        // Core 1 runs continuously without yielding, making it completely independent
+        // of Core 0's USB/Bluetooth operations and timer interrupts
     }
 }
 
@@ -183,23 +250,52 @@ int main() {
     uart_puts(uart0, "UART0 console ready (115200 8N1)\r\n");
 
     // Note: stdio_init_all() not called as it may interfere with SerialPort UART setup
+    // Initialize TinyUSB for USB HID device support (concurrent with Bluetooth)
     if (!tusb_init()) {
         // TinyUSB initialization failed
-        // Can't print error since stdio not initialized
+        printf("TinyUSB initialization failed\n");
         return -1;
     }
+#if ENABLE_BLUEPAD32
+    printf("USB initialized - Bluetooth + USB mode active\n");
+#else
+    printf("USB initialized - USB mode active\n");
+#endif
+
+    // Clock speed configuration
+    // For Bluetooth builds, use 225MHz (matching logronoid's stable configuration)
+    // CYW43 chip has issues at very high clock speeds (270MHz causes STALL timeouts)
+    // 225MHz provides good balance between performance and stability
+    #if ENABLE_BLUEPAD32
+    uint32_t clock_khz = 225000;  // 225 MHz for Bluetooth builds (matching logronoid)
+    printf("Bluetooth build: Using 225 MHz (matching logronoid's config)\n");
+    #else
+    uint32_t clock_khz = DEFAULT_CPU_CLOCK_KHZ;
+    #endif
+    
+    if (!set_sys_clock_khz(clock_khz, false))
+      printf("system clock %d MHz failed\n", clock_khz / 1000);
+    else
+      printf("system clock now %d MHz\n", clock_khz / 1000);
+
+#if ENABLE_BLUEPAD32
+    // CRITICAL: Initialize CYW43/Bluepad32 BEFORE any I2C/SPI peripherals
+    // Forum reports show I2C/SPI initialization can interfere with CYW43 pin configuration
+    // See: https://forums.pimoroni.com/t/plasma-2350-w-wifi-problems/26810
+    if (!bluepad32_init()) {
+        printf("Failed to initialize Bluepad32\n");
+        return -1;
+    }
+    printf("Bluepad32 initialized - scanning for Bluetooth gamepads...\n");
+#endif
 
 #if ENABLE_OLED_DISPLAY
+    // Initialize OLED display AFTER CYW43 to avoid pin conflicts
+    // I2C initialization before CYW43 can put wireless pins in wrong state
     UserInterface ui;
     ui.init();
     ui.update();
 #endif
-
-    // Overclock the Pico for maximum performance
-    if (!set_sys_clock_khz(DEFAULT_CPU_CLOCK_KHZ, false))
-      printf("system clock %d MHz failed\n", DEFAULT_CPU_CLOCK_KHZ / 1000);
-    else
-      printf("system clock now %d MHz\n", DEFAULT_CPU_CLOCK_KHZ / 1000);
 
     // Setup the UART and HID instance.
     SerialPort::instance().open();
@@ -217,32 +313,143 @@ int main() {
     // Force mouse enabled at startup
     HidInput::instance().force_usb_mouse();
 
+    // Runtime state: USB and Bluetooth can be toggled on/off at runtime
+    // Both start enabled by default (when ENABLE_BLUEPAD32 is defined, both are available)
+    // State is managed by runtime_toggle functions
+    printf("Runtime toggle available: USB and Bluetooth can be toggled at runtime\n");
+#if ENABLE_BLUEPAD32
+    // Enable Bluetooth by default if initialization succeeded
+    if (bluepad32_is_enabled()) {
+        bt_runtime_enable();  // Ensure Bluetooth is enabled at startup
+        printf("Bluetooth enabled at startup\n");
+    } else {
+        bt_runtime_disable();
+        printf("Bluetooth disabled (initialization failed)\n");
+    }
+    printf("Current state: USB=%s, BT=%s\n", 
+           usb_runtime_is_enabled() ? "ON" : "OFF",
+           bt_runtime_is_enabled() ? "ON" : "OFF");
+#endif
+
     absolute_time_t ten_ms = get_absolute_time();
+    absolute_time_t heartbeat_ms = get_absolute_time();
+#if ENABLE_BLUEPAD32
+    absolute_time_t bt_poll_ms = get_absolute_time();  // For Bluetooth polling (1ms interval)
+    static uint32_t bt_poll_count = 0;
+#endif
+    static uint32_t loop_count = 0;
+    
+    printf("Main loop: Starting...\n");
+    
     while (true) {
         absolute_time_t tm = get_absolute_time();
+        loop_count++;
 
         // HIGH PRIORITY: Check for serial data from ST every loop iteration
         // At 7812 baud, bytes arrive every ~1.28ms - must not miss them!
         handle_rx_from_st();
+        
+        // Drain TX log buffer for UI display (non-critical path)
+        SerialPort::instance().drain_tx_log();
 
         AtariSTMouse::instance().update();
 
-        // 10ms handler for less time-critical tasks
+        // 10ms handler for USB HID devices and other tasks (matching main branch approach)
         if (absolute_time_diff_us(ten_ms, tm) >= 10000) {
             ten_ms = tm;
 
-            tuh_task();
+            // USB task processing (moved from separate 5ms handler to 10ms handler)
+            if (usb_runtime_is_enabled()) {
+                tuh_task();
+            }
             
-            // Check for Switch Pro Controller delayed initialization
-            switch_check_delayed_init();
+            // Mouse handling MUST come before keyboard handling
+            // This ensures wheel pulses are enqueued before they're consumed
+            // Poll mouse if USB or Bluetooth is enabled (mouse can come from either)
+#if ENABLE_BLUEPAD32
+            if (usb_runtime_is_enabled() || bt_runtime_is_enabled()) {
+                HidInput::instance().handle_mouse(cpu.ncycles);
+            }
+#else
+            if (usb_runtime_is_enabled()) {
+                HidInput::instance().handle_mouse(cpu.ncycles);
+            }
+#endif
             
-            HidInput::instance().handle_keyboard();
-            HidInput::instance().handle_mouse(cpu.ncycles);
+            // Handle USB devices if USB is enabled
+            if (usb_runtime_is_enabled()) {
+                // Check for Switch Pro Controller delayed initialization
+                switch_check_delayed_init();
+                
+                HidInput::instance().handle_keyboard();
+            }
+            
+            // Handle Bluetooth keyboard/mouse if Bluetooth is enabled
+            // (Bluetooth keyboard/mouse handling is integrated into handle_keyboard/handle_mouse)
+#if ENABLE_BLUEPAD32
+            if (bt_runtime_is_enabled()) {
+                HidInput::instance().handle_keyboard();
+            }
+#endif
+            
+            // Joystick handler (handles GPIO, USB, and Bluetooth)
             HidInput::instance().handle_joystick();
+            
+#if ENABLE_BLUEPAD32
+            // Check if Bluetooth UI update is needed (deferred from BT callbacks)
+            // Only if Bluetooth is enabled
+            if (bt_runtime_is_enabled()) {
+                bluepad32_check_ui_update();
+            }
+#endif
+            
 #if ENABLE_OLED_DISPLAY
             ui.update();
 #endif
         }
+        
+#if ENABLE_BLUEPAD32
+        // Poll Bluetooth frequently (every 1ms) for responsive controller input
+        // Matching logronoid's approach of frequent Bluetooth polling
+        // Only poll if Bluetooth is enabled at runtime
+        if (bt_runtime_is_enabled() && bluepad32_is_enabled() && absolute_time_diff_us(bt_poll_ms, tm) >= 1000) {
+            bt_poll_ms = tm;
+            bt_poll_count++;
+            bluepad32_poll();  // Process Bluetooth events
+            // Immediately poll USB after Bluetooth to prevent USB starvation (if USB enabled)
+            if (usb_runtime_is_enabled()) {
+                tuh_task();
+            }
+        }
+#endif
+        
+        // Heartbeat: Print less frequently to reduce log spam but still show liveness
+        // 10 seconds interval (only in debug builds with serial logging enabled)
+#if ENABLE_SERIAL_LOGGING
+        if (absolute_time_diff_us(heartbeat_ms, tm) >= 10000000) {
+            heartbeat_ms = tm;
+            uint32_t core1_heartbeat = g_core1_heartbeat_counter;
+            uint32_t core1_cycles = g_core1_cycle_count;
+            uint32_t core1_loops = g_core1_loop_counter;
+            static uint32_t last_core1_cycles = 0;
+            static uint32_t last_core1_loops = 0;
+            bool core1_frozen = (core1_cycles == last_core1_cycles && core1_cycles > 0);
+            bool core1_loops_frozen = (core1_loops == last_core1_loops && core1_loops > 0);
+            last_core1_cycles = core1_cycles;
+            last_core1_loops = core1_loops;
+#if ENABLE_BLUEPAD32
+            printf("Main loop: HEARTBEAT - loops=%lu, BT polls=%lu, Core1: hb=%lu cycles=%lu loops=%lu%s%s\n", 
+                   loop_count, bt_poll_count, core1_heartbeat, core1_cycles, core1_loops,
+                   core1_frozen ? " [CYCLES_FROZEN!]" : "",
+                   core1_loops_frozen ? " [LOOPS_FROZEN!]" : "");
+#else
+            printf("Main loop: HEARTBEAT - loops=%lu, Core1: hb=%lu cycles=%lu loops=%lu%s%s\n", 
+                   loop_count, core1_heartbeat, core1_cycles, core1_loops,
+                   core1_frozen ? " [CYCLES_FROZEN!]" : "",
+                   core1_loops_frozen ? " [LOOPS_FROZEN!]" : "");
+#endif
+        }
+#endif
     }
     return 0;
 }
@@ -272,7 +479,7 @@ extern "C" {
     void switch_check_delayed_init(void);
 }
 
-// Global Xbox report counter for debugging (accessible from UI)
+// Global Xbox report counter (accessible from UI)
 static uint32_t xbox_report_count = 0;
 extern "C" uint32_t get_xbox_report_count() {
     return xbox_report_count;
@@ -293,17 +500,15 @@ void tuh_xinput_mount_cb(uint8_t dev_addr, uint8_t instance, const xinputh_inter
     // Register with Atari mapper
     xinput_register_controller(dev_addr, xinput_itf);
     
-    // Increment joystick counter and update UI (FIX: Xbox controllers weren't incrementing counter)
+    // Increment joystick counter and update UI
     xinput_joy_count++;
     xinput_notify_ui_mount();
     
 #if ENABLE_OLED_DISPLAY
-    // Show XBOX splash screen (reinstated with debug info)
     extern ssd1306_t disp;
     ssd1306_clear(&disp);
     ssd1306_draw_string(&disp, 20, 10, 2, (char*)"XBOX!");
     
-    char line[20];
     if (xinput_itf->type == XBOX360_WIRED) {
         ssd1306_draw_string(&disp, 15, 35, 1, (char*)"360 Wired");
     } else if (xinput_itf->type == XBOX360_WIRELESS) {
@@ -313,12 +518,8 @@ void tuh_xinput_mount_cb(uint8_t dev_addr, uint8_t instance, const xinputh_inter
     } else {
         ssd1306_draw_string(&disp, 15, 35, 1, (char*)"Detected!");
     }
-    
-    // Show debug info: Address, Instance, Connection status
-    snprintf(line, sizeof(line), "A:%d I:%d C:%d", dev_addr, instance, xinput_itf->connected);
-    ssd1306_draw_string(&disp, 10, 50, 1, line);
     ssd1306_show(&disp);
-    sleep_ms(3000);  // Extended to 3 seconds to read debug info
+    sleep_ms(2000);
 #endif
     
     // For Xbox 360 Wireless, wait for connection before setting LEDs
@@ -340,7 +541,7 @@ void tuh_xinput_umount_cb(uint8_t dev_addr, uint8_t instance) {
     // Unregister from Atari mapper
     xinput_unregister_controller(dev_addr);
     
-    // Decrement joystick counter and update UI (FIX: Xbox controllers weren't decrementing counter)
+    // Decrement joystick counter and update UI
     if (xinput_joy_count > 0) {
         xinput_joy_count--;
     }
@@ -359,32 +560,6 @@ void tuh_xinput_report_received_cb(uint8_t dev_addr, uint8_t instance,
     
     // Update controller state for mapper
     xinput_register_controller(dev_addr, xid_itf);
-    
-    // Debug disabled - using storage debug in xinput_atari.cpp instead
-    #if 0
-    static uint32_t report_count = 0;
-    report_count++;
-    
-    if (report_count <= 5 && xid_itf->last_xfer_result == XFER_RESULT_SUCCESS && 
-        xid_itf->connected && xid_itf->new_pad_data) {
-        extern ssd1306_t disp;
-        ssd1306_clear(&disp);
-        ssd1306_draw_string(&disp, 15, 0, 1, (char*)"XBOX REPORT");
-        
-        char line[20];
-        snprintf(line, sizeof(line), "Count: %lu", report_count);
-        ssd1306_draw_string(&disp, 5, 15, 1, line);
-        
-        snprintf(line, sizeof(line), "Btns: %04X", xid_itf->pad.wButtons);
-        ssd1306_draw_string(&disp, 5, 30, 1, line);
-        
-        snprintf(line, sizeof(line), "LX:%d LY:%d", xid_itf->pad.sThumbLX, xid_itf->pad.sThumbLY);
-        ssd1306_draw_string(&disp, 5, 45, 1, line);
-        
-        ssd1306_show(&disp);
-        sleep_ms(2000);
-    }
-    #endif
     
     tuh_xinput_receive_report(dev_addr, instance);
 }

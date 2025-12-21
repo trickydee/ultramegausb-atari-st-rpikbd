@@ -156,17 +156,6 @@ bool ps4_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len) {
         input->r2_trigger = report[offset + 8];
     }
     
-    // Minimal debug output (every 500th report = ~2 seconds)
-    static uint32_t report_count = 0;
-    report_count++;
-    
-    #if 0  // Disable debug output for performance - enable only for troubleshooting
-    if ((report_count % 500) == 0) {
-        int8_t drift_x = input->x - 128;
-        int8_t drift_y = input->y - 128;
-        printf("PS4: Rpt %lu - Drift(%+d,%+d)\n", report_count, drift_x, drift_y);
-    }
-    #endif
     
     return true;
 }

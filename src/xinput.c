@@ -305,7 +305,6 @@ static void xbox_report_received_cb(tuh_xfer_t* xfer) {
             snprintf(msg, sizeof(msg), "Rpt: %lu", report_count);
             ssd1306_draw_string(&disp, 5, 35, 1, msg);
             
-            // Show first few bytes of report for debugging
             char data_msg[20];
             snprintf(data_msg, sizeof(data_msg), "%02X %02X %02X %02X", 
                      xfer->buffer[0], xfer->buffer[1], xfer->buffer[2], xfer->buffer[3]);
@@ -412,10 +411,6 @@ bool xinput_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len
         input->stick_right_y = (int16_t)(report[16] | (report[17] << 8));
     }
     
-    // Debug output (can be removed later)
-    static uint32_t report_count = 0;
-    if ((report_count++ % 100) == 0) {  // Print every 100th report
-        printf("Xbox: Buttons=0x%04X LX=%d LY=%d\n", 
                input->buttons, input->stick_left_x, input->stick_left_y);
     }
     

@@ -3,9 +3,9 @@
 This project allows you to use a RP2040 or RP2350 microcontroller (Raspberry Pi Pico or Pico 2) to emulate the HD6301 controller that is used as the intelligent keyboard controller for the Atari ST/STe/TT series of computers. 
 This is useful if for example you have a Mega ST that is missing its keyboard. The emulator provides the ability to use a USB keyboard, mouse and joysticks with the ST.
 
-The original project was initially created by fieldofcows in 2020 https://github.com/fieldofcows/atari-st-rpikb. This project builds on this great foundation to improve compatability, stability and add support for many modern game controllers.
+The original project was initially created by fieldofcows in 2020 https://github.com/fieldofcows/atari-st-rpikb. This project builds on this great foundation to improve compatability, stability and add support for many modern game controllers either Wired or Bluetooth connected.
 
-The "ultramegausb" title is intended to highlight the massively enhanced USB compatability from the great work of TinyUSB project and associated projects listed below.
+The "ultramegausb" title is intended to highlight the massively enhanced USB compatability from the great work of TinyUSB project, Bluepad32 and associated projects listed below.
 
 This project is opensource and I am happy to recieve PR's and issues to further improve capabilies.
 Lookout for a published roadmap of new features and an easy to build hardware device you can self manufacture.
@@ -24,6 +24,41 @@ Mouse wheel scrolling mapped to GEM Desktop cursor controls (12.5.x)
 Logitech Unifying Adapter - Keyboard, Mice, Trackball
 
 Logitech Bolt Adapter - Keyboard, Mice, Trackball
+
+## Bluetooth Support (Pico 2 W only)
+
+The emulator supports Bluetooth keyboards, mice, and gamepads on the Raspberry Pi Pico 2 W (RP2350). This allows you to use wireless devices without USB cables, providing a completely wireless setup for your Atari ST.
+
+### Supported Bluetooth Devices
+
+- **Bluetooth Keyboards**: Standard HID keyboards with full shortcut support (Ctrl+F4, Ctrl+F11, etc.)
+- **Bluetooth Mice**: Standard HID mice with scroll wheel support (scroll wheel mapped to cursor up/down keys)
+- **Bluetooth Gamepads**: DualSense, DualShock 4, Switch Pro, Xbox Wireless, and more via [Bluepad32](https://github.com/ricardoquesada/bluepad32)
+
+### Pairing Bluetooth Devices
+
+Pairing is simple - **just put your device into Bluetooth pairing mode**. The emulator will automatically detect and connect to supported devices. The emulator continuously scans for new devices, so you can pair devices at any time without needing to restart.
+
+### Bluetooth Mode Selection
+
+On the splash screen (homescreen), you can use the **left button** to cycle between three modes:
+- **USB + Bluetooth** (default): Both USB and Bluetooth devices are active simultaneously
+- **USB only**: Only USB devices are used, Bluetooth is disabled
+- **Bluetooth only**: Only Bluetooth devices are used, USB is disabled
+
+### Resetting Bluetooth Pairings
+
+If you need to clear stored Bluetooth pairing keys (for example, if a device won't reconnect or you want to re-pair from scratch), press the **right button** on the splash screen. This will delete all stored Bluetooth pairing information, allowing you to re-pair devices from scratch.
+
+### Bluetooth Gamepad Support
+
+Bluetooth gamepads work just like USB gamepads:
+- They appear in the joystick count alongside USB controllers
+- They can be assigned to Joystick 0 or Joystick 1 via the OLED interface
+- **Llamatron dual-stick mode works with Bluetooth gamepads** (requires exactly one gamepad, USB or Bluetooth)
+- All keyboard shortcuts work with Bluetooth keyboards (Ctrl+F4, Ctrl+F11, etc.)
+
+**Note**: Bluetooth support requires a Pico 2 W (RP2350). The original Pico W (RP2040) does not have enough RAM for Bluetooth support.
 
 ## Game Controller support.
 
@@ -188,7 +223,11 @@ If you don't know how or can't build the firmware by yourself, please use the bu
 ## Using the emulator
 If you build the emulator as per the schematic, the Pico is powered directly from the Atari 5V supply. The Pico boots immediately but USB enumeration can take a few seconds. Once this is complete, the emulator is fully operational.
 
-The user interface has 4 pages that are rotated between by pressing the middle UI button. The first three pages all show the number of connected USB devices at the top but allow configuration of an option below. The pages in order are:
+The user interface has multiple pages that are rotated between by pressing the middle UI button. The first three pages all show the number of connected USB devices at the top but allow configuration of an option below. The pages in order are:
+
+0. **Splash Screen** (ATARI logo): Shows firmware version and connection status. On Pico 2 W builds with Bluetooth support:
+   - **Left button**: Cycles between USB+Bluetooth, USB only, and Bluetooth only modes
+   - **Right button**: Deletes all stored Bluetooth pairing keys (useful for troubleshooting connection issues)
 
 1. USB Status + Mouse speed. Left and right buttons change allow the mouse speed to be altered.
    
@@ -202,7 +241,7 @@ The user interface has 4 pages that are rotated between by pressing the middle U
    
    ![Joystick 1](docs/joy1_usb.jpg) &emsp; ![Joystick 0](docs/joy1_dsub.jpg)
 
-4. Serial data Tx/Rx between emulator and Atari. Data received from the Atari is on the left, data sent to the Atari is on the right.
+4. Serial data Tx/Rx between emulator and Atari (Debug builds Only). Data received from the Atari is on the left, data sent to the Atari is on the right.
    
    ![Comms](docs/comms.jpg)
 
@@ -252,6 +291,7 @@ Mult language support was added by Klyde https://github.com/klyde2278/atari-st-r
 ## Credits
 To create this ultramegausb build I also relied on the following projects for inspiration and reference implementations:
 
+- **[Bluepad32](https://github.com/ricardoquesada/bluepad32)** by Ricardo Quesada - Bluetooth HID gamepad library providing support for DualSense, DualShock 4, Switch Pro, Xbox Wireless, and other Bluetooth gamepads
 - **[tusb_xinput](https://github.com/Ryzee119/tusb_xinput)** by Ryzee119 - TinyUSB XInput host driver used for Xbox controller support
 - **[BetterJoy](https://github.com/Davidobot/BetterJoy)** by Davidobot - Reference implementation for Nintendo Switch Pro Controller USB initialization and protocol handling
 - **[stadia-vigem](https://github.com/walkco/stadia-vigem)** by walkco - Complete USB HID report format and button mapping for Google Stadia Controller support

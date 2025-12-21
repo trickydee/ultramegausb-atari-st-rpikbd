@@ -67,7 +67,6 @@ void stadia_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len
     stadia_controller_t* ctrl = stadia_get_controller(dev_addr);
     if (!ctrl) return;
     
-    // Debug: Show first report to understand format
     static bool first_report = true;
     static uint32_t report_count = 0;
     report_count++;

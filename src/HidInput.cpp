@@ -32,6 +32,7 @@
 #include "switch_controller.h"
 #include "stadia_controller.h"
 #include "xinput.h"
+#include "runtime_toggle.h"  // For usb_runtime_is_enabled() and bt_runtime_is_enabled()
 #include <map>
 #include <set>
 #include <deque>
@@ -89,7 +90,7 @@ static int mouse_count = 0;
 static int joy_count = 0;  // HID joysticks (not Xbox)
 static std::set<uint8_t> gc_counted_devices;  // Track GameCube devices already counted
 
-// Debug: Path counters (file-level static, accessed via getters)
+// Path counters (file-level static, accessed via getters)
 static uint32_t g_gpio_path_count = 0;
 static uint32_t g_usb_path_count = 0;
 static uint32_t g_hid_joy_success = 0;
@@ -117,9 +118,12 @@ static void enqueue_wheel_pulses(int delta) {
         return;
     }
 
-    const uint8_t key = (delta > 0) ? ATARI_CURSOR_UP : ATARI_CURSOR_DOWN;
+    // Positive delta = scroll down = cursor DOWN key
+    // Negative delta = scroll up = cursor UP key
+    const uint8_t key = (delta > 0) ? ATARI_CURSOR_DOWN : ATARI_CURSOR_UP;
     int steps = delta > 0 ? delta : -delta;
     steps = std::min(steps, 8);  // Avoid bursts from high-resolution wheels
+
 
     for (int i = 0; i < steps; ++i) {
         if (wheel_pulses.size() >= MAX_WHEEL_PULSES) {
@@ -180,6 +184,96 @@ void gc_notify_unmount(uint8_t dev_addr) {
     }
 }
 
+#if ENABLE_BLUEPAD32
+// Functions for Bluetooth gamepad to notify UI of mount/unmount
+extern "C" {
+    // Forward declaration - implemented in bluepad32_platform.c
+    int bluepad32_get_connected_count(void);
+    bool bluepad32_get_gamepad(int idx, void* out_gamepad);
+    bool bluepad32_to_atari_joystick(const void* gp_ptr, uint8_t* axis, uint8_t* button);
+    bool bluepad32_get_keyboard(int idx, void* out_keyboard);
+    bool bluepad32_peek_keyboard(int idx, void* out_keyboard);
+    bool bluepad32_get_mouse(int idx, void* out_mouse);
+    int bluepad32_get_keyboard_count(void);
+    int bluepad32_get_mouse_count(void);
+}
+
+// Track Bluetooth gamepad count separately to avoid double-counting
+static int bt_joy_count = 0;
+
+// Flag to indicate UI needs updating (set by BT callbacks, cleared by main loop)
+static volatile bool g_bt_ui_update_needed = false;
+
+void bluepad32_notify_ui_update() {
+    // Defer UI update to main loop to avoid blocking Bluetooth callbacks
+    // This prevents Core 1 from being starved during pairing/connection
+    g_bt_ui_update_needed = true;
+}
+
+// Called from bluepad32_platform.c when a Bluetooth gamepad connects
+extern "C" void bluepad32_notify_mount() {
+    bt_joy_count++;
+    // Bluetooth joysticks are assigned to joystick 1 first (matching USB behavior)
+    // Defer UI update to avoid blocking in Bluetooth callback
+    bluepad32_notify_ui_update();
+}
+
+// Called from bluepad32_platform.c when a Bluetooth gamepad disconnects
+extern "C" void bluepad32_notify_unmount() {
+    if (bt_joy_count > 0) {
+        bt_joy_count--;
+        // Defer UI update to avoid blocking in Bluetooth callback
+        bluepad32_notify_ui_update();
+    }
+}
+
+// Called from bluepad32_platform.c when a Bluetooth keyboard connects
+extern "C" void bluepad32_notify_keyboard_mount() {
+    kb_count++;
+    if (ui_) {
+        ui_->usb_connect_state(kb_count, mouse_count, joy_count + xinput_joy_count + bt_joy_count);
+    }
+}
+
+// Called from bluepad32_platform.c when a Bluetooth keyboard disconnects
+extern "C" void bluepad32_notify_keyboard_unmount() {
+    if (kb_count > 0) {
+        kb_count--;
+        if (ui_) {
+            ui_->usb_connect_state(kb_count, mouse_count, joy_count + xinput_joy_count + bt_joy_count);
+        }
+    }
+}
+
+// Called from bluepad32_platform.c when a Bluetooth mouse connects
+extern "C" void bluepad32_notify_mouse_mount() {
+    mouse_count++;
+    if (ui_) {
+        ui_->usb_connect_state(kb_count, mouse_count, joy_count + xinput_joy_count + bt_joy_count);
+    }
+}
+
+// Called from bluepad32_platform.c when a Bluetooth mouse disconnects
+extern "C" void bluepad32_notify_mouse_unmount() {
+    if (mouse_count > 0) {
+        mouse_count--;
+        if (ui_) {
+            ui_->usb_connect_state(kb_count, mouse_count, joy_count + xinput_joy_count + bt_joy_count);
+        }
+    }
+}
+
+// Check if UI update is needed and perform it (called from main loop)
+void bluepad32_check_ui_update() {
+    if (g_bt_ui_update_needed) {
+        g_bt_ui_update_needed = false;
+        if (ui_) {
+            ui_->usb_connect_state(kb_count, mouse_count, joy_count + xinput_joy_count + bt_joy_count);
+        }
+    }
+}
+#endif
+
 static uint8_t count_connected_usb_gamepads() {
     uint8_t total = 0;
     total += ps4_connected_count();
@@ -191,6 +285,16 @@ static uint8_t count_connected_usb_gamepads() {
     return total;
 }
 
+static uint8_t count_connected_gamepads() {
+    uint8_t total = count_connected_usb_gamepads();
+#if ENABLE_BLUEPAD32
+    if (bt_runtime_is_enabled()) {
+        total += bluepad32_get_connected_count();
+    }
+#endif
+    return total;
+}
+
 static bool collect_llamatron_sample(uint8_t& joy1_axis, uint8_t& joy1_fire,
                                      uint8_t& joy0_axis, uint8_t& joy0_fire) {
     if (ps4_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
@@ -199,6 +303,11 @@ static bool collect_llamatron_sample(uint8_t& joy1_axis, uint8_t& joy1_fire,
     if (stadia_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
     if (xinput_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
     if (gc_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
+#if ENABLE_BLUEPAD32
+    extern bool bluepad32_llamatron_axes(uint8_t* joy1_axis, uint8_t* joy1_fire,
+                                         uint8_t* joy0_axis, uint8_t* joy0_fire);
+    if (bluepad32_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
+#endif
     return false;
 }
 
@@ -314,33 +423,6 @@ void tuh_hid_mounted_cb(uint8_t dev_addr) {
     } else {
         tp = tuh_hid_get_type(actual_addr);
     }
-    
-    // Debug disabled for performance
-    #if 0
-    static uint32_t mount_count = 0;
-    mount_count++;
-    extern ssd1306_t disp;
-    ssd1306_clear(&disp);
-    ssd1306_draw_string(&disp, 10, 0, 1, (char*)"MOUNT CALLBACK");
-    
-    char line1[20];
-    const char* type_str = (tp == HID_MOUSE) ? "MOUSE" : 
-                           (tp == HID_KEYBOARD) ? "KEYBOARD" : 
-                           (tp == HID_JOYSTICK) ? "JOYSTICK" : "UNKNOWN";
-    snprintf(line1, sizeof(line1), "A:%d(%d) T:%s", dev_addr, actual_addr, type_str);
-    ssd1306_draw_string(&disp, 5, 15, 1, line1);
-    
-    char line2[20];
-    snprintf(line2, sizeof(line2), "#%lu", mount_count);
-    ssd1306_draw_string(&disp, 5, 30, 1, line2);
-    
-    char line3[20];
-    snprintf(line3, sizeof(line3), "KB:%d M:%d J:%d", kb_count, mouse_count, joy_count);
-    ssd1306_draw_string(&disp, 5, 45, 1, line3);
-    
-    ssd1306_show(&disp);
-    sleep_ms(2000);
-    #endif
     
     if (tp == HID_KEYBOARD) {
         // For keyboards, check if already registered (prevent multi-interface conflict)
@@ -823,7 +905,7 @@ void HidInput::handle_keyboard() {
                         uint8_t joy_setting = ui_->get_joystick();
                         bool joy0_usb = !(joy_setting & 0x01);
                         bool joy1_usb = !(joy_setting & 0x02);
-                        uint8_t pad_count = count_connected_usb_gamepads();
+                        uint8_t pad_count = count_connected_gamepads();
                         if (!joy0_usb || !joy1_usb) {
                             show_llamatron_status("USB joysticks only", "Set Joy0/Joy1 to USB");
                         } else if (pad_count != 1) {
@@ -952,6 +1034,7 @@ void HidInput::handle_keyboard() {
             for (int i = 1; i < key_states.size(); ++i) {
                 bool down = false;
                 bool pulse_active = wheel_press_mask.test(i);
+                bool prev_pulse_active = wheel_prev_mask.test(i);
                 
                 // Special handling for Caps Lock - send pulse only when toggling
                 if (i == ATARI_CAPSLOCK) {
@@ -966,13 +1049,15 @@ void HidInput::handle_keyboard() {
                     }
                 }
                 
+                // Apply wheel pulses (momentary press)
+                // Wheel pulses override keyboard state - if wheel is active, key is pressed
                 if (pulse_active) {
                     down = true;
                 }
                 
                 key_states[i] = down ? 1 : 0;
             }
-
+            
             // Handle modifier keys
             key_states[ATARI_LSHIFT] = (kb->modifier & KEYBOARD_MODIFIER_LEFTSHIFT) ? 1 : 0;
             key_states[ATARI_RSHIFT] = (kb->modifier & KEYBOARD_MODIFIER_RIGHTSHIFT) ? 1 : 0;
@@ -988,16 +1073,20 @@ void HidInput::handle_keyboard() {
 
     if (!keyboard_handled) {
         // No keyboard present; apply wheel presses directly to key matrix
-        for (size_t idx = 0; idx < wheel_prev_mask.size(); ++idx) {
-            if (wheel_prev_mask.test(idx) && !wheel_press_mask.test(idx)) {
-                key_states[idx] = 0;
-            }
-        }
+        // First, set keys that are in the current mask
         for (size_t idx = 0; idx < wheel_press_mask.size(); ++idx) {
             if (wheel_press_mask.test(idx)) {
                 key_states[idx] = 1;
             }
         }
+        // Then, clear keys that were in previous mask but not in current mask
+        // (only clear if they're not being set in this frame)
+        for (size_t idx = 0; idx < wheel_prev_mask.size(); ++idx) {
+            if (wheel_prev_mask.test(idx) && !wheel_press_mask.test(idx)) {
+                key_states[idx] = 0;
+            }
+        }
+        // Update wheel_prev_mask AFTER processing (so keys persist for at least one frame)
         wheel_prev_mask = wheel_press_mask;
     } else if (wheel_prev_mask.any()) {
         // Clear any residual injections from a previous no-keyboard frame
@@ -1006,41 +1095,425 @@ void HidInput::handle_keyboard() {
                 key_states[idx] = 0;
             }
         }
-        wheel_prev_mask.reset();
     }
+    
+    // Update wheel_prev_mask for next frame (after all processing)
+    wheel_prev_mask = wheel_press_mask;
+    
+    // Handle Bluetooth keyboards
+#if ENABLE_BLUEPAD32
+    if (bt_runtime_is_enabled()) {
+        // Get Bluepad32 keyboard structure (matches uni_keyboard_t)
+        // UNI_KEYBOARD_PRESSED_KEYS_MAX is 10, but HID standard is 6 keys
+        typedef struct {
+            uint8_t modifiers;
+            uint8_t pressed_keys[10];  // UNI_KEYBOARD_PRESSED_KEYS_MAX = 10
+        } bt_keyboard_t;
+        
+        bt_keyboard_t bt_kb;
+        int bt_kb_count = bluepad32_get_keyboard_count();
+        
+        // Process first connected Bluetooth keyboard
+        if (bt_kb_count > 0) {
+            bt_keyboard_t bt_kb;
+            // Try to get keyboard data (marks as read)
+            bool has_data = bluepad32_get_keyboard(0, &bt_kb);
+            
+            // If no new data, peek at current state (for shortcuts)
+            if (!has_data) {
+                has_data = bluepad32_peek_keyboard(0, &bt_kb);
+            }
+            
+            if (has_data) {
+                // Convert Bluepad32 keyboard format to TinyUSB format
+                hid_keyboard_report_t kb_report;
+                kb_report.modifier = bt_kb.modifiers;
+                kb_report.reserved = 0;
+                
+                // Copy pressed keys (up to 6 keys for HID standard)
+                int key_count = 0;
+                for (int i = 0; i < 10 && key_count < 6; i++) {  // UNI_KEYBOARD_PRESSED_KEYS_MAX = 10
+                    if (bt_kb.pressed_keys[i] != 0) {
+                        kb_report.keycode[key_count++] = bt_kb.pressed_keys[i];
+                    }
+                }
+                // Zero out remaining slots
+                for (int i = key_count; i < 6; i++) {
+                    kb_report.keycode[i] = 0;
+                }
+                
+                // Process the keyboard report using the same logic as USB keyboards
+                // (reuse the existing keyboard handling code by treating it as a USB keyboard)
+                // For now, we'll process modifiers and keycodes directly
+                // Check for Ctrl+F12 to toggle mouse mode
+                static bool last_bt_toggle_state = false;
+                bool ctrl_pressed = (kb_report.modifier & KEYBOARD_MODIFIER_LEFTCTRL) || (kb_report.modifier & KEYBOARD_MODIFIER_RIGHTCTRL);
+                bool f12_pressed = false;
+                bool f5_pressed = false;
+                bool f6_pressed = false;
+                bool f7_pressed = false;
+                bool f9_pressed = false;
+                bool f10_pressed = false;
+                bool f11_pressed = false;
+                bool f4_pressed = false;
+                
+                for (int i = 0; i < 6; ++i) {
+                    if (kb_report.keycode[i] == TOGGLE_MOUSE_MODE) {
+                        f12_pressed = true;
+                    }
+                    if (kb_report.keycode[i] == MOUSE_RELATIVE_KEY) {
+                        f5_pressed = true;
+                    }
+                    if (kb_report.keycode[i] == MOUSE_ABSOLUTE_KEY) {
+                        f6_pressed = true;
+                    }
+                    if (kb_report.keycode[i] == MOUSE_KEYCODE_KEY) {
+                        f7_pressed = true;
+                    }
+                    if (kb_report.keycode[i] == HID_KEY_F9) {
+                        f9_pressed = true;
+                    }
+                    if (kb_report.keycode[i] == HID_KEY_F10) {
+                        f10_pressed = true;
+                    }
+                    if (kb_report.keycode[i] == XRESET_KEY) {
+                        f11_pressed = true;
+                    }
+                    if (kb_report.keycode[i] == HID_KEY_F4) {
+                        f4_pressed = true;
+                    }
+                }
+            if (ctrl_pressed && f12_pressed) {
+                if (!last_bt_toggle_state) {
+                    if (g_llamatron_mode) {
+                        show_llamatron_status("Mouse locked", "Disable Llamatron first");
+                    } else {
+                        ui_->set_mouse_enabled(!ui_->get_mouse_enabled());
+                    }
+                    last_bt_toggle_state = true;
+                }
+            } else {
+                last_bt_toggle_state = false;
+            }
+            
+            // Check for Ctrl+F5 to set relative mouse mode (send 0x08)
+            static bool last_bt_mouse_rel_state = false;
+            
+            if (ctrl_pressed && f5_pressed) {
+                if (!last_bt_mouse_rel_state) {
+#if ENABLE_OLED_DISPLAY
+                    // Show visual feedback on OLED
+                    ssd1306_clear(&disp);
+                    ssd1306_draw_string(&disp, 20, 15, 2, (char*)"MOUSE");
+                    ssd1306_draw_string(&disp, 10, 35, 1, (char*)"Relative Mode");
+                    ssd1306_draw_string(&disp, 15, 50, 1, (char*)"Ctrl+F5");
+                    ssd1306_show(&disp);
+#endif
+                    
+                    // First disable joystick reporting (0x1A = disable joystick)
+                    hd6301_receive_byte(0x1A);
+                    hd6301_receive_byte(0x00);  // Disable both joysticks
+                    
+                    // Enable mouse reporting (0x92 0x00 = enable mouse)
+                    hd6301_receive_byte(0x92);
+                    hd6301_receive_byte(0x00);  // Enable mouse
+                    
+                    // Then send 0x08 (SET RELATIVE MOUSE MODE) to HD6301
+                    hd6301_receive_byte(0x08);
+                    
+#if ENABLE_OLED_DISPLAY
+                    // Small delay so user can see the message
+                    sleep_ms(500);
+#endif
+                    
+                    last_bt_mouse_rel_state = true;
+                }
+            } else {
+                last_bt_mouse_rel_state = false;
+            }
+            
+            // Check for Ctrl+F6 to set absolute mouse mode (send 0x09 + parameters)
+            static bool last_bt_mouse_abs_state = false;
+            
+            if (ctrl_pressed && f6_pressed) {
+                if (!last_bt_mouse_abs_state) {
+#if ENABLE_OLED_DISPLAY
+                    // Show visual feedback on OLED
+                    ssd1306_clear(&disp);
+                    ssd1306_draw_string(&disp, 20, 15, 2, (char*)"MOUSE");
+                    ssd1306_draw_string(&disp, 10, 35, 1, (char*)"Absolute Mode");
+                    ssd1306_draw_string(&disp, 15, 50, 1, (char*)"Ctrl+F6");
+                    ssd1306_show(&disp);
+#endif
+                    
+                    // First disable joystick reporting (0x1A = disable joystick)
+                    hd6301_receive_byte(0x1A);
+                    hd6301_receive_byte(0x00);  // Disable both joysticks
+                    
+                    // Enable mouse reporting (0x92 0x00 = enable mouse)
+                    hd6301_receive_byte(0x92);
+                    hd6301_receive_byte(0x00);  // Enable mouse
+                    
+                    // Then send 0x09 (SET ABSOLUTE MOUSE MODE) to HD6301
+                    // Format: 0x09 Xmax_MSB Xmax_LSB Ymax_MSB Ymax_LSB
+                    // Using standard ST high-res: 640x400
+                    hd6301_receive_byte(0x09);
+                    hd6301_receive_byte(0x02);  // Xmax MSB (640 = 0x0280)
+                    hd6301_receive_byte(0x80);  // Xmax LSB
+                    hd6301_receive_byte(0x01);  // Ymax MSB (400 = 0x0190)
+                    hd6301_receive_byte(0x90);  // Ymax LSB
+                    
+#if ENABLE_OLED_DISPLAY
+                    // Small delay so user can see the message
+                    sleep_ms(500);
+#endif
+                    
+                    last_bt_mouse_abs_state = true;
+                }
+            } else {
+                last_bt_mouse_abs_state = false;
+            }
+            
+            // Check for Ctrl+F7 to set mouse keycode mode (send 0x0A + parameters)
+            static bool last_bt_mouse_key_state = false;
+            
+            if (ctrl_pressed && f7_pressed) {
+                if (!last_bt_mouse_key_state) {
+#if ENABLE_OLED_DISPLAY
+                    // Show visual feedback on OLED
+                    ssd1306_clear(&disp);
+                    ssd1306_draw_string(&disp, 20, 15, 2, (char*)"MOUSE");
+                    ssd1306_draw_string(&disp, 10, 35, 1, (char*)"Keycode Mode");
+                    ssd1306_draw_string(&disp, 15, 50, 1, (char*)"Ctrl+F7");
+                    ssd1306_show(&disp);
+#endif
+                    
+                    // First disable joystick reporting (0x1A = disable joystick)
+                    hd6301_receive_byte(0x1A);
+                    hd6301_receive_byte(0x00);  // Disable both joysticks
+                    
+                    // Enable mouse reporting (0x92 0x00 = enable mouse)
+                    hd6301_receive_byte(0x92);
+                    hd6301_receive_byte(0x00);  // Enable mouse
+                    
+                    // Then send 0x0A (SET MOUSE KEYCODE MODE) to HD6301
+                    // Format: 0x0A deltaX deltaY
+                    // Using 1,1 as reasonable defaults (1 pixel per keypress)
+                    hd6301_receive_byte(0x0A);
+                    hd6301_receive_byte(0x01);  // deltaX = 1
+                    hd6301_receive_byte(0x01);  // deltaY = 1
+                    
+#if ENABLE_OLED_DISPLAY
+                    // Small delay so user can see the message
+                    sleep_ms(500);
+#endif
+                    
+                    last_bt_mouse_key_state = true;
+                }
+            } else {
+                last_bt_mouse_key_state = false;
+            }
+            
+            // Check for Ctrl+F11 to trigger XRESET (HD6301 hardware reset)
+            static bool last_bt_reset_state = false;
+            if (ctrl_pressed && f11_pressed) {
+                if (!last_bt_reset_state) {
+#if ENABLE_OLED_DISPLAY
+                    // Show visual feedback on OLED
+                    ssd1306_clear(&disp);
+                    ssd1306_draw_string(&disp, 30, 20, 2, (char*)"RESET");
+                    ssd1306_draw_string(&disp, 20, 45, 1, (char*)"Ctrl+F11");
+                    ssd1306_show(&disp);
+                    
+                    // Small delay so user can see the message
+                    sleep_ms(500);
+#endif
+                    
+                    // Trigger the reset
+                    hd6301_trigger_reset();
+                    last_bt_reset_state = true;
+                }
+            } else {
+                last_bt_reset_state = false;
+            }
+            
+            // Check for Ctrl+F9 to toggle Joystick 0 (D-SUB <-> USB)
+            static bool last_bt_joy0_state = false;
+            if (ctrl_pressed && f9_pressed) {
+                if (!last_bt_joy0_state) {
+                    ui_->toggle_joystick_source(0);  // Toggle Joystick 0
+                    last_bt_joy0_state = true;
+                }
+            } else {
+                last_bt_joy0_state = false;
+            }
+            
+            // Check for Ctrl+F10 to toggle Joystick 1 (D-SUB <-> USB)
+            static bool last_bt_joy1_state = false;
+            if (ctrl_pressed && f10_pressed) {
+                if (!last_bt_joy1_state) {
+                    ui_->toggle_joystick_source(1);  // Toggle Joystick 1
+                    last_bt_joy1_state = true;
+                }
+            } else {
+                last_bt_joy1_state = false;
+            }
+            
+            // Check for Ctrl+F4 to toggle Llamatron dual-stick mode
+            static bool last_bt_llama_toggle = false;
+            if (ctrl_pressed && f4_pressed) {
+                if (!last_bt_llama_toggle) {
+                    if (g_llamatron_mode) {
+                        g_llamatron_mode = false;
+                        g_llamatron_active = false;
+                        // Reset pause state when disabling Llamatron mode
+                        g_llama_paused = false;
+                        g_llama_pause_button_prev = false;
+                        key_states[ATARI_KEY_P] = 0;
+                        key_states[ATARI_KEY_O] = 0;
+                        if (g_llamatron_restore_mouse && ui_) {
+                            ui_->set_mouse_enabled(true);
+                            g_llamatron_restore_mouse = false;
+                        }
+                        show_llamatron_status("DISABLED", nullptr);
+                    } else {
+                        uint8_t joy_setting = ui_->get_joystick();
+                        bool joy0_usb = !(joy_setting & 0x01);
+                        bool joy1_usb = !(joy_setting & 0x02);
+                        uint8_t pad_count = count_connected_gamepads();
+                        if (!joy0_usb || !joy1_usb) {
+                            show_llamatron_status("USB joysticks only", "Set Joy0/Joy1 to USB");
+                        } else if (pad_count != 1) {
+                            show_llamatron_status("Requires single pad", "Connect only one gamepad");
+                        } else {
+                            g_llamatron_mode = true;
+                            if (ui_) {
+                                g_llamatron_restore_mouse = ui_->get_mouse_enabled();
+                                if (g_llamatron_restore_mouse) {
+                                    ui_->set_mouse_enabled(false);
+                                }
+                            } else {
+                                g_llamatron_restore_mouse = false;
+                            }
+                            show_llamatron_status("ACTIVE", nullptr);
+                        }
+                    }
+                    last_bt_llama_toggle = true;
+                }
+            } else {
+                last_bt_llama_toggle = false;
+            }
+            
+            // Check for Alt modifier (needed for ALT + /, ALT + [, ALT + ] shortcuts)
+            bool alt_pressed = (kb_report.modifier & KEYBOARD_MODIFIER_LEFTALT) || 
+                              (kb_report.modifier & KEYBOARD_MODIFIER_RIGHTALT);
+            
+            // Check for Alt + Plus to set 270MHz
+            static bool last_bt_plus_state = false;
+            bool plus_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb_report.keycode[i] == HID_KEY_EQUAL) {
+                    plus_pressed = true;
+                    break;
+                }
+            }
+            if (alt_pressed && plus_pressed) {
+                if (!last_bt_plus_state) {
+                    set_sys_clock_khz(270000, false);
+                    last_bt_plus_state = true;
+                }
+            } else {
+                last_bt_plus_state = false;
+            }
+            
+            // Check for Alt + Minus to set 150MHz
+            static bool last_bt_minus_state = false;
+            bool minus_pressed = false;
+            for (int i = 0; i < 6; ++i) {
+                if (kb_report.keycode[i] == HID_KEY_MINUS) {
+                    minus_pressed = true;
+                    break;
+                }
+            }
+            if (alt_pressed && minus_pressed) {
+                if (!last_bt_minus_state) {
+                    set_sys_clock_khz(150000, false);
+                    last_bt_minus_state = true;
+                }
+            } else {
+                last_bt_minus_state = false;
+            }
+            
+            // Convert to Atari ST keycodes and update key_states
+            unsigned char st_keys[6] = {0};
+            for (int i = 0; i < 6; ++i) {
+                if (kb_report.keycode[i] != 0) {
+                    // If Alt + / is pressed, replace / with INSERT (matching USB keyboard behavior)
+                    if (alt_pressed && kb_report.keycode[i] == HID_KEY_SLASH) {
+                        st_keys[i] = ATARI_INSERT;
+                    }
+                    // If Alt + [ is pressed, send Atari keypad / (scancode 101)
+                    else if (alt_pressed && kb_report.keycode[i] == HID_KEY_BRACKET_LEFT) {
+                        st_keys[i] = 101;  // Atari keypad /
+                    }
+                    // If Alt + ] is pressed, send Atari keypad * (scancode 102)
+                    else if (alt_pressed && kb_report.keycode[i] == HID_KEY_BRACKET_RIGHT) {
+                        st_keys[i] = 102;  // Atari keypad *
+                    }
+                    // If Alt + Plus or Alt + Minus, don't send to Atari (used for clock control)
+                    else if (alt_pressed && (kb_report.keycode[i] == HID_KEY_EQUAL || kb_report.keycode[i] == HID_KEY_MINUS)) {
+                        st_keys[i] = 0;
+                    }
+                    // If Ctrl+F11, don't send to Atari (used for XRESET)
+                    else if (ctrl_pressed && kb_report.keycode[i] == XRESET_KEY) {
+                        st_keys[i] = 0;
+                    }
+                    // If Ctrl+F10, don't send to Atari (used for Joy1 toggle)
+                    else if (ctrl_pressed && kb_report.keycode[i] == HID_KEY_F10) {
+                        st_keys[i] = 0;
+                    }
+                    // If Ctrl+F9, don't send to Atari (used for Joy0 toggle)
+                    else if (ctrl_pressed && kb_report.keycode[i] == HID_KEY_F9) {
+                        st_keys[i] = 0;
+                    }
+                    // All other keys (including cursor keys) work normally with ALT
+                    else {
+                        st_keys[i] = st_key_lookup_hid_gb[kb_report.keycode[i]];
+                    }
+                } else {
+                    st_keys[i] = 0;
+                }
+            }
+            
+            // Update key states
+            for (int i = 1; i < key_states.size(); ++i) {
+                bool down = false;
+                for (int j = 0; j < 6; ++j) {
+                    if (st_keys[j] == i) {
+                        down = true;
+                        break;
+                    }
+                }
+                key_states[i] = down ? 1 : 0;
+            }
+            
+                // Handle modifier keys
+                key_states[ATARI_LSHIFT] = (kb_report.modifier & KEYBOARD_MODIFIER_LEFTSHIFT) ? 1 : 0;
+                key_states[ATARI_RSHIFT] = (kb_report.modifier & KEYBOARD_MODIFIER_RIGHTSHIFT) ? 1 : 0;
+                key_states[ATARI_CTRL] = ((kb_report.modifier & KEYBOARD_MODIFIER_LEFTCTRL) ||
+                                          (kb_report.modifier & KEYBOARD_MODIFIER_RIGHTCTRL)) ? 1 : 0;
+                key_states[ATARI_ALT] = ((kb_report.modifier & KEYBOARD_MODIFIER_LEFTALT) ||
+                                          (kb_report.modifier & KEYBOARD_MODIFIER_RIGHTALT)) ? 1 : 0;
+            }
+        }
+    }
+#endif
 }
 
 void HidInput::handle_mouse(const int64_t cpu_cycles) {
     int32_t x = 0;
     int32_t y = 0;
     
-    // Debug disabled for performance - enable for troubleshooting
-    #if 0
-    static uint32_t debug_count = 0;
-    if ((debug_count++ % 500) == 0 && debug_count > 1) {
-        extern ssd1306_t disp;
-        ssd1306_clear(&disp);
-        ssd1306_draw_string(&disp, 10, 0, 1, (char*)"DEVICE MAP");
-        
-        char line[20];
-        snprintf(line, sizeof(line), "Devices: %d", (int)device.size());
-        ssd1306_draw_string(&disp, 5, 15, 1, line);
-        
-        int y_pos = 30;
-        for (auto it : device) {
-            HID_TYPE tp = tuh_hid_get_type(it.first);
-            const char* type = (tp == HID_MOUSE) ? "M" : 
-                              (tp == HID_KEYBOARD) ? "K" : 
-                              (tp == HID_JOYSTICK) ? "J" : "?";
-            snprintf(line, sizeof(line), "Addr %d: %s", it.first, type);
-            ssd1306_draw_string(&disp, 5, y_pos, 1, line);
-            y_pos += 15;
-            if (y_pos > 50) break;
-        }
-        
-        ssd1306_show(&disp);
-    }
-    #endif
     
     for (auto it : device) {
         // Decode if this is a multi-interface mouse (key > 128)
@@ -1050,33 +1523,6 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
             continue;
         }
         
-        // Debug disabled for performance
-        #if 0
-        static uint32_t mouse_handler_count = 0;
-        if ((mouse_handler_count++ % 500) == 0 && mouse_handler_count > 1) {
-            extern ssd1306_t disp;
-            ssd1306_clear(&disp);
-            ssd1306_draw_string(&disp, 15, 0, 1, (char*)"MOUSE HANDLER");
-            
-            char line1[20];
-            snprintf(line1, sizeof(line1), "Key:%d Addr:%d", it.first, actual_addr);
-            ssd1306_draw_string(&disp, 5, 15, 1, line1);
-            
-            char line2[20];
-            bool mounted = tuh_hid_is_mounted(it.first);
-            bool busy = tuh_hid_is_busy(it.first);
-            snprintf(line2, sizeof(line2), "M:%d B:%d", mounted, busy);
-            ssd1306_draw_string(&disp, 5, 30, 1, line2);
-            
-            HID_ReportInfo_t* info = tuh_hid_get_report_info(it.first);
-            char line3[20];
-            snprintf(line3, sizeof(line3), "Info: %s", info ? "YES" : "NULL");
-            ssd1306_draw_string(&disp, 5, 45, 1, line3);
-            
-            ssd1306_show(&disp);
-            sleep_ms(1500);
-        }
-        #endif
         
         if (tuh_hid_is_mounted(it.first) && !tuh_hid_is_busy(it.first)) {  // Use key, not actual_addr
             hid_mouse_report_t* mouse = (hid_mouse_report_t*)it.second;
@@ -1178,7 +1624,58 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
             hid_app_request_report(it.first, it.second);
         }
     }
+    // Handle Bluetooth mice
+#if ENABLE_BLUEPAD32
+    if (bt_runtime_is_enabled()) {
+        // Use uni_mouse_t structure exactly as defined in bluepad32
+        // Structure: int32_t delta_x, int32_t delta_y, uint16_t buttons, int8_t scroll_wheel, uint8_t misc_buttons
+        // We define it locally to avoid header dependencies, but it must match exactly
+        typedef struct {
+            int32_t delta_x;
+            int32_t delta_y;
+            uint16_t buttons;  // Bitmask: UNI_MOUSE_BUTTON_LEFT = BIT(0) = 0x01, UNI_MOUSE_BUTTON_RIGHT = BIT(1) = 0x02
+            int8_t scroll_wheel;
+            uint8_t misc_buttons;
+        } __attribute__((packed)) bt_mouse_t;
+        
+        bt_mouse_t bt_mouse;
+        int bt_mouse_count = bluepad32_get_mouse_count();
+        
+        // Process first connected Bluetooth mouse
+        if (bt_mouse_count > 0 && bluepad32_get_mouse(0, &bt_mouse)) {
+            // Extract movement deltas (Bluepad32 clamps to -127 to 127)
+            // Use deltas directly (matching Logronoid's approach) - acceleration will be applied later
+            int32_t bt_x = bt_mouse.delta_x;
+            int32_t bt_y = bt_mouse.delta_y;
+            
+            // Accumulate with USB mouse movement
+            x += bt_x;
+            y += bt_y;
+            
+            // Extract button states using bitmasks (matching logronoid's approach)
+            // UNI_MOUSE_BUTTON_LEFT = BIT(0) = 0x01
+            // UNI_MOUSE_BUTTON_RIGHT = BIT(1) = 0x02
+            bool left_down = (bt_mouse.buttons & 0x01) != 0;
+            bool right_down = (bt_mouse.buttons & 0x02) != 0;
+            
+            // Update button state (match USB mouse button handling)
+            // Atari ST mouse_state: bit 1 = left button (0x02), bit 0 = right button (0x01)
+            mouse_state = (mouse_state & 0xfd) | (left_down ? 2 : 0);   // Left button
+            mouse_state = (mouse_state & 0xfe) | (right_down ? 1 : 0);  // Right button
+            
+            // Handle scroll wheel (matching USB mouse behavior)
+            // Note: scroll_wheel is int8_t, so values are -128 to 127
+            // Positive = scroll down, negative = scroll up
+            if (bt_mouse.scroll_wheel != 0) {
+                enqueue_wheel_pulses(bt_mouse.scroll_wheel);
+            }
+        }
+    }
+#endif
+    
     // Handle the mouse acceleration/deceleration configured in the UI.
+    // Base multiplier of 1.0 with speed adjustment (0.0-9.0) adds 0.0-0.9
+    // This gives a range of 1.0x to 1.9x acceleration
     double accel = 1.0 + ((double)ui_->get_mouse_speed() * 0.1);
     AtariSTMouse::instance().set_speed((int)((double)x * accel), (int)((double)y * accel));
 }
@@ -1383,24 +1880,27 @@ bool HidInput::get_gamecube_joystick(int joystick_num, uint8_t& axis, uint8_t& b
 
 bool HidInput::get_ps4_joystick(int joystick_num, uint8_t& axis, uint8_t& button) {
     // Get PS4 controller state
+    static uint32_t call_count = 0;
+    static uint32_t success_count = 0;
+    call_count++;
+    
     for (uint8_t dev_addr = 1; dev_addr < 8; dev_addr++) {
         ps4_controller_t* ps4 = ps4_get_controller(dev_addr);
         if (ps4 && ps4->connected) {
             // Found a connected PS4 controller!
             ps4_to_atari(ps4, joystick_num, &axis, &button);
             
-            // Debug disabled for performance
-            // (Enable only for troubleshooting)
-            #if 0
-            static uint32_t debug_count = 0;
-            if ((debug_count++ % 500) == 0) {
-                printf("PS4->Atari: Joy%d axis=0x%02X fire=%d\n", joystick_num, axis, button);
+            success_count++;
+            // Debug: Show input detection (throttled to avoid spam)
+            if ((call_count % 100) == 0 || (success_count <= 5)) {
+                printf("PS4 Joy%d: INPUT DETECTED - axis=0x%02X button=%d (calls=%lu success=%lu)\n", 
+                       joystick_num, axis, button, call_count, success_count);
             }
-            #endif
             
             return true;
         }
     }
+    
     
     return false;
 }
@@ -1440,21 +1940,26 @@ bool HidInput::get_stadia_joystick(int joystick_num, uint8_t& axis, uint8_t& but
 }
 
 void HidInput::handle_joystick() {
-    // Find the joystick addresses
+    // Find the joystick addresses (USB mode only)
     std::vector<int> joystick_addr;
     int next_joystick = 0;
-    for (auto it : device) {
-        if (tuh_hid_get_type(it.first) == HID_JOYSTICK) {
-            joystick_addr.push_back(it.first);
+    // Scan for USB HID joysticks if USB is enabled at runtime
+    // (Works even when Bluetooth is compiled in)
+    if (usb_runtime_is_enabled()) {
+        for (auto it : device) {
+            if (tuh_hid_get_type(it.first) == HID_JOYSTICK) {
+                joystick_addr.push_back(it.first);
+            }
         }
     }
 
     bool llama_prev_active = g_llamatron_active;
+    // Llamatron mode supported for both USB and Bluetooth gamepads
     if (g_llamatron_mode) {
         uint8_t joy_setting = ui_->get_joystick();
         bool usb0 = !(joy_setting & 0x01);
         bool usb1 = !(joy_setting & 0x02);
-        uint8_t pad_count = count_connected_usb_gamepads();
+        uint8_t pad_count = count_connected_gamepads();
         uint8_t axis1 = 0, fire1 = 0, axis0 = 0, fire0 = 0;
         bool have_sample = (pad_count == 1 && usb0 && usb1 &&
                             collect_llamatron_sample(axis1, fire1, axis0, fire0));
@@ -1501,7 +2006,7 @@ void HidInput::handle_joystick() {
 
             if (g_llamatron_mode && llama_prev_active) {
                 if (pad_count != 1) {
-                    show_llamatron_status("Suspended", "Need single USB pad");
+                    show_llamatron_status("Suspended", "Need single pad");
                 } else if (!usb0 || !usb1) {
                     show_llamatron_status("Suspended", "Joy0/Joy1 must use USB");
                 }
@@ -1513,7 +2018,6 @@ void HidInput::handle_joystick() {
         g_llama_fire_joy1 = 0;
         g_llama_axis_joy0 = 0;
         g_llama_fire_joy0 = 0;
-
     }
 
     // See if the joysticks are GPIO or USB
@@ -1564,47 +2068,93 @@ void HidInput::handle_joystick() {
                 }
             }
             
-            // First priority: USB HID joystick
-            if (!got_input && next_joystick < joystick_addr.size()) {
-                if (get_usb_joystick(joystick_addr[next_joystick], axis, button)) {
-                    got_input = true;
-                    g_hid_joy_success++;  // Track HID success
+            // Check USB controllers if USB is enabled at runtime
+            // (Works even when Bluetooth is compiled in)
+            if (usb_runtime_is_enabled()) {
+                // USB mode: Check USB HID joystick and USB-specific controllers
+                // First priority: USB HID joystick
+                if (!got_input && next_joystick < joystick_addr.size()) {
+                    if (get_usb_joystick(joystick_addr[next_joystick], axis, button)) {
+                        got_input = true;
+                        g_hid_joy_success++;  // Track HID success
+                    }
+                    ++next_joystick;
                 }
-                ++next_joystick;
+                
+                // Second priority: PS4 controller (always check, even if HID exists)
+                // FIX: PS4 and Xbox were being skipped if ANY HID entry existed, even disconnected ones
+                if (!got_input && get_ps4_joystick(joystick, axis, button)) {
+                    got_input = true;
+                    g_ps4_success++;  // Track PS4 success
+                }
+                
+                // PS3 controller (check after PS4)
+                if (!got_input && get_ps3_joystick(joystick, axis, button)) {
+                    got_input = true;
+                }
+                
+                // GameCube adapter (check after PS3)
+                if (!got_input && get_gamecube_joystick(joystick, axis, button)) {
+                    got_input = true;
+                }
+                
+                // Third priority: Switch controller
+                if (!got_input && get_switch_joystick(joystick, axis, button)) {
+                    got_input = true;
+                    g_switch_success++;  // Track Switch success
+                }
+                
+                // Fourth priority: Stadia controller - NOW USES GENERIC HID PATH
+                // (Stadia is detected as standard HID joystick, handled above)
+                
+                // Fifth priority: Xbox controller (always check as final fallback)
+                // FIX: This ensures Xbox is checked even if stale HID entries exist
+                if (!got_input && get_xbox_joystick(joystick, axis, button)) {
+                    got_input = true;
+                    g_xbox_success++;  // Track Xbox success
+                }
             }
             
-            // Second priority: PS4 controller (always check, even if HID exists)
-            // FIX: PS4 and Xbox were being skipped if ANY HID entry existed, even disconnected ones
-            if (!got_input && get_ps4_joystick(joystick, axis, button)) {
-                got_input = true;
-                g_ps4_success++;  // Track PS4 success
+#if ENABLE_BLUEPAD32
+            // Check Bluetooth controllers if Bluetooth is enabled at runtime
+            // Match USB behavior: assign to joystick 1 first, then joystick 0
+            // This allows mouse to work with joystick 1 (joystick 0 conflicts with mouse)
+            if (!got_input && bt_runtime_is_enabled()) {
+                int bt_count = bluepad32_get_connected_count();
+                if (bt_count > 0) {
+                    // Map joystick number: joystick 1 -> bt_index 0, joystick 0 -> bt_index 1
+                    // This matches USB behavior where first USB joystick goes to joystick 1
+                    int bt_index = (joystick == 1) ? 0 : 1;
+                    if (bt_index < bt_count) {
+                        // Local struct with layout matching uni_gamepad_t exactly.
+                        // See bluepad32's uni_gamepad_t definition.
+                        struct {
+                            uint8_t  dpad;
+                            int32_t  axis_x;
+                            int32_t  axis_y;
+                            int32_t  axis_rx;
+                            int32_t  axis_ry;
+                            int32_t  brake;
+                            int32_t  throttle;
+                            uint16_t buttons;
+                            uint8_t  misc_buttons;
+                            int32_t  gyro[3];
+                            int32_t  accel[3];
+                        } bt_gamepad;
+                        
+                        if (bluepad32_get_gamepad(bt_index, &bt_gamepad)) {
+                            uint8_t bt_axis = 0;
+                            uint8_t bt_button = 0;
+                            if (bluepad32_to_atari_joystick(&bt_gamepad, &bt_axis, &bt_button)) {
+                                axis = bt_axis;
+                                button = bt_button;
+                                got_input = true;
+                            }
+                        }
+                    }
+                }
             }
-            
-            // PS3 controller (check after PS4)
-            if (!got_input && get_ps3_joystick(joystick, axis, button)) {
-                got_input = true;
-            }
-            
-            // GameCube adapter (check after PS3)
-            if (!got_input && get_gamecube_joystick(joystick, axis, button)) {
-                got_input = true;
-            }
-            
-            // Third priority: Switch controller
-            if (!got_input && get_switch_joystick(joystick, axis, button)) {
-                got_input = true;
-                g_switch_success++;  // Track Switch success
-            }
-            
-            // Fourth priority: Stadia controller - NOW USES GENERIC HID PATH
-            // (Stadia is detected as standard HID joystick, handled above)
-            
-            // Fifth priority: Xbox controller (always check as final fallback)
-            // FIX: This ensures Xbox is checked even if stale HID entries exist
-            if (!got_input && get_xbox_joystick(joystick, axis, button)) {
-                got_input = true;
-                g_xbox_success++;  // Track Xbox success
-            }
+#endif
             
             // Update joystick state if we got input from either source
             if (got_input) {
@@ -1619,6 +2169,19 @@ void HidInput::handle_joystick() {
                     mouse_state = (mouse_state & 0xfe) | (button ? 1 : 0);
                     joystick_state &= ~(0xf << 4);
                     joystick_state |= (axis << 4);
+
+#if ENABLE_BLUEPAD32
+                    // Special-case for Bluetooth-only mode:
+                    // Many Atari games read Joy0 as the primary joystick.
+                    // When running in pure Bluetooth mode (USB disabled), mirror
+                    // joystick 1 input into joystick 0 as long as mouse is not enabled.
+                    if (!usb_runtime_is_enabled() && bt_runtime_is_enabled() && !ui_->get_mouse_enabled()) {
+                        joystick_state &= ~0xf;
+                        joystick_state |= axis;
+                        // Note: we intentionally do NOT mirror the mouse_state buttons here
+                        // to avoid interfering with Atari mouse emulation on Joy0.
+                    }
+#endif
                 }
             }
         }
@@ -1669,3 +2232,4 @@ void update_joystick_state() {
     // Provides on-demand joystick updates for better timing accuracy
     HidInput::instance().handle_joystick();
 }
+

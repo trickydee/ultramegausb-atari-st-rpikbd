@@ -1,11 +1,15 @@
 #!/bin/bash
 ################################################################################
 # Build Script for Atari ST USB Adapter
-# Builds firmware for both Raspberry Pi Pico (RP2040) and Pico 2 (RP2350)
+# Builds firmware for:
+#   - Raspberry Pi Pico (RP2040)
+#   - Raspberry Pi Pico 2 (RP2350)
+#   - Raspberry Pi Pico 2 W (RP2350 with WiFi/Bluetooth)
+#   - Raspberry Pi Pico W (RP2040 with WiFi)
 #
-# IMPORTANT: Build directories (build-pico, build-pico2) should NEVER be
-#            committed to git. They are automatically generated and cleaned
-#            by this script. Make sure .gitignore includes them!
+# IMPORTANT: Build directories (build-pico, build-pico2, build-picow) should
+#            NEVER be committed to git. They are automatically generated and
+#            cleaned by this script. Make sure .gitignore includes them!
 ################################################################################
 
 set -e  # Exit on error
@@ -68,6 +72,105 @@ echo ""
 # Apply patches
 echo ">>> Applying patches..."
 ./apply-patches.sh || echo "Warning: Patch application returned non-zero"
+echo ""
+
+################################################################################
+# Build for Raspberry Pi Pico 2 W (RP2350 with WiFi/Bluetooth)
+################################################################################
+
+echo ">>> Building for Raspberry Pi Pico 2 W (RP2350 with WiFi/Bluetooth)..."
+echo ""
+
+# Check for Bluepad32 submodule (required for Bluetooth)
+BLUEPAD32_OK=false
+if [ -d "./bluepad32/src" ] && [ -f "./bluepad32/src/components/bluepad32/CMakeLists.txt" ]; then
+    BLUEPAD32_OK=true
+    echo "    ✅ Bluepad32 is properly initialized"
+else
+    echo "    ⚠️  Bluepad32 missing - initializing..."
+    if ! git submodule update --init --recursive bluepad32; then
+        echo "    ⚠️  Warning: Bluepad32 initialization failed, skipping Pico 2 W build"
+        BLUEPAD32_OK=false
+    else
+        BLUEPAD32_OK=true
+        echo "    ✅ Bluepad32 initialized successfully"
+    fi
+fi
+
+if [ "$BLUEPAD32_OK" = true ]; then
+    # Clean and create build directory
+    rm -rf ./build-pico2_w
+    mkdir -p ./build-pico2_w
+
+    # Configure
+    echo "    Configuring CMake for RP2350 WiFi/Bluetooth (pico2_w)..."
+    cmake -B ./build-pico2_w -S . \
+        -DPICO_BOARD=pico2_w \
+        -DLANGUAGE="${LANGUAGE}" \
+        -DENABLE_DEBUG="${DEBUG}" \
+        -DENABLE_OLED_DISPLAY="${OLED}" \
+        -DENABLE_SERIAL_LOGGING="${LOGGING}" \
+        > ./build-pico2_w/cmake.log 2>&1
+
+    if [ $? -ne 0 ]; then
+        echo "    ⚠️  Warning: CMake configuration failed for RP2350 WiFi/Bluetooth (pico2_w)!"
+        tail -20 ./build-pico2_w/cmake.log
+    else
+        # Build
+        echo "    Compiling firmware for RP2350 WiFi/Bluetooth (this may take longer due to Bluepad32)..."
+        cmake --build ./build-pico2_w -j$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4) \
+            > ./build-pico2_w/build.log 2>&1
+
+        if [ $? -ne 0 ]; then
+            echo "    ⚠️  Warning: Build failed for RP2350 WiFi/Bluetooth (pico2_w)!"
+            tail -30 ./build-pico2_w/build.log
+        else
+            echo "    ✅ RP2350 WiFi/Bluetooth (pico2_w) build complete!"
+        fi
+    fi
+fi
+
+echo ""
+
+################################################################################
+# Build for Raspberry Pi Pico W (RP2040 with WiFi)
+################################################################################
+
+echo ">>> Building for Raspberry Pi Pico W (RP2040 with WiFi)..."
+echo ""
+
+# Clean and create build directory
+rm -rf ./build-picow
+mkdir -p ./build-picow
+
+# Configure
+echo "    Configuring CMake for RP2040 WiFi (pico_w)..."
+cmake -B ./build-picow -S . \
+    -DPICO_BOARD=pico_w \
+    -DLANGUAGE="${LANGUAGE}" \
+    -DENABLE_DEBUG="${DEBUG}" \
+    -DENABLE_OLED_DISPLAY="${OLED}" \
+    -DENABLE_SERIAL_LOGGING="${LOGGING}" \
+    > ./build-picow/cmake.log 2>&1
+
+if [ $? -ne 0 ]; then
+    echo "ERROR: CMake configuration failed for RP2040 WiFi (pico_w)!"
+    tail -20 ./build-picow/cmake.log
+    exit 1
+fi
+
+# Build
+echo "    Compiling firmware for RP2040 WiFi (pico_w)..."
+cmake --build ./build-picow -j$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4) \
+    > ./build-picow/build.log 2>&1
+
+if [ $? -ne 0 ]; then
+    echo "ERROR: Build failed for RP2040 WiFi (pico_w)!"
+    tail -30 ./build-picow/build.log
+    exit 1
+fi
+
+echo "    ✅ RP2040 WiFi (pico_w) build complete!"
 echo ""
 
 ################################################################################
@@ -163,6 +266,8 @@ mkdir -p ./dist
 BUILD_VARIANT=""
 if [ "$OLED" = "0" ] && [ "$LOGGING" = "0" ]; then
     BUILD_VARIANT="_speed"
+elif [ "$OLED" = "1" ] && [ "$LOGGING" = "0" ]; then
+    BUILD_VARIANT="_production"
 elif [ "$OLED" = "0" ]; then
     BUILD_VARIANT="_nooled"
 elif [ "$LOGGING" = "0" ]; then
@@ -179,6 +284,16 @@ else
     echo "    ⚠️  Warning: atari_ikbd_pico.uf2 not found!"
 fi
 
+# Copy RP2040 WiFi (Pico W) firmware
+if [ -f "./build-picow/atari_ikbd_pico.uf2" ]; then
+    cp ./build-picow/atari_ikbd_pico.uf2 ./dist/atari_ikbd_picow${BUILD_VARIANT}.uf2
+    cp ./build-picow/atari_ikbd_pico.elf ./dist/atari_ikbd_picow${BUILD_VARIANT}.elf 2>/dev/null || true
+    cp ./build-picow/atari_ikbd_pico.bin ./dist/atari_ikbd_picow${BUILD_VARIANT}.bin 2>/dev/null || true
+    echo "    ✅ Copied atari_ikbd_picow${BUILD_VARIANT}.uf2"
+else
+    echo "    ⚠️  Warning: atari_ikbd_pico.uf2 for Pico W (pico_w) not found!"
+fi
+
 # Copy RP2350 firmware
 if [ -f "./build-pico2/atari_ikbd_pico2.uf2" ]; then
     cp ./build-pico2/atari_ikbd_pico2.uf2 ./dist/atari_ikbd_pico2${BUILD_VARIANT}.uf2
@@ -187,6 +302,19 @@ if [ -f "./build-pico2/atari_ikbd_pico2.uf2" ]; then
     echo "    ✅ Copied atari_ikbd_pico2${BUILD_VARIANT}.uf2"
 else
     echo "    ⚠️  Warning: atari_ikbd_pico2.uf2 not found!"
+fi
+
+# Copy RP2350 WiFi/Bluetooth (Pico 2 W) firmware
+if [ -f "./build-pico2_w/atari_ikbd_pico2_w.uf2" ]; then
+    cp ./build-pico2_w/atari_ikbd_pico2_w.uf2 ./dist/atari_ikbd_pico2_w${BUILD_VARIANT}_wireless.uf2
+    cp ./build-pico2_w/atari_ikbd_pico2_w.elf ./dist/atari_ikbd_pico2_w${BUILD_VARIANT}_wireless.elf 2>/dev/null || true
+    cp ./build-pico2_w/atari_ikbd_pico2_w.bin ./dist/atari_ikbd_pico2_w${BUILD_VARIANT}_wireless.bin 2>/dev/null || true
+    echo "    ✅ Copied atari_ikbd_pico2_w${BUILD_VARIANT}_wireless.uf2"
+elif [ -f "./build-pico2_w/atari_ikbd_pico2.uf2" ]; then
+    cp ./build-pico2_w/atari_ikbd_pico2.uf2 ./dist/atari_ikbd_pico2_w${BUILD_VARIANT}_wireless.uf2
+    cp ./build-pico2_w/atari_ikbd_pico2.elf ./dist/atari_ikbd_pico2_w${BUILD_VARIANT}_wireless.elf 2>/dev/null || true
+    cp ./build-pico2_w/atari_ikbd_pico2.bin ./dist/atari_ikbd_pico2_w${BUILD_VARIANT}_wireless.bin 2>/dev/null || true
+    echo "    ✅ Copied atari_ikbd_pico2_w${BUILD_VARIANT}_wireless.uf2"
 fi
 
 echo ""
@@ -224,6 +352,16 @@ if [ -f "./dist/atari_ikbd_pico2${BUILD_VARIANT}.uf2" ]; then
     echo "  📦 Raspberry Pi Pico 2 (RP2350): atari_ikbd_pico2${BUILD_VARIANT}.uf2 (${SIZE_PICO2})"
 fi
 
+if [ -f "./dist/atari_ikbd_pico2_w${BUILD_VARIANT}_wireless.uf2" ]; then
+    SIZE_PICO2_W=$(ls -lh "./dist/atari_ikbd_pico2_w${BUILD_VARIANT}_wireless.uf2" | awk '{print $5}')
+    echo "  📦 Raspberry Pi Pico 2 W (RP2350 + Bluetooth): atari_ikbd_pico2_w${BUILD_VARIANT}_wireless.uf2 (${SIZE_PICO2_W})"
+fi
+
+if [ -f "./dist/atari_ikbd_picow${BUILD_VARIANT}.uf2" ]; then
+    SIZE_PICOW=$(ls -lh "./dist/atari_ikbd_picow${BUILD_VARIANT}.uf2" | awk '{print $5}')
+    echo "  📦 Raspberry Pi Pico W (RP2040 WiFi): atari_ikbd_picow${BUILD_VARIANT}.uf2 (${SIZE_PICOW})"
+fi
+
 echo ""
 echo "To flash firmware:"
 echo "  1. Hold BOOTSEL button on your Pico/Pico 2"
@@ -233,8 +371,11 @@ echo "  4. Copy the appropriate .uf2 file to the RPI-RP2 drive"
 echo ""
 echo "================================================================================"
 
-# Automatically build speed-mode variant after standard build (unless skipped)
+# Automatically build production & speed variants after standard build (unless skipped)
 if [ "${SKIP_SPEED_BUILD:-0}" != "1" ] && [ "${OLED}" = "1" ] && [ "${LOGGING}" = "1" ]; then
+    echo ""
+    echo ">>> Auto-building production variant (OLED=1, LOGGING=0)..."
+    OLED=1 LOGGING=0 SKIP_SPEED_BUILD=1 "$0"
     echo ""
     echo ">>> Auto-building speed mode variant (OLED=0, LOGGING=0)..."
     OLED=0 LOGGING=0 SKIP_SPEED_BUILD=1 "$0"

@@ -14,6 +14,7 @@
 #include "reg.h"
 #include "sci.h"
 #include "timer.h"
+#include "pico.h"
 
 #ifdef USE_PROTOTYPES
 #include "instr.h"
@@ -33,8 +34,7 @@ reset ()
 /*
  * instr_exec - execute an instruction
  */
-instr_exec ()
-{
+void __not_in_flash_func(instr_exec)() {
 
   /*
    * Get opcode from memory,

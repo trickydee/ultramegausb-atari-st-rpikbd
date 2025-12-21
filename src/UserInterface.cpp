@@ -22,6 +22,10 @@
 #include "hid_app_host.h"
 #include "config.h"
 #include "hardware/clocks.h"
+#if ENABLE_BLUEPAD32
+#include "runtime_toggle.h"  // Runtime USB/Bluetooth toggle control
+#include "bluepad32_platform.h"  // For bluepad32_delete_pairing_keys()
+#endif
 
 // Forward declare Xbox debug counters (defined in main.cpp and xinput_atari.cpp)
 extern "C" {
@@ -171,11 +175,42 @@ void UserInterface::update_splash() {
     
     // ATARI text (centered)
     ssd1306_draw_string(&disp, 30, 0, 2, (char*)"ATARI");
-    ssd1306_draw_string(&disp, 28, 25, 1, (char*)"USB - Mega");
-    ssd1306_draw_string(&disp, 40, 40, 1, (char*)"Adapter");
+
+    // Branding + version for ultramegausb.com
+    ssd1306_draw_string(&disp, 4, 24, 1, (char*)"ultramegausb.com");
+    // Move version up one line from the original bottom position
+    ssd1306_draw_string(&disp, 40, 40, 1, (char*)"v" PROJECT_VERSION_STRING);
     
-    // Version number at bottom
-    ssd1306_draw_string(&disp, 45, 55, 1, (char*)"v" PROJECT_VERSION_STRING);
+#if ENABLE_BLUEPAD32
+    // Show USB/Bluetooth status on splash screen (bottom row)
+    char mode_buf[32];
+    bool usb_enabled = usb_runtime_is_enabled();
+    bool bt_enabled = bt_runtime_is_enabled();
+    
+    if (usb_enabled && bt_enabled) {
+        sprintf(mode_buf, "USB+BT");
+    }
+    else if (usb_enabled) {
+        sprintf(mode_buf, "USB");
+    }
+    else if (bt_enabled) {
+        sprintf(mode_buf, "BT");
+    }
+    else {
+        sprintf(mode_buf, "OFF");
+    }
+
+    // Show mode on bottom row with label
+    char mode_line[32];
+    sprintf(mode_line, "Mode %s", mode_buf);
+    ssd1306_draw_string(&disp, 0, 55, 1, mode_line);
+    
+    // Show button label on splash screen
+    // Right button: RST (Reset Bluetooth keys) - only show if BT is enabled
+    if (bt_enabled) {
+        ssd1306_draw_string(&disp, 100, 55, 1, (char*)"RST");
+    }
+#endif
 }
 
 void UserInterface::update_pro_init() {
@@ -387,19 +422,60 @@ void UserInterface::on_button_down(int i) {
     // Middle button changes page
     if (i == BUTTON_MIDDLE) {
         int pg = (int)page;
-#if ENABLE_CONTROLLER_DEBUG
-        // Debug mode: include Pro Init page
+#if ENABLE_SERIAL_LOGGING
+    #if ENABLE_CONTROLLER_DEBUG
+        // Debug mode (standard build): include all pages up to PRO_INIT
         pg = ((pg + 1) % (PAGE_PRO_INIT + 1));
+    #else
+        // Standard build without controller debug: cycle up to USB_DEBUG / SERIAL
+        pg = ((pg + 1) % (PAGE_USB_DEBUG));
+    #endif
 #else
-        // Production mode: skip Pro Init page
-        pg = ((pg + 1) % PAGE_USB_DEBUG);
-        if (pg == PAGE_USB_DEBUG) pg = PAGE_SPLASH; // Skip USB_DEBUG and PRO_INIT in production
+        // Production / speed builds (logging disabled): only cycle core pages
+        // PAGE enum: SPLASH, MOUSE, JOY0, JOY1, SERIAL, ...
+        // Limit cycle to 0..3 (SPLASH, MOUSE, JOY0, JOY1)
+        pg = ((pg + 1) % PAGE_SERIAL);
 #endif
         page = (PAGE)pg;
         dirty = true;
     }
     else if (i == BUTTON_LEFT) {
-        if (page == PAGE_MOUSE) {
+        if (page == PAGE_SPLASH) {
+            // On ATARI splash screen, toggle USB/Bluetooth modes
+#if ENABLE_BLUEPAD32
+            // Cycle through: Both -> USB only -> BT only -> Both
+            bool usb_enabled = usb_runtime_is_enabled();
+            bool bt_enabled = bt_runtime_is_enabled();
+            
+            if (usb_enabled && bt_enabled) {
+                // Both enabled -> USB only
+                bt_runtime_disable();
+                printf("Toggled to USB only mode\n");
+            }
+            else if (usb_enabled && !bt_enabled) {
+                // USB only -> BT only
+                usb_runtime_disable();
+                bt_runtime_enable();
+                printf("Toggled to Bluetooth only mode\n");
+            }
+            else if (!usb_enabled && bt_enabled) {
+                // BT only -> Both
+                usb_runtime_enable();
+                printf("Toggled to USB + Bluetooth mode\n");
+            }
+            else {
+                // Both disabled -> Both enabled (shouldn't happen, but handle it)
+                usb_runtime_enable();
+                bt_runtime_enable();
+                printf("Toggled to USB + Bluetooth mode\n");
+            }
+            dirty = true;
+#else
+            // No Bluetooth support - just toggle USB (though this shouldn't be useful)
+            printf("Bluetooth not available in this build\n");
+#endif
+        }
+        else if (page == PAGE_MOUSE) {
             if (settings.get_settings().mouse_speed > MOUSE_MIN) {
                 --settings.get_settings().mouse_speed;
                 settings.write();
@@ -413,7 +489,21 @@ void UserInterface::on_button_down(int i) {
         }
     }
     else if (i == BUTTON_RIGHT) {
-        if (page == PAGE_MOUSE) {
+        if (page == PAGE_SPLASH) {
+            // On ATARI splash screen, delete stored Bluetooth pairing keys
+#if ENABLE_BLUEPAD32
+            if (bt_runtime_is_enabled()) {
+                bluepad32_delete_pairing_keys();
+                printf("Bluetooth pairing keys deleted\n");
+            } else {
+                printf("Bluetooth not enabled\n");
+            }
+            dirty = true;
+#else
+            printf("Bluetooth not available in this build\n");
+#endif
+        }
+        else if (page == PAGE_MOUSE) {
             if (settings.get_settings().mouse_speed < MOUSE_MAX) {
                 ++settings.get_settings().mouse_speed;
                 settings.write();
@@ -447,6 +537,7 @@ void UserInterface::update() {
             update_joy(1);
         }
         else if (page == PAGE_SERIAL) {
+#if ENABLE_SERIAL_LOGGING
             absolute_time_t tm = get_absolute_time();
             if (absolute_time_diff_us(serial_tm, tm) >= (500 * 1000)) {
                 serial_tm = tm;
@@ -456,12 +547,13 @@ void UserInterface::update() {
                 // Not time yet
                 dirty = true;
             }
+#endif
         }
         else if (page == PAGE_SPLASH) {
             update_splash();
         }
         else if (page == PAGE_USB_DEBUG) {
-#if ENABLE_CONTROLLER_DEBUG
+#if ENABLE_CONTROLLER_DEBUG && ENABLE_SERIAL_LOGGING
             update_usb_debug();
             ssd1306_show(&disp);
             // Keep refreshing debug page
@@ -469,7 +561,7 @@ void UserInterface::update() {
 #endif
         }
         else if (page == PAGE_PRO_INIT) {
-#if ENABLE_CONTROLLER_DEBUG
+#if ENABLE_CONTROLLER_DEBUG && ENABLE_SERIAL_LOGGING
             update_pro_init();
             ssd1306_show(&disp);
             // Keep refreshing to show latest status

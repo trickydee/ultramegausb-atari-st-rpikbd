@@ -12,7 +12,7 @@
 #include "ps4_controller.h"
 #include "switch_controller.h"
 #include "stadia_controller.h"
-#include "ssd1306.h"  // For OLED debug display
+#include "ssd1306.h"
 #include <string.h>
 
 // Structure to track HID devices
@@ -214,28 +214,6 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
   tuh_vid_pid_get(dev_addr, &vid, &pid);
   uint8_t protocol = tuh_hid_interface_protocol(dev_addr, instance);
   
-  // Debug disabled for performance - enable for troubleshooting
-  #if 0
-  extern ssd1306_t disp;
-  
-  ssd1306_clear(&disp);
-  ssd1306_draw_string(&disp, 5, 0, 2, (char*)"HID!!");
-  
-  char line1[20];
-  snprintf(line1, sizeof(line1), "Addr:%d Inst:%d", dev_addr, instance);
-  ssd1306_draw_string(&disp, 5, 25, 1, line1);
-  
-  char line2[20];
-  snprintf(line2, sizeof(line2), "VID:%04X PID:%04X", vid, pid);
-  ssd1306_draw_string(&disp, 5, 40, 1, line2);
-  
-  char line3[20];
-  snprintf(line3, sizeof(line3), "P:%d L:%d", protocol, desc_len);
-  ssd1306_draw_string(&disp, 5, 55, 1, line3);
-  
-  ssd1306_show(&disp);
-  sleep_ms(3000);
-  #endif
   
   // Check for GameCube USB Adapter
   bool is_gamecube = gc_is_adapter(vid, pid);
@@ -583,21 +561,6 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
   printf("HID Device detected: VID=0x%04X, PID=0x%04X, Protocol=%d, is_switch=%d\n", 
          vid, pid, protocol, is_switch);
   
-  // Debug disabled - was used to verify PowerA detection
-  #if 0
-  if (vid == POWERA_VENDOR_ID) {
-    ssd1306_clear(&disp);
-    ssd1306_draw_string(&disp, 5, 0, 2, (char*)(is_switch ? "SWITCH!" : "NOT SW"));
-    char line[20];
-    snprintf(line, sizeof(line), "is_switch=%d", is_switch);
-    ssd1306_draw_string(&disp, 5, 35, 1, line);
-    snprintf(line, sizeof(line), "PID:%04X", pid);
-    ssd1306_draw_string(&disp, 5, 50, 1, line);
-    ssd1306_show(&disp);
-    sleep_ms(3000);
-  }
-  #endif
-  
   if (is_switch) {
     printf("Nintendo Switch controller detected: VID=0x%04X, PID=0x%04X, Protocol=%d\n", 
            vid, pid, protocol);
@@ -718,27 +681,6 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
       printf("Stadia: Set filter_type to JOYSTICK (%d)\n", filter_type);
     }
     
-    // Debug disabled for performance
-    #if 0
-    if (vid == 0x046D) {
-      extern ssd1306_t disp;
-      
-      ssd1306_clear(&disp);
-      ssd1306_draw_string(&disp, 20, 10, 2, (char*)"PARSED");
-      
-      char type_line[20];
-      snprintf(type_line, sizeof(type_line), "Type: %s", type_str);
-      ssd1306_draw_string(&disp, 5, 35, 1, type_line);
-      
-      char items_line[20];
-      snprintf(items_line, sizeof(items_line), "Items: %d", dev->report_info.TotalReportItems);
-      ssd1306_draw_string(&disp, 5, 50, 1, items_line);
-      
-      ssd1306_show(&disp);
-      sleep_ms(2000);
-    }
-    #endif
-    
     // Start receiving reports
     tuh_hid_receive_report(dev_addr, instance);
     
@@ -857,7 +799,6 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance) {
 void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report, uint16_t len) {
   debug_report_calls++;
   
-  // DEBUG: Minimal GameCube report tracking (disabled excessive screens)
   uint16_t vid, pid;
   tuh_vid_pid_get(dev_addr, &vid, &pid);
   if (vid == 0x057E && pid == 0x0337) {
@@ -956,12 +897,6 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
     static uint32_t gc_callback_count = 0;
     gc_callback_count++;
     
-    // Disabled for performance
-    // #if ENABLE_SERIAL_LOGGING
-    // if ((gc_callback_count % 100) == 1) {
-    //   printf("GC: Report callback #%lu, len=%d\n", gc_callback_count, len);
-    // }
-    // #endif
     
     gc_process_report(dev_addr, report, len);
     

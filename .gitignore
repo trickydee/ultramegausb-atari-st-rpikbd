@@ -25,3 +25,7 @@ dist/
 # Patches
 *.rej
 *.orig
+
+# Documentation (excluded from commits)
+docs/CRITICAL_DIFFERENCES.md
+docs/THIRD_PARTY_ANALYSIS.md
