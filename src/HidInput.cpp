@@ -90,7 +90,7 @@ static int mouse_count = 0;
 static int joy_count = 0;  // HID joysticks (not Xbox)
 static std::set<uint8_t> gc_counted_devices;  // Track GameCube devices already counted
 
-// Debug: Path counters (file-level static, accessed via getters)
+// Path counters (file-level static, accessed via getters)
 static uint32_t g_gpio_path_count = 0;
 static uint32_t g_usb_path_count = 0;
 static uint32_t g_hid_joy_success = 0;
@@ -213,8 +213,7 @@ void bluepad32_notify_ui_update() {
 // Called from bluepad32_platform.c when a Bluetooth gamepad connects
 extern "C" void bluepad32_notify_mount() {
     bt_joy_count++;
-    // Note: We don't disable mouse mode anymore - Bluetooth joysticks are assigned to
-    // joystick 1 first (matching USB behavior), so mouse can still work with joystick 1
+    // Bluetooth joysticks are assigned to joystick 1 first (matching USB behavior)
     // Defer UI update to avoid blocking in Bluetooth callback
     bluepad32_notify_ui_update();
 }
@@ -424,37 +423,6 @@ void tuh_hid_mounted_cb(uint8_t dev_addr) {
     } else {
         tp = tuh_hid_get_type(actual_addr);
     }
-    
-    // Debug disabled for performance
-    #if 0
-    static uint32_t mount_count = 0;
-    mount_count++;
-    extern ssd1306_t disp;
-    ssd1306_clear(&disp);
-    ssd1306_draw_string(&disp, 10, 0, 1, (char*)"MOUNT CALLBACK");
-    
-    char line1[20];
-    const char* type_str = (tp == HID_MOUSE) ? "MOUSE" : 
-                           (tp == HID_KEYBOARD) ? "KEYBOARD" : 
-                           (tp == HID_JOYSTICK) ? "JOYSTICK" : "UNKNOWN";
-    snprintf(line1, sizeof(line1), "A:%d(%d) T:%s", dev_addr, actual_addr, type_str);
-    ssd1306_draw_string(&disp, 5, 15, 1, line1);
-    
-    char line2[20];
-    snprintf(line2, sizeof(line2), "#%lu", mount_count);
-    ssd1306_draw_string(&disp, 5, 30, 1, line2);
-    
-    char line3[20];
-#if ENABLE_BLUEPAD32
-    snprintf(line3, sizeof(line3), "KB:%d M:%d J:%d BT:%d", kb_count, mouse_count, joy_count + xinput_joy_count, bt_joy_count);
-#else
-    snprintf(line3, sizeof(line3), "KB:%d M:%d J:%d", kb_count, mouse_count, joy_count);
-#endif
-    ssd1306_draw_string(&disp, 5, 45, 1, line3);
-    
-    ssd1306_show(&disp);
-    sleep_ms(2000);
-    #endif
     
     if (tp == HID_KEYBOARD) {
         // For keyboards, check if already registered (prevent multi-interface conflict)
@@ -1546,33 +1514,6 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
     int32_t x = 0;
     int32_t y = 0;
     
-    // Debug disabled for performance - enable for troubleshooting
-    #if 0
-    static uint32_t debug_count = 0;
-    if ((debug_count++ % 500) == 0 && debug_count > 1) {
-        extern ssd1306_t disp;
-        ssd1306_clear(&disp);
-        ssd1306_draw_string(&disp, 10, 0, 1, (char*)"DEVICE MAP");
-        
-        char line[20];
-        snprintf(line, sizeof(line), "Devices: %d", (int)device.size());
-        ssd1306_draw_string(&disp, 5, 15, 1, line);
-        
-        int y_pos = 30;
-        for (auto it : device) {
-            HID_TYPE tp = tuh_hid_get_type(it.first);
-            const char* type = (tp == HID_MOUSE) ? "M" : 
-                              (tp == HID_KEYBOARD) ? "K" : 
-                              (tp == HID_JOYSTICK) ? "J" : "?";
-            snprintf(line, sizeof(line), "Addr %d: %s", it.first, type);
-            ssd1306_draw_string(&disp, 5, y_pos, 1, line);
-            y_pos += 15;
-            if (y_pos > 50) break;
-        }
-        
-        ssd1306_show(&disp);
-    }
-    #endif
     
     for (auto it : device) {
         // Decode if this is a multi-interface mouse (key > 128)
@@ -1582,33 +1523,6 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
             continue;
         }
         
-        // Debug disabled for performance
-        #if 0
-        static uint32_t mouse_handler_count = 0;
-        if ((mouse_handler_count++ % 500) == 0 && mouse_handler_count > 1) {
-            extern ssd1306_t disp;
-            ssd1306_clear(&disp);
-            ssd1306_draw_string(&disp, 15, 0, 1, (char*)"MOUSE HANDLER");
-            
-            char line1[20];
-            snprintf(line1, sizeof(line1), "Key:%d Addr:%d", it.first, actual_addr);
-            ssd1306_draw_string(&disp, 5, 15, 1, line1);
-            
-            char line2[20];
-            bool mounted = tuh_hid_is_mounted(it.first);
-            bool busy = tuh_hid_is_busy(it.first);
-            snprintf(line2, sizeof(line2), "M:%d B:%d", mounted, busy);
-            ssd1306_draw_string(&disp, 5, 30, 1, line2);
-            
-            HID_ReportInfo_t* info = tuh_hid_get_report_info(it.first);
-            char line3[20];
-            snprintf(line3, sizeof(line3), "Info: %s", info ? "YES" : "NULL");
-            ssd1306_draw_string(&disp, 5, 45, 1, line3);
-            
-            ssd1306_show(&disp);
-            sleep_ms(1500);
-        }
-        #endif
         
         if (tuh_hid_is_mounted(it.first) && !tuh_hid_is_busy(it.first)) {  // Use key, not actual_addr
             hid_mouse_report_t* mouse = (hid_mouse_report_t*)it.second;
@@ -1987,10 +1901,6 @@ bool HidInput::get_ps4_joystick(int joystick_num, uint8_t& axis, uint8_t& button
         }
     }
     
-    // Debug: Show when no input found (only first few times)
-    if (call_count <= 5) {
-        printf("PS4 Joy%d: NO INPUT (call %lu)\n", joystick_num, call_count);
-    }
     
     return false;
 }

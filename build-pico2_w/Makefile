@@ -143,6 +143,32 @@ bs2_default/fast:
 .PHONY : bs2_default/fast
 
 #=============================================================================
+# Target rules for targets named picotoolForceReconfigure
+
+# Build rule for target.
+picotoolForceReconfigure: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 picotoolForceReconfigure
+.PHONY : picotoolForceReconfigure
+
+# fast build rule for target.
+picotoolForceReconfigure/fast:
+	$(MAKE) $(MAKESILENT) -f pico-sdk/src/rp2350/boot_stage2/CMakeFiles/picotoolForceReconfigure.dir/build.make pico-sdk/src/rp2350/boot_stage2/CMakeFiles/picotoolForceReconfigure.dir/build
+.PHONY : picotoolForceReconfigure/fast
+
+#=============================================================================
+# Target rules for targets named picotoolBuild
+
+# Build rule for target.
+picotoolBuild: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 picotoolBuild
+.PHONY : picotoolBuild
+
+# fast build rule for target.
+picotoolBuild/fast:
+	$(MAKE) $(MAKESILENT) -f pico-sdk/src/rp2350/boot_stage2/CMakeFiles/picotoolBuild.dir/build.make pico-sdk/src/rp2350/boot_stage2/CMakeFiles/picotoolBuild.dir/build
+.PHONY : picotoolBuild/fast
+
+#=============================================================================
 # Target rules for targets named bs2_default_bin
 
 # Build rule for target.
@@ -167,6 +193,19 @@ bs2_default_library: cmake_check_build_system
 bs2_default_library/fast:
 	$(MAKE) $(MAKESILENT) -f pico-sdk/src/rp2350/boot_stage2/CMakeFiles/bs2_default_library.dir/build.make pico-sdk/src/rp2350/boot_stage2/CMakeFiles/bs2_default_library.dir/build
 .PHONY : bs2_default_library/fast
+
+#=============================================================================
+# Target rules for targets named pioasmBuild
+
+# Build rule for target.
+pioasmBuild: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 pioasmBuild
+.PHONY : pioasmBuild
+
+# fast build rule for target.
+pioasmBuild/fast:
+	$(MAKE) $(MAKESILENT) -f pico-sdk/src/rp2_common/pico_cyw43_driver/CMakeFiles/pioasmBuild.dir/build.make pico-sdk/src/rp2_common/pico_cyw43_driver/CMakeFiles/pioasmBuild.dir/build
+.PHONY : pioasmBuild/fast
 
 #=============================================================================
 # Target rules for targets named cyw43_driver_picow_cyw43_bus_pio_spi_pio_h
@@ -1790,6 +1829,30 @@ pico-sdk/lib/btstack/src/classic/btstack_cvsd_plc.s: pico-sdk/lib/btstack/src/cl
 pico-sdk/lib/btstack/src/classic/btstack_cvsd_plc.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/atari_ikbd.dir/build.make CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_cvsd_plc.c.s
 .PHONY : pico-sdk/lib/btstack/src/classic/btstack_cvsd_plc.c.s
+
+pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.o: pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.o
+.PHONY : pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.o
+
+# target to build an object file
+pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/atari_ikbd.dir/build.make CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.o
+.PHONY : pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.o
+
+pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.i: pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.i
+.PHONY : pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.i
+
+# target to preprocess a source file
+pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/atari_ikbd.dir/build.make CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.i
+.PHONY : pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.i
+
+pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.s: pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.s
+.PHONY : pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.s
+
+# target to generate assembly for a file
+pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/atari_ikbd.dir/build.make CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.s
+.PHONY : pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.s
 
 pico-sdk/lib/btstack/src/classic/btstack_link_key_db_tlv.o: pico-sdk/lib/btstack/src/classic/btstack_link_key_db_tlv.c.o
 .PHONY : pico-sdk/lib/btstack/src/classic/btstack_link_key_db_tlv.o
@@ -5290,6 +5353,9 @@ help:
 	@echo "... bs2_default_bin"
 	@echo "... cyw43_driver_picow_cyw43_bus_pio_spi_pio_h"
 	@echo "... pico_status_led_ws2812_pio_h"
+	@echo "... picotoolBuild"
+	@echo "... picotoolForceReconfigure"
+	@echo "... pioasmBuild"
 	@echo "... atari_ikbd"
 	@echo "... bluepad32"
 	@echo "... bs2_default"
@@ -5492,6 +5558,9 @@ help:
 	@echo "... pico-sdk/lib/btstack/src/classic/btstack_cvsd_plc.o"
 	@echo "... pico-sdk/lib/btstack/src/classic/btstack_cvsd_plc.i"
 	@echo "... pico-sdk/lib/btstack/src/classic/btstack_cvsd_plc.s"
+	@echo "... pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.o"
+	@echo "... pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.i"
+	@echo "... pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.s"
 	@echo "... pico-sdk/lib/btstack/src/classic/btstack_link_key_db_tlv.o"
 	@echo "... pico-sdk/lib/btstack/src/classic/btstack_link_key_db_tlv.i"
 	@echo "... pico-sdk/lib/btstack/src/classic/btstack_link_key_db_tlv.s"

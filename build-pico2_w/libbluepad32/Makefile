@@ -1666,6 +1666,30 @@ __/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_cvsd_plc.c.s:
 	cd /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w && $(MAKE) $(MAKESILENT) -f libbluepad32/CMakeFiles/bluepad32.dir/build.make libbluepad32/CMakeFiles/bluepad32.dir/__/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_cvsd_plc.c.s
 .PHONY : __/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_cvsd_plc.c.s
 
+__/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.o: __/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.o
+.PHONY : __/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.o
+
+# target to build an object file
+__/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.o:
+	cd /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w && $(MAKE) $(MAKESILENT) -f libbluepad32/CMakeFiles/bluepad32.dir/build.make libbluepad32/CMakeFiles/bluepad32.dir/__/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.o
+.PHONY : __/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.o
+
+__/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.i: __/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.i
+.PHONY : __/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.i
+
+# target to preprocess a source file
+__/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.i:
+	cd /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w && $(MAKE) $(MAKESILENT) -f libbluepad32/CMakeFiles/bluepad32.dir/build.make libbluepad32/CMakeFiles/bluepad32.dir/__/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.i
+.PHONY : __/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.i
+
+__/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.s: __/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.s
+.PHONY : __/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.s
+
+# target to generate assembly for a file
+__/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.s:
+	cd /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w && $(MAKE) $(MAKESILENT) -f libbluepad32/CMakeFiles/bluepad32.dir/build.make libbluepad32/CMakeFiles/bluepad32.dir/__/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.s
+.PHONY : __/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.s
+
 __/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_tlv.o: __/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_tlv.c.o
 .PHONY : __/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_tlv.o
 
@@ -5667,6 +5691,9 @@ help:
 	@echo "... __/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_cvsd_plc.o"
 	@echo "... __/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_cvsd_plc.i"
 	@echo "... __/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_cvsd_plc.s"
+	@echo "... __/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.o"
+	@echo "... __/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.i"
+	@echo "... __/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.s"
 	@echo "... __/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_tlv.o"
 	@echo "... __/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_tlv.i"
 	@echo "... __/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_tlv.s"

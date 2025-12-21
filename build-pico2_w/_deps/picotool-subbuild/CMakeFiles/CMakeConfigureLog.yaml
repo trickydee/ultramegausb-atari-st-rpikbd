@@ -30,6 +30,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
       - "/opt/homebrew/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
     searched_directories:
       - "/usr/local/bin/uname"
       - "/System/Cryptexes/App/usr/bin/uname"
@@ -46,6 +47,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
   -
     kind: "message-v1"
     backtrace:
@@ -83,6 +85,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
       - "/opt/homebrew/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
     searched_directories:
       - "/usr/local/bin/install_name_tool"
       - "/System/Cryptexes/App/usr/bin/install_name_tool"
@@ -99,5 +102,6 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_INSTALL_PREFIX: "/usr/local"
 ...

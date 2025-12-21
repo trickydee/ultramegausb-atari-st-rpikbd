@@ -252,13 +252,13 @@ DOXYGEN_DOT_EXECUTABLE:FILEPATH=DOXYGEN_DOT_EXECUTABLE-NOTFOUND
 DOXYGEN_EXECUTABLE:FILEPATH=DOXYGEN_EXECUTABLE-NOTFOUND
 
 //Enable debug displays (0 or 1)
-ENABLE_DEBUG:STRING=0
+ENABLE_DEBUG:STRING=1
 
 //Enable OLED display (0 or 1)
-ENABLE_OLED_DISPLAY:STRING=1
+ENABLE_OLED_DISPLAY:STRING=0
 
 //Enable verbose serial logging (0 or 1)
-ENABLE_SERIAL_LOGGING:STRING=1
+ENABLE_SERIAL_LOGGING:STRING=0
 
 //Directory under which to collect all populated content
 FETCHCONTENT_BASE_DIR:PATH=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/_deps

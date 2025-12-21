@@ -131,6 +131,34 @@ bs2_default/fast:
 .PHONY : bs2_default/fast
 
 # Convenience name for target.
+pico-sdk/src/rp2350/boot_stage2/CMakeFiles/picotoolForceReconfigure.dir/rule:
+	cd /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 pico-sdk/src/rp2350/boot_stage2/CMakeFiles/picotoolForceReconfigure.dir/rule
+.PHONY : pico-sdk/src/rp2350/boot_stage2/CMakeFiles/picotoolForceReconfigure.dir/rule
+
+# Convenience name for target.
+picotoolForceReconfigure: pico-sdk/src/rp2350/boot_stage2/CMakeFiles/picotoolForceReconfigure.dir/rule
+.PHONY : picotoolForceReconfigure
+
+# fast build rule for target.
+picotoolForceReconfigure/fast:
+	cd /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w && $(MAKE) $(MAKESILENT) -f pico-sdk/src/rp2350/boot_stage2/CMakeFiles/picotoolForceReconfigure.dir/build.make pico-sdk/src/rp2350/boot_stage2/CMakeFiles/picotoolForceReconfigure.dir/build
+.PHONY : picotoolForceReconfigure/fast
+
+# Convenience name for target.
+pico-sdk/src/rp2350/boot_stage2/CMakeFiles/picotoolBuild.dir/rule:
+	cd /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 pico-sdk/src/rp2350/boot_stage2/CMakeFiles/picotoolBuild.dir/rule
+.PHONY : pico-sdk/src/rp2350/boot_stage2/CMakeFiles/picotoolBuild.dir/rule
+
+# Convenience name for target.
+picotoolBuild: pico-sdk/src/rp2350/boot_stage2/CMakeFiles/picotoolBuild.dir/rule
+.PHONY : picotoolBuild
+
+# fast build rule for target.
+picotoolBuild/fast:
+	cd /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w && $(MAKE) $(MAKESILENT) -f pico-sdk/src/rp2350/boot_stage2/CMakeFiles/picotoolBuild.dir/build.make pico-sdk/src/rp2350/boot_stage2/CMakeFiles/picotoolBuild.dir/build
+.PHONY : picotoolBuild/fast
+
+# Convenience name for target.
 pico-sdk/src/rp2350/boot_stage2/CMakeFiles/bs2_default_bin.dir/rule:
 	cd /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 pico-sdk/src/rp2350/boot_stage2/CMakeFiles/bs2_default_bin.dir/rule
 .PHONY : pico-sdk/src/rp2350/boot_stage2/CMakeFiles/bs2_default_bin.dir/rule
@@ -183,6 +211,8 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... bs2_default_bin"
+	@echo "... picotoolBuild"
+	@echo "... picotoolForceReconfigure"
 	@echo "... bs2_default"
 	@echo "... bs2_default_library"
 	@echo "... bs2_default_padded_checksummed.o"

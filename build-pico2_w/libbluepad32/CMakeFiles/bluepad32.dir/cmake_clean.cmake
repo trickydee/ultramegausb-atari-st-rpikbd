@@ -127,6 +127,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/bluepad32.dir/__/__/__/__/pico-sdk/lib/btstack/src/classic/avrcp_target.c.o.d"
   "CMakeFiles/bluepad32.dir/__/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_cvsd_plc.c.o"
   "CMakeFiles/bluepad32.dir/__/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_cvsd_plc.c.o.d"
+  "CMakeFiles/bluepad32.dir/__/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.o"
+  "CMakeFiles/bluepad32.dir/__/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.o.d"
   "CMakeFiles/bluepad32.dir/__/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_tlv.c.o"
   "CMakeFiles/bluepad32.dir/__/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_tlv.c.o.d"
   "CMakeFiles/bluepad32.dir/__/__/__/__/pico-sdk/lib/btstack/src/classic/btstack_sbc_plc.c.o"

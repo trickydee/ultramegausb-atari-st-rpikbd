@@ -117,6 +117,20 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
+pico-sdk/src/rp2_common/pico_cyw43_driver/CMakeFiles/pioasmBuild.dir/rule:
+	cd /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 pico-sdk/src/rp2_common/pico_cyw43_driver/CMakeFiles/pioasmBuild.dir/rule
+.PHONY : pico-sdk/src/rp2_common/pico_cyw43_driver/CMakeFiles/pioasmBuild.dir/rule
+
+# Convenience name for target.
+pioasmBuild: pico-sdk/src/rp2_common/pico_cyw43_driver/CMakeFiles/pioasmBuild.dir/rule
+.PHONY : pioasmBuild
+
+# fast build rule for target.
+pioasmBuild/fast:
+	cd /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w && $(MAKE) $(MAKESILENT) -f pico-sdk/src/rp2_common/pico_cyw43_driver/CMakeFiles/pioasmBuild.dir/build.make pico-sdk/src/rp2_common/pico_cyw43_driver/CMakeFiles/pioasmBuild.dir/build
+.PHONY : pioasmBuild/fast
+
+# Convenience name for target.
 pico-sdk/src/rp2_common/pico_cyw43_driver/CMakeFiles/cyw43_driver_picow_cyw43_bus_pio_spi_pio_h.dir/rule:
 	cd /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 pico-sdk/src/rp2_common/pico_cyw43_driver/CMakeFiles/cyw43_driver_picow_cyw43_bus_pio_spi_pio_h.dir/rule
 .PHONY : pico-sdk/src/rp2_common/pico_cyw43_driver/CMakeFiles/cyw43_driver_picow_cyw43_bus_pio_spi_pio_h.dir/rule
@@ -139,6 +153,7 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... cyw43_driver_picow_cyw43_bus_pio_spi_pio_h"
+	@echo "... pioasmBuild"
 .PHONY : help
 
 

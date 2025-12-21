@@ -30,6 +30,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
       - "/opt/homebrew/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
     searched_directories:
       - "/usr/local/bin/uname"
       - "/System/Cryptexes/App/usr/bin/uname"
@@ -46,6 +47,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
   -
     kind: "find-v1"
     backtrace:
@@ -81,6 +83,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
   -
     kind: "find-v1"
     backtrace:
@@ -114,6 +117,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
       - "/opt/homebrew/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
     searched_directories:
       - "/usr/local/bin/arm-none-eabi-gcc"
       - "/System/Cryptexes/App/usr/bin/arm-none-eabi-gcc"
@@ -137,6 +141,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
   -
     kind: "find-v1"
     backtrace:
@@ -172,6 +177,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
   -
     kind: "find-v1"
     backtrace:
@@ -205,6 +211,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
       - "/opt/homebrew/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
     searched_directories:
       - "/usr/local/bin/arm-none-eabi-g++"
       - "/System/Cryptexes/App/usr/bin/arm-none-eabi-g++"
@@ -228,6 +235,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
   -
     kind: "find-v1"
     backtrace:
@@ -263,6 +271,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
   -
     kind: "find-v1"
     backtrace:
@@ -296,6 +305,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
       - "/opt/homebrew/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
     searched_directories:
       - "/usr/local/bin/arm-none-eabi-objcopy"
       - "/System/Cryptexes/App/usr/bin/arm-none-eabi-objcopy"
@@ -319,6 +329,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
   -
     kind: "find-v1"
     backtrace:
@@ -354,6 +365,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
   -
     kind: "find-v1"
     backtrace:
@@ -387,6 +399,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
       - "/opt/homebrew/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
     searched_directories:
       - "/usr/local/bin/arm-none-eabi-objdump"
       - "/System/Cryptexes/App/usr/bin/arm-none-eabi-objdump"
@@ -410,6 +423,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
   -
     kind: "message-v1"
     backtrace:
@@ -449,6 +463,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
       - "/opt/homebrew/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
     searched_directories:
       - "/usr/local/bin/gmake"
       - "/System/Cryptexes/App/usr/bin/gmake"
@@ -460,6 +475,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/gmake"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/gmake"
       - "/opt/homebrew/bin/gmake"
+      - "/Applications/Ghostty.app/Contents/MacOS/gmake"
       - "/usr/local/bin/make"
       - "/System/Cryptexes/App/usr/bin/make"
     found: "/usr/bin/make"
@@ -475,6 +491,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_FIND_ROOT_PATH: "/opt/homebrew"
   -
     kind: "find-v1"
@@ -514,6 +531,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_FIND_ROOT_PATH: "/opt/homebrew"
   -
     kind: "message-v1"
@@ -573,6 +591,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_FIND_ROOT_PATH: "/opt/homebrew"
   -
     kind: "message-v1"
@@ -627,6 +646,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
     found: "/opt/homebrew/bin/arm-none-eabi-ar"
     search_context:
       ENV{PATH}:
@@ -640,6 +660,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_FIND_ROOT_PATH: "/opt/homebrew"
   -
     kind: "find-v1"
@@ -672,6 +693,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
     found: "/opt/homebrew/bin/arm-none-eabi-ranlib"
     search_context:
       ENV{PATH}:
@@ -685,6 +707,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_FIND_ROOT_PATH: "/opt/homebrew"
   -
     kind: "find-v1"
@@ -717,6 +740,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
     found: "/opt/homebrew/bin/arm-none-eabi-strip"
     search_context:
       ENV{PATH}:
@@ -730,6 +754,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_FIND_ROOT_PATH: "/opt/homebrew"
   -
     kind: "find-v1"
@@ -762,6 +787,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
     found: "/opt/homebrew/bin/arm-none-eabi-ld"
     search_context:
       ENV{PATH}:
@@ -775,6 +801,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_FIND_ROOT_PATH: "/opt/homebrew"
   -
     kind: "find-v1"
@@ -807,6 +834,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
     found: "/opt/homebrew/bin/arm-none-eabi-nm"
     search_context:
       ENV{PATH}:
@@ -820,6 +848,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_FIND_ROOT_PATH: "/opt/homebrew"
   -
     kind: "find-v1"
@@ -852,6 +881,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
     found: "/opt/homebrew/bin/arm-none-eabi-readelf"
     search_context:
       ENV{PATH}:
@@ -865,6 +895,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_FIND_ROOT_PATH: "/opt/homebrew"
   -
     kind: "find-v1"
@@ -897,6 +928,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
     searched_directories:
       - "/opt/homebrew/bin/arm-none-eabi-dlltool"
       - "/usr/local/bin/arm-none-eabi-dlltool"
@@ -908,6 +940,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/arm-none-eabi-dlltool"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/arm-none-eabi-dlltool"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/arm-none-eabi-dlltool"
+      - "/Applications/Ghostty.app/Contents/MacOS/arm-none-eabi-dlltool"
       - "/opt/homebrew/bin/dlltool"
       - "/usr/local/bin/dlltool"
       - "/System/Cryptexes/App/usr/bin/dlltool"
@@ -918,6 +951,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/dlltool"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/dlltool"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/dlltool"
+      - "/Applications/Ghostty.app/Contents/MacOS/dlltool"
     found: false
     search_context:
       ENV{PATH}:
@@ -931,6 +965,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_FIND_ROOT_PATH: "/opt/homebrew"
   -
     kind: "find-v1"
@@ -963,6 +998,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
     found: "/opt/homebrew/bin/arm-none-eabi-addr2line"
     search_context:
       ENV{PATH}:
@@ -976,6 +1012,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_FIND_ROOT_PATH: "/opt/homebrew"
   -
     kind: "find-v1"
@@ -1008,6 +1045,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
     searched_directories:
       - "/opt/homebrew/bin/arm-none-eabi-tapi"
       - "/usr/local/bin/arm-none-eabi-tapi"
@@ -1019,6 +1057,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/arm-none-eabi-tapi"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/arm-none-eabi-tapi"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/arm-none-eabi-tapi"
+      - "/Applications/Ghostty.app/Contents/MacOS/arm-none-eabi-tapi"
       - "/opt/homebrew/bin/tapi"
       - "/usr/local/bin/tapi"
       - "/System/Cryptexes/App/usr/bin/tapi"
@@ -1029,6 +1068,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/tapi"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/tapi"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/tapi"
+      - "/Applications/Ghostty.app/Contents/MacOS/tapi"
     found: false
     search_context:
       ENV{PATH}:
@@ -1042,6 +1082,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_FIND_ROOT_PATH: "/opt/homebrew"
   -
     kind: "find-v1"
@@ -1076,6 +1117,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
     searched_directories:
       - "/opt/homebrew/bin/arm-none-eabi-gcc-ar-10.3"
       - "/usr/local/bin/arm-none-eabi-gcc-ar-10.3"
@@ -1087,6 +1129,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/arm-none-eabi-gcc-ar-10.3"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/arm-none-eabi-gcc-ar-10.3"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/arm-none-eabi-gcc-ar-10.3"
+      - "/Applications/Ghostty.app/Contents/MacOS/arm-none-eabi-gcc-ar-10.3"
       - "/opt/homebrew/bin/arm-none-eabi-gcc-ar-10"
       - "/usr/local/bin/arm-none-eabi-gcc-ar-10"
       - "/System/Cryptexes/App/usr/bin/arm-none-eabi-gcc-ar-10"
@@ -1097,6 +1140,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/arm-none-eabi-gcc-ar-10"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/arm-none-eabi-gcc-ar-10"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/arm-none-eabi-gcc-ar-10"
+      - "/Applications/Ghostty.app/Contents/MacOS/arm-none-eabi-gcc-ar-10"
       - "/opt/homebrew/bin/arm-none-eabi-gcc-ar10"
       - "/usr/local/bin/arm-none-eabi-gcc-ar10"
       - "/System/Cryptexes/App/usr/bin/arm-none-eabi-gcc-ar10"
@@ -1107,6 +1151,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/arm-none-eabi-gcc-ar10"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/arm-none-eabi-gcc-ar10"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/arm-none-eabi-gcc-ar10"
+      - "/Applications/Ghostty.app/Contents/MacOS/arm-none-eabi-gcc-ar10"
     found: "/opt/homebrew/bin/arm-none-eabi-gcc-ar"
     search_context:
       ENV{PATH}:
@@ -1120,6 +1165,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_FIND_ROOT_PATH: "/opt/homebrew"
   -
     kind: "find-v1"
@@ -1154,6 +1200,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
     searched_directories:
       - "/opt/homebrew/bin/arm-none-eabi-gcc-ranlib-10.3"
       - "/usr/local/bin/arm-none-eabi-gcc-ranlib-10.3"
@@ -1165,6 +1212,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/arm-none-eabi-gcc-ranlib-10.3"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/arm-none-eabi-gcc-ranlib-10.3"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/arm-none-eabi-gcc-ranlib-10.3"
+      - "/Applications/Ghostty.app/Contents/MacOS/arm-none-eabi-gcc-ranlib-10.3"
       - "/opt/homebrew/bin/arm-none-eabi-gcc-ranlib-10"
       - "/usr/local/bin/arm-none-eabi-gcc-ranlib-10"
       - "/System/Cryptexes/App/usr/bin/arm-none-eabi-gcc-ranlib-10"
@@ -1175,6 +1223,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/arm-none-eabi-gcc-ranlib-10"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/arm-none-eabi-gcc-ranlib-10"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/arm-none-eabi-gcc-ranlib-10"
+      - "/Applications/Ghostty.app/Contents/MacOS/arm-none-eabi-gcc-ranlib-10"
       - "/opt/homebrew/bin/arm-none-eabi-gcc-ranlib10"
       - "/usr/local/bin/arm-none-eabi-gcc-ranlib10"
       - "/System/Cryptexes/App/usr/bin/arm-none-eabi-gcc-ranlib10"
@@ -1185,6 +1234,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/arm-none-eabi-gcc-ranlib10"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/arm-none-eabi-gcc-ranlib10"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/arm-none-eabi-gcc-ranlib10"
+      - "/Applications/Ghostty.app/Contents/MacOS/arm-none-eabi-gcc-ranlib10"
     found: "/opt/homebrew/bin/arm-none-eabi-gcc-ranlib"
     search_context:
       ENV{PATH}:
@@ -1198,6 +1248,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_FIND_ROOT_PATH: "/opt/homebrew"
   -
     kind: "find-v1"
@@ -1237,6 +1288,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_FIND_ROOT_PATH: "/opt/homebrew"
   -
     kind: "message-v1"
@@ -1296,6 +1348,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_FIND_ROOT_PATH: "/opt/homebrew"
   -
     kind: "message-v1"
@@ -1352,6 +1405,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
     searched_directories:
       - "/opt/homebrew/bin/arm-none-eabi-gcc-ar-10.3"
       - "/usr/local/bin/arm-none-eabi-gcc-ar-10.3"
@@ -1363,6 +1417,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/arm-none-eabi-gcc-ar-10.3"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/arm-none-eabi-gcc-ar-10.3"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/arm-none-eabi-gcc-ar-10.3"
+      - "/Applications/Ghostty.app/Contents/MacOS/arm-none-eabi-gcc-ar-10.3"
       - "/opt/homebrew/bin/arm-none-eabi-gcc-ar-10"
       - "/usr/local/bin/arm-none-eabi-gcc-ar-10"
       - "/System/Cryptexes/App/usr/bin/arm-none-eabi-gcc-ar-10"
@@ -1373,6 +1428,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/arm-none-eabi-gcc-ar-10"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/arm-none-eabi-gcc-ar-10"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/arm-none-eabi-gcc-ar-10"
+      - "/Applications/Ghostty.app/Contents/MacOS/arm-none-eabi-gcc-ar-10"
       - "/opt/homebrew/bin/arm-none-eabi-gcc-ar10"
       - "/usr/local/bin/arm-none-eabi-gcc-ar10"
       - "/System/Cryptexes/App/usr/bin/arm-none-eabi-gcc-ar10"
@@ -1383,6 +1439,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/arm-none-eabi-gcc-ar10"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/arm-none-eabi-gcc-ar10"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/arm-none-eabi-gcc-ar10"
+      - "/Applications/Ghostty.app/Contents/MacOS/arm-none-eabi-gcc-ar10"
     found: "/opt/homebrew/bin/arm-none-eabi-gcc-ar"
     search_context:
       ENV{PATH}:
@@ -1396,6 +1453,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_FIND_ROOT_PATH: "/opt/homebrew"
   -
     kind: "find-v1"
@@ -1430,6 +1488,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
     searched_directories:
       - "/opt/homebrew/bin/arm-none-eabi-gcc-ranlib-10.3"
       - "/usr/local/bin/arm-none-eabi-gcc-ranlib-10.3"
@@ -1441,6 +1500,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/arm-none-eabi-gcc-ranlib-10.3"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/arm-none-eabi-gcc-ranlib-10.3"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/arm-none-eabi-gcc-ranlib-10.3"
+      - "/Applications/Ghostty.app/Contents/MacOS/arm-none-eabi-gcc-ranlib-10.3"
       - "/opt/homebrew/bin/arm-none-eabi-gcc-ranlib-10"
       - "/usr/local/bin/arm-none-eabi-gcc-ranlib-10"
       - "/System/Cryptexes/App/usr/bin/arm-none-eabi-gcc-ranlib-10"
@@ -1451,6 +1511,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/arm-none-eabi-gcc-ranlib-10"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/arm-none-eabi-gcc-ranlib-10"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/arm-none-eabi-gcc-ranlib-10"
+      - "/Applications/Ghostty.app/Contents/MacOS/arm-none-eabi-gcc-ranlib-10"
       - "/opt/homebrew/bin/arm-none-eabi-gcc-ranlib10"
       - "/usr/local/bin/arm-none-eabi-gcc-ranlib10"
       - "/System/Cryptexes/App/usr/bin/arm-none-eabi-gcc-ranlib10"
@@ -1461,6 +1522,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/arm-none-eabi-gcc-ranlib10"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/arm-none-eabi-gcc-ranlib10"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/arm-none-eabi-gcc-ranlib10"
+      - "/Applications/Ghostty.app/Contents/MacOS/arm-none-eabi-gcc-ranlib10"
     found: "/opt/homebrew/bin/arm-none-eabi-gcc-ranlib"
     search_context:
       ENV{PATH}:
@@ -1474,6 +1536,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_FIND_ROOT_PATH: "/opt/homebrew"
   -
     kind: "message-v1"
@@ -1521,6 +1584,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
     searched_directories:
       - "/opt/homebrew/bin/arm-none-eabi-gcc-ar-"
       - "/usr/local/bin/arm-none-eabi-gcc-ar-"
@@ -1532,6 +1596,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/arm-none-eabi-gcc-ar-"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/arm-none-eabi-gcc-ar-"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/arm-none-eabi-gcc-ar-"
+      - "/Applications/Ghostty.app/Contents/MacOS/arm-none-eabi-gcc-ar-"
       - "/opt/homebrew/bin/arm-none-eabi-gcc-ar-"
       - "/usr/local/bin/arm-none-eabi-gcc-ar-"
       - "/System/Cryptexes/App/usr/bin/arm-none-eabi-gcc-ar-"
@@ -1542,6 +1607,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/arm-none-eabi-gcc-ar-"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/arm-none-eabi-gcc-ar-"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/arm-none-eabi-gcc-ar-"
+      - "/Applications/Ghostty.app/Contents/MacOS/arm-none-eabi-gcc-ar-"
     found: "/opt/homebrew/bin/arm-none-eabi-gcc-ar"
     search_context:
       ENV{PATH}:
@@ -1555,6 +1621,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_FIND_ROOT_PATH: "/opt/homebrew"
   -
     kind: "find-v1"
@@ -1589,6 +1656,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
     searched_directories:
       - "/opt/homebrew/bin/arm-none-eabi-gcc-ranlib-"
       - "/usr/local/bin/arm-none-eabi-gcc-ranlib-"
@@ -1600,6 +1668,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/arm-none-eabi-gcc-ranlib-"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/arm-none-eabi-gcc-ranlib-"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/arm-none-eabi-gcc-ranlib-"
+      - "/Applications/Ghostty.app/Contents/MacOS/arm-none-eabi-gcc-ranlib-"
       - "/opt/homebrew/bin/arm-none-eabi-gcc-ranlib-"
       - "/usr/local/bin/arm-none-eabi-gcc-ranlib-"
       - "/System/Cryptexes/App/usr/bin/arm-none-eabi-gcc-ranlib-"
@@ -1610,6 +1679,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/arm-none-eabi-gcc-ranlib-"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/arm-none-eabi-gcc-ranlib-"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/arm-none-eabi-gcc-ranlib-"
+      - "/Applications/Ghostty.app/Contents/MacOS/arm-none-eabi-gcc-ranlib-"
     found: "/opt/homebrew/bin/arm-none-eabi-gcc-ranlib"
     search_context:
       ENV{PATH}:
@@ -1623,6 +1693,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_FIND_ROOT_PATH: "/opt/homebrew"
   -
     kind: "try_compile-v1"
@@ -1633,8 +1704,8 @@ events:
     checks:
       - "Detecting C compiler ABI info"
     directories:
-      source: "/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles/CMakeScratch/TryCompile-xScg3I"
-      binary: "/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles/CMakeScratch/TryCompile-xScg3I"
+      source: "/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles/CMakeScratch/TryCompile-A8VLaY"
+      binary: "/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles/CMakeScratch/TryCompile-A8VLaY"
     cmakeVariables:
       CMAKE_C_FLAGS: "-mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp -mcmse"
       CMAKE_C_FLAGS_DEBUG: "-Og -g"
@@ -1645,12 +1716,12 @@ events:
       variable: "CMAKE_C_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: '/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles/CMakeScratch/TryCompile-xScg3I'
+        Change Dir: '/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles/CMakeScratch/TryCompile-A8VLaY'
         
-        Run Build Command(s): /opt/homebrew/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_9dcdf/fast
-        /Library/Developer/CommandLineTools/usr/bin/make  -f CMakeFiles/cmTC_9dcdf.dir/build.make CMakeFiles/cmTC_9dcdf.dir/build
-        Building C object CMakeFiles/cmTC_9dcdf.dir/CMakeCCompilerABI.c.o
-        /opt/homebrew/bin/arm-none-eabi-gcc   -mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp -mcmse    -v -o CMakeFiles/cmTC_9dcdf.dir/CMakeCCompilerABI.c.o -c /opt/homebrew/share/cmake/Modules/CMakeCCompilerABI.c
+        Run Build Command(s): /opt/homebrew/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_777e8/fast
+        /Library/Developer/CommandLineTools/usr/bin/make  -f CMakeFiles/cmTC_777e8.dir/build.make CMakeFiles/cmTC_777e8.dir/build
+        Building C object CMakeFiles/cmTC_777e8.dir/CMakeCCompilerABI.c.o
+        /opt/homebrew/bin/arm-none-eabi-gcc   -mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp -mcmse    -v -o CMakeFiles/cmTC_777e8.dir/CMakeCCompilerABI.c.o -c /opt/homebrew/share/cmake/Modules/CMakeCCompilerABI.c
         Using built-in specs.
         COLLECT_GCC=/opt/homebrew/bin/arm-none-eabi-gcc
         Target: arm-none-eabi
@@ -1658,8 +1729,8 @@ events:
         Thread model: single
         Supported LTO compression algorithms: zlib
         gcc version 10.3.1 20210824 (release) (GNU Arm Embedded Toolchain 10.3-2021.10) 
-        COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-v' '-o' 'CMakeFiles/cmTC_9dcdf.dir/CMakeCCompilerABI.c.o' '-c' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp'
-         /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/cc1 -quiet -v -imultilib thumb/v8-m.main+fp/softfp -iprefix /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/ -isysroot /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi -D__USES_INITFINI__ /opt/homebrew/share/cmake/Modules/CMakeCCompilerABI.c -quiet -dumpbase CMakeCCompilerABI.c -mcpu=cortex-m33 -mthumb -mfloat-abi=softfp -mcmse -mlibarch=armv8-m.main+dsp+fp -march=armv8-m.main+dsp+fp -auxbase-strip CMakeFiles/cmTC_9dcdf.dir/CMakeCCompilerABI.c.o -version -o /var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//ccv52YYk.s
+        COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-v' '-o' 'CMakeFiles/cmTC_777e8.dir/CMakeCCompilerABI.c.o' '-c' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp'
+         /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/cc1 -quiet -v -imultilib thumb/v8-m.main+fp/softfp -iprefix /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/ -isysroot /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi -D__USES_INITFINI__ /opt/homebrew/share/cmake/Modules/CMakeCCompilerABI.c -quiet -dumpbase CMakeCCompilerABI.c -mcpu=cortex-m33 -mthumb -mfloat-abi=softfp -mcmse -mlibarch=armv8-m.main+dsp+fp -march=armv8-m.main+dsp+fp -auxbase-strip CMakeFiles/cmTC_777e8.dir/CMakeCCompilerABI.c.o -version -o /var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//cc2hwojo.s
         GNU C17 (GNU Arm Embedded Toolchain 10.3-2021.10) version 10.3.1 20210824 (release) (arm-none-eabi)
         	compiled by GNU C version 4.2.1 Compatible Apple LLVM 11.0.0 (clang-1100.0.33.17), GMP version 6.1.0, MPFR version 3.1.4, MPC version 1.0.3, isl version isl-0.18-GMP
         
@@ -1680,14 +1751,14 @@ events:
         
         GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
         Compiler executable checksum: 733728c033f099ebc66962b91852e3eb
-        COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-v' '-o' 'CMakeFiles/cmTC_9dcdf.dir/CMakeCCompilerABI.c.o' '-c' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp'
-         /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/bin/as -v -march=armv8-m.main+dsp -mfloat-abi=softfp -meabi=5 -o CMakeFiles/cmTC_9dcdf.dir/CMakeCCompilerABI.c.o /var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//ccv52YYk.s
+        COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-v' '-o' 'CMakeFiles/cmTC_777e8.dir/CMakeCCompilerABI.c.o' '-c' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp'
+         /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/bin/as -v -march=armv8-m.main+dsp -mfloat-abi=softfp -meabi=5 -o CMakeFiles/cmTC_777e8.dir/CMakeCCompilerABI.c.o /var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//cc2hwojo.s
         GNU assembler version 2.36.1 (arm-none-eabi) using BFD version (GNU Arm Embedded Toolchain 10.3-2021.10) 2.36.1.20210621
         COMPILER_PATH=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/bin/
         LIBRARY_PATH=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v8-m.main+fp/softfp/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/
-        COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-v' '-o' 'CMakeFiles/cmTC_9dcdf.dir/CMakeCCompilerABI.c.o' '-c' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp'
-        Linking C executable cmTC_9dcdf.elf
-        /opt/homebrew/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9dcdf.dir/link.txt --verbose=1
+        COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-v' '-o' 'CMakeFiles/cmTC_777e8.dir/CMakeCCompilerABI.c.o' '-c' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp'
+        Linking C executable cmTC_777e8.elf
+        /opt/homebrew/bin/cmake -E cmake_link_script CMakeFiles/cmTC_777e8.dir/link.txt --verbose=1
         Using built-in specs.
         COLLECT_GCC=/opt/homebrew/bin/arm-none-eabi-gcc
         COLLECT_LTO_WRAPPER=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/lto-wrapper
@@ -1698,11 +1769,11 @@ events:
         gcc version 10.3.1 20210824 (release) (GNU Arm Embedded Toolchain 10.3-2021.10) 
         COMPILER_PATH=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/bin/
         LIBRARY_PATH=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v8-m.main+fp/softfp/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/
-        COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-nostdlib' '-v' '-o' 'cmTC_9dcdf.elf' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp'
-         /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/collect2 -plugin /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/liblto_plugin.so -plugin-opt=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/lto-wrapper -plugin-opt=-fresolution=/var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//ccdechIJ.res --sysroot=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi -X -o cmTC_9dcdf.elf -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v8-m.main+fp/softfp -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1 -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib --build-id=none CMakeFiles/cmTC_9dcdf.dir/CMakeCCompilerABI.c.o
+        COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-nostdlib' '-v' '-o' 'cmTC_777e8.elf' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp'
+         /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/collect2 -plugin /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/liblto_plugin.so -plugin-opt=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/lto-wrapper -plugin-opt=-fresolution=/var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//cctL8AKW.res --sysroot=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi -X -o cmTC_777e8.elf -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v8-m.main+fp/softfp -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1 -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib --build-id=none CMakeFiles/cmTC_777e8.dir/CMakeCCompilerABI.c.o
         /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 0000000000008000
-        COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-nostdlib' '-v' '-o' 'cmTC_9dcdf.elf' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp'
-        /opt/homebrew/bin/arm-none-eabi-gcc -mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp -mcmse  -Wl,--build-id=none -nostdlib  -v CMakeFiles/cmTC_9dcdf.dir/CMakeCCompilerABI.c.o -o cmTC_9dcdf.elf
+        COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-nostdlib' '-v' '-o' 'cmTC_777e8.elf' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp'
+        /opt/homebrew/bin/arm-none-eabi-gcc -mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp -mcmse  -Wl,--build-id=none -nostdlib  -v CMakeFiles/cmTC_777e8.dir/CMakeCCompilerABI.c.o -o cmTC_777e8.elf
         
       exitCode: 0
   -
@@ -1735,12 +1806,12 @@ events:
       Parsed C implicit link information:
         link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
         linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)))("|,| |$)]
-        ignore line: [Change Dir: '/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles/CMakeScratch/TryCompile-xScg3I']
+        ignore line: [Change Dir: '/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles/CMakeScratch/TryCompile-A8VLaY']
         ignore line: []
-        ignore line: [Run Build Command(s): /opt/homebrew/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_9dcdf/fast]
-        ignore line: [/Library/Developer/CommandLineTools/usr/bin/make  -f CMakeFiles/cmTC_9dcdf.dir/build.make CMakeFiles/cmTC_9dcdf.dir/build]
-        ignore line: [Building C object CMakeFiles/cmTC_9dcdf.dir/CMakeCCompilerABI.c.o]
-        ignore line: [/opt/homebrew/bin/arm-none-eabi-gcc   -mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp -mcmse    -v -o CMakeFiles/cmTC_9dcdf.dir/CMakeCCompilerABI.c.o -c /opt/homebrew/share/cmake/Modules/CMakeCCompilerABI.c]
+        ignore line: [Run Build Command(s): /opt/homebrew/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_777e8/fast]
+        ignore line: [/Library/Developer/CommandLineTools/usr/bin/make  -f CMakeFiles/cmTC_777e8.dir/build.make CMakeFiles/cmTC_777e8.dir/build]
+        ignore line: [Building C object CMakeFiles/cmTC_777e8.dir/CMakeCCompilerABI.c.o]
+        ignore line: [/opt/homebrew/bin/arm-none-eabi-gcc   -mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp -mcmse    -v -o CMakeFiles/cmTC_777e8.dir/CMakeCCompilerABI.c.o -c /opt/homebrew/share/cmake/Modules/CMakeCCompilerABI.c]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=/opt/homebrew/bin/arm-none-eabi-gcc]
         ignore line: [Target: arm-none-eabi]
@@ -1748,8 +1819,8 @@ events:
         ignore line: [Thread model: single]
         ignore line: [Supported LTO compression algorithms: zlib]
         ignore line: [gcc version 10.3.1 20210824 (release) (GNU Arm Embedded Toolchain 10.3-2021.10) ]
-        ignore line: [COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-v' '-o' 'CMakeFiles/cmTC_9dcdf.dir/CMakeCCompilerABI.c.o' '-c' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp']
-        ignore line: [ /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/cc1 -quiet -v -imultilib thumb/v8-m.main+fp/softfp -iprefix /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/ -isysroot /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi -D__USES_INITFINI__ /opt/homebrew/share/cmake/Modules/CMakeCCompilerABI.c -quiet -dumpbase CMakeCCompilerABI.c -mcpu=cortex-m33 -mthumb -mfloat-abi=softfp -mcmse -mlibarch=armv8-m.main+dsp+fp -march=armv8-m.main+dsp+fp -auxbase-strip CMakeFiles/cmTC_9dcdf.dir/CMakeCCompilerABI.c.o -version -o /var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//ccv52YYk.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-v' '-o' 'CMakeFiles/cmTC_777e8.dir/CMakeCCompilerABI.c.o' '-c' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp']
+        ignore line: [ /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/cc1 -quiet -v -imultilib thumb/v8-m.main+fp/softfp -iprefix /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/ -isysroot /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi -D__USES_INITFINI__ /opt/homebrew/share/cmake/Modules/CMakeCCompilerABI.c -quiet -dumpbase CMakeCCompilerABI.c -mcpu=cortex-m33 -mthumb -mfloat-abi=softfp -mcmse -mlibarch=armv8-m.main+dsp+fp -march=armv8-m.main+dsp+fp -auxbase-strip CMakeFiles/cmTC_777e8.dir/CMakeCCompilerABI.c.o -version -o /var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//cc2hwojo.s]
         ignore line: [GNU C17 (GNU Arm Embedded Toolchain 10.3-2021.10) version 10.3.1 20210824 (release) (arm-none-eabi)]
         ignore line: [	compiled by GNU C version 4.2.1 Compatible Apple LLVM 11.0.0 (clang-1100.0.33.17)  GMP version 6.1.0  MPFR version 3.1.4  MPC version 1.0.3  isl version isl-0.18-GMP]
         ignore line: []
@@ -1770,14 +1841,14 @@ events:
         ignore line: []
         ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
         ignore line: [Compiler executable checksum: 733728c033f099ebc66962b91852e3eb]
-        ignore line: [COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-v' '-o' 'CMakeFiles/cmTC_9dcdf.dir/CMakeCCompilerABI.c.o' '-c' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp']
-        ignore line: [ /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/bin/as -v -march=armv8-m.main+dsp -mfloat-abi=softfp -meabi=5 -o CMakeFiles/cmTC_9dcdf.dir/CMakeCCompilerABI.c.o /var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//ccv52YYk.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-v' '-o' 'CMakeFiles/cmTC_777e8.dir/CMakeCCompilerABI.c.o' '-c' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp']
+        ignore line: [ /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/bin/as -v -march=armv8-m.main+dsp -mfloat-abi=softfp -meabi=5 -o CMakeFiles/cmTC_777e8.dir/CMakeCCompilerABI.c.o /var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//cc2hwojo.s]
         ignore line: [GNU assembler version 2.36.1 (arm-none-eabi) using BFD version (GNU Arm Embedded Toolchain 10.3-2021.10) 2.36.1.20210621]
         ignore line: [COMPILER_PATH=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/bin/]
         ignore line: [LIBRARY_PATH=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v8-m.main+fp/softfp/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-v' '-o' 'CMakeFiles/cmTC_9dcdf.dir/CMakeCCompilerABI.c.o' '-c' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp']
-        ignore line: [Linking C executable cmTC_9dcdf.elf]
-        ignore line: [/opt/homebrew/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9dcdf.dir/link.txt --verbose=1]
+        ignore line: [COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-v' '-o' 'CMakeFiles/cmTC_777e8.dir/CMakeCCompilerABI.c.o' '-c' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp']
+        ignore line: [Linking C executable cmTC_777e8.elf]
+        ignore line: [/opt/homebrew/bin/cmake -E cmake_link_script CMakeFiles/cmTC_777e8.dir/link.txt --verbose=1]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=/opt/homebrew/bin/arm-none-eabi-gcc]
         ignore line: [COLLECT_LTO_WRAPPER=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/lto-wrapper]
@@ -1788,17 +1859,17 @@ events:
         ignore line: [gcc version 10.3.1 20210824 (release) (GNU Arm Embedded Toolchain 10.3-2021.10) ]
         ignore line: [COMPILER_PATH=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/bin/]
         ignore line: [LIBRARY_PATH=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v8-m.main+fp/softfp/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-nostdlib' '-v' '-o' 'cmTC_9dcdf.elf' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp']
-        link line: [ /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/collect2 -plugin /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/liblto_plugin.so -plugin-opt=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/lto-wrapper -plugin-opt=-fresolution=/var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//ccdechIJ.res --sysroot=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi -X -o cmTC_9dcdf.elf -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v8-m.main+fp/softfp -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1 -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib --build-id=none CMakeFiles/cmTC_9dcdf.dir/CMakeCCompilerABI.c.o]
+        ignore line: [COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-nostdlib' '-v' '-o' 'cmTC_777e8.elf' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp']
+        link line: [ /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/collect2 -plugin /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/liblto_plugin.so -plugin-opt=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/lto-wrapper -plugin-opt=-fresolution=/var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//cctL8AKW.res --sysroot=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi -X -o cmTC_777e8.elf -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v8-m.main+fp/softfp -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1 -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib --build-id=none CMakeFiles/cmTC_777e8.dir/CMakeCCompilerABI.c.o]
           arg [/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/collect2] ==> ignore
           arg [-plugin] ==> ignore
           arg [/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/liblto_plugin.so] ==> ignore
           arg [-plugin-opt=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/lto-wrapper] ==> ignore
-          arg [-plugin-opt=-fresolution=/var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//ccdechIJ.res] ==> ignore
+          arg [-plugin-opt=-fresolution=/var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//cctL8AKW.res] ==> ignore
           arg [--sysroot=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi] ==> ignore
           arg [-X] ==> ignore
           arg [-o] ==> ignore
-          arg [cmTC_9dcdf.elf] ==> ignore
+          arg [cmTC_777e8.elf] ==> ignore
           arg [-L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v8-m.main+fp/softfp] ==> dir [/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v8-m.main+fp/softfp]
           arg [-L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp] ==> dir [/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp]
           arg [-L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp] ==> dir [/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp]
@@ -1807,11 +1878,11 @@ events:
           arg [-L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib] ==> dir [/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib]
           arg [-L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib] ==> dir [/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib]
           arg [--build-id=none] ==> ignore
-          arg [CMakeFiles/cmTC_9dcdf.dir/CMakeCCompilerABI.c.o] ==> ignore
+          arg [CMakeFiles/cmTC_777e8.dir/CMakeCCompilerABI.c.o] ==> ignore
         ignore line: [/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/bin/ld: warning: cannot find entry symbol _start]
         ignore line: [ defaulting to 0000000000008000]
-        ignore line: [COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-nostdlib' '-v' '-o' 'cmTC_9dcdf.elf' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp']
-        ignore line: [/opt/homebrew/bin/arm-none-eabi-gcc -mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp -mcmse  -Wl --build-id=none -nostdlib  -v CMakeFiles/cmTC_9dcdf.dir/CMakeCCompilerABI.c.o -o cmTC_9dcdf.elf]
+        ignore line: [COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-nostdlib' '-v' '-o' 'cmTC_777e8.elf' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp']
+        ignore line: [/opt/homebrew/bin/arm-none-eabi-gcc -mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp -mcmse  -Wl --build-id=none -nostdlib  -v CMakeFiles/cmTC_777e8.dir/CMakeCCompilerABI.c.o -o cmTC_777e8.elf]
         ignore line: []
         ignore line: []
         collapse library dir [/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v8-m.main+fp/softfp] ==> [/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/lib/gcc/arm-none-eabi/10.3.1/thumb/v8-m.main+fp/softfp]
@@ -1836,8 +1907,8 @@ events:
     checks:
       - "Detecting CXX compiler ABI info"
     directories:
-      source: "/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles/CMakeScratch/TryCompile-HV4aje"
-      binary: "/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles/CMakeScratch/TryCompile-HV4aje"
+      source: "/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles/CMakeScratch/TryCompile-Q1dwzQ"
+      binary: "/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles/CMakeScratch/TryCompile-Q1dwzQ"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "-mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp -mcmse"
       CMAKE_CXX_FLAGS_DEBUG: "-Og -g"
@@ -1849,12 +1920,12 @@ events:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: '/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles/CMakeScratch/TryCompile-HV4aje'
+        Change Dir: '/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles/CMakeScratch/TryCompile-Q1dwzQ'
         
-        Run Build Command(s): /opt/homebrew/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_dba70/fast
-        /Library/Developer/CommandLineTools/usr/bin/make  -f CMakeFiles/cmTC_dba70.dir/build.make CMakeFiles/cmTC_dba70.dir/build
-        Building CXX object CMakeFiles/cmTC_dba70.dir/CMakeCXXCompilerABI.cpp.o
-        /opt/homebrew/bin/arm-none-eabi-g++   -mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp -mcmse    -v -o CMakeFiles/cmTC_dba70.dir/CMakeCXXCompilerABI.cpp.o -c /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp
+        Run Build Command(s): /opt/homebrew/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_0b95f/fast
+        /Library/Developer/CommandLineTools/usr/bin/make  -f CMakeFiles/cmTC_0b95f.dir/build.make CMakeFiles/cmTC_0b95f.dir/build
+        Building CXX object CMakeFiles/cmTC_0b95f.dir/CMakeCXXCompilerABI.cpp.o
+        /opt/homebrew/bin/arm-none-eabi-g++   -mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp -mcmse    -v -o CMakeFiles/cmTC_0b95f.dir/CMakeCXXCompilerABI.cpp.o -c /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp
         Using built-in specs.
         COLLECT_GCC=/opt/homebrew/bin/arm-none-eabi-g++
         Target: arm-none-eabi
@@ -1862,8 +1933,8 @@ events:
         Thread model: single
         Supported LTO compression algorithms: zlib
         gcc version 10.3.1 20210824 (release) (GNU Arm Embedded Toolchain 10.3-2021.10) 
-        COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-v' '-o' 'CMakeFiles/cmTC_dba70.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp'
-         /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/cc1plus -quiet -v -imultilib thumb/v8-m.main+fp/softfp -iprefix /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/ -isysroot /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi -D__USES_INITFINI__ /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpbase CMakeCXXCompilerABI.cpp -mcpu=cortex-m33 -mthumb -mfloat-abi=softfp -mcmse -mlibarch=armv8-m.main+dsp+fp -march=armv8-m.main+dsp+fp -auxbase-strip CMakeFiles/cmTC_dba70.dir/CMakeCXXCompilerABI.cpp.o -version -o /var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//ccnxxiTr.s
+        COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-v' '-o' 'CMakeFiles/cmTC_0b95f.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp'
+         /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/cc1plus -quiet -v -imultilib thumb/v8-m.main+fp/softfp -iprefix /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/ -isysroot /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi -D__USES_INITFINI__ /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpbase CMakeCXXCompilerABI.cpp -mcpu=cortex-m33 -mthumb -mfloat-abi=softfp -mcmse -mlibarch=armv8-m.main+dsp+fp -march=armv8-m.main+dsp+fp -auxbase-strip CMakeFiles/cmTC_0b95f.dir/CMakeCXXCompilerABI.cpp.o -version -o /var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//cci934BU.s
         GNU C++14 (GNU Arm Embedded Toolchain 10.3-2021.10) version 10.3.1 20210824 (release) (arm-none-eabi)
         	compiled by GNU C version 4.2.1 Compatible Apple LLVM 11.0.0 (clang-1100.0.33.17), GMP version 6.1.0, MPFR version 3.1.4, MPC version 1.0.3, isl version isl-0.18-GMP
         
@@ -1890,14 +1961,14 @@ events:
         
         GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
         Compiler executable checksum: aef279e1140f94be80a6badcc599c728
-        COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-v' '-o' 'CMakeFiles/cmTC_dba70.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp'
-         /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/bin/as -v -march=armv8-m.main+dsp -mfloat-abi=softfp -meabi=5 -o CMakeFiles/cmTC_dba70.dir/CMakeCXXCompilerABI.cpp.o /var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//ccnxxiTr.s
+        COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-v' '-o' 'CMakeFiles/cmTC_0b95f.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp'
+         /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/bin/as -v -march=armv8-m.main+dsp -mfloat-abi=softfp -meabi=5 -o CMakeFiles/cmTC_0b95f.dir/CMakeCXXCompilerABI.cpp.o /var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//cci934BU.s
         GNU assembler version 2.36.1 (arm-none-eabi) using BFD version (GNU Arm Embedded Toolchain 10.3-2021.10) 2.36.1.20210621
         COMPILER_PATH=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/bin/
         LIBRARY_PATH=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v8-m.main+fp/softfp/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/
-        COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-v' '-o' 'CMakeFiles/cmTC_dba70.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp'
-        Linking CXX executable cmTC_dba70.elf
-        /opt/homebrew/bin/cmake -E cmake_link_script CMakeFiles/cmTC_dba70.dir/link.txt --verbose=1
+        COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-v' '-o' 'CMakeFiles/cmTC_0b95f.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp'
+        Linking CXX executable cmTC_0b95f.elf
+        /opt/homebrew/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0b95f.dir/link.txt --verbose=1
         Using built-in specs.
         COLLECT_GCC=/opt/homebrew/bin/arm-none-eabi-g++
         COLLECT_LTO_WRAPPER=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/lto-wrapper
@@ -1908,11 +1979,11 @@ events:
         gcc version 10.3.1 20210824 (release) (GNU Arm Embedded Toolchain 10.3-2021.10) 
         COMPILER_PATH=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/bin/
         LIBRARY_PATH=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v8-m.main+fp/softfp/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/
-        COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-nostdlib' '-v' '-o' 'cmTC_dba70.elf' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp'
-         /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/collect2 -plugin /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/liblto_plugin.so -plugin-opt=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/lto-wrapper -plugin-opt=-fresolution=/var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//ccU0kOsh.res --sysroot=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi -X -o cmTC_dba70.elf -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v8-m.main+fp/softfp -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1 -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib --build-id=none CMakeFiles/cmTC_dba70.dir/CMakeCXXCompilerABI.cpp.o
+        COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-nostdlib' '-v' '-o' 'cmTC_0b95f.elf' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp'
+         /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/collect2 -plugin /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/liblto_plugin.so -plugin-opt=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/lto-wrapper -plugin-opt=-fresolution=/var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//ccThKbBk.res --sysroot=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi -X -o cmTC_0b95f.elf -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v8-m.main+fp/softfp -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1 -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib --build-id=none CMakeFiles/cmTC_0b95f.dir/CMakeCXXCompilerABI.cpp.o
         /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 0000000000008000
-        COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-nostdlib' '-v' '-o' 'cmTC_dba70.elf' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp'
-        /opt/homebrew/bin/arm-none-eabi-g++ -mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp -mcmse  -Wl,--build-id=none -nostdlib  -v CMakeFiles/cmTC_dba70.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_dba70.elf
+        COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-nostdlib' '-v' '-o' 'cmTC_0b95f.elf' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp'
+        /opt/homebrew/bin/arm-none-eabi-g++ -mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp -mcmse  -Wl,--build-id=none -nostdlib  -v CMakeFiles/cmTC_0b95f.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_0b95f.elf
         
       exitCode: 0
   -
@@ -1951,12 +2022,12 @@ events:
       Parsed CXX implicit link information:
         link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
         linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)))("|,| |$)]
-        ignore line: [Change Dir: '/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles/CMakeScratch/TryCompile-HV4aje']
+        ignore line: [Change Dir: '/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles/CMakeScratch/TryCompile-Q1dwzQ']
         ignore line: []
-        ignore line: [Run Build Command(s): /opt/homebrew/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_dba70/fast]
-        ignore line: [/Library/Developer/CommandLineTools/usr/bin/make  -f CMakeFiles/cmTC_dba70.dir/build.make CMakeFiles/cmTC_dba70.dir/build]
-        ignore line: [Building CXX object CMakeFiles/cmTC_dba70.dir/CMakeCXXCompilerABI.cpp.o]
-        ignore line: [/opt/homebrew/bin/arm-none-eabi-g++   -mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp -mcmse    -v -o CMakeFiles/cmTC_dba70.dir/CMakeCXXCompilerABI.cpp.o -c /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [Run Build Command(s): /opt/homebrew/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_0b95f/fast]
+        ignore line: [/Library/Developer/CommandLineTools/usr/bin/make  -f CMakeFiles/cmTC_0b95f.dir/build.make CMakeFiles/cmTC_0b95f.dir/build]
+        ignore line: [Building CXX object CMakeFiles/cmTC_0b95f.dir/CMakeCXXCompilerABI.cpp.o]
+        ignore line: [/opt/homebrew/bin/arm-none-eabi-g++   -mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp -mcmse    -v -o CMakeFiles/cmTC_0b95f.dir/CMakeCXXCompilerABI.cpp.o -c /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=/opt/homebrew/bin/arm-none-eabi-g++]
         ignore line: [Target: arm-none-eabi]
@@ -1964,8 +2035,8 @@ events:
         ignore line: [Thread model: single]
         ignore line: [Supported LTO compression algorithms: zlib]
         ignore line: [gcc version 10.3.1 20210824 (release) (GNU Arm Embedded Toolchain 10.3-2021.10) ]
-        ignore line: [COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-v' '-o' 'CMakeFiles/cmTC_dba70.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp']
-        ignore line: [ /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/cc1plus -quiet -v -imultilib thumb/v8-m.main+fp/softfp -iprefix /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/ -isysroot /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi -D__USES_INITFINI__ /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpbase CMakeCXXCompilerABI.cpp -mcpu=cortex-m33 -mthumb -mfloat-abi=softfp -mcmse -mlibarch=armv8-m.main+dsp+fp -march=armv8-m.main+dsp+fp -auxbase-strip CMakeFiles/cmTC_dba70.dir/CMakeCXXCompilerABI.cpp.o -version -o /var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//ccnxxiTr.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-v' '-o' 'CMakeFiles/cmTC_0b95f.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp']
+        ignore line: [ /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/cc1plus -quiet -v -imultilib thumb/v8-m.main+fp/softfp -iprefix /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/ -isysroot /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi -D__USES_INITFINI__ /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpbase CMakeCXXCompilerABI.cpp -mcpu=cortex-m33 -mthumb -mfloat-abi=softfp -mcmse -mlibarch=armv8-m.main+dsp+fp -march=armv8-m.main+dsp+fp -auxbase-strip CMakeFiles/cmTC_0b95f.dir/CMakeCXXCompilerABI.cpp.o -version -o /var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//cci934BU.s]
         ignore line: [GNU C++14 (GNU Arm Embedded Toolchain 10.3-2021.10) version 10.3.1 20210824 (release) (arm-none-eabi)]
         ignore line: [	compiled by GNU C version 4.2.1 Compatible Apple LLVM 11.0.0 (clang-1100.0.33.17)  GMP version 6.1.0  MPFR version 3.1.4  MPC version 1.0.3  isl version isl-0.18-GMP]
         ignore line: []
@@ -1992,14 +2063,14 @@ events:
         ignore line: []
         ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
         ignore line: [Compiler executable checksum: aef279e1140f94be80a6badcc599c728]
-        ignore line: [COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-v' '-o' 'CMakeFiles/cmTC_dba70.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp']
-        ignore line: [ /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/bin/as -v -march=armv8-m.main+dsp -mfloat-abi=softfp -meabi=5 -o CMakeFiles/cmTC_dba70.dir/CMakeCXXCompilerABI.cpp.o /var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//ccnxxiTr.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-v' '-o' 'CMakeFiles/cmTC_0b95f.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp']
+        ignore line: [ /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/bin/as -v -march=armv8-m.main+dsp -mfloat-abi=softfp -meabi=5 -o CMakeFiles/cmTC_0b95f.dir/CMakeCXXCompilerABI.cpp.o /var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//cci934BU.s]
         ignore line: [GNU assembler version 2.36.1 (arm-none-eabi) using BFD version (GNU Arm Embedded Toolchain 10.3-2021.10) 2.36.1.20210621]
         ignore line: [COMPILER_PATH=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/bin/]
         ignore line: [LIBRARY_PATH=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v8-m.main+fp/softfp/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-v' '-o' 'CMakeFiles/cmTC_dba70.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp']
-        ignore line: [Linking CXX executable cmTC_dba70.elf]
-        ignore line: [/opt/homebrew/bin/cmake -E cmake_link_script CMakeFiles/cmTC_dba70.dir/link.txt --verbose=1]
+        ignore line: [COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-v' '-o' 'CMakeFiles/cmTC_0b95f.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp']
+        ignore line: [Linking CXX executable cmTC_0b95f.elf]
+        ignore line: [/opt/homebrew/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0b95f.dir/link.txt --verbose=1]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=/opt/homebrew/bin/arm-none-eabi-g++]
         ignore line: [COLLECT_LTO_WRAPPER=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/lto-wrapper]
@@ -2010,17 +2081,17 @@ events:
         ignore line: [gcc version 10.3.1 20210824 (release) (GNU Arm Embedded Toolchain 10.3-2021.10) ]
         ignore line: [COMPILER_PATH=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/bin/]
         ignore line: [LIBRARY_PATH=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v8-m.main+fp/softfp/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/:/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-nostdlib' '-v' '-o' 'cmTC_dba70.elf' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp']
-        link line: [ /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/collect2 -plugin /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/liblto_plugin.so -plugin-opt=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/lto-wrapper -plugin-opt=-fresolution=/var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//ccU0kOsh.res --sysroot=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi -X -o cmTC_dba70.elf -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v8-m.main+fp/softfp -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1 -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib --build-id=none CMakeFiles/cmTC_dba70.dir/CMakeCXXCompilerABI.cpp.o]
+        ignore line: [COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-nostdlib' '-v' '-o' 'cmTC_0b95f.elf' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp']
+        link line: [ /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/collect2 -plugin /opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/liblto_plugin.so -plugin-opt=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/lto-wrapper -plugin-opt=-fresolution=/var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//ccThKbBk.res --sysroot=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi -X -o cmTC_0b95f.elf -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v8-m.main+fp/softfp -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1 -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib -L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib --build-id=none CMakeFiles/cmTC_0b95f.dir/CMakeCXXCompilerABI.cpp.o]
           arg [/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/collect2] ==> ignore
           arg [-plugin] ==> ignore
           arg [/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/liblto_plugin.so] ==> ignore
           arg [-plugin-opt=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/lto-wrapper] ==> ignore
-          arg [-plugin-opt=-fresolution=/var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//ccU0kOsh.res] ==> ignore
+          arg [-plugin-opt=-fresolution=/var/folders/6v/8l47zk_n6njcynkqxq6qnx140000gn/T//ccThKbBk.res] ==> ignore
           arg [--sysroot=/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi] ==> ignore
           arg [-X] ==> ignore
           arg [-o] ==> ignore
-          arg [cmTC_dba70.elf] ==> ignore
+          arg [cmTC_0b95f.elf] ==> ignore
           arg [-L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v8-m.main+fp/softfp] ==> dir [/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v8-m.main+fp/softfp]
           arg [-L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp] ==> dir [/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp]
           arg [-L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp] ==> dir [/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib/thumb/v8-m.main+fp/softfp]
@@ -2029,11 +2100,11 @@ events:
           arg [-L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib] ==> dir [/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib]
           arg [-L/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib] ==> dir [/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../arm-none-eabi/lib]
           arg [--build-id=none] ==> ignore
-          arg [CMakeFiles/cmTC_dba70.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+          arg [CMakeFiles/cmTC_0b95f.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
         ignore line: [/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/bin/ld: warning: cannot find entry symbol _start]
         ignore line: [ defaulting to 0000000000008000]
-        ignore line: [COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-nostdlib' '-v' '-o' 'cmTC_dba70.elf' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp']
-        ignore line: [/opt/homebrew/bin/arm-none-eabi-g++ -mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp -mcmse  -Wl --build-id=none -nostdlib  -v CMakeFiles/cmTC_dba70.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_dba70.elf]
+        ignore line: [COLLECT_GCC_OPTIONS='-mcpu=cortex-m33' '-mthumb'  '-mfloat-abi=softfp' '-mcmse' '-nostdlib' '-v' '-o' 'cmTC_0b95f.elf' '-mlibarch=armv8-m.main+dsp+fp' '-march=armv8-m.main+dsp+fp']
+        ignore line: [/opt/homebrew/bin/arm-none-eabi-g++ -mcpu=cortex-m33 -mthumb -march=armv8-m.main+fp+dsp -mfloat-abi=softfp -mcmse  -Wl --build-id=none -nostdlib  -v CMakeFiles/cmTC_0b95f.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_0b95f.elf]
         ignore line: []
         ignore line: []
         collapse library dir [/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v8-m.main+fp/softfp] ==> [/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.10/gcc/lib/gcc/arm-none-eabi/10.3.1/thumb/v8-m.main+fp/softfp]
@@ -2138,6 +2209,14 @@ events:
         mode: "config"
         reason: "no_exist"
       -
+        path: "/Applications/Ghostty.app/Contents/MacOS/picotoolConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/Applications/Ghostty.app/Contents/MacOS/picotool-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
         path: "/opt/picotoolConfig.cmake"
         mode: "config"
         reason: "no_exist"
@@ -2158,6 +2237,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_INSTALL_PREFIX: "/usr/local"
       CMAKE_SYSTEM_PREFIX_PATH:
         - "/usr/local"
@@ -2207,6 +2287,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
       - "/opt/homebrew/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
       - "/usr/local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/"
@@ -2243,6 +2324,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_INSTALL_PREFIX: "/usr/local"
       CMAKE_SYSTEM_PREFIX_PATH:
         - "/usr/local"
@@ -2424,6 +2506,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_INSTALL_PREFIX: "/usr/local"
       CMAKE_SYSTEM_PREFIX_PATH:
         - "/usr/local"
@@ -2523,6 +2606,14 @@ events:
         mode: "config"
         reason: "no_exist"
       -
+        path: "/Applications/Ghostty.app/Contents/MacOS/pioasmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/Applications/Ghostty.app/Contents/MacOS/pioasm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
         path: "/opt/pioasmConfig.cmake"
         mode: "config"
         reason: "no_exist"
@@ -2543,6 +2634,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_INSTALL_PREFIX: "/usr/local"
       CMAKE_SYSTEM_PREFIX_PATH:
         - "/usr/local"
@@ -2584,6 +2676,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
       - "/opt/homebrew/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
       - "/usr/local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/"
@@ -2619,6 +2712,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/doxygen"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/doxygen"
       - "/opt/homebrew/bin/doxygen"
+      - "/Applications/Ghostty.app/Contents/MacOS/doxygen"
       - "/usr/local/bin/doxygen"
       - "/usr/local/sbin/doxygen"
       - "/usr/local/doxygen"
@@ -2656,6 +2750,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_INSTALL_PREFIX: "/usr/local"
       CMAKE_SYSTEM_PREFIX_PATH:
         - "/usr/local"
@@ -2697,6 +2792,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
       - "/opt/homebrew/bin/"
+      - "/Applications/Ghostty.app/Contents/MacOS/"
       - "/usr/local/bin/"
       - "/usr/local/sbin/"
       - "/usr/local/"
@@ -2736,6 +2832,7 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/dot"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/dot"
       - "/opt/homebrew/bin/dot"
+      - "/Applications/Ghostty.app/Contents/MacOS/dot"
       - "/usr/local/bin/dot"
       - "/usr/local/sbin/dot"
       - "/usr/local/dot"
@@ -2777,6 +2874,7 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
         - "/opt/homebrew/bin"
+        - "/Applications/Ghostty.app/Contents/MacOS"
       CMAKE_INSTALL_PREFIX: "/usr/local"
       CMAKE_SYSTEM_PREFIX_PATH:
         - "/usr/local"

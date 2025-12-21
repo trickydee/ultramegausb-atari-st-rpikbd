@@ -57,6 +57,7 @@ private:
     int x_period_us = 0;
     int y_period_us = 0;
 
+
     // The last time each register was rotated
     absolute_time_t last_x_us;
     absolute_time_t last_y_us;

@@ -332,7 +332,7 @@ int main() {
 #endif
 
     absolute_time_t ten_ms = get_absolute_time();
-    absolute_time_t heartbeat_ms = get_absolute_time();  // For heartbeat debug
+    absolute_time_t heartbeat_ms = get_absolute_time();
 #if ENABLE_BLUEPAD32
     absolute_time_t bt_poll_ms = get_absolute_time();  // For Bluetooth polling (1ms interval)
     static uint32_t bt_poll_count = 0;
@@ -424,7 +424,6 @@ int main() {
 #endif
         
         // Heartbeat: Print less frequently to reduce log spam but still show liveness
-        // Note: This printf may be necessary for Bluetooth stack stability
         // 10 seconds interval
         if (absolute_time_diff_us(heartbeat_ms, tm) >= 10000000) {
             heartbeat_ms = tm;
@@ -478,7 +477,7 @@ extern "C" {
     void switch_check_delayed_init(void);
 }
 
-// Global Xbox report counter for debugging (accessible from UI)
+// Global Xbox report counter (accessible from UI)
 static uint32_t xbox_report_count = 0;
 extern "C" uint32_t get_xbox_report_count() {
     return xbox_report_count;
@@ -499,17 +498,15 @@ void tuh_xinput_mount_cb(uint8_t dev_addr, uint8_t instance, const xinputh_inter
     // Register with Atari mapper
     xinput_register_controller(dev_addr, xinput_itf);
     
-    // Increment joystick counter and update UI (FIX: Xbox controllers weren't incrementing counter)
+    // Increment joystick counter and update UI
     xinput_joy_count++;
     xinput_notify_ui_mount();
     
 #if ENABLE_OLED_DISPLAY
-    // Show XBOX splash screen (reinstated with debug info)
     extern ssd1306_t disp;
     ssd1306_clear(&disp);
     ssd1306_draw_string(&disp, 20, 10, 2, (char*)"XBOX!");
     
-    char line[20];
     if (xinput_itf->type == XBOX360_WIRED) {
         ssd1306_draw_string(&disp, 15, 35, 1, (char*)"360 Wired");
     } else if (xinput_itf->type == XBOX360_WIRELESS) {
@@ -519,12 +516,8 @@ void tuh_xinput_mount_cb(uint8_t dev_addr, uint8_t instance, const xinputh_inter
     } else {
         ssd1306_draw_string(&disp, 15, 35, 1, (char*)"Detected!");
     }
-    
-    // Show debug info: Address, Instance, Connection status
-    snprintf(line, sizeof(line), "A:%d I:%d C:%d", dev_addr, instance, xinput_itf->connected);
-    ssd1306_draw_string(&disp, 10, 50, 1, line);
     ssd1306_show(&disp);
-    sleep_ms(3000);  // Extended to 3 seconds to read debug info
+    sleep_ms(2000);
 #endif
     
     // For Xbox 360 Wireless, wait for connection before setting LEDs
@@ -546,7 +539,7 @@ void tuh_xinput_umount_cb(uint8_t dev_addr, uint8_t instance) {
     // Unregister from Atari mapper
     xinput_unregister_controller(dev_addr);
     
-    // Decrement joystick counter and update UI (FIX: Xbox controllers weren't decrementing counter)
+    // Decrement joystick counter and update UI
     if (xinput_joy_count > 0) {
         xinput_joy_count--;
     }
@@ -565,32 +558,6 @@ void tuh_xinput_report_received_cb(uint8_t dev_addr, uint8_t instance,
     
     // Update controller state for mapper
     xinput_register_controller(dev_addr, xid_itf);
-    
-    // Debug disabled - using storage debug in xinput_atari.cpp instead
-    #if 0
-    static uint32_t report_count = 0;
-    report_count++;
-    
-    if (report_count <= 5 && xid_itf->last_xfer_result == XFER_RESULT_SUCCESS && 
-        xid_itf->connected && xid_itf->new_pad_data) {
-        extern ssd1306_t disp;
-        ssd1306_clear(&disp);
-        ssd1306_draw_string(&disp, 15, 0, 1, (char*)"XBOX REPORT");
-        
-        char line[20];
-        snprintf(line, sizeof(line), "Count: %lu", report_count);
-        ssd1306_draw_string(&disp, 5, 15, 1, line);
-        
-        snprintf(line, sizeof(line), "Btns: %04X", xid_itf->pad.wButtons);
-        ssd1306_draw_string(&disp, 5, 30, 1, line);
-        
-        snprintf(line, sizeof(line), "LX:%d LY:%d", xid_itf->pad.sThumbLX, xid_itf->pad.sThumbLY);
-        ssd1306_draw_string(&disp, 5, 45, 1, line);
-        
-        ssd1306_show(&disp);
-        sleep_ms(2000);
-    }
-    #endif
     
     tuh_xinput_receive_report(dev_addr, instance);
 }

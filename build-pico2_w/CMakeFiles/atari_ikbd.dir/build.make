@@ -1910,10 +1910,24 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_t
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_tlv.c.s"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_tlv.c -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_tlv.c.s
 
+CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.o: CMakeFiles/atari_ikbd.dir/flags.make
+CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c
+CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_133) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.o"
+	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c
+
+CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.i"
+	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c > CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.i
+
+CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.s"
+	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.s
+
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_sbc_plc.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_sbc_plc.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/btstack_sbc_plc.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_sbc_plc.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_133) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_sbc_plc.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_134) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_sbc_plc.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_sbc_plc.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_sbc_plc.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_sbc_plc.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/btstack_sbc_plc.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_sbc_plc.c.i: cmake_force
@@ -1927,7 +1941,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_sbc_plc.c.s: 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/device_id_server.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/device_id_server.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/device_id_server.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/device_id_server.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_134) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/device_id_server.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_135) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/device_id_server.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/device_id_server.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/device_id_server.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/device_id_server.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/device_id_server.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/device_id_server.c.i: cmake_force
@@ -1941,7 +1955,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/device_id_server.c.s:
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/gatt_sdp.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/gatt_sdp.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/gatt_sdp.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/gatt_sdp.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_135) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/gatt_sdp.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_136) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/gatt_sdp.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/gatt_sdp.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/gatt_sdp.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/gatt_sdp.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/gatt_sdp.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/gatt_sdp.c.i: cmake_force
@@ -1955,7 +1969,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/gatt_sdp.c.s: cmake_f
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/goep_client.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/goep_client.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/goep_client.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/goep_client.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_136) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/goep_client.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_137) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/goep_client.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/goep_client.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/goep_client.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/goep_client.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/goep_client.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/goep_client.c.i: cmake_force
@@ -1969,7 +1983,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/goep_client.c.s: cmak
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/goep_server.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/goep_server.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/goep_server.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/goep_server.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_137) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/goep_server.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_138) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/goep_server.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/goep_server.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/goep_server.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/goep_server.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/goep_server.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/goep_server.c.i: cmake_force
@@ -1983,7 +1997,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/goep_server.c.s: cmak
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/hfp.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_138) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_139) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/hfp.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp.c.i: cmake_force
@@ -1997,7 +2011,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp.c.s: cmake_force
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_ag.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_ag.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/hfp_ag.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_ag.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_139) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_ag.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_140) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_ag.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_ag.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_ag.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_ag.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/hfp_ag.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_ag.c.i: cmake_force
@@ -2011,7 +2025,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_ag.c.s: cmake_for
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_gsm_model.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_gsm_model.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/hfp_gsm_model.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_gsm_model.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_140) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_gsm_model.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_141) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_gsm_model.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_gsm_model.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_gsm_model.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_gsm_model.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/hfp_gsm_model.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_gsm_model.c.i: cmake_force
@@ -2025,7 +2039,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_gsm_model.c.s: cm
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_hf.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_hf.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/hfp_hf.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_hf.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_141) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_hf.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_142) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_hf.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_hf.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_hf.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_hf.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/hfp_hf.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_hf.c.i: cmake_force
@@ -2039,7 +2053,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_hf.c.s: cmake_for
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_msbc.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_msbc.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/hfp_msbc.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_msbc.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_142) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_msbc.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_143) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_msbc.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_msbc.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_msbc.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_msbc.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/hfp_msbc.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_msbc.c.i: cmake_force
@@ -2053,7 +2067,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hfp_msbc.c.s: cmake_f
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hid_device.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hid_device.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/hid_device.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hid_device.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_143) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hid_device.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_144) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hid_device.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hid_device.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hid_device.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hid_device.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/hid_device.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hid_device.c.i: cmake_force
@@ -2067,7 +2081,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hid_device.c.s: cmake
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hid_host.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hid_host.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/hid_host.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hid_host.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_144) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hid_host.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_145) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hid_host.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hid_host.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hid_host.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hid_host.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/hid_host.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hid_host.c.i: cmake_force
@@ -2081,7 +2095,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hid_host.c.s: cmake_f
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hsp_ag.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hsp_ag.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/hsp_ag.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hsp_ag.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_145) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hsp_ag.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_146) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hsp_ag.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hsp_ag.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hsp_ag.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hsp_ag.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/hsp_ag.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hsp_ag.c.i: cmake_force
@@ -2095,7 +2109,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hsp_ag.c.s: cmake_for
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hsp_hs.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hsp_hs.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/hsp_hs.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hsp_hs.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_146) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hsp_hs.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_147) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hsp_hs.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hsp_hs.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hsp_hs.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hsp_hs.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/hsp_hs.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hsp_hs.c.i: cmake_force
@@ -2109,7 +2123,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/hsp_hs.c.s: cmake_for
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_iterator.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_iterator.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/obex_iterator.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_iterator.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_147) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_iterator.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_148) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_iterator.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_iterator.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_iterator.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_iterator.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/obex_iterator.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_iterator.c.i: cmake_force
@@ -2123,7 +2137,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_iterator.c.s: cm
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_message_builder.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_message_builder.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/obex_message_builder.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_message_builder.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_148) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_message_builder.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_149) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_message_builder.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_message_builder.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_message_builder.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_message_builder.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/obex_message_builder.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_message_builder.c.i: cmake_force
@@ -2137,7 +2151,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_message_builder.
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_parser.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_parser.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/obex_parser.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_parser.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_149) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_parser.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_150) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_parser.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_parser.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_parser.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_parser.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/obex_parser.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_parser.c.i: cmake_force
@@ -2151,7 +2165,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_parser.c.s: cmak
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/pan.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/pan.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/pan.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/pan.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_150) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/pan.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_151) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/pan.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/pan.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/pan.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/pan.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/pan.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/pan.c.i: cmake_force
@@ -2165,7 +2179,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/pan.c.s: cmake_force
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/pbap_client.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/pbap_client.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/pbap_client.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/pbap_client.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_151) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/pbap_client.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_152) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/pbap_client.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/pbap_client.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/pbap_client.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/pbap_client.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/pbap_client.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/pbap_client.c.i: cmake_force
@@ -2179,7 +2193,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/pbap_client.c.s: cmak
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/rfcomm.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/rfcomm.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/rfcomm.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/rfcomm.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_152) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/rfcomm.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_153) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/rfcomm.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/rfcomm.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/rfcomm.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/rfcomm.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/rfcomm.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/rfcomm.c.i: cmake_force
@@ -2193,7 +2207,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/rfcomm.c.s: cmake_for
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_client.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_client.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/sdp_client.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_client.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_153) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_client.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_154) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_client.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_client.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_client.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_client.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/sdp_client.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_client.c.i: cmake_force
@@ -2207,7 +2221,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_client.c.s: cmake
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_client_rfcomm.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_client_rfcomm.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/sdp_client_rfcomm.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_client_rfcomm.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_154) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_client_rfcomm.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_155) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_client_rfcomm.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_client_rfcomm.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_client_rfcomm.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_client_rfcomm.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/sdp_client_rfcomm.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_client_rfcomm.c.i: cmake_force
@@ -2221,7 +2235,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_client_rfcomm.c.s
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_server.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_server.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/sdp_server.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_server.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_155) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_server.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_156) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_server.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_server.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_server.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_server.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/sdp_server.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_server.c.i: cmake_force
@@ -2235,7 +2249,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_server.c.s: cmake
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_util.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_util.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/sdp_util.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_util.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_156) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_util.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_157) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_util.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_util.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_util.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_util.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/sdp_util.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_util.c.i: cmake_force
@@ -2249,7 +2263,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/sdp_util.c.s: cmake_f
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/spp_server.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/spp_server.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/spp_server.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/spp_server.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_157) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/spp_server.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_158) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/spp_server.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/spp_server.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/spp_server.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/spp_server.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/spp_server.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/spp_server.c.i: cmake_force
@@ -2263,7 +2277,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/spp_server.c.s: cmake
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_srm_client.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_srm_client.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/obex_srm_client.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_srm_client.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_158) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_srm_client.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_159) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_srm_client.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_srm_client.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_srm_client.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_srm_client.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/classic/obex_srm_client.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_srm_client.c.i: cmake_force
@@ -2277,7 +2291,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/obex_srm_client.c.s: 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/micro-ecc/uECC.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/micro-ecc/uECC.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/3rd-party/micro-ecc/uECC.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/micro-ecc/uECC.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_159) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/micro-ecc/uECC.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_160) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/micro-ecc/uECC.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/micro-ecc/uECC.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/micro-ecc/uECC.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/micro-ecc/uECC.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/3rd-party/micro-ecc/uECC.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/micro-ecc/uECC.c.i: cmake_force
@@ -2291,7 +2305,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/micro-ecc/uECC.c.s: cma
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/rijndael/rijndael.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/rijndael/rijndael.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/3rd-party/rijndael/rijndael.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/rijndael/rijndael.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_160) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/rijndael/rijndael.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_161) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/rijndael/rijndael.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/rijndael/rijndael.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/rijndael/rijndael.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/rijndael/rijndael.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/3rd-party/rijndael/rijndael.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/rijndael/rijndael.c.i: cmake_force
@@ -2305,7 +2319,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/rijndael/rijndael.c.s: 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/segger-rtt/SEGGER_RTT_printf.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/segger-rtt/SEGGER_RTT_printf.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/3rd-party/segger-rtt/SEGGER_RTT_printf.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/segger-rtt/SEGGER_RTT_printf.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_161) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/segger-rtt/SEGGER_RTT_printf.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_162) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/segger-rtt/SEGGER_RTT_printf.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/segger-rtt/SEGGER_RTT_printf.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/segger-rtt/SEGGER_RTT_printf.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/segger-rtt/SEGGER_RTT_printf.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/3rd-party/segger-rtt/SEGGER_RTT_printf.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/segger-rtt/SEGGER_RTT_printf.c.i: cmake_force
@@ -2319,7 +2333,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/segger-rtt/SEGGER_RTT_p
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/btstack_tlv_flash_bank.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/btstack_tlv_flash_bank.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/platform/embedded/btstack_tlv_flash_bank.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/btstack_tlv_flash_bank.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_162) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/btstack_tlv_flash_bank.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_163) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/btstack_tlv_flash_bank.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/btstack_tlv_flash_bank.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/btstack_tlv_flash_bank.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/btstack_tlv_flash_bank.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/platform/embedded/btstack_tlv_flash_bank.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/btstack_tlv_flash_bank.c.i: cmake_force
@@ -2333,7 +2347,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/btstack_tlv_fla
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/hci_dump_embedded_stdout.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/hci_dump_embedded_stdout.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/platform/embedded/hci_dump_embedded_stdout.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/hci_dump_embedded_stdout.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_163) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/hci_dump_embedded_stdout.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_164) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/hci_dump_embedded_stdout.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/hci_dump_embedded_stdout.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/hci_dump_embedded_stdout.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/hci_dump_embedded_stdout.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/platform/embedded/hci_dump_embedded_stdout.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/hci_dump_embedded_stdout.c.i: cmake_force
@@ -2347,7 +2361,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/hci_dump_embedd
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/hci_dump_segger_rtt_stdout.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/hci_dump_segger_rtt_stdout.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/platform/embedded/hci_dump_segger_rtt_stdout.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/hci_dump_segger_rtt_stdout.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_164) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/hci_dump_segger_rtt_stdout.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_165) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/hci_dump_segger_rtt_stdout.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/hci_dump_segger_rtt_stdout.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/hci_dump_segger_rtt_stdout.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/hci_dump_segger_rtt_stdout.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/platform/embedded/hci_dump_segger_rtt_stdout.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/hci_dump_segger_rtt_stdout.c.i: cmake_force
@@ -2361,7 +2375,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/platform/embedded/hci_dump_segger
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ad_parser.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ad_parser.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ad_parser.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ad_parser.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_165) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ad_parser.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_166) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ad_parser.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ad_parser.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ad_parser.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ad_parser.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ad_parser.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ad_parser.c.i: cmake_force
@@ -2375,7 +2389,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ad_parser.c.s: cmake_force
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_audio.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_audio.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_audio.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_audio.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_166) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_audio.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_167) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_audio.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_audio.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_audio.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_audio.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_audio.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_audio.c.i: cmake_force
@@ -2389,7 +2403,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_audio.c.s: cmake_forc
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_base64_decoder.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_base64_decoder.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_base64_decoder.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_base64_decoder.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_167) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_base64_decoder.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_168) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_base64_decoder.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_base64_decoder.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_base64_decoder.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_base64_decoder.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_base64_decoder.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_base64_decoder.c.i: cmake_force
@@ -2403,7 +2417,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_base64_decoder.c.s: c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_crypto.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_crypto.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_crypto.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_crypto.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_168) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_crypto.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_169) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_crypto.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_crypto.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_crypto.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_crypto.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_crypto.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_crypto.c.i: cmake_force
@@ -2417,7 +2431,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_crypto.c.s: cmake_for
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_hid.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_hid.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_hid.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_hid.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_169) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_hid.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_170) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_hid.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_hid.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_hid.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_hid.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_hid.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_hid.c.i: cmake_force
@@ -2431,7 +2445,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_hid.c.s: cmake_force
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_hid_parser.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_hid_parser.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_hid_parser.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_hid_parser.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_170) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_hid_parser.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_171) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_hid_parser.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_hid_parser.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_hid_parser.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_hid_parser.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_hid_parser.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_hid_parser.c.i: cmake_force
@@ -2445,7 +2459,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_hid_parser.c.s: cmake
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_linked_list.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_linked_list.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_linked_list.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_linked_list.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_171) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_linked_list.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_172) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_linked_list.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_linked_list.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_linked_list.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_linked_list.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_linked_list.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_linked_list.c.i: cmake_force
@@ -2459,7 +2473,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_linked_list.c.s: cmak
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_memory.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_memory.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_memory.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_memory.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_172) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_memory.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_173) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_memory.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_memory.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_memory.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_memory.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_memory.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_memory.c.i: cmake_force
@@ -2473,7 +2487,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_memory.c.s: cmake_for
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_memory_pool.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_memory_pool.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_memory_pool.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_memory_pool.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_173) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_memory_pool.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_174) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_memory_pool.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_memory_pool.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_memory_pool.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_memory_pool.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_memory_pool.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_memory_pool.c.i: cmake_force
@@ -2487,7 +2501,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_memory_pool.c.s: cmak
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_resample.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_resample.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_resample.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_resample.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_174) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_resample.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_175) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_resample.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_resample.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_resample.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_resample.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_resample.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_resample.c.i: cmake_force
@@ -2501,7 +2515,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_resample.c.s: cmake_f
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_ring_buffer.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_ring_buffer.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_ring_buffer.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_ring_buffer.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_175) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_ring_buffer.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_176) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_ring_buffer.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_ring_buffer.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_ring_buffer.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_ring_buffer.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_ring_buffer.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_ring_buffer.c.i: cmake_force
@@ -2515,7 +2529,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_ring_buffer.c.s: cmak
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_run_loop.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_run_loop.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_run_loop.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_run_loop.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_176) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_run_loop.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_177) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_run_loop.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_run_loop.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_run_loop.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_run_loop.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_run_loop.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_run_loop.c.i: cmake_force
@@ -2529,7 +2543,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_run_loop.c.s: cmake_f
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_run_loop_base.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_run_loop_base.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_run_loop_base.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_run_loop_base.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_177) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_run_loop_base.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_178) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_run_loop_base.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_run_loop_base.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_run_loop_base.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_run_loop_base.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_run_loop_base.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_run_loop_base.c.i: cmake_force
@@ -2543,7 +2557,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_run_loop_base.c.s: cm
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_slip.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_slip.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_slip.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_slip.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_178) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_slip.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_179) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_slip.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_slip.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_slip.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_slip.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_slip.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_slip.c.i: cmake_force
@@ -2557,7 +2571,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_slip.c.s: cmake_force
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_tlv.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_tlv.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_tlv.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_tlv.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_179) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_tlv.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_180) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_tlv.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_tlv.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_tlv.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_tlv.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_tlv.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_tlv.c.i: cmake_force
@@ -2571,7 +2585,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_tlv.c.s: cmake_force
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_tlv_none.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_tlv_none.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_tlv_none.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_tlv_none.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_180) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_tlv_none.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_181) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_tlv_none.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_tlv_none.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_tlv_none.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_tlv_none.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_tlv_none.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_tlv_none.c.i: cmake_force
@@ -2585,7 +2599,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_tlv_none.c.s: cmake_f
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_util.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_util.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_util.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_util.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_181) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_util.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_182) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_util.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_util.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_util.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_util.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/btstack_util.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_util.c.i: cmake_force
@@ -2599,7 +2613,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/btstack_util.c.s: cmake_force
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/hci.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_182) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_183) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/hci.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci.c.i: cmake_force
@@ -2613,7 +2627,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci.c.s: cmake_force
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_cmd.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_cmd.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/hci_cmd.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_cmd.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_183) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_cmd.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_184) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_cmd.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_cmd.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_cmd.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_cmd.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/hci_cmd.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_cmd.c.i: cmake_force
@@ -2627,7 +2641,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_cmd.c.s: cmake_force
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_dump.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_dump.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/hci_dump.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_dump.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_184) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_dump.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_185) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_dump.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_dump.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_dump.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_dump.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/hci_dump.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_dump.c.i: cmake_force
@@ -2641,7 +2655,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_dump.c.s: cmake_force
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_event.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_event.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/hci_event.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_event.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_185) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_event.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_186) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_event.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_event.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_event.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_event.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/hci_event.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_event.c.i: cmake_force
@@ -2655,7 +2669,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_event.c.s: cmake_force
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/l2cap.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/l2cap.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/l2cap.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/l2cap.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_186) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/l2cap.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_187) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/l2cap.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/l2cap.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/l2cap.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/l2cap.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/l2cap.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/l2cap.c.i: cmake_force
@@ -2669,7 +2683,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/l2cap.c.s: cmake_force
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/l2cap_signaling.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/l2cap_signaling.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/l2cap_signaling.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/l2cap_signaling.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_187) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/l2cap_signaling.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_188) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/l2cap_signaling.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/l2cap_signaling.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/l2cap_signaling.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/l2cap_signaling.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/l2cap_signaling.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/l2cap_signaling.c.i: cmake_force
@@ -2683,7 +2697,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/l2cap_signaling.c.s: cmake_fo
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/md5/md5.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/md5/md5.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/3rd-party/md5/md5.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/md5/md5.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_188) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/md5/md5.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_189) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/md5/md5.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/md5/md5.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/md5/md5.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/md5/md5.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/3rd-party/md5/md5.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/md5/md5.c.i: cmake_force
@@ -2697,7 +2711,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/md5/md5.c.s: cmake_forc
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/yxml/yxml.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/yxml/yxml.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/3rd-party/yxml/yxml.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/yxml/yxml.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_189) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/yxml/yxml.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_190) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/yxml/yxml.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/yxml/yxml.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/yxml/yxml.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/yxml/yxml.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/3rd-party/yxml/yxml.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/yxml/yxml.c.i: cmake_force
@@ -2711,7 +2725,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/yxml/yxml.c.s: cmake_fo
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_stdin_pico.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_stdin_pico.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/src/rp2_common/pico_btstack/btstack_stdin_pico.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_stdin_pico.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_190) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_stdin_pico.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_191) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_stdin_pico.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_stdin_pico.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_stdin_pico.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_stdin_pico.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/src/rp2_common/pico_btstack/btstack_stdin_pico.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_stdin_pico.c.i: cmake_force
@@ -2725,7 +2739,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_stdin_pic
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/segger-rtt/SEGGER_RTT.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/segger-rtt/SEGGER_RTT.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/3rd-party/segger-rtt/SEGGER_RTT.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/segger-rtt/SEGGER_RTT.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_191) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/segger-rtt/SEGGER_RTT.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_192) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/segger-rtt/SEGGER_RTT.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/segger-rtt/SEGGER_RTT.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/segger-rtt/SEGGER_RTT.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/segger-rtt/SEGGER_RTT.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/3rd-party/segger-rtt/SEGGER_RTT.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/segger-rtt/SEGGER_RTT.c.i: cmake_force
@@ -2739,7 +2753,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/3rd-party/segger-rtt/SEGGER_RTT.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_cyw43.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_cyw43.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_cyw43.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_cyw43.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_192) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_cyw43.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_193) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_cyw43.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_cyw43.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_cyw43.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_cyw43.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_cyw43.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_cyw43.c.i: cmake_force
@@ -2753,7 +2767,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_cyw4
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_flash_bank.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_flash_bank.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/src/rp2_common/pico_btstack/btstack_flash_bank.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_flash_bank.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_193) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_flash_bank.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_194) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_flash_bank.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_flash_bank.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_flash_bank.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_flash_bank.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/src/rp2_common/pico_btstack/btstack_flash_bank.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_flash_bank.c.i: cmake_force
@@ -2767,7 +2781,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_flash_ban
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_run_loop_async_context.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_run_loop_async_context.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/src/rp2_common/pico_btstack/btstack_run_loop_async_context.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_run_loop_async_context.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_194) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_run_loop_async_context.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_195) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_run_loop_async_context.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_run_loop_async_context.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_run_loop_async_context.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_run_loop_async_context.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/src/rp2_common/pico_btstack/btstack_run_loop_async_context.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_run_loop_async_context.c.i: cmake_force
@@ -2781,7 +2795,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_btstack/btstack_run_loop_
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_hci_transport_cyw43.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_hci_transport_cyw43.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_hci_transport_cyw43.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_hci_transport_cyw43.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_195) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_hci_transport_cyw43.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_196) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_hci_transport_cyw43.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_hci_transport_cyw43.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_hci_transport_cyw43.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_hci_transport_cyw43.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_hci_transport_cyw43.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_hci_transport_cyw43.c.i: cmake_force
@@ -2795,7 +2809,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_hci_
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_chipset_cyw43.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_chipset_cyw43.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_chipset_cyw43.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_chipset_cyw43.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_196) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_chipset_cyw43.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_197) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_chipset_cyw43.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_chipset_cyw43.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_chipset_cyw43.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_chipset_cyw43.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_chipset_cyw43.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_chipset_cyw43.c.i: cmake_force
@@ -2809,7 +2823,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_cyw43_driver/btstack_chip
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_async_context/async_context_poll.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_async_context/async_context_poll.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/src/rp2_common/pico_async_context/async_context_poll.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_async_context/async_context_poll.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_197) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_async_context/async_context_poll.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_198) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_async_context/async_context_poll.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_async_context/async_context_poll.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_async_context/async_context_poll.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_async_context/async_context_poll.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/src/rp2_common/pico_async_context/async_context_poll.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_async_context/async_context_poll.c.i: cmake_force
@@ -2823,7 +2837,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/src/rp2_common/pico_async_context/async_conte
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_db.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_db.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/att_db.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_db.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_198) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_db.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_199) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_db.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_db.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_db.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_db.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/att_db.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_db.c.i: cmake_force
@@ -2837,7 +2851,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_db.c.s: cmake_force
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_db_util.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_db_util.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/att_db_util.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_db_util.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_199) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_db_util.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_200) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_db_util.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_db_util.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_db_util.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_db_util.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/att_db_util.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_db_util.c.i: cmake_force
@@ -2851,7 +2865,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_db_util.c.s: cmake_fo
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_dispatch.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_dispatch.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/att_dispatch.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_dispatch.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_200) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_dispatch.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_201) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_dispatch.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_dispatch.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_dispatch.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_dispatch.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/att_dispatch.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_dispatch.c.i: cmake_force
@@ -2865,7 +2879,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_dispatch.c.s: cmake_f
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_server.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_server.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/att_server.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_server.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_201) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_server.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_202) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_server.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_server.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_server.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_server.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/att_server.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_server.c.i: cmake_force
@@ -2879,7 +2893,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/att_server.c.s: cmake_for
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/battery_service_server.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/battery_service_server.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt-service/battery_service_server.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/battery_service_server.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_202) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/battery_service_server.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_203) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/battery_service_server.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/battery_service_server.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/battery_service_server.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/battery_service_server.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt-service/battery_service_server.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/battery_service_server.c.i: cmake_force
@@ -2893,7 +2907,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/battery_serv
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/battery_service_client.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/battery_service_client.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt-service/battery_service_client.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/battery_service_client.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_203) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/battery_service_client.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_204) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/battery_service_client.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/battery_service_client.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/battery_service_client.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/battery_service_client.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt-service/battery_service_client.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/battery_service_client.c.i: cmake_force
@@ -2907,7 +2921,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/battery_serv
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/cycling_power_service_server.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/cycling_power_service_server.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt-service/cycling_power_service_server.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/cycling_power_service_server.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_204) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/cycling_power_service_server.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_205) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/cycling_power_service_server.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/cycling_power_service_server.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/cycling_power_service_server.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/cycling_power_service_server.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt-service/cycling_power_service_server.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/cycling_power_service_server.c.i: cmake_force
@@ -2921,7 +2935,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/cycling_powe
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/cycling_speed_and_cadence_service_server.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/cycling_speed_and_cadence_service_server.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt-service/cycling_speed_and_cadence_service_server.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/cycling_speed_and_cadence_service_server.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_205) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/cycling_speed_and_cadence_service_server.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_206) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/cycling_speed_and_cadence_service_server.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/cycling_speed_and_cadence_service_server.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/cycling_speed_and_cadence_service_server.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/cycling_speed_and_cadence_service_server.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt-service/cycling_speed_and_cadence_service_server.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/cycling_speed_and_cadence_service_server.c.i: cmake_force
@@ -2935,7 +2949,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/cycling_spee
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/device_information_service_server.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/device_information_service_server.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt-service/device_information_service_server.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/device_information_service_server.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_206) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/device_information_service_server.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_207) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/device_information_service_server.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/device_information_service_server.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/device_information_service_server.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/device_information_service_server.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt-service/device_information_service_server.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/device_information_service_server.c.i: cmake_force
@@ -2949,7 +2963,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/device_infor
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/device_information_service_client.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/device_information_service_client.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt-service/device_information_service_client.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/device_information_service_client.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_207) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/device_information_service_client.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_208) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/device_information_service_client.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/device_information_service_client.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/device_information_service_client.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/device_information_service_client.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt-service/device_information_service_client.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/device_information_service_client.c.i: cmake_force
@@ -2963,7 +2977,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/device_infor
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/heart_rate_service_server.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/heart_rate_service_server.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt-service/heart_rate_service_server.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/heart_rate_service_server.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_208) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/heart_rate_service_server.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_209) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/heart_rate_service_server.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/heart_rate_service_server.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/heart_rate_service_server.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/heart_rate_service_server.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt-service/heart_rate_service_server.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/heart_rate_service_server.c.i: cmake_force
@@ -2977,7 +2991,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/heart_rate_s
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/hids_client.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/hids_client.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt-service/hids_client.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/hids_client.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_209) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/hids_client.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_210) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/hids_client.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/hids_client.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/hids_client.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/hids_client.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt-service/hids_client.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/hids_client.c.i: cmake_force
@@ -2991,7 +3005,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/hids_client.
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/hids_device.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/hids_device.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt-service/hids_device.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/hids_device.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_210) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/hids_device.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_211) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/hids_device.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/hids_device.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/hids_device.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/hids_device.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt-service/hids_device.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/hids_device.c.i: cmake_force
@@ -3005,7 +3019,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/hids_device.
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/nordic_spp_service_server.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/nordic_spp_service_server.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt-service/nordic_spp_service_server.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/nordic_spp_service_server.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_211) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/nordic_spp_service_server.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_212) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/nordic_spp_service_server.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/nordic_spp_service_server.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/nordic_spp_service_server.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/nordic_spp_service_server.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt-service/nordic_spp_service_server.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/nordic_spp_service_server.c.i: cmake_force
@@ -3019,7 +3033,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/nordic_spp_s
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/ublox_spp_service_server.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/ublox_spp_service_server.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt-service/ublox_spp_service_server.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/ublox_spp_service_server.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_212) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/ublox_spp_service_server.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_213) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/ublox_spp_service_server.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/ublox_spp_service_server.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/ublox_spp_service_server.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/ublox_spp_service_server.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt-service/ublox_spp_service_server.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/ublox_spp_service_server.c.i: cmake_force
@@ -3033,7 +3047,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/ublox_spp_se
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/ancs_client.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/ancs_client.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt-service/ancs_client.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/ancs_client.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_213) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/ancs_client.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_214) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/ancs_client.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/ancs_client.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/ancs_client.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/ancs_client.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt-service/ancs_client.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/ancs_client.c.i: cmake_force
@@ -3047,7 +3061,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt-service/ancs_client.
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt_client.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt_client.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt_client.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt_client.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_214) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt_client.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_215) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt_client.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt_client.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt_client.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt_client.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/gatt_client.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt_client.c.i: cmake_force
@@ -3061,7 +3075,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/gatt_client.c.s: cmake_fo
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/le_device_db_memory.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/le_device_db_memory.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/le_device_db_memory.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/le_device_db_memory.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_215) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/le_device_db_memory.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_216) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/le_device_db_memory.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/le_device_db_memory.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/le_device_db_memory.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/le_device_db_memory.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/le_device_db_memory.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/le_device_db_memory.c.i: cmake_force
@@ -3075,7 +3089,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/le_device_db_memory.c.s: 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/le_device_db_tlv.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/le_device_db_tlv.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/le_device_db_tlv.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/le_device_db_tlv.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_216) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/le_device_db_tlv.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_217) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/le_device_db_tlv.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/le_device_db_tlv.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/le_device_db_tlv.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/le_device_db_tlv.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/le_device_db_tlv.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/le_device_db_tlv.c.i: cmake_force
@@ -3089,7 +3103,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/le_device_db_tlv.c.s: cma
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/sm.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/sm.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/sm.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/sm.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_217) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/sm.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_218) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/sm.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/sm.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/sm.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/sm.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/ble/sm.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/sm.c.i: cmake_force
@@ -3103,7 +3117,7 @@ CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/ble/sm.c.s: cmake_force
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_event_builder.c.o: CMakeFiles/atari_ikbd.dir/flags.make
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_event_builder.c.o: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/hci_event_builder.c
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_event_builder.c.o: CMakeFiles/atari_ikbd.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_218) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_event_builder.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_219) "Building C object CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_event_builder.c.o"
 	/opt/homebrew/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_event_builder.c.o -MF CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_event_builder.c.o.d -o CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_event_builder.c.o -c /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/lib/btstack/src/hci_event_builder.c
 
 CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/hci_event_builder.c.i: cmake_force
@@ -3248,6 +3262,7 @@ atari_ikbd_OBJECTS = \
 "CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/avrcp_target.c.o" \
 "CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_cvsd_plc.c.o" \
 "CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_tlv.c.o" \
+"CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.o" \
 "CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_sbc_plc.c.o" \
 "CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/device_id_server.c.o" \
 "CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/gatt_sdp.c.o" \
@@ -3470,6 +3485,7 @@ atari_ikbd_pico2_w.elf: CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/class
 atari_ikbd_pico2_w.elf: CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/avrcp_target.c.o
 atari_ikbd_pico2_w.elf: CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_cvsd_plc.c.o
 atari_ikbd_pico2_w.elf: CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_tlv.c.o
+atari_ikbd_pico2_w.elf: CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_link_key_db_memory.c.o
 atari_ikbd_pico2_w.elf: CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/btstack_sbc_plc.c.o
 atari_ikbd_pico2_w.elf: CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/device_id_server.c.o
 atari_ikbd_pico2_w.elf: CMakeFiles/atari_ikbd.dir/pico-sdk/lib/btstack/src/classic/gatt_sdp.c.o
@@ -3561,7 +3577,7 @@ atari_ikbd_pico2_w.elf: pico-sdk/src/rp2350/boot_stage2/CMakeFiles/bs2_default_l
 atari_ikbd_pico2_w.elf: libbluepad32/libbluepad32.a
 atari_ikbd_pico2_w.elf: /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/pico-sdk/src/rp2_common/pico_crt0/rp2350/memmap_default.ld
 atari_ikbd_pico2_w.elf: CMakeFiles/atari_ikbd.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_219) "Linking CXX executable atari_ikbd_pico2_w.elf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/CMakeFiles --progress-num=$(CMAKE_PROGRESS_220) "Linking CXX executable atari_ikbd_pico2_w.elf"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/atari_ikbd.dir/link.txt --verbose=$(VERBOSE)
 	/opt/homebrew/bin/arm-none-eabi-objdump -h /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/atari_ikbd_pico2_w.elf > atari_ikbd_pico2_w.dis
 	/opt/homebrew/bin/arm-none-eabi-objdump -d /Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/atari_ikbd_pico2_w.elf >> atari_ikbd_pico2_w.dis

@@ -143,7 +143,6 @@ static void my_platform_on_init_complete(void) {
 }
 
 static uni_error_t my_platform_on_device_discovered(bd_addr_t addr, const char* name, uint16_t cod, uint8_t rssi) {
-    // Log all discovered devices for debugging
     char addr_str[18];
     snprintf(addr_str, sizeof(addr_str), "%02X:%02X:%02X:%02X:%02X:%02X",
              addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
@@ -310,7 +309,6 @@ static void my_platform_on_controller_data(uni_hid_device_t* d, uni_controller_t
                 // Copy keyboard data
                 storage->keyboard = ctl->keyboard;
                 storage->updated = true;
-                // Debug: log first few keyboard samples
                 static uint32_t kb_sample_count = 0;
                 if (kb_sample_count < 5) {
                     kb_sample_count++;
@@ -333,7 +331,6 @@ static void my_platform_on_controller_data(uni_hid_device_t* d, uni_controller_t
                 // Copy mouse data
                 storage->mouse = ctl->mouse;
                 storage->updated = true;
-                // Debug: log first few mouse samples
                 static uint32_t mouse_sample_count = 0;
                 if (mouse_sample_count < 5) {
                     mouse_sample_count++;
