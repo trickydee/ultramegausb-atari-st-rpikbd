@@ -8,7 +8,8 @@ The original project was initially created by fieldofcows in 2020 https://github
 The "ultramegausb" title is intended to highlight the massively enhanced USB compatability from the great work of TinyUSB project, Bluepad32 and associated projects listed below.
 
 This project is opensource and I am happy to recieve PR's and issues to further improve capabilies.
-Lookout for a published roadmap of new features and an easy to build hardware device you can self manufacture.
+
+A reference hardware design (KiCad schematic and PCB) for the Atari Mega ST, Mega STE, and TT computers is included in the `hardware/` directory, along with Gerber files ready for manufacture.
 
 With a RP2350 Pico 2 W device It is possible to Mix and Match any combination of USB, Bluetooth or 9Pin Atari Joystick peripherals.
 
@@ -159,6 +160,21 @@ The emulator is configured as per the schematic below.
 All of the external components except the level shifter are optional - you do not need to include the display and buttons if you are happy to hardcode mouse acceleration and joystick assignment settings in code. Also, if you only plan to use USB joysticks then you can omit the DB-9 connectors.
 
 The level shifter is required as the Atari uses 5V logic over the serial connection whereas the Pico uses 3.3V logic. You can possible get away with leaving UART_RX disconnected and connect UART_TX to the Atari without a level shifter but many games and applications will not work like this as they send commands to the IKBD/emulator.
+
+## Hardware Design
+
+A reference PCB design is available in KiCad format in the `hardware/` directory for the following Atari computers:
+
+- **Atari Mega ST**
+- **Atari Mega STE**
+- **Atari TT**
+
+The design includes:
+- Complete KiCad project files (schematic and PCB layout)
+- Gerber files in the `gerbers/` subdirectory
+- A ready-to-upload Gerber zip file: `ultramegausb-atari-mega-adapter-2.2-gerbers.zip`
+
+You can upload the `ultramegausb-atari-mega-adapter-2.2-gerbers.zip` file directly to PCB manufacturers such as [JLPCB](https://jlcpcb.com/) or [PCBway](https://www.pcbway.com/) to order your own boards.
 
 ## Compiling the Emulator Firmware
 
