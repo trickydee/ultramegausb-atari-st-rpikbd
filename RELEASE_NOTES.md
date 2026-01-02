@@ -5,6 +5,69 @@
 
 ---
 
+## Version 21.0.1 (January 2, 2026)
+
+### Improvements and Cleanup
+
+Version 21.0.1 includes code cleanup and build script improvements following the major Bluetooth feature addition in v21.0.0.
+
+**What's New:**
+- ✅ Code cleanup and optimizations
+- ✅ Build script improvements
+- ✅ Production build variants (OLED=1, LOGGING=0)
+- ✅ Updated splash screen design
+- ✅ Debug OLED pages gated behind ENABLE_SERIAL_LOGGING=1
+
+---
+
+## Version 21.0.0 (December 2025)
+
+### Major New Feature: Bluetooth Support for Pico 2 W
+
+Version 21.0.0 introduces comprehensive **Bluetooth support** for the Raspberry Pi Pico 2 W (RP2350), enabling wireless keyboards, mice, and gamepads!
+
+**What's New:**
+- ✅ **Bluetooth Keyboard Support** - Full HID keyboard support with all keyboard shortcuts (Ctrl+F4, Ctrl+F11, etc.)
+- ✅ **Bluetooth Mouse Support** - Standard HID mice with scroll wheel support (scroll wheel mapped to cursor up/down keys)
+- ✅ **Bluetooth Gamepad Support** - DualSense, DualShock 4, Switch Pro, Xbox Wireless, and more via Bluepad32
+- ✅ **Mix and Match** - Use any combination of USB, Bluetooth, or 9-pin Atari joystick peripherals simultaneously
+- ✅ **Llamatron Dual-Stick Mode** - Works seamlessly with Bluetooth gamepads
+- ✅ **Runtime Mode Selection** - Switch between USB+Bluetooth, USB only, or Bluetooth only modes via OLED interface
+- ✅ **Bluetooth Pairing Management** - Easy pairing and ability to clear stored pairing keys
+
+**Technical Details:**
+- **Hardware Requirement:** Raspberry Pi Pico 2 W (RP2350) - Bluetooth requires additional RAM not available on original Pico W
+- **Bluetooth Stack:** Bluepad32 library integration
+- **Supported Protocols:** BR/EDR (Bluetooth Classic) for gamepads, HID for keyboards and mice
+- **Pairing:** Automatic detection - just put device into Bluetooth pairing mode
+- **Mode Selection:** Use left button on splash screen to cycle through USB+Bluetooth, USB only, Bluetooth only
+- **Pairing Reset:** Press right button on splash screen to delete all stored Bluetooth pairing keys
+
+**Supported Bluetooth Devices:**
+- **Keyboards:** Standard HID keyboards with full shortcut support
+- **Mice:** Standard HID mice with scroll wheel support
+- **Gamepads:** 
+  - PlayStation DualSense (PS5)
+  - PlayStation DualShock 4 (PS4)
+  - Nintendo Switch Pro Controller
+  - Nintendo Switch JoyCons
+  - Xbox Wireless Controllers
+  - And more via Bluepad32
+
+**Known Limitations:**
+- Bluetooth support requires Pico 2 W (RP2350) - original Pico W (RP2040) does not have enough RAM
+- Logitech MX devices require re-pairing after each emulator restart
+- Bluetooth keyboards and mice work seamlessly
+- All keyboard shortcuts work with Bluetooth keyboards
+- Llamatron dual-stick mode works with Bluetooth gamepads
+
+**Build Information:**
+- Bluetooth builds automatically enabled for `pico2_w` board type
+- Uses Bluepad32 library for gamepad support
+- Standard HID protocol for keyboards and mice
+
+---
+
 ## Version 10.0.0 (October 31, 2025)
 
 ### New Feature: PlayStation 3 DualShock 3 Support
