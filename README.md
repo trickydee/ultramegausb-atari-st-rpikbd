@@ -44,6 +44,15 @@ The emulator supports Bluetooth keyboards, mice, and gamepads on the Raspberry P
 * **Bluetooth Mice**: Standard HID mice with scroll wheel support (scroll wheel mapped to cursor up/down keys)
 * **Bluetooth Gamepads**: DualSense, DualShock 4, Switch Pro, Xbox Wireless, and more via [Bluepad32](https://github.com/ricardoquesada/bluepad32)
 
+
+# Usage
+
+
+## USB
+For USB devices, just connect your device via the Pico's USB port using a USB OTG HUB.
+The devices listed above will work a few seconds after being connected, you can confirm they are detected on the OLED screen, if you find a modern device that does not let me know via an issue ticket. 
+
+## Bluetooth
 ### Pairing Bluetooth Devices
 
 Pairing is simple - **just put your device into Bluetooth pairing mode**. The emulator will automatically detect and connect to supported devices. The emulator continuously scans for new devices, so you can pair devices at any time without needing to restart.
@@ -148,14 +157,17 @@ The interface is available in English, French, German, Spanish and Italian.
 The emulator supports both USB and Atari ST compatible joysticks, supported a maximum of two joysticks at a time. Using the user interface
 you can select whether the USB joystick or Atari joystick are assigned to Joysticks 0 and 1.
 
-## Emulator details - How it works
+
+# Emulator Hardware
+
+## How it works
 The Atari ST keyboard contains an HD6301 microcontroller that can be programmed by the Atari TOS or by user applications to read the keyboard, mouse and joysticks. The keyboard is connected to the Atari via a serial interface (7812.5bps). Commands can be sent from the Atari to the keyboard and the keyboard sends mouse movements, keystrokes and joystick states to the Atari.
 
 Instead of writing code to handle the serial protocol between the Atari and the keyboard, this project provides a full emulation of the HD6301 microcontroller and the hardware connected to it. This means that it appears to the Atari as a real keyboard, and can be customised and programmed by software like a real keyboard, providing maximum compatibility.
 
 The RP2040/RP2350 USB host port or RP2350 Bluetooth is used to connect a keyboard, mouse and joysticks using a USB hub. These are translated into an emulation of the relevant device and fed into the emulated HD6301 control registers, allowing the HD6301 to determine how to communicate this with the Atari.
 
-## Building the emulator
+## Building the emulator Hardware
 The emulator is configured as per the schematic below.
 
 ![Schematic](docs/schematic.png)
@@ -164,7 +176,7 @@ All of the external components *except the level shifter* are optional - you do 
 
 The level shifter is required as the Atari uses 5V logic over the serial connection whereas the Pico uses 3.3V logic.
 
-## Hardware Design - Atari Mega Adapter
+## Hardware PCB Design - Atari Mega Adapter
 
 A reference PCB design is available in KiCad format in the `hardware/` directory for the following Atari computers:
 
@@ -178,6 +190,11 @@ The design includes:
 - A ready-to-upload Gerber zip file: `ultramegausb-atari-mega-adapter-2.2-gerbers.zip`
 
 You can upload the `ultramegausb-atari-mega-adapter-2.2-gerbers.zip` file directly to PCB manufacturers such as [JLPCB](https://jlcpcb.com/) or [PCBway](https://www.pcbway.com/) to order your own boards.
+
+
+![Atari Mega ST - Mega STE - TT adapter PCB Screenshot - 2.2](docs/Atari%20Mega%20ST%20-%20Mega%20STE%20-%20TT%20adapter%20PCB%20Screenshot%20-%202.2.png)
+
+![Atari Mega ST - Mega STE - TT adapter PCB 3d Render Screenshot - 2.2](docs/Atari%20Mega%20ST%20-%20Mega%20STE%20-%20TT%20adapter%20PCB%203d%20Render%20Screenshot%20-%202.2.png)
 
 ## Building/Compiling the Emulator Firmware
 
@@ -254,6 +271,7 @@ If you don't know how or can't build the firmware by yourself, please use the bu
 ## Using the emulator
 If you build the emulator as per the schematic, the Pico is powered directly from the Atari 5V supply. The Pico boots immediately but USB enumeration can take a few seconds. Once this is complete, the emulator is fully operational.
 
+## Emulator UI
 The user interface has multiple pages that are rotated between by pressing the middle UI button. The first three pages all show the number of connected USB devices at the top but allow configuration of an option below. The pages in order are:
 
 0. **Splash Screen** (ATARI logo): Shows firmware version and connection status. On Pico 2 W builds with Bluetooth support:
