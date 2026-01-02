@@ -4,6 +4,7 @@ build-pico/
 build-pico2/
 build-pico2_w/
 build-picow/
+build-pico_w/
 dist/
 
 # macOS

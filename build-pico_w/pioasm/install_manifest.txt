@@ -1,5 +1,0 @@
-/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico_w/pioasm-install/pioasm/pioasm
-/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico_w/pioasm-install/pioasm/pioasmTargets.cmake
-/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico_w/pioasm-install/pioasm/pioasmTargets-release.cmake
-/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico_w/pioasm-install/pioasm/pioasmConfig.cmake
-/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico_w/pioasm-install/pioasm/pioasmConfigVersion.cmake
