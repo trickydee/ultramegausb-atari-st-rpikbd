@@ -13,6 +13,10 @@ The project is based on an an original idea created by 'fieldofcows' in 2020, th
 
 A reference hardware design (KiCad schematic and PCB) for the Atari Mega ST, Mega STE, and TT computers is included in the `hardware/` directory, along with Gerber files ready for manufacture at JLPCB or PCBWAY.
 
+![Atari-Mega-USB-Bluetooth-Adapter](assets/Atari-Mega-USB-Bluetooth-Adapter.png)
+
+## Contributions
+
 This project is opensource and I am happy to recieve PR's and issues to further improve capabilies.
 
 ## USB Device Support
