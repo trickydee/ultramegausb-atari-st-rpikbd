@@ -1,2 +1,0 @@
-/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/_deps/picotool-build/enc_bootloader_mbedtls/CMakeFiles/edit_cache.dir
-/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/_deps/picotool-build/enc_bootloader_mbedtls/CMakeFiles/rebuild_cache.dir

@@ -1,7 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"/Users/rich/Documents/Code/Pico/Atari-Keyboard/ultramegausb-atari-st-rpikbd/build-pico2_w/_deps/picotool-subbuild/cmake_install.cmake"
-	],
-	"Parallel" : false
-}
