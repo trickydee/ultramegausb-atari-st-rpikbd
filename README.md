@@ -11,7 +11,7 @@ Currently bluetooth requires a Pico 2w device - with this it is possible to Mix 
 
 The project is based on an an original idea created by 'fieldofcows' in 2020, this project builds on this amazing foundation to improve compatability, stability and add support for many modern game controllers either wired USB or wireless Bluetooth connected.
 
-A reference hardware design (KiCad schematic and PCB) for the Atari Mega ST, Mega STE, and TT computers is included in the `hardware/` directory, along with Gerber files ready for manufacture at JLPCB or PCBWAY.
+A reference hardware design (KiCad schematic and PCB) for the Atari Mega ST, Mega STE, and TT computers is included in the `hardware/` directory, along with Gerber files ready for manufacture at JLCPCB or PCBWAY.
 
 ![Atari-Mega-USB-Bluetooth-Adapter](docs/Atari-Mega-USB-Bluetooth-Adapter.png)
 
