@@ -1,4 +1,4 @@
-# Atari ST IKBD Emulator With USB and Bluetooth support
+# Atari ST Keyboard (IKBD) Emulator with USB and Bluetooth support
 
 ## Overview
 This project uses a Raspberry PI PICO to emulate the Atari iKBD keyboard controller and provides USB, Bluetooth and Atari 9 Pin connectivity for devices.
@@ -199,6 +199,34 @@ You can upload the `ultramegausb-atari-mega-adapter-2.2-gerbers.zip` file direct
 ![Atari Mega ST - Mega STE - TT adapter PCB Screenshot - 2.2](docs/Atari%20Mega%20ST%20-%20Mega%20STE%20-%20TT%20adapter%20PCB%20Screenshot%20-%202.2.png)
 
 ![Atari Mega ST - Mega STE - TT adapter PCB 3d Render Screenshot - 2.2](docs/Atari%20Mega%20ST%20-%20Mega%20STE%20-%20TT%20adapter%20PCB%203d%20Render%20Screenshot%20-%202.2.png)
+
+## Bill of materials
+
+The reference adapter is very simple to construct and is also suprisingly cheap. The table below shows example pricing.
+A single adapter can be made for around $20.
+
+
+
+| Component                                             | Quantity | Required | Link / Comment                                                | Aprx Cost |
+|-------------------------------------------------------|----------|----------|:--------------------------------------------------------------|----------|
+| Raspberry PI Pico                                     | 1        | Y         | Pico 2040 / 2350 Module                                       | $7 |
+| 1 x 20 Pin 2.54 ingle Row Male Pin Header Connector   | 2        | N        | PCB Pico connector - Optional Pico may be soldered to PCB.    | inc with Pico |
+| 1 x 20 Pin 2.54 ingle Row Female Pin Header Connector | 2        | N        | PCB Pico connector - Optional as Pico may be soldered to PCB. | $7 for 10 |
+| Bi-Directional 4 Channel logic level shifter / converter module 3.3v - 5v                           | 1        | Y        |                                                               | $7 for 10 |
+| 1 x 6 Pin 2.54 Single Row Male Pin Header Connector   | 2        | y        | PCB Voltage Regulator connector | inc with Shifter |
+| 1 x RJ12 Unshielded 90 Degree push in type 6P6C connector | 1        | y        | Atari Mega ST/TT Keyboard Connector | $9 for 30 |
+| 1 x 6 Pin 2.54 Single Row Female Pin Header Connector | 2        | N        | PCB Voltage Regulator connector | $2 for 20 |
+| OLED 0.96" Display 128x64 I2C SSD1306.                | 1        | N        | OLED Display - Blue / White / Yellow + Blue                                                  | $4 |
+| 1 x 4 Pin 2.54 Single Row Male Pin Header Connector   | 1        | N        | OLED Connector | inc with OLED |
+| Micro Push Button Switch - 6mm x 6mm x5mm             | 3        | N        | OLED Control buttons                                          | $12 for 20 |
+| Micro Push Button Switch - 6mm x 6mm x5mm             | 1        | N        | Pico Reset buttons                                            | As Above |
+| 1 x 4 Pin 2.54 Single Row Female Pin Header Connector | 1        | N        | PCB OLED connector | $2 for 20 |
+| 9 Pin Male D-Sub Socket PCB Board Mount Connector | 2        | N        | 9 Pin Joystick Port | $10.14 for 30! |
+| PCB Print at JLPCB | 1        | Y        | Example print  | $10 for 5 |
+
+You will also need a straight through R12 to RJ12 Cable (All 6 pins connected) to connect between the Atari and the Adapter. These can be purchased pre made from Amazon (A modem cable will do if all 6 pins are terminated).
+
+
 
 ## Building/Compiling the Emulator Firmware
 
