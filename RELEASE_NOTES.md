@@ -1,7 +1,22 @@
 # Release Notes
 
-**Current Version:** 21.0.1  
-**Last Updated:** January 2, 2026
+**Current Version:** 21.0.2  
+**Last Updated:** February 2026
+
+---
+
+## Version 21.0.2 (February 2026)
+
+### Expanded USB Controller Support (Phase 1)
+
+Version 21.0.2 adds many additional USB VID/PIDs for Sony and Nintendo controllers, using the same HID report formats as the existing drivers. No new controller types—just broader compatibility.
+
+**What's New:**
+- **PS3 DualShock 3**: Third-party PS3-compatible pads now supported: HORI, Mad Catz, Qanba, Nacon Daija (PS3), Fire NEOGEOX, Generic Zero Delay (PC/PS3), Logitech F310 (PS3 mode).
+- **PS4 DualShock 4**: Third-party PS4-compatible pads now supported: HORI, Razer, Brook/Feir, Mad Catz, Qanba, Nacon Daija (PS4), PowerA FUSION FightPad, ASW Guilty Gear xrd, Universal PCB Project.
+- **Nintendo Switch**: Joy-Con Charge Grip (0x200E) and SNES Controller for Nintendo Switch Online (0x2017) now detected and supported alongside Pro Controller and Joy-Con L/R/Pair.
+
+See `docs/custom-mappings.md` and the developer guide for full VID/PID lists.
 
 ---
 

@@ -30,13 +30,15 @@ This project is opensource and I am happy to recieve PR's and issues to further 
 ## Game Controller support.
 The following USB HID Gamepads/Joysticks are supported (More to come)
 
-* PlayStation 3 DualShock 3 Controllers
-* PlayStation 4 DualShock 4 Controllers
+* PlayStation 3 DualShock 3 Controllers (including third-party PS3-compatible pads: HORI, Mad Catz, Qanba, Nacon, Logitech F310, etc.)
+* PlayStation 4 DualShock 4 Controllers (including third-party PS4-compatible pads: HORI, Razer, Brook, Mad Catz, Qanba, Nacon, PowerA FightPad, etc.)
 * Xbox Xinput - Xbox One, Xbox 360 Controllers
-* Nintendo Switch Pro Controller (Version 1)
+* Nintendo Switch Pro Controller (Version 1), Joy-Con (L/R/Pair/Grip), SNES Controller (NSO)
 * PowerA Fusion Wireless Arcade Stick for Nintendo Switch
 * Google Stadia Controller
 * Nintendo Switch / Wii U GameCube Controller USB Adapter (v11.0.0)
+
+**v21.0.2:** Expanded USB controller support: many additional third-party PS3- and PS4-compatible VID/PIDs (same HID report format as official pads), plus Nintendo Joy-Con Charge Grip and SNES Controller (NSO).
 
 ## Bluetooth Support (Pico 2 W only)
 
@@ -337,9 +339,9 @@ Note: The serial data page should only be used for ensuring the connection works
 The emulator supports multiple types of USB game controllers with reliable hot-swapping:
 
 - **Xbox Controllers**: Xbox 360 (wired/wireless), Xbox One, Xbox Series X|S, Original Xbox
-- **PS3 DualShock 3**: Full support via USB (wired) (v10.0.0)
-- **PS4 DualShock 4**: Full support via USB (wired)
-- **Nintendo Switch Pro Controller**: Full support with analog stick precision and no drift
+- **PS3 DualShock 3**: Full support via USB (wired); includes third-party PS3-compatible pads (HORI, Mad Catz, Qanba, Nacon, Logitech F310, etc.) (v10.0.0, expanded v21.0.2)
+- **PS4 DualShock 4**: Full support via USB (wired); includes third-party PS4-compatible pads (HORI, Razer, Brook, Mad Catz, Qanba, Nacon, PowerA FightPad, etc.) (expanded v21.0.2)
+- **Nintendo Switch Pro Controller**: Full support with analog stick precision and no drift; also Joy-Con (L/R/Pair/Charge Grip) and SNES Controller (NSO) (expanded v21.0.2)
 - **PowerA Fusion Wireless Arcade Stick**: Full support for Nintendo Switch arcade sticks (v8.0.0)
 - **Google Stadia Controller**: Full support for Stadia controllers (v8.0.0)
 - **Nintendo Switch / Wii U GameCube Adapter**: Full support for official Nintendo GameCube controller USB adapter (v11.0.0)

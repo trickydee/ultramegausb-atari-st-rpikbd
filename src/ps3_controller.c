@@ -65,13 +65,22 @@ static void free_controller(uint8_t dev_addr) {
 //--------------------------------------------------------------------
 // Public API Implementation
 //--------------------------------------------------------------------
+// Third-party PS3-compatible VID/PIDs (same HID report format as DualShock 3).
+// List matches joypad-os sony_ds3.c for arcade sticks and PC/PS3 controllers.
+
+static bool ps3_match_vid_pid(uint16_t vid, uint16_t pid) {
+    return (vid == 0x054c && pid == 0x0268)    // Sony DualShock 3
+        || (vid == 0x0f0d && (pid == 0x0010 || pid == 0x0011 || pid == 0x0026 || pid == 0x0027 || pid == 0x008b)) // HORI
+        || (vid == 0x0738 && (pid == 0x3180 || pid == 0x8818 || pid == 0x8838)) // Mad Catz
+        || (vid == 0x2c22 && (pid == 0x2302 || pid == 0x2500))   // Qanba
+        || (vid == 0x146b && pid == 0x0904)    // Nacon Daija (PS3)
+        || (vid == 0x1292 && pid == 0x4e47)    // Fire NEOGEOX (PS3 HID)
+        || (vid == 0x0079 && pid == 0x0006)    // Generic Zero Delay (PC/PS3)
+        || (vid == 0x046d && pid == 0xc216);   // Logitech F310 (PS3 Mode)
+}
 
 bool ps3_is_dualshock3(uint16_t vid, uint16_t pid) {
-    if (vid != PS3_VENDOR_ID) {
-        return false;
-    }
-    
-    return (pid == PS3_DS3_PID);
+    return ps3_match_vid_pid(vid, pid);
 }
 
 bool ps3_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len) {

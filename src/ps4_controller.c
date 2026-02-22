@@ -64,20 +64,24 @@ static void free_controller(uint8_t dev_addr) {
 //--------------------------------------------------------------------
 // Public API Implementation
 //--------------------------------------------------------------------
+// Third-party PS4-compatible VID/PIDs (same HID report format as DualShock 4).
+// List matches joypad-os sony_ds4.c for arcade sticks and PS4 controllers.
+
+static bool ps4_match_vid_pid(uint16_t vid, uint16_t pid) {
+    return (vid == 0x054c && (pid == 0x09cc || pid == 0x05c4 || pid == 0x0ba0)) // Sony DS4 + dongle
+        || (vid == 0x0f0d && (pid == 0x005e || pid == 0x0066 || pid == 0x008a || pid == 0x00ee)) // HORI
+        || (vid == 0x1532 && (pid == 0x0401 || pid == 0x1004 || pid == 0x1008)) // Razer
+        || (vid == 0x0c12 && (pid == 0x0c30 || pid == 0x0ef7 || pid == 0x1e1b)) // Brook, Feir
+        || (vid == 0x0738 && (pid == 0x8180 || pid == 0x8384 || pid == 0x8481)) // Mad Catz
+        || (vid == 0x2c22 && (pid == 0x2000 || pid == 0x2200 || pid == 0x2300))  // Qanba
+        || (vid == 0x146b && pid == 0x0d09)    // Nacon Daija (PS4)
+        || (vid == 0x20d6 && pid == 0x792a)    // PowerA FUSION FightPad
+        || (vid == 0x1f4f && pid == 0x1002)    // ASW Guilty Gear xrd
+        || (vid == 0x04d8 && pid == 0x1529);   // Universal PCB Project (UPCB)
+}
 
 bool ps4_is_dualshock4(uint16_t vid, uint16_t pid) {
-    if (vid != PS4_VENDOR_ID) {
-        return false;
-    }
-    
-    switch (pid) {
-        case PS4_DS4_PID_V1:
-        case PS4_DS4_PID_V2:
-        case PS4_DS4_PID_DONGLE:
-            return true;
-        default:
-            return false;
-    }
+    return ps4_match_vid_pid(vid, pid);
 }
 
 bool ps4_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len) {

@@ -32,6 +32,8 @@ extern "C" {
 #define SWITCH_JOYCON_L         0x2006  // Joy-Con Left
 #define SWITCH_JOYCON_R         0x2007  // Joy-Con Right
 #define SWITCH_JOYCON_PAIR      0x2008  // Joy-Con Pair
+#define SWITCH_JOYCON_GRIP      0x200E  // Joy-Con Charge Grip (same report as Pro)
+#define SWITCH_SNES_NSO         0x2017  // SNES Controller (NSO)
 
 // PowerA Vendor ID (third-party Switch controllers)
 #define POWERA_VENDOR_ID        0x20D6

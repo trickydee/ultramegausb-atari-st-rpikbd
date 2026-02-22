@@ -142,6 +142,8 @@ bool switch_is_controller(uint16_t vid, uint16_t pid) {
             case SWITCH_JOYCON_L:
             case SWITCH_JOYCON_R:
             case SWITCH_JOYCON_PAIR:
+            case SWITCH_JOYCON_GRIP:
+            case SWITCH_SNES_NSO:
                 return true;
         }
     }
