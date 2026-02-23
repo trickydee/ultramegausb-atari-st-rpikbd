@@ -327,7 +327,8 @@ To upgrade to the latest version:
 
 1. Download the firmware from the `dist/` directory:
    - `atari_ikbd_pico.uf2` for Raspberry Pi Pico (RP2040)
-   - `atari_ikbd_pico2.uf2` for Raspberry Pi Pico 2 (RP2350)
+   - `atari_ikbd_pico2.uf2` for Raspberry Pi Pico 2 (RP2350, USB only)
+   - `atari_ikbd_pico2_w.uf2` for Raspberry Pi Pico 2 W (RP2350 + Bluetooth)
 2. Hold BOOTSEL button on your Pico
 3. Connect USB cable
 4. Release BOOTSEL button

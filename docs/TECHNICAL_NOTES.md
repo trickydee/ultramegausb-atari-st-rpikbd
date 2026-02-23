@@ -2,7 +2,7 @@
 
 This document consolidates technical documentation, performance optimizations, bug fixes, and architecture notes for the Atari ST IKBD emulator.
 
-**Last Updated:** January 2, 2026
+**Last Updated:** February 2026
 
 ---
 

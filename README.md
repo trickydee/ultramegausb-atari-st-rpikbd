@@ -3,13 +3,13 @@
 ## Overview
 This project uses a Raspberry PI PICO to emulate the Atari iKBD keyboard controller and provides USB, Bluetooth and Atari 9 Pin connectivity for devices.
 
-This is useful if you have an Atari Mega ST that is missing its keyboard or if you just want to use modern keybords,mice and Joysticks with your ST.
+This is useful if you have an Atari Mega ST that is missing its keyboard or if you just want to use modern keyboards, mice and joysticks with your ST.
 
 The emulator provides the ability to use USB or Bluetooth keyboards, mice and joysticks / gamepads with the ST. You can also use original 9 pin Dsub 'Atari' Joysticks!. 
 
 Currently bluetooth requires a Pico 2w device - with this it is possible to Mix and Match any combination of USB, Bluetooth or 9 Pin Atari Joystick peripherals to create your perfect atari setup. If you just want USB support any Pico device will suffice.
 
-The project is based on an an original idea created by 'fieldofcows' in 2020, this project builds on this amazing foundation to improve compatability, stability and add support for many modern game controllers either wired USB or wireless Bluetooth connected.
+The project is based on an an original idea created by 'fieldofcows' in 2020, this project builds on this amazing foundation to improve compatibility, stability and add support for many modern game controllers either wired USB or wireless Bluetooth connected.
 
 A reference hardware design (KiCad schematic and PCB) for the Atari Mega ST, Mega STE, and TT computers is included in the `hardware/` directory, along with Gerber files ready for manufacture at JLCPCB or PCBWAY.
 
@@ -17,7 +17,7 @@ A reference hardware design (KiCad schematic and PCB) for the Atari Mega ST, Meg
 
 ## Contributions
 
-This project is opensource and I am happy to recieve PR's and issues to further improve capabilies.
+This project is open source and I am happy to receive pull requests and issues to further improve capabilities.
 
 ## USB Device Support
 
@@ -71,7 +71,7 @@ The devices listed above will work a few seconds after being connected, you can 
 Pairing is simple - **just put your device into Bluetooth pairing mode**. The emulator will automatically detect and connect to supported devices. The emulator continuously scans for new devices, so you can pair devices at any time without needing to restart.
 Most Bluetooth devices will remain paired and can be unpaired at the device ot by pressing the right - unpair button on the homescreen.
 
-Note: During testing it has been identified that Logitexh MX devices require re-pairing after each restart of the emulator.
+Note: During testing it has been identified that Logitech MX devices require re-pairing after each restart of the emulator.
 
 
 ### Bluetooth Mode Selection
@@ -202,7 +202,7 @@ The design includes:
 - Gerber files in the `gerbers/` subdirectory
 - A ready-to-upload Gerber zip file: `ultramegausb-atari-mega-adapter-2.2-gerbers.zip`
 
-You can upload the `ultramegausb-atari-mega-adapter-2.2-gerbers.zip` file directly to PCB manufacturers such as [JLPCB](https://jlcpcb.com/) or [PCBway](https://www.pcbway.com/) to order your own boards.
+You can upload the `ultramegausb-atari-mega-adapter-2.2-gerbers.zip` file directly to PCB manufacturers such as [JLCPCB](https://jlcpcb.com/) or [PCBway](https://www.pcbway.com/) to order your own boards.
 
 
 ![Atari Mega ST - Mega STE - TT adapter PCB Screenshot - 2.2](docs/Atari%20Mega%20ST%20-%20Mega%20STE%20-%20TT%20adapter%20PCB%20Screenshot%20-%202.2.png)
@@ -219,11 +219,11 @@ A single adapter can be made for around $20.
 | Component                                             | Quantity | Required | Link / Comment                                                | Aprx Cost |
 |-------------------------------------------------------|----------|----------|:--------------------------------------------------------------|----------|
 | Raspberry PI Pico                                     | 1        | Y         | Pico 2040 / 2350 Module                                       | $7 |
-| 1 x 20 Pin 2.54 ingle Row Male Pin Header Connector   | 2        | N        | PCB Pico connector - Optional Pico may be soldered to PCB.    | inc with Pico |
-| 1 x 20 Pin 2.54 ingle Row Female Pin Header Connector | 2        | N        | PCB Pico connector - Optional as Pico may be soldered to PCB. | $7 for 10 |
+| 1 x 20 Pin 2.54 Single Row Male Pin Header Connector   | 2        | N        | PCB Pico connector - Optional Pico may be soldered to PCB.    | inc with Pico |
+| 1 x 20 Pin 2.54 Single Row Female Pin Header Connector | 2        | N        | PCB Pico connector - Optional as Pico may be soldered to PCB. | $7 for 10 |
 | Bi-Directional 4 Channel logic level shifter / converter module 3.3v - 5v                           | 1        | Y        |                                                               | $7 for 10 |
-| 1 x 6 Pin 2.54 Single Row Male Pin Header Connector   | 2        | y        | PCB Voltage Regulator connector | inc with Shifter |
-| 1 x RJ12 Unshielded 90 Degree push in type 6P6C connector | 1        | y        | Atari Mega ST/TT Keyboard Connector | $9 for 30 |
+| 1 x 6 Pin 2.54 Single Row Male Pin Header Connector   | 2        | Y        | PCB Voltage Regulator connector | inc with Shifter |
+| 1 x RJ12 Unshielded 90 Degree push in type 6P6C connector | 1        | Y        | Atari Mega ST/TT Keyboard Connector | $9 for 30 |
 | 1 x 6 Pin 2.54 Single Row Female Pin Header Connector | 2        | N        | PCB Voltage Regulator connector | $2 for 20 |
 | OLED 0.96" Display 128x64 I2C SSD1306.                | 1        | N        | OLED Display - Blue / White / Yellow + Blue                                                  | $4 |
 | 1 x 4 Pin 2.54 Single Row Male Pin Header Connector   | 1        | N        | OLED Connector | inc with OLED |
@@ -264,15 +264,15 @@ sudo apt install gcc-arm-none-eabi
 #Install cmake
 sudo apt install cmake
 
-#Clone the main repo in your home folder
-git clone --recursive https://github.com/klyde2278/atari-st-rpikb.git
+# Clone the main repo in your home folder
+git clone --recursive https://github.com/trickydee/ultramegausb-atari-st-rpikbd.git
 
-#Update submodules
-cd atari-st-rpkib
+# Update submodules
+cd ultramegausb-atari-st-rpikbd
 git submodule update --init --recursive
 
-#fix missing hidparser include in cmakelists.txt
-Open file: atari-st-rpikb/pico-sdk/src/rp2_common/tinyusb/CMakeLists.txt
+# Fix missing hidparser include in CMakeLists.txt (if needed)
+# Open file: ultramegausb-atari-st-rpikbd/pico-sdk/src/rp2_common/tinyusb/CMakeLists.txt
 If not present, add this line after line 91:  ${PICO_TINYUSB_PATH}/src/class/hid/hidparser/HIDParser.c
 You should have:
 
@@ -288,7 +288,7 @@ target_sources(tinyusb_host INTERFACE
             ${PICO_TINYUSB_PATH}/src/class/msc/msc_host.c
             ${PICO_TINYUSB_PATH}/src/class/vendor/vendor_host.c
             )
-From your atari-st-rpikb folder:
+From your ultramegausb-atari-st-rpikbd folder:
 mkdir build
 cd build
 
@@ -370,9 +370,9 @@ This build also fixes the following bugs in the original build:
 * Enabled UART FIFO for RX and TX (32X buffer)
 
 ## Acknowledgements
-The project is based on an an original idea created by 'fieldofcows' in 2020 - https://github.com/fieldofcows/atari-st-rpikb. This project builds on this great foundation to improve compatability, stability and add support for many modern game controllers either wired USB or wireless Bluetooth connected.
+The project is based on an an original idea created by 'fieldofcows' in 2020 - https://github.com/fieldofcows/atari-st-rpikb. This project builds on this great foundation to improve compatibility, stability and add support for many modern game controllers either wired USB or wireless Bluetooth connected.
 
-The "ultramegausb" title is tounge in cheek and intended to highlight the massively enhanced capabilities made possible by the great work of TinyUSB project, Bluepad32 and associated projects listed below.
+The "ultramegausb" title is tongue in cheek and intended to highlight the massively enhanced capabilities made possible by the great work of TinyUSB project, Bluepad32 and associated projects listed below.
 
 The project uses code extracted from [Steem SSE](https://sourceforge.net/projects/steemsse/). All of the work of wiring up the keyboard functions to the HD6301 CPU is credited to Steem SSE. This project contains a stripped-down version of this interface, connecting it to the Raspberry Pi's serial port.
 

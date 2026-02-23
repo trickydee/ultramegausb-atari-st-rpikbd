@@ -2,7 +2,7 @@
 
 This document consolidates the implementation history of major features and controller support in the Atari ST IKBD emulator.
 
-**Last Updated:** January 2, 2026
+**Last Updated:** February 2026
 
 ---
 

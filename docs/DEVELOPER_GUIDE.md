@@ -487,7 +487,7 @@ list(APPEND SOURCES
 - **Compact Report (buttons + 4 axes):** See `horipad_controller.c` (7-byte HORIPAD report)
 - **Complex Controller:** See `ps4_controller.c` (multiple PIDs, initialization)
 - **PS5-style Report:** See `ps5_controller.c` (report ID 0x01/0x31, DualSense)
-- **Non-Standard Protocol:** See `xinput.c` (custom protocol, endpoint management)
+- **Non-Standard Protocol:** See `xinput_atari.cpp` and `xinput_host.c` (custom protocol, endpoint management)
 - **Bluetooth Controller:** See `bluepad32_atari.cpp` (Bluepad32 integration)
 
 ---
@@ -795,7 +795,7 @@ When adding a new controller:
 - **Compact (4 axes):** `horipad_controller.c` - HORI HORIPAD, 7-byte report
 - **Complex Controller:** `ps4_controller.c` - Multiple PIDs, initialization
 - **PS5 DualSense:** `ps5_controller.c` - Report ID 0x01/0x31, Llamatron
-- **Custom Protocol:** `xinput.c` - Non-standard USB protocol
+- **Custom Protocol:** `xinput_atari.cpp` / `xinput_host.c` - Non-standard USB protocol
 - **Bluetooth Controller:** `bluepad32_atari.cpp` - Bluetooth integration
 
 ---
