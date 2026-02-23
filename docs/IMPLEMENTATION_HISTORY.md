@@ -4,6 +4,8 @@ This document consolidates the implementation history of major features and cont
 
 **Last Updated:** February 2026
 
+**Design rationale:** The notes below include brief "why" context where it helps. Implementations often reflect trade-offs (e.g. compatibility vs complexity, RAM vs speed). For full architecture and patterns, see [docs/DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md) and [docs/TECHNICAL_NOTES.md](TECHNICAL_NOTES.md).
+
 ---
 
 ## Controller Implementations
@@ -27,9 +29,12 @@ This document consolidates the implementation history of major features and cont
 - Parses 64-byte Xbox input reports
 - Integrates with joystick priority system
 
+**Why this approach:** TinyUSB's vendor class support was insufficient for XInput, so the implementation uses the raw endpoint API (`tuh_edpt_open()`, `tuh_edpt_xfer()`) to send the wake-up packet and poll the interrupt endpoint. This avoids depending on upstream XInput host support and keeps full control over the protocol.
+
 **Files:**
 - `include/xinput.h` - XInput protocol definitions
-- `src/xinput.c` - Xbox controller handler
+- `src/xinput_atari.cpp` - Xbox-to-Atari mapping
+- `src/xinput_host.c` - XInput driver wrapper and endpoint handling
 
 ---
 
@@ -117,6 +122,8 @@ This document consolidates the implementation history of major features and cont
 - Face/shoulder buttons in byte 3 (bitmask)
 - Triggers in bytes 8-9 (analog)
 
+**Why manual parsing:** The Stadia controller's HID descriptor is incomplete or non-standard, so generic HID parsing does not reliably expose axes and buttons. Using the report layout documented by the stadia-vigem project and parsing bytes directly in our driver avoids dependency on a correct descriptor and gives predictable mapping.
+
 **Reference:** Based on stadia-vigem project format
 
 **Files:**
@@ -144,6 +151,8 @@ This document consolidates the implementation history of major features and cont
 - Uses HID hijacking approach (HID driver claims device, custom logic handles protocol)
 - Requires initialization: control transfer + 0x13 write to interrupt pipe
 - Report callback processing for controller input
+
+**Why HID hijacking:** The Nintendo adapter exposes a non-standard protocol (control transfer + interrupt write) that does not match a generic HID profile. Letting the HID host claim the device and then running custom init and report handling in the same driver avoids conflicts and keeps one code path for the adapter.
 
 **Files:**
 - `src/gamecube_adapter.c` - GameCube adapter implementation
@@ -196,6 +205,8 @@ This document consolidates the implementation history of major features and cont
 - HID protocol for keyboards and mice
 - Critical initialization order: CYW43 before I2C/SPI peripherals
 - Clock speed: 150 MHz for Bluetooth builds
+
+**Why Bluepad32:** Gamepad support was the main goal; Bluepad32 already handles many controllers (DualSense, DualShock 4, Switch Pro, Xbox Wireless) and has a Pico W platform. Using it avoided reimplementing Bluetooth HID and gamepad protocols. The original Pico W (RP2040) has insufficient RAM for the stack, so Bluetooth is limited to Pico 2 W (RP2350).
 
 **Files:**
 - `src/bluepad32_init.c` - Bluepad32 initialization
@@ -254,6 +265,8 @@ This document consolidates the implementation history of major features and cont
 - Mouse automatically disabled while mode active
 - Pause/unpause button support (Options/Menu/Start buttons)
 - Visual feedback on OLED display
+
+**Why this design:** Twin-stick games (e.g. Llamatron, Robotron) expect two physical joysticks. With one dual-stick gamepad we map left stick + fire to Joy 1 and right stick + one face button to Joy 0 so a single pad can drive both ports. The "exactly one gamepad" rule and automatic suspension keep behaviour predictable and avoid ambiguity when multiple pads are connected.
 
 **Files:**
 - `src/HidInput.cpp` - Main implementation

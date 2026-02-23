@@ -6,6 +6,30 @@ This document consolidates technical documentation, performance optimizations, b
 
 ---
 
+## System Architecture Overview
+
+This section gives a high-level view of how the emulator is structured. For full detail (data flow, design decisions, adding controllers), see [docs/DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md).
+
+**Two-core split:**
+- **Core 0 (main):** USB host, Bluetooth (Pico 2 W), keyboard/mouse/gamepad input, OLED UI, serial TX/RX to the Atari. Runs the main loop and polls devices.
+- **Core 1 (HD6301):** Dedicated HD6301 CPU emulation in a tight loop. Runs 6301 ROM firmware, handles serial I/O with Core 0, and must maintain accurate 1 MHz timing.
+
+**Data flow:**
+1. **Input:** USB/Bluetooth device → Core 0 (TinyUSB / Bluepad32) → input processing → Core 0 builds IKBD events → Core 0 → Core 1 (via shared serial path) → 6301 emulator → serial TX → Atari ST.
+2. **Commands:** Atari ST → serial RX → Core 1 → 6301 emulator → response → serial TX → Atari ST.
+
+**Critical constraints:**
+- **Serial baud:** 7812 bps (Atari IKBD standard). RX must be polled frequently (~every loop iteration) to avoid dropping bytes.
+- **Core 1 timing:** `CYCLES_PER_LOOP = 1000` (1 ms of emulated time per iteration). Changing this can break ROM and serial behaviour.
+- **Bluetooth (Pico 2 W):** CYW43 must be initialised before I2C/SPI; Core 1 is paused during flash writes (e.g. pairing storage) to avoid freezes.
+
+**Component interaction:**
+- `hid_app_host.c` attaches HID devices and routes reports to controller-specific code (PS3, PS4, Switch, etc.).
+- `HidInput.cpp` runs the joystick/keyboard/mouse priority and maps everything into the format sent to the 6301.
+- Core 0 and Core 1 communicate only via the serial layer (and shared flash-safe coordination for Bluetooth).
+
+---
+
 ## Performance Optimizations
 
 ### Serial Communication Optimizations
