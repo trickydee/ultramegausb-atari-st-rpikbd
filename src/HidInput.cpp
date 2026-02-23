@@ -27,6 +27,7 @@
 #include "ssd1306.h"
 // xinput.h removed - using official xinput_host.h driver now
 #include "ps4_controller.h"
+#include "ps5_controller.h"
 #include "ps3_controller.h"
 #include "gamecube_adapter.h"
 #include "switch_controller.h"
@@ -277,6 +278,7 @@ void bluepad32_check_ui_update() {
 static uint8_t count_connected_usb_gamepads() {
     uint8_t total = 0;
     total += ps4_connected_count();
+    total += ps5_connected_count();
     total += ps3_connected_count();
     total += switch_connected_count();
     total += stadia_connected_count();
@@ -298,6 +300,7 @@ static uint8_t count_connected_gamepads() {
 static bool collect_llamatron_sample(uint8_t& joy1_axis, uint8_t& joy1_fire,
                                      uint8_t& joy0_axis, uint8_t& joy0_fire) {
     if (ps4_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
+    if (ps5_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
     if (ps3_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
     if (switch_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
     if (stadia_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
@@ -1905,6 +1908,17 @@ bool HidInput::get_ps4_joystick(int joystick_num, uint8_t& axis, uint8_t& button
     return false;
 }
 
+bool HidInput::get_ps5_joystick(int joystick_num, uint8_t& axis, uint8_t& button) {
+    for (uint8_t dev_addr = 1; dev_addr < 8; dev_addr++) {
+        ps5_controller_t* ps5 = ps5_get_controller(dev_addr);
+        if (ps5 && ps5->connected) {
+            ps5_to_atari(ps5, joystick_num, &axis, &button);
+            return true;
+        }
+    }
+    return false;
+}
+
 // Forward declaration for Xbox-to-Atari mapper
 extern "C" bool xinput_to_atari_joystick(int joystick_num, uint8_t* axis, uint8_t* button);
 
@@ -2088,7 +2102,12 @@ void HidInput::handle_joystick() {
                     g_ps4_success++;  // Track PS4 success
                 }
                 
-                // PS3 controller (check after PS4)
+                // PS5 DualSense (check after PS4)
+                if (!got_input && get_ps5_joystick(joystick, axis, button)) {
+                    got_input = true;
+                }
+                
+                // PS3 controller (check after PS5)
                 if (!got_input && get_ps3_joystick(joystick, axis, button)) {
                     got_input = true;
                 }

@@ -135,6 +135,7 @@ set(SOURCES
     src/xinput_host.c  # Official tusb_xinput driver
     src/xinput_atari.cpp  # Xbox-to-Atari joystick mapper
     src/ps4_controller.c
+    src/ps5_controller.c
     src/ps3_controller.c
     src/gamecube_adapter.c
     # src/gamecube_vendor.c  # v11.1+: Disabled, using HID hijacking approach instead

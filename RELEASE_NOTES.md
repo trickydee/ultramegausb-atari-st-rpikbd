@@ -1,7 +1,21 @@
 # Release Notes
 
-**Current Version:** 21.0.2  
+**Current Version:** 21.0.3  
 **Last Updated:** February 2026
+
+---
+
+## Version 21.0.3 (February 2026)
+
+### PS5 DualSense / DualSense Edge USB Support
+
+Version 21.0.3 adds **USB support for PlayStation 5 DualSense and DualSense Edge** controllers.
+
+**What's New:**
+- **PS5 DualSense** (VID 0x054C, PID 0x0CE6) and **DualSense Edge** (PID 0x0DF2) detected and mapped as joysticks
+- D-pad and left stick for direction; Cross and R2 trigger for fire (same mapping as PS4)
+- **Llamatron dual-stick mode** supported: left stick + fire → Joy 1, right stick + Circle → Joy 0
+- OLED splash screen shows "PS5 / DualSense" on connect
 
 ---
 

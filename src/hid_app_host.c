@@ -10,6 +10,7 @@
 #include "ps3_controller.h"
 #include "gamecube_adapter.h"
 #include "ps4_controller.h"
+#include "ps5_controller.h"
 #include "switch_controller.h"
 #include "stadia_controller.h"
 #include "ssd1306.h"
@@ -527,6 +528,25 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
     return;
   }
   
+  // Check for PS5 DualSense
+  bool is_ps5 = ps5_is_dualsense(vid, pid);
+  
+  if (is_ps5) {
+    printf("PS5 DualSense detected: VID=0x%04X, PID=0x%04X\n", vid, pid);
+    
+    hidh_device_t* dev = alloc_device(dev_addr, instance);
+    if (!dev) return;
+    
+    dev->hid_type = HID_JOYSTICK;
+    dev->report_size = 64;  // DualSense USB report up to 64 bytes
+    dev->has_report_info = false;
+    
+    ps5_mount_cb(dev_addr);
+    tuh_hid_receive_report(dev_addr, instance);
+    tuh_hid_mounted_cb(dev_addr);
+    return;
+  }
+  
   // Check for Google Stadia Controller
   // Stadia uses STANDARD HID, so we'll let it fall through to HID parser
   // We'll show splash screen AFTER device is allocated and parsed
@@ -763,6 +783,8 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance) {
     ps3_unmount_cb(dev_addr);
   } else if (ps4_is_dualshock4(vid, pid)) {
     ps4_unmount_cb(dev_addr);
+  } else if (ps5_is_dualsense(vid, pid)) {
+    ps5_unmount_cb(dev_addr);
   } else if (switch_is_controller(vid, pid)) {
     switch_unmount_cb(dev_addr);
   }
@@ -918,10 +940,14 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
 
   // PS4 DualShock 4
   if (ps4_is_dualshock4(vid, pid)) {
-    // This is a PS4 controller report - pass to PS4 handler
     ps4_process_report(dev_addr, report, len);
-    
-    // Queue next report
+    tuh_hid_receive_report(dev_addr, instance);
+    return;
+  }
+  
+  // PS5 DualSense
+  if (ps5_is_dualsense(vid, pid)) {
+    ps5_process_report(dev_addr, report, len);
     tuh_hid_receive_report(dev_addr, instance);
     return;
   }
