@@ -60,7 +60,9 @@ private:
     bool get_xbox_joystick(int joystick_num, uint8_t& axis, uint8_t& button);
     bool get_ps4_joystick(int joystick_num, uint8_t& axis, uint8_t& button);
     bool get_ps5_joystick(int joystick_num, uint8_t& axis, uint8_t& button);
+    bool get_psc_joystick(int joystick_num, uint8_t& axis, uint8_t& button);
     bool get_ps3_joystick(int joystick_num, uint8_t& axis, uint8_t& button);
+    bool get_horipad_joystick(int joystick_num, uint8_t& axis, uint8_t& button);
     bool get_gamecube_joystick(int joystick_num, uint8_t& axis, uint8_t& button);
     bool get_switch_joystick(int joystick_num, uint8_t& axis, uint8_t& button);
     bool get_stadia_joystick(int joystick_num, uint8_t& axis, uint8_t& button);

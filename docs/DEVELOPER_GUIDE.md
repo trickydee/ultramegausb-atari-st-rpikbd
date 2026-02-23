@@ -2,7 +2,7 @@
 
 **Purpose:** Onboarding guide for developers and AI assistants working on the Atari ST IKBD emulator project.
 
-**Last Updated:** January 2, 2026
+**Last Updated:** February 2026
 
 ---
 
@@ -134,6 +134,8 @@ src/
 ├── ps4_controller.c          # PS4 DualShock 4 support
 ├── switch_controller.c       # Nintendo Switch controller support
 ├── stadia_controller.c       # Google Stadia controller support
+├── psc_controller.c          # PlayStation Classic (PSC) support
+├── horipad_controller.c      # HORI HORIPAD (Switch) support
 ├── gamecube_adapter.c        # GameCube USB adapter support
 ├── bluepad32_init.c          # Bluetooth initialization
 ├── bluepad32_platform.c      # Bluepad32 platform integration
@@ -481,7 +483,10 @@ list(APPEND SOURCES
 ### Reference Implementations
 
 - **Simple HID Controller:** See `stadia_controller.c` (11-byte report, manual parsing)
+- **Minimal Report (no sticks):** See `psc_controller.c` (3-byte PSC report, d-pad + buttons only)
+- **Compact Report (buttons + 4 axes):** See `horipad_controller.c` (7-byte HORIPAD report)
 - **Complex Controller:** See `ps4_controller.c` (multiple PIDs, initialization)
+- **PS5-style Report:** See `ps5_controller.c` (report ID 0x01/0x31, DualSense)
 - **Non-Standard Protocol:** See `xinput.c` (custom protocol, endpoint management)
 - **Bluetooth Controller:** See `bluepad32_atari.cpp` (Bluepad32 integration)
 
@@ -786,12 +791,15 @@ When adding a new controller:
 ### Code Examples
 
 - **Simple Controller:** `stadia_controller.c` - Basic HID controller
+- **Minimal (no sticks):** `psc_controller.c` - PlayStation Classic, 3-byte report
+- **Compact (4 axes):** `horipad_controller.c` - HORI HORIPAD, 7-byte report
 - **Complex Controller:** `ps4_controller.c` - Multiple PIDs, initialization
+- **PS5 DualSense:** `ps5_controller.c` - Report ID 0x01/0x31, Llamatron
 - **Custom Protocol:** `xinput.c` - Non-standard USB protocol
 - **Bluetooth Controller:** `bluepad32_atari.cpp` - Bluetooth integration
 
 ---
 
-**Last Updated:** January 2, 2026  
-**Version:** 21.0.1
+**Last Updated:** February 2026  
+**Version:** 21.0.4
 

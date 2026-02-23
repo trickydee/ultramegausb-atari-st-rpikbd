@@ -151,6 +151,31 @@ This document consolidates the implementation history of major features and cont
 
 ---
 
+### PlayStation Classic (PSC) and HORI HORIPAD (v21.0.4)
+
+**Status:** ✅ Complete
+
+**Implementation:** USB support for Sony PlayStation Classic controller and HORI HORIPAD for Nintendo Switch.
+
+**PlayStation Classic (PSC):**
+- VID 0x054C, PID 0x0CDA; 3-byte HID report (no analog sticks)
+- D-pad for direction; Cross and R2 for fire
+- OLED splash "PSC / PlayStation Classic"
+
+**HORI HORIPAD (Switch):**
+- VID 0x0F0D, PID 0x00C1; 7-byte report (buttons, d-pad, 4 axes)
+- D-pad or left stick for direction; B and R2 for fire
+- Llamatron dual-stick: left stick + B → Joy 1, right stick + A → Joy 0
+- OLED splash "HORI / HORIPAD (Switch)"
+
+**Files:**
+- `include/psc_controller.h`, `src/psc_controller.c` - PSC implementation
+- `include/horipad_controller.h`, `src/horipad_controller.c` - HORIPAD implementation
+- `src/hid_app_host.c` - Mount/report/unmount wiring
+- `src/HidInput.cpp` - Joystick priority and Llamatron (HORIPAD)
+
+---
+
 ### Bluetooth Support (v21.0.0)
 
 **Status:** ✅ Complete
@@ -217,6 +242,8 @@ This document consolidates the implementation history of major features and cont
 **Supported Controllers:**
 - PlayStation 3 DualShock 3
 - PlayStation 4 DualShock 4
+- PlayStation 5 DualSense / DualSense Edge
+- HORI HORIPAD (Switch)
 - Xbox One / Xbox Series X|S
 - Nintendo Switch Pro Controller
 - Google Stadia Controller
@@ -237,6 +264,9 @@ This document consolidates the implementation history of major features and cont
 
 ### Version History
 
+- **v21.0.4:** PlayStation Classic (PSC) and HORI HORIPAD (Switch) USB support
+- **v21.0.3:** PlayStation 5 DualSense / DualSense Edge USB support
+- **v21.0.2:** Expanded PS3/PS4/Switch VID/PIDs (Phase 1)
 - **v21.0.1:** Bluetooth support improvements, code cleanup, production build variants
 - **v21.0.0:** Major Bluetooth support addition for Pico 2 W
 - **v12.5.9:** Llamatron mode and speed optimizations
@@ -269,8 +299,11 @@ Many implementations used OLED display for debugging when serial console wasn't 
 | Generic USB HID Joysticks | Initial | ✅ |
 | Xbox 360 / Xbox One / Xbox Series X\|S | v7.0.0 | ✅ |
 | PlayStation 4 DualShock 4 | Initial | ✅ |
+| PlayStation 5 DualSense / DualSense Edge | v21.0.3 | ✅ |
+| PlayStation Classic (PSC) | v21.0.4 | ✅ |
 | PlayStation 3 DualShock 3 | v10.0.0 | ✅ |
 | Nintendo Switch Pro Controller | Initial | ✅ |
+| HORI HORIPAD (Switch) | v21.0.4 | ✅ |
 | PowerA Fusion Wireless Arcade Stick | v8.0.0 | ✅ |
 | Google Stadia Controller | v9.0.0 | ✅ |
 | Nintendo GameCube (USB adapter) | v11.0.0+ | ✅ |

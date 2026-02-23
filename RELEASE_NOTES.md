@@ -1,7 +1,21 @@
 # Release Notes
 
-**Current Version:** 21.0.3  
+**Current Version:** 21.0.4  
 **Last Updated:** February 2026
+
+---
+
+## Version 21.0.4 (February 2026)
+
+### PSC and HORIPAD USB Support (Phase 3)
+
+Version 21.0.4 adds **USB support for PlayStation Classic (PSC)** and **HORI HORIPAD for Nintendo Switch** controllers.
+
+**What's New:**
+- **PlayStation Classic (PSC)** (VID 0x054C, PID 0x0CDA): 3-byte HID report, D-pad + Cross/R2 for fire; no analog sticks. OLED splash "PSC / PlayStation Classic".
+- **HORI HORIPAD (Switch)** (VID 0x0F0D, PID 0x00C1): D-pad and left stick for direction; B and R2 for fire; **Llamatron dual-stick mode** (left stick + B → Joy 1, right stick + A → Joy 0). OLED splash "HORI / HORIPAD (Switch)".
+
+See `docs/custom-mappings.md` for mapping details.
 
 ---
 

@@ -11,7 +11,9 @@
 #include "gamecube_adapter.h"
 #include "ps4_controller.h"
 #include "ps5_controller.h"
+#include "psc_controller.h"
 #include "switch_controller.h"
+#include "horipad_controller.h"
 #include "stadia_controller.h"
 #include "ssd1306.h"
 #include <string.h>
@@ -547,6 +549,21 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
     return;
   }
   
+  // Check for PlayStation Classic (PSC)
+  bool is_psc = psc_is_controller(vid, pid);
+  if (is_psc) {
+    printf("PSC PlayStation Classic detected: VID=0x%04X, PID=0x%04X\n", vid, pid);
+    hidh_device_t* dev = alloc_device(dev_addr, instance);
+    if (!dev) return;
+    dev->hid_type = HID_JOYSTICK;
+    dev->report_size = 8;
+    dev->has_report_info = false;
+    psc_mount_cb(dev_addr);
+    tuh_hid_receive_report(dev_addr, instance);
+    tuh_hid_mounted_cb(dev_addr);
+    return;
+  }
+  
   // Check for Google Stadia Controller
   // Stadia uses STANDARD HID, so we'll let it fall through to HID parser
   // We'll show splash screen AFTER device is allocated and parsed
@@ -601,6 +618,21 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
     tuh_hid_receive_report(dev_addr, instance);
     
     // Call mounted callback
+    tuh_hid_mounted_cb(dev_addr);
+    return;
+  }
+  
+  // Check for HORI HORIPAD (Switch)
+  bool is_horipad = horipad_is_controller(vid, pid);
+  if (is_horipad) {
+    printf("HORI HORIPAD (Switch) detected: VID=0x%04X, PID=0x%04X\n", vid, pid);
+    hidh_device_t* dev = alloc_device(dev_addr, instance);
+    if (!dev) return;
+    dev->hid_type = HID_JOYSTICK;
+    dev->report_size = 16;
+    dev->has_report_info = false;
+    horipad_mount_cb(dev_addr);
+    tuh_hid_receive_report(dev_addr, instance);
     tuh_hid_mounted_cb(dev_addr);
     return;
   }
@@ -785,8 +817,12 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance) {
     ps4_unmount_cb(dev_addr);
   } else if (ps5_is_dualsense(vid, pid)) {
     ps5_unmount_cb(dev_addr);
+  } else if (psc_is_controller(vid, pid)) {
+    psc_unmount_cb(dev_addr);
   } else if (switch_is_controller(vid, pid)) {
     switch_unmount_cb(dev_addr);
+  } else if (horipad_is_controller(vid, pid)) {
+    horipad_unmount_cb(dev_addr);
   }
   
   // Clear report destination to prevent callbacks to freed memory
@@ -952,12 +988,23 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
     return;
   }
   
+  // PlayStation Classic (PSC)
+  if (psc_is_controller(vid, pid)) {
+    psc_process_report(dev_addr, report, len);
+    tuh_hid_receive_report(dev_addr, instance);
+    return;
+  }
+  
   // Nintendo Switch controllers
   if (switch_is_controller(vid, pid)) {
-    // This is a Switch controller report - pass to Switch handler
     switch_process_report(dev_addr, report, len);
-    
-    // Queue next report
+    tuh_hid_receive_report(dev_addr, instance);
+    return;
+  }
+  
+  // HORI HORIPAD (Switch)
+  if (horipad_is_controller(vid, pid)) {
+    horipad_process_report(dev_addr, report, len);
     tuh_hid_receive_report(dev_addr, instance);
     return;
   }

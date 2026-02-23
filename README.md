@@ -33,8 +33,10 @@ The following USB HID Gamepads/Joysticks are supported (More to come)
 * PlayStation 3 DualShock 3 Controllers (including third-party PS3-compatible pads: HORI, Mad Catz, Qanba, Nacon, Logitech F310, etc.)
 * PlayStation 4 DualShock 4 Controllers (including third-party PS4-compatible pads: HORI, Razer, Brook, Mad Catz, Qanba, Nacon, PowerA FightPad, etc.)
 * PlayStation 5 DualSense and DualSense Edge (USB) (v21.0.3)
+* PlayStation Classic (PSC) (v21.0.4)
 * Xbox Xinput - Xbox One, Xbox 360 Controllers
 * Nintendo Switch Pro Controller (Version 1), Joy-Con (L/R/Pair/Grip), SNES Controller (NSO)
+* HORI HORIPAD for Nintendo Switch (v21.0.4)
 * PowerA Fusion Wireless Arcade Stick for Nintendo Switch
 * Google Stadia Controller
 * Nintendo Switch / Wii U GameCube Controller USB Adapter (v11.0.0)
@@ -42,6 +44,8 @@ The following USB HID Gamepads/Joysticks are supported (More to come)
 **v21.0.2:** Expanded USB controller support: many additional third-party PS3- and PS4-compatible VID/PIDs (same HID report format as official pads), plus Nintendo Joy-Con Charge Grip and SNES Controller (NSO).
 
 **v21.0.3:** USB support for PlayStation 5 DualSense and DualSense Edge controllers; full joystick mapping and Llamatron dual-stick mode.
+
+**v21.0.4:** USB support for PlayStation Classic (PSC) and HORI HORIPAD for Nintendo Switch; HORIPAD supports Llamatron dual-stick mode.
 
 ## Bluetooth Support (Pico 2 W only)
 
@@ -345,7 +349,9 @@ The emulator supports multiple types of USB game controllers with reliable hot-s
 - **PS3 DualShock 3**: Full support via USB (wired); includes third-party PS3-compatible pads (HORI, Mad Catz, Qanba, Nacon, Logitech F310, etc.) (v10.0.0, expanded v21.0.2)
 - **PS4 DualShock 4**: Full support via USB (wired); includes third-party PS4-compatible pads (HORI, Razer, Brook, Mad Catz, Qanba, Nacon, PowerA FightPad, etc.) (expanded v21.0.2)
 - **PS5 DualSense / DualSense Edge**: Full support via USB (wired); D-pad, sticks, Cross/R2 fire, Llamatron dual-stick (v21.0.3)
+- **PlayStation Classic (PSC)**: Full support via USB; D-pad, Cross/R2 fire; no analog sticks (v21.0.4)
 - **Nintendo Switch Pro Controller**: Full support with analog stick precision and no drift; also Joy-Con (L/R/Pair/Charge Grip) and SNES Controller (NSO) (expanded v21.0.2)
+- **HORI HORIPAD (Switch)**: Full support via USB; D-pad/stick, B/R2 fire; Llamatron dual-stick (v21.0.4)
 - **PowerA Fusion Wireless Arcade Stick**: Full support for Nintendo Switch arcade sticks (v8.0.0)
 - **Google Stadia Controller**: Full support for Stadia controllers (v8.0.0)
 - **Nintendo Switch / Wii U GameCube Adapter**: Full support for official Nintendo GameCube controller USB adapter (v11.0.0)

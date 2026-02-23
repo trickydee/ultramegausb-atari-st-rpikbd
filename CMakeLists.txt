@@ -136,7 +136,9 @@ set(SOURCES
     src/xinput_atari.cpp  # Xbox-to-Atari joystick mapper
     src/ps4_controller.c
     src/ps5_controller.c
+    src/psc_controller.c
     src/ps3_controller.c
+    src/horipad_controller.c
     src/gamecube_adapter.c
     # src/gamecube_vendor.c  # v11.1+: Disabled, using HID hijacking approach instead
     src/switch_controller.c

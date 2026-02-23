@@ -28,7 +28,9 @@
 // xinput.h removed - using official xinput_host.h driver now
 #include "ps4_controller.h"
 #include "ps5_controller.h"
+#include "psc_controller.h"
 #include "ps3_controller.h"
+#include "horipad_controller.h"
 #include "gamecube_adapter.h"
 #include "switch_controller.h"
 #include "stadia_controller.h"
@@ -279,7 +281,9 @@ static uint8_t count_connected_usb_gamepads() {
     uint8_t total = 0;
     total += ps4_connected_count();
     total += ps5_connected_count();
+    total += psc_connected_count();
     total += ps3_connected_count();
+    total += horipad_connected_count();
     total += switch_connected_count();
     total += stadia_connected_count();
     total += xinput_connected_count();
@@ -301,6 +305,7 @@ static bool collect_llamatron_sample(uint8_t& joy1_axis, uint8_t& joy1_fire,
                                      uint8_t& joy0_axis, uint8_t& joy0_fire) {
     if (ps4_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
     if (ps5_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
+    if (horipad_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
     if (ps3_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
     if (switch_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
     if (stadia_llamatron_axes(&joy1_axis, &joy1_fire, &joy0_axis, &joy0_fire)) return true;
@@ -1919,6 +1924,28 @@ bool HidInput::get_ps5_joystick(int joystick_num, uint8_t& axis, uint8_t& button
     return false;
 }
 
+bool HidInput::get_psc_joystick(int joystick_num, uint8_t& axis, uint8_t& button) {
+    for (uint8_t dev_addr = 1; dev_addr < 8; dev_addr++) {
+        psc_controller_t* psc = psc_get_controller(dev_addr);
+        if (psc && psc->connected) {
+            psc_to_atari(psc, joystick_num, &axis, &button);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool HidInput::get_horipad_joystick(int joystick_num, uint8_t& axis, uint8_t& button) {
+    for (uint8_t dev_addr = 1; dev_addr < 8; dev_addr++) {
+        horipad_controller_t* hp = horipad_get_controller(dev_addr);
+        if (hp && hp->connected) {
+            horipad_to_atari(hp, joystick_num, &axis, &button);
+            return true;
+        }
+    }
+    return false;
+}
+
 // Forward declaration for Xbox-to-Atari mapper
 extern "C" bool xinput_to_atari_joystick(int joystick_num, uint8_t* axis, uint8_t* button);
 
@@ -2107,7 +2134,12 @@ void HidInput::handle_joystick() {
                     got_input = true;
                 }
                 
-                // PS3 controller (check after PS5)
+                // PlayStation Classic (check after PS5)
+                if (!got_input && get_psc_joystick(joystick, axis, button)) {
+                    got_input = true;
+                }
+                
+                // PS3 controller (check after PSC)
                 if (!got_input && get_ps3_joystick(joystick, axis, button)) {
                     got_input = true;
                 }
@@ -2121,6 +2153,11 @@ void HidInput::handle_joystick() {
                 if (!got_input && get_switch_joystick(joystick, axis, button)) {
                     got_input = true;
                     g_switch_success++;  // Track Switch success
+                }
+                
+                // HORI HORIPAD (Switch) - check after Switch
+                if (!got_input && get_horipad_joystick(joystick, axis, button)) {
+                    got_input = true;
                 }
                 
                 // Fourth priority: Stadia controller - NOW USES GENERIC HID PATH
