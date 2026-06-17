@@ -15,6 +15,8 @@
 #include <uni.h>
 #include "bluepad32_platform.h"
 
+struct uni_platform* get_my_platform(void);
+
 // Global async context for btstack (accessed from main.cpp)
 async_context_poll_t* g_btstack_async_context = NULL;
 

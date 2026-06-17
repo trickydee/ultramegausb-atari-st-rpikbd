@@ -286,9 +286,9 @@ static u_char dr4_getb (offs)
 }
 
 
-static port_putb P_((u_int offs, u_char value));
+static void port_putb P_((u_int offs, u_char value));
 
-static
+static void
 port_putb (offs, value)
   u_int  offs;
   u_char value;

@@ -11,8 +11,8 @@
 
 /* ../../src/arch/h6301/timer.c */
 extern u_char tcsr_getb P_((u_int offs));
-extern int tcsr_putb P_((u_int offs, u_char value));
-extern int ocr_putb P_((u_int offs, u_char value));
+extern void tcsr_putb P_((u_int offs, u_char value));
+extern void ocr_putb P_((u_int offs, u_char value));
 extern int timer_inc P_((u_int ncycles));
 
 #undef P_

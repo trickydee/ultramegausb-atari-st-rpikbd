@@ -90,7 +90,7 @@ void __not_in_flash_func(instr_exec)() {
     {
       TRACE("pc=%x, 6301 emu is hopelessly crashed!\n",pc);
       crashed = 1;
-      return -1;
+      return;
     }
 #endif
 
@@ -101,6 +101,5 @@ void __not_in_flash_func(instr_exec)() {
   
   cpu_setncycles (cpu_getncycles () + opptr->op_n_cycles);
   timer_inc (opptr->op_n_cycles);
-  return 0;
 }
 

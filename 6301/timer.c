@@ -33,7 +33,7 @@ u_char tcsr_getb (offs)
   return tcsr;
 }
 
-tcsr_putb (offs, value)
+void tcsr_putb (offs, value)
   u_int  offs;
   u_char value;
 {
@@ -48,7 +48,7 @@ tcsr_putb (offs, value)
  * 6801 Output Compare Flag is cleared if TSR is read and
  * Output Compare Register hi or low byte is written
  */
-ocr_putb (offs, value)
+void ocr_putb (offs, value)
   u_int  offs;
   u_char value;
 {

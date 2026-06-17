@@ -125,24 +125,20 @@ if [ "$BLUEPAD32_OK" = true ]; then
 
     # Configure
     echo "    Configuring CMake for RP2350 WiFi/Bluetooth (pico2_w)..."
-    cmake -B ./build-pico2_w -S . \
+    if ! cmake -B ./build-pico2_w -S . \
         -DPICO_BOARD=pico2_w \
         -DLANGUAGE="${LANGUAGE}" \
         -DENABLE_DEBUG="${DEBUG}" \
         -DENABLE_OLED_DISPLAY="${OLED}" \
         -DENABLE_SERIAL_LOGGING="${LOGGING}" \
-        > ./build-pico2_w/cmake.log 2>&1
-
-    if [ $? -ne 0 ]; then
+        > ./build-pico2_w/cmake.log 2>&1; then
         echo "    ⚠️  Warning: CMake configuration failed for RP2350 WiFi/Bluetooth (pico2_w)!"
         tail -20 ./build-pico2_w/cmake.log
     else
-        # Build
+        # Build (|| true: set -e must not abort — other board variants should still build)
         echo "    Compiling firmware for RP2350 WiFi/Bluetooth (this may take longer due to Bluepad32)..."
-        cmake --build ./build-pico2_w -j$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4) \
-            > ./build-pico2_w/build.log 2>&1
-
-        if [ $? -ne 0 ]; then
+        if ! cmake --build ./build-pico2_w -j$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4) \
+            > ./build-pico2_w/build.log 2>&1; then
             echo "    ⚠️  Warning: Build failed for RP2350 WiFi/Bluetooth (pico2_w)!"
             tail -30 ./build-pico2_w/build.log
         else
