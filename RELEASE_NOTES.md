@@ -1,7 +1,21 @@
 # Release Notes
 
-**Current Version:** 21.0.4  
-**Last Updated:** February 2026
+**Current Version:** 21.0.5  
+**Last Updated:** June 2026
+
+---
+
+## Version 21.0.5 (June 2026)
+
+### Build compatibility (GCC 15)
+
+Version 21.0.5 fixes firmware builds with **GCC 15** (e.g. current Homebrew `arm-none-eabi-gcc`):
+
+- **6301 emulator:** explicit `void` return types for I/O register handlers; fix invalid returns in `instr_exec`
+- **Bluepad32:** declare `get_my_platform()` in `bluepad32_init.c`
+- **build-all.sh:** Pico 2 W build failures no longer abort the multi-board build (`set -e` interaction)
+
+No functional changes to USB/Bluetooth controller behaviour.
 
 ---
 

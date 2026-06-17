@@ -27,5 +27,5 @@ This document captures how each supported USB controller is currently translated
 | West (left) | X | Square | Y | X | Only Stadia today |
 | Right trigger | RT | R2 | ZR | R2 | Xbox, PS4, Switch, Stadia accept it as fire |
 
-These tables reflect the firmware state at version 21.0.4 and should be updated if additional controllers or custom-mapping features are implemented.
+These tables reflect the firmware state at version 21.0.5 and should be updated if additional controllers or custom-mapping features are implemented.
 

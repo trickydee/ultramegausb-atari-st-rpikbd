@@ -2,7 +2,7 @@
 
 This document consolidates the implementation history of major features and controller support in the Atari ST IKBD emulator.
 
-**Last Updated:** February 2026
+**Last Updated:** June 2026
 
 **Design rationale:** The notes below include brief "why" context where it helps. Implementations often reflect trade-offs (e.g. compatibility vs complexity, RAM vs speed). For full architecture and patterns, see [docs/DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md) and [docs/TECHNICAL_NOTES.md](TECHNICAL_NOTES.md).
 
@@ -160,6 +160,21 @@ This document consolidates the implementation history of major features and cont
 
 ---
 
+### Build compatibility (v21.0.5)
+
+**Date:** June 2026
+
+**What changed:**
+- GCC 15 treats implicit `int` and incompatible function pointer types as errors in the 6301 emulator sources
+- `build-all.sh` used `set -e` with post-hoc `$?` checks, so a Pico 2 W failure exited before Pico / Pico W / Pico 2 could build
+
+**Files:**
+- `6301/ireg.c`, `6301/timer.c`, `6301/timer.h`, `6301/instr.c`
+- `src/bluepad32_init.c`
+- `build-all.sh`
+
+---
+
 ### PlayStation Classic (PSC) and HORI HORIPAD (v21.0.4)
 
 **Status:** ✅ Complete
@@ -277,6 +292,7 @@ This document consolidates the implementation history of major features and cont
 
 ### Version History
 
+- **v21.0.5:** GCC 15 / ARM toolchain build compatibility; `build-all.sh` multi-board fix
 - **v21.0.4:** PlayStation Classic (PSC) and HORI HORIPAD (Switch) USB support
 - **v21.0.3:** PlayStation 5 DualSense / DualSense Edge USB support
 - **v21.0.2:** Expanded PS3/PS4/Switch VID/PIDs (Phase 1)

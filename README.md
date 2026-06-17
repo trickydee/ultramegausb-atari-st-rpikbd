@@ -47,6 +47,8 @@ The following USB HID Gamepads/Joysticks are supported (More to come)
 
 **v21.0.4:** USB support for PlayStation Classic (PSC) and HORI HORIPAD for Nintendo Switch; HORIPAD supports Llamatron dual-stick mode.
 
+**v21.0.5:** Build fixes for GCC 15 / current ARM toolchains; `build-all.sh` continues building all board variants if Pico 2 W fails.
+
 ## Bluetooth Support (Pico 2 W only)
 
 The emulator supports Bluetooth keyboards, mice, and gamepads on the Raspberry Pi Pico 2 W (RP2350). This allows you to use wireless devices without USB cables, providing a completely wireless setup for your Atari ST.
