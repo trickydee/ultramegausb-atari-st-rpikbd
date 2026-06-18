@@ -19,18 +19,20 @@ Hardware confirmed: **v21.0.5 (`ebafed7`) works** including Xbox/Stadia Bluetoot
 | ✅ | Revert to **10 ms** single block (`main.cpp`) | OK | Proved 2 ms HID path is the culprit |
 | ✅ | `build-all.sh` — `BUILD_BOARDS=pico2_w` default + docs | — | Faster dev builds |
 | ✅ | `420e8a4` — non-blocking mount splashes (`3bb2139`) | OK | USB splash; BT pairing still OK |
-| ⏳ | `e92dc4e` — atomic cross-core state (`c7fe1ff`) | *test on hardware* | Cherry-picked; build OK |
+| ✅ | `e92dc4e` — atomic cross-core state (`c7fe1ff`) | OK | BT + USB OK |
+| ⏭️ | `c07ad1a` — 2 ms `tuh_task` + splash hold | *skipped* | Redundant (`tuh_task` already ~1 ms with BT on); avoid 2 ms experiment |
+| ⏳ | `204d8b9` — mouse delta accumulation | *next* | |
 
 ### What we proved (June 2026)
 
 1. **`7a2c46e` without TLV/NVSettings is BT-safe** — dual-core joystick fix + pico-sdk `setup_tlv` submodule alone did not break pairing on tested hardware.
 2. **Raw `9f83ed6` is NOT BT-safe** — running `tuh_task()` + `handle_mouse`/`handle_keyboard`/`handle_joystick` every **2 ms** caused Stadia (and likely Xbox) pairing hangs. Restoring one **10 ms** block fixed it.
-3. **Do not cherry-pick `9f83ed6` as-is.** When we want USB responsiveness later, use **`c07ad1a` pattern**: 2 ms `tuh_task()` only, 10 ms HID — not 2 ms on everything.
-4. **`bluepad32_poll()` at 1 ms unchanged** — the regression was the extra 2 ms HID/USB work, not BT poll rate.
+3. **Do not cherry-pick `9f83ed6` as-is.** Optional later: `c07ad1a` 2 ms `tuh_task` only — skipped for now (`tuh_task` already called every 1 ms after `bluepad32_poll` when USB+BT on).
+4. **`420e8a4` + `e92dc4e` are BT-safe** on tested hardware.
 
-**Current `main.cpp` timing:** one 10 ms block (USB + HID + UI); `bluepad32_poll()` still 1 ms; serial RX every loop.
+**Current `main.cpp` timing:** one 10 ms block (USB + HID + UI); `bluepad32_poll()` still 1 ms; `tuh_task()` also ~1 ms when USB+BT enabled.
 
-**Next picks (revised order):** `420e8a4` → `e92dc4e` → `c07ad1a` (skip re-applying raw `9f83ed6`; `c07ad1a` adds 2 ms `tuh_task` only if desired) → `204d8b9` → `4f42d8e`. Test BT after each.
+**Next picks:** `204d8b9` → `4f42d8e`. Test BT after each. Defer `c07ad1a` unless USB-only mount speed becomes an issue.
 
 ---
 
@@ -123,11 +125,11 @@ ebafed7  chore: bump version to 21.0.5  ← WORKING BASELINE
 
 ---
 
-### `c07ad1a` — Mouse speed + 2s splash — ✅ Safe to cherry-pick
+### `c07ad1a` — Mouse speed + 2s splash — ⏭️ Skipped on picking-cherrys
 
-- Mouse/kb/joy back to 10 ms sampling (keep 2 ms `tuh_task`)
-- Mount splashes held ~2 s; cached text; poll from main loop
-- Xbox mount path in `main.cpp` → `mount_splash`
+- Adds 2 ms `tuh_task()` split + `mount_splash_poll()` / 2 s hold / Xbox splash path
+- **Skipped:** `tuh_task` already ~1 ms when USB+BT on; splash basics from `420e8a4` sufficient for now
+- Cherry-pick later only if USB-only mount speed or 2 s splash hold needed
 
 **Files:** `main.cpp`, `mount_splash.c`, `HidInput.cpp`, `UserInterface.cpp`
 
@@ -192,10 +194,7 @@ ebafed7  chore: bump version to 21.0.5  ← WORKING BASELINE
 
 3. **P1 commits (revised order)** — test BT Xbox/Stadia after each:
    ```bash
-   # SKIP raw 9f83ed6 — proved BT-unsafe; keep 10 ms or use c07ad1a split later
-   git cherry-pick 420e8a4
-   git cherry-pick e92dc4e
-   git cherry-pick c07ad1a    # 2 ms tuh_task only; verify BT still OK
+   # DONE: 420e8a4, e92dc4e — SKIP: 9f83ed6, c07ad1a
    git cherry-pick 204d8b9
    git cherry-pick 4f42d8e
    ```
