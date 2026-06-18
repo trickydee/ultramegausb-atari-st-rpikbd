@@ -72,8 +72,8 @@ private:
     int mouse_handle = -1;
     int joystick_handle = -1;
     std::vector<unsigned char> key_states;
-    int mouse_state = 0;
-    unsigned char joystick_state = 0;
+    volatile int mouse_state = 0;
+    volatile unsigned char joystick_state = 0;
     bool mouse_en = true;
 };
 
@@ -102,8 +102,8 @@ unsigned char st_joystick();
 int st_mouse_enabled();
 
 /**
- * Update joystick state on-demand (called from 6301 emulator)
- * Provides better timing accuracy for games that poll rapidly
+ * Legacy hook from 6301 port reads. Joystick state is updated on Core 0 only
+ * (handle_joystick); Core 1 must not call USB or TinyUSB from here.
  */
 void update_joystick_state();
 

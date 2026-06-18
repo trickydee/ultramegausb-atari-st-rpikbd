@@ -633,15 +633,40 @@ if (len < expected_len) {
 
 ### Build Scripts
 
-- **`build-all.sh`:** Builds all board variants (standard + speed)
-- **`build-wireless.sh`:** Builds Bluetooth variants
-- **Output:** `.uf2` files in `dist/` directory
+#### `build-all.sh` (recommended)
+
+Primary build entry point. For each board (`pico`, `pico2`, `pico_w`, `pico2_w`) the script:
+
+1. Creates a fresh CMake tree under `build/build-pico`, `build/build-pico2`, `build/build-picow`, or `build/build-pico2_w`
+2. Compiles firmware (Pico 2 W failures are warned but do not stop other boards)
+3. Copies `.uf2` files to `dist/` with a variant suffix (`_debug`, `_production`, `_speed`)
+4. Removes each build subdirectory after a successful copy (unless `CLEAN_BUILD_DIRS=0`)
+
+By default, `./build-all.sh` builds the **production** variant only (`SKIP_VARIANTS=1`). Use `BUILD_VARIANT=debug SKIP_VARIANTS=0` to build debug, production, and speed in one run.
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `BUILD_VARIANT` | `production` | `debug`, `production`, or `speed` |
+| `SKIP_VARIANTS` | `1` | `0` = after debug, also build production and speed |
+| `DEBUG` | `0` | `1` = debug OLED screens |
+| `LANGUAGE` | `EN` | `EN`, `FR`, `DE`, `SP`, `IT` |
+| `CLEAN_BUILD_DIRS` | `1` | `0` = keep `build/build-*` for incremental rebuilds / logs |
+
+```bash
+./build-all.sh
+BUILD_VARIANT=production SKIP_VARIANTS=1 DEBUG=0 ./build-all.sh
+CLEAN_BUILD_DIRS=0 ./build-all.sh
+```
+
+**Output:** `dist/atari_ikbd_pico{,_w,_2,_2_w}_{debug,production,speed}.uf2`
 
 ### Build Variants
 
-- **Standard:** Full features, OLED enabled, logging enabled
-- **Speed:** No OLED, minimal logging, optimized for performance
-- **Debug:** Additional debug displays and verbose logging
+| Variant | OLED | Serial logging | Typical use |
+| --- | --- | --- | --- |
+| `debug` | on | verbose | Development, controller debug screens |
+| `production` | on | minimal | Daily use with OLED status |
+| `speed` | off | minimal | Lowest overhead, no display |
 
 ### Adding New Features
 

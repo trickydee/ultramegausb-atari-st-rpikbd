@@ -12,17 +12,46 @@
 #   - production: OLED=1, LOGGING=0 (OLED enabled, minimal logging)
 #   - speed: OLED=0, LOGGING=0 (no OLED, minimal logging)
 #
-# IMPORTANT: Build directories (build-pico, build-pico2, build-picow, build-pico2_w)
+# Environment variables:
+#   CLEAN_BUILD_DIRS  - 1 (default) remove build-* dirs after UF2 copied to dist/
+#                       0 keep build directories for incremental rebuilds / debugging
+#   SKIP_VARIANTS     - 1 (default) build only the variant selected by BUILD_VARIANT
+#                       0 after a debug build, also build production and speed
+#   DEBUG             - 0 (default) production UI; 1 = debug OLED screens
+#   LANGUAGE          - EN (default), FR, DE, SP, or IT
+#   BUILD_VARIANT     - production (default), debug, or speed
+#
+# IMPORTANT: Build directories (build/build-pico, build/build-pico2, etc.)
 #            should NEVER be committed to git. They are automatically generated
-#            and cleaned by this script. Make sure .gitignore includes them!
+#            and cleaned by this script. Make sure .gitignore includes build/
 ################################################################################
 
 set -e  # Exit on error
 
 # Configuration
 LANGUAGE="${LANGUAGE:-EN}"
-DEBUG="${DEBUG:-1}"  # Set to 1 to enable debug displays
-BUILD_VARIANT="${BUILD_VARIANT:-debug}"  # debug, production, or speed
+DEBUG="${DEBUG:-0}"  # Set to 1 to enable debug OLED screens
+BUILD_VARIANT="${BUILD_VARIANT:-production}"  # production, debug, or speed
+SKIP_VARIANTS="${SKIP_VARIANTS:-1}"  # 1 = single variant; 0 = after debug, also build production and speed
+CLEAN_BUILD_DIRS="${CLEAN_BUILD_DIRS:-1}"  # 1 = remove build dirs after successful dist copy
+
+# All CMake build trees live under ./build/ (e.g. build/build-pico2_w)
+BUILD_ROOT="./build"
+DIR_PICO2_W="${BUILD_ROOT}/build-pico2_w"
+DIR_PICOW="${BUILD_ROOT}/build-picow"
+DIR_PICO2="${BUILD_ROOT}/build-pico2"
+DIR_PICO="${BUILD_ROOT}/build-pico"
+JOBS=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
+
+mkdir -p "${BUILD_ROOT}"
+
+# Remove legacy root-level build dirs from older script versions
+for legacy in build-pico build-pico2 build-pico2_w build-picow build-pico_w; do
+    if [ -d "./${legacy}" ]; then
+        rm -rf "./${legacy}"
+        echo "    Removed legacy ./${legacy}/ (build trees now live under ./build/)"
+    fi
+done
 
 # Map build variant to OLED and LOGGING settings
 case "$BUILD_VARIANT" in
@@ -48,6 +77,8 @@ echo "  Language: ${LANGUAGE}"
 echo "  Debug Mode: ${DEBUG}"
 echo "  OLED Display: ${OLED}"
 echo "  Serial Logging: ${LOGGING}"
+echo "  Skip Variants: ${SKIP_VARIANTS}"
+echo "  Clean Build Dirs: ${CLEAN_BUILD_DIRS}"
 echo "================================================================================"
 echo ""
 
@@ -90,11 +121,6 @@ fi
 
 echo ""
 
-# Apply patches
-echo ">>> Applying patches..."
-./apply-patches.sh || echo "Warning: Patch application returned non-zero"
-echo ""
-
 ################################################################################
 # Build for Raspberry Pi Pico 2 W (RP2350 with WiFi/Bluetooth)
 ################################################################################
@@ -120,27 +146,27 @@ fi
 
 if [ "$BLUEPAD32_OK" = true ]; then
     # Clean and create build directory
-    rm -rf ./build-pico2_w
-    mkdir -p ./build-pico2_w
+    rm -rf ${DIR_PICO2_W}
+    mkdir -p ${DIR_PICO2_W}
 
     # Configure
     echo "    Configuring CMake for RP2350 WiFi/Bluetooth (pico2_w)..."
-    if ! cmake -B ./build-pico2_w -S . \
+    if ! cmake -B ${DIR_PICO2_W} -S . \
         -DPICO_BOARD=pico2_w \
         -DLANGUAGE="${LANGUAGE}" \
         -DENABLE_DEBUG="${DEBUG}" \
         -DENABLE_OLED_DISPLAY="${OLED}" \
         -DENABLE_SERIAL_LOGGING="${LOGGING}" \
-        > ./build-pico2_w/cmake.log 2>&1; then
+        > ${DIR_PICO2_W}/cmake.log 2>&1; then
         echo "    ⚠️  Warning: CMake configuration failed for RP2350 WiFi/Bluetooth (pico2_w)!"
-        tail -20 ./build-pico2_w/cmake.log
+        tail -20 ${DIR_PICO2_W}/cmake.log
     else
         # Build (|| true: set -e must not abort — other board variants should still build)
         echo "    Compiling firmware for RP2350 WiFi/Bluetooth (this may take longer due to Bluepad32)..."
-        if ! cmake --build ./build-pico2_w -j$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4) \
-            > ./build-pico2_w/build.log 2>&1; then
+        if ! cmake --build "${DIR_PICO2_W}" -j"${JOBS}" \
+            > ${DIR_PICO2_W}/build.log 2>&1; then
             echo "    ⚠️  Warning: Build failed for RP2350 WiFi/Bluetooth (pico2_w)!"
-            tail -30 ./build-pico2_w/build.log
+            tail -30 ${DIR_PICO2_W}/build.log
         else
             echo "    ✅ RP2350 WiFi/Bluetooth (pico2_w) build complete!"
         fi
@@ -157,33 +183,33 @@ echo ">>> Building for Raspberry Pi Pico W (RP2040 with WiFi)..."
 echo ""
 
 # Clean and create build directory
-rm -rf ./build-picow
-mkdir -p ./build-picow
+rm -rf ${DIR_PICOW}
+mkdir -p ${DIR_PICOW}
 
 # Configure
 echo "    Configuring CMake for RP2040 WiFi (pico_w)..."
-cmake -B ./build-picow -S . \
+cmake -B ${DIR_PICOW} -S . \
     -DPICO_BOARD=pico_w \
     -DLANGUAGE="${LANGUAGE}" \
     -DENABLE_DEBUG="${DEBUG}" \
     -DENABLE_OLED_DISPLAY="${OLED}" \
     -DENABLE_SERIAL_LOGGING="${LOGGING}" \
-    > ./build-picow/cmake.log 2>&1
+    > ${DIR_PICOW}/cmake.log 2>&1
 
 if [ $? -ne 0 ]; then
     echo "ERROR: CMake configuration failed for RP2040 WiFi (pico_w)!"
-    tail -20 ./build-picow/cmake.log
+    tail -20 ${DIR_PICOW}/cmake.log
     exit 1
 fi
 
 # Build
 echo "    Compiling firmware for RP2040 WiFi (pico_w)..."
-cmake --build ./build-picow -j$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4) \
-    > ./build-picow/build.log 2>&1
+cmake --build "${DIR_PICOW}" -j"${JOBS}" \
+    > ${DIR_PICOW}/build.log 2>&1
 
 if [ $? -ne 0 ]; then
     echo "ERROR: Build failed for RP2040 WiFi (pico_w)!"
-    tail -30 ./build-picow/build.log
+    tail -30 ${DIR_PICOW}/build.log
     exit 1
 fi
 
@@ -198,33 +224,33 @@ echo ">>> Building for Raspberry Pi Pico 2 (RP2350)..."
 echo ""
 
 # Clean and create build directory
-rm -rf ./build-pico2
-mkdir -p ./build-pico2
+rm -rf ${DIR_PICO2}
+mkdir -p ${DIR_PICO2}
 
 # Configure
 echo "    Configuring CMake for RP2350..."
-cmake -B ./build-pico2 -S . \
+cmake -B ${DIR_PICO2} -S . \
     -DPICO_BOARD=pico2 \
     -DLANGUAGE="${LANGUAGE}" \
     -DENABLE_DEBUG="${DEBUG}" \
     -DENABLE_OLED_DISPLAY="${OLED}" \
     -DENABLE_SERIAL_LOGGING="${LOGGING}" \
-    > ./build-pico2/cmake.log 2>&1
+    > ${DIR_PICO2}/cmake.log 2>&1
 
 if [ $? -ne 0 ]; then
     echo "ERROR: CMake configuration failed for RP2350!"
-    tail -20 ./build-pico2/cmake.log
+    tail -20 ${DIR_PICO2}/cmake.log
     exit 1
 fi
 
 # Build
 echo "    Compiling firmware for RP2350..."
-cmake --build ./build-pico2 -j$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4) \
-    > ./build-pico2/build.log 2>&1
+cmake --build "${DIR_PICO2}" -j"${JOBS}" \
+    > ${DIR_PICO2}/build.log 2>&1
 
 if [ $? -ne 0 ]; then
     echo "ERROR: Build failed for RP2350!"
-    tail -30 ./build-pico2/build.log
+    tail -30 ${DIR_PICO2}/build.log
     exit 1
 fi
 
@@ -239,33 +265,33 @@ echo ">>> Building for Raspberry Pi Pico (RP2040)..."
 echo ""
 
 # Clean and create build directory
-rm -rf ./build-pico
-mkdir -p ./build-pico
+rm -rf ${DIR_PICO}
+mkdir -p ${DIR_PICO}
 
 # Configure
 echo "    Configuring CMake for RP2040..."
-cmake -B ./build-pico -S . \
+cmake -B ${DIR_PICO} -S . \
     -DPICO_BOARD=pico \
     -DLANGUAGE="${LANGUAGE}" \
     -DENABLE_DEBUG="${DEBUG}" \
     -DENABLE_OLED_DISPLAY="${OLED}" \
     -DENABLE_SERIAL_LOGGING="${LOGGING}" \
-    > ./build-pico/cmake.log 2>&1
+    > ${DIR_PICO}/cmake.log 2>&1
 
 if [ $? -ne 0 ]; then
     echo "ERROR: CMake configuration failed for RP2040!"
-    tail -20 ./build-pico/cmake.log
+    tail -20 ${DIR_PICO}/cmake.log
     exit 1
 fi
 
 # Build
 echo "    Compiling firmware for RP2040..."
-cmake --build ./build-pico -j$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4) \
-    > ./build-pico/build.log 2>&1
+cmake --build "${DIR_PICO}" -j"${JOBS}" \
+    > ${DIR_PICO}/build.log 2>&1
 
 if [ $? -ne 0 ]; then
     echo "ERROR: Build failed for RP2040!"
-    tail -30 ./build-pico/build.log
+    tail -30 ${DIR_PICO}/build.log
     exit 1
 fi
 
@@ -283,39 +309,73 @@ mkdir -p ./dist
 VARIANT_SUFFIX="_${BUILD_VARIANT}"
 
 # Copy RP2040 firmware
-if [ -f "./build-pico/atari_ikbd_pico.uf2" ]; then
-    cp ./build-pico/atari_ikbd_pico.uf2 ./dist/atari_ikbd_pico${VARIANT_SUFFIX}.uf2
+COPIED_PICO=false
+if [ -f "${DIR_PICO}/atari_ikbd_pico.uf2" ]; then
+    cp ${DIR_PICO}/atari_ikbd_pico.uf2 ./dist/atari_ikbd_pico${VARIANT_SUFFIX}.uf2
     echo "    ✅ Copied atari_ikbd_pico${VARIANT_SUFFIX}.uf2"
+    COPIED_PICO=true
 else
     echo "    ⚠️  Warning: atari_ikbd_pico.uf2 not found!"
 fi
 
 # Copy RP2040 WiFi (Pico W) firmware
-if [ -f "./build-picow/atari_ikbd_pico.uf2" ]; then
-    cp ./build-picow/atari_ikbd_pico.uf2 ./dist/atari_ikbd_pico_w${VARIANT_SUFFIX}.uf2
+COPIED_PICOW=false
+if [ -f "${DIR_PICOW}/atari_ikbd_pico.uf2" ]; then
+    cp ${DIR_PICOW}/atari_ikbd_pico.uf2 ./dist/atari_ikbd_pico_w${VARIANT_SUFFIX}.uf2
     echo "    ✅ Copied atari_ikbd_pico_w${VARIANT_SUFFIX}.uf2"
+    COPIED_PICOW=true
 else
     echo "    ⚠️  Warning: atari_ikbd_pico.uf2 for Pico W (pico_w) not found!"
 fi
 
 # Copy RP2350 firmware
-if [ -f "./build-pico2/atari_ikbd_pico2.uf2" ]; then
-    cp ./build-pico2/atari_ikbd_pico2.uf2 ./dist/atari_ikbd_pico2${VARIANT_SUFFIX}.uf2
+COPIED_PICO2=false
+if [ -f "${DIR_PICO2}/atari_ikbd_pico2.uf2" ]; then
+    cp ${DIR_PICO2}/atari_ikbd_pico2.uf2 ./dist/atari_ikbd_pico2${VARIANT_SUFFIX}.uf2
     echo "    ✅ Copied atari_ikbd_pico2${VARIANT_SUFFIX}.uf2"
+    COPIED_PICO2=true
 else
     echo "    ⚠️  Warning: atari_ikbd_pico2.uf2 not found!"
 fi
 
 # Copy RP2350 WiFi/Bluetooth (Pico 2 W) firmware
-if [ -f "./build-pico2_w/atari_ikbd_pico2_w.uf2" ]; then
-    cp ./build-pico2_w/atari_ikbd_pico2_w.uf2 ./dist/atari_ikbd_pico2_w${VARIANT_SUFFIX}.uf2
+COPIED_PICO2_W=false
+if [ -f "${DIR_PICO2_W}/atari_ikbd_pico2_w.uf2" ]; then
+    cp ${DIR_PICO2_W}/atari_ikbd_pico2_w.uf2 ./dist/atari_ikbd_pico2_w${VARIANT_SUFFIX}.uf2
     echo "    ✅ Copied atari_ikbd_pico2_w${VARIANT_SUFFIX}.uf2"
-elif [ -f "./build-pico2_w/atari_ikbd_pico2.uf2" ]; then
-    cp ./build-pico2_w/atari_ikbd_pico2.uf2 ./dist/atari_ikbd_pico2_w${VARIANT_SUFFIX}.uf2
+    COPIED_PICO2_W=true
+elif [ -f "${DIR_PICO2_W}/atari_ikbd_pico2.uf2" ]; then
+    cp ${DIR_PICO2_W}/atari_ikbd_pico2.uf2 ./dist/atari_ikbd_pico2_w${VARIANT_SUFFIX}.uf2
     echo "    ✅ Copied atari_ikbd_pico2_w${VARIANT_SUFFIX}.uf2"
+    COPIED_PICO2_W=true
 fi
 
 echo ""
+
+################################################################################
+# Remove build directories after successful dist copy (optional)
+################################################################################
+
+if [ "${CLEAN_BUILD_DIRS}" = "1" ]; then
+    echo ">>> Cleaning build directories..."
+    if [ "$COPIED_PICO" = true ] && [ -d "${DIR_PICO}" ]; then
+        rm -rf "${DIR_PICO}"
+        echo "    ✅ Removed ${DIR_PICO}"
+    fi
+    if [ "$COPIED_PICOW" = true ] && [ -d "${DIR_PICOW}" ]; then
+        rm -rf "${DIR_PICOW}"
+        echo "    ✅ Removed ${DIR_PICOW}"
+    fi
+    if [ "$COPIED_PICO2" = true ] && [ -d "${DIR_PICO2}" ]; then
+        rm -rf "${DIR_PICO2}"
+        echo "    ✅ Removed ${DIR_PICO2}"
+    fi
+    if [ "$COPIED_PICO2_W" = true ] && [ -d "${DIR_PICO2_W}" ]; then
+        rm -rf "${DIR_PICO2_W}"
+        echo "    ✅ Removed ${DIR_PICO2_W}"
+    fi
+    echo ""
+fi
 
 ################################################################################
 # Display firmware information

@@ -2284,8 +2284,7 @@ int st_mouse_enabled() {
 }
 
 void update_joystick_state() {
-    // Called from 6301 emulator when DR2/DR4 registers are read
-    // Provides on-demand joystick updates for better timing accuracy
-    HidInput::instance().handle_joystick();
+    // Joystick/mouse state is refreshed on Core 0 in handle_joystick().
+    // Core 1 reads cached state via st_joystick() / st_mouse_buttons() only.
 }
 
