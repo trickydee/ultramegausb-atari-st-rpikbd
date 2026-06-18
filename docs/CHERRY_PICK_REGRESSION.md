@@ -19,7 +19,7 @@ Hardware confirmed: **v21.0.5 (`ebafed7`) works** including Xbox/Stadia Bluetoot
 | ✅ | Revert to **10 ms** single block (`main.cpp`) | OK | Proved 2 ms HID path is the culprit |
 | ✅ | `build-all.sh` — `BUILD_BOARDS=pico2_w` default + docs | — | Faster dev builds |
 | ✅ | `420e8a4` — non-blocking mount splashes (`3bb2139`) | OK | USB splash; BT pairing still OK |
-| ⏳ | `e92dc4e` — atomic cross-core state | *next* | |
+| ⏳ | `e92dc4e` — atomic cross-core state (`c7fe1ff`) | *test on hardware* | Cherry-picked; build OK |
 
 ### What we proved (June 2026)
 
