@@ -6,6 +6,7 @@
  */
 
 #include "stadia_controller.h"
+#include "mount_splash.h"
 #include "tusb.h"
 #include "ssd1306.h"
 #include "config.h"
@@ -227,18 +228,9 @@ void stadia_mount_cb(uint8_t dev_addr) {
     printf("\n");
     
 #if ENABLE_OLED_DISPLAY
-    // Show on OLED (matching PS4/Xbox/Switch style)
-    ssd1306_clear(&disp);
-    ssd1306_draw_string(&disp, 15, 10, 2, (char*)"STADIA");
-    ssd1306_draw_string(&disp, 5, 35, 1, (char*)"Google Controller");
-    
-    // Show debug info: Address
     char debug_line[20];
     snprintf(debug_line, sizeof(debug_line), "Addr:%d", dev_addr);
-    ssd1306_draw_string(&disp, 35, 50, 1, debug_line);
-    
-    ssd1306_show(&disp);
-    sleep_ms(2000);
+    mount_splash_show(MOUNT_SPLASH_DEFAULT_MS, "STADIA", "Google Controller", debug_line);
 #endif
     
     // Allocate controller

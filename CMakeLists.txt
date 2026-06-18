@@ -118,6 +118,7 @@ set(SOURCES
     src/SerialPort.cpp
     src/HidInput.cpp
     src/util.cpp
+    src/mount_splash.c
     src/UserInterface.cpp
     ${LANG_SRC}  # Specific language source file
     src/NVSettings.cpp

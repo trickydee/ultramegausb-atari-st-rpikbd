@@ -520,6 +520,11 @@ void UserInterface::on_button_down(int i) {
 
 void UserInterface::update() {
     handle_buttons();
+    mount_splash_poll();
+
+    if (mount_splash_is_active()) {
+        return;
+    }
 
     if (dirty) {
         dirty = false;

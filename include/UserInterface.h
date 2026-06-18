@@ -20,6 +20,7 @@
 
 #include "ssd1306.h"
 #include "NVSettings.h"
+#include "mount_splash.h"
 #include <string>
 #include <deque>
 

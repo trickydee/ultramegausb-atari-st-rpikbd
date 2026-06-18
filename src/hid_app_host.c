@@ -15,6 +15,7 @@
 #include "switch_controller.h"
 #include "horipad_controller.h"
 #include "stadia_controller.h"
+#include "mount_splash.h"
 #include "ssd1306.h"
 #include <string.h>
 
@@ -463,13 +464,8 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report_
     sleep_ms(recv_ok ? 2000 : 5000);
 #else
   #if ENABLE_OLED_DISPLAY
-    // Production splash screen - show GameCube adapter detected (matching Xbox/PS style)
-    if (instance == 0) {  // Only show once for instance 0
-      ssd1306_clear(&disp);
-      ssd1306_draw_string(&disp, 0, 10, 2, (char*)"GAMECUBE!");
-      ssd1306_draw_string(&disp, 5, 35, 1, (char*)"USB Adapter");
-      ssd1306_show(&disp);
-      sleep_ms(2000);
+    if (instance == 0) {
+      mount_splash_show(MOUNT_SPLASH_DEFAULT_MS, "GAMECUBE!", "USB Adapter", NULL);
     }
   #endif
 #endif

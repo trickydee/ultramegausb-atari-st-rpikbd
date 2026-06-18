@@ -7,6 +7,7 @@
  */
 
 #include "ps3_controller.h"
+#include "mount_splash.h"
 #include "config.h"
 #include "tusb.h"
 #include "ssd1306.h"
@@ -313,12 +314,7 @@ void ps3_mount_cb(uint8_t dev_addr) {
     printf("\n");
     
 #if ENABLE_OLED_DISPLAY
-    // Show on OLED - match Xbox/PS4/Switch style
-    ssd1306_clear(&disp);
-    ssd1306_draw_string(&disp, 25, 10, 2, (char*)"PS3");
-    ssd1306_draw_string(&disp, 10, 35, 1, (char*)"DualShock 3");
-    ssd1306_show(&disp);
-    sleep_ms(2000);
+    mount_splash_show(MOUNT_SPLASH_DEFAULT_MS, "PS3", "DualShock 3", NULL);
 #endif
     
     ps3_controller_t* ctrl = allocate_controller(dev_addr);

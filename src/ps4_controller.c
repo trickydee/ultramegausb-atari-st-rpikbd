@@ -7,6 +7,7 @@
  */
 
 #include "ps4_controller.h"
+#include "mount_splash.h"
 #include "tusb.h"
 #include "ssd1306.h"
 #include <stdio.h>
@@ -261,19 +262,10 @@ void ps4_mount_cb(uint8_t dev_addr) {
     printf("\n");
     
 #if ENABLE_OLED_DISPLAY
-    // Show on OLED
-    ssd1306_clear(&disp);
-    ssd1306_draw_string(&disp, 25, 10, 2, (char*)"PS4");
-    ssd1306_draw_string(&disp, 10, 35, 1, (char*)"DualShock 4");
-    
-    // Show debug info: Address
     char debug_line[20];
     snprintf(debug_line, sizeof(debug_line), "Addr:%d", dev_addr);
-    ssd1306_draw_string(&disp, 25, 50, 1, debug_line);
-    
-    ssd1306_show(&disp);
-    sleep_ms(2000);
-#endif  // Extended to match Xbox timing
+    mount_splash_show(MOUNT_SPLASH_DEFAULT_MS, "PS4", "DualShock 4", debug_line);
+#endif
     
     ps4_controller_t* ctrl = allocate_controller(dev_addr);
     if (ctrl) {

@@ -7,6 +7,7 @@
  */
 
 #include "switch_controller.h"
+#include "mount_splash.h"
 #include "tusb.h"
 #include "ssd1306.h"
 #include "config.h"
@@ -578,26 +579,17 @@ void switch_mount_cb(uint8_t dev_addr) {
            controller_name, dev_addr, vid, pid);
     
 #if ENABLE_OLED_DISPLAY
-    // Show on OLED (matching PS4/Xbox splash screen style)
-    ssd1306_clear(&disp);
-    ssd1306_draw_string(&disp, 10, 10, 2, (char*)"SWITCH!");
-    
-    // Show controller type
+    const char* subtitle;
     if (vid == POWERA_VENDOR_ID && (pid == POWERA_FUSION_ARCADE || pid == POWERA_FUSION_ARCADE_V2)) {
-        ssd1306_draw_string(&disp, 5, 35, 1, (char*)"PowerA Arcade");
+        subtitle = "PowerA Arcade";
     } else if (vid == SWITCH_VENDOR_ID && pid == SWITCH_PRO_CONTROLLER) {
-        ssd1306_draw_string(&disp, 10, 35, 1, (char*)"Pro Controller");
+        subtitle = "Pro Controller";
     } else {
-        ssd1306_draw_string(&disp, 15, 35, 1, (char*)"Controller");
+        subtitle = "Controller";
     }
-    
-    // Show debug info: Address (matching PS4/Xbox format)
     char debug_line[20];
     snprintf(debug_line, sizeof(debug_line), "Addr:%d", dev_addr);
-    ssd1306_draw_string(&disp, 25, 50, 1, debug_line);
-    
-    ssd1306_show(&disp);
-    sleep_ms(2000);  // Match PS4 timing for consistency
+    mount_splash_show(MOUNT_SPLASH_DEFAULT_MS, "SWITCH!", subtitle, debug_line);
 #endif
     
     // Allocate controller first
