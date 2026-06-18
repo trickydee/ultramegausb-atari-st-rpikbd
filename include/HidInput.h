@@ -21,6 +21,7 @@
 #ifdef __cplusplus
 #include <stdexcept>
 #include <vector>
+#include <atomic>
 #include "UserInterface.h"
 
 class HidInputException: public std::runtime_error {
@@ -67,13 +68,17 @@ private:
     bool get_switch_joystick(int joystick_num, uint8_t& axis, uint8_t& button);
     bool get_stadia_joystick(int joystick_num, uint8_t& axis, uint8_t& button);
     
+    void set_mouse_state_bits(int clear_mask, int set_bits);
+    void set_joystick_low_nibble(uint8_t axis);
+    void set_joystick_high_nibble(uint8_t axis);
+    
 private:
     int keyboard_handle = -1;
     int mouse_handle = -1;
     int joystick_handle = -1;
     std::vector<unsigned char> key_states;
-    volatile int mouse_state = 0;
-    volatile unsigned char joystick_state = 0;
+    std::atomic<int> mouse_state{0};
+    std::atomic<uint8_t> joystick_state{0};
     bool mouse_en = true;
 };
 

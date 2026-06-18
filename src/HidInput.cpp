@@ -1565,8 +1565,8 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
                 y = dy;
                 
                 // Update button state
-                mouse_state = (mouse_state & 0xfd) | ((buttons & 0x01) ? 2 : 0);  // Left button
-                mouse_state = (mouse_state & 0xfe) | ((buttons & 0x02) ? 1 : 0);  // Right button
+                set_mouse_state_bits(0xfd, (buttons & 0x01) ? 2 : 0);  // Left button
+                set_mouse_state_bits(0xfe, (buttons & 0x02) ? 1 : 0);  // Right button
 
                 if (mouse) {
                     wheel_delta = mouse->wheel;
@@ -1613,8 +1613,8 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
                     }
                 }
                 // Update button state
-                mouse_state = (mouse_state & 0xfd) | ((buttons & MOUSE_BUTTON_LEFT) ? 2 : 0);
-                mouse_state = (mouse_state & 0xfe) | ((buttons & MOUSE_BUTTON_RIGHT) ? 1 : 0);
+                set_mouse_state_bits(0xfd, (buttons & MOUSE_BUTTON_LEFT) ? 2 : 0);
+                set_mouse_state_bits(0xfe, (buttons & MOUSE_BUTTON_RIGHT) ? 1 : 0);
 
                 if (wheel_found) {
                     wheel_delta = wheel_candidate;
@@ -1668,8 +1668,8 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
             
             // Update button state (match USB mouse button handling)
             // Atari ST mouse_state: bit 1 = left button (0x02), bit 0 = right button (0x01)
-            mouse_state = (mouse_state & 0xfd) | (left_down ? 2 : 0);   // Left button
-            mouse_state = (mouse_state & 0xfe) | (right_down ? 1 : 0);  // Right button
+            set_mouse_state_bits(0xfd, left_down ? 2 : 0);   // Left button
+            set_mouse_state_bits(0xfe, right_down ? 1 : 0);  // Right button
             
             // Handle scroll wheel (matching USB mouse behavior)
             // Note: scroll_wheel is int8_t, so values are -128 to 127
@@ -2072,22 +2072,20 @@ void HidInput::handle_joystick() {
             // GPIO path
             g_gpio_path_count++;
             if (joystick == 1) {
-                mouse_state = (mouse_state & 0xfe) | (gpio_get(JOY1_FIRE) ? 0 : 1);
+                set_mouse_state_bits(0xfe, gpio_get(JOY1_FIRE) ? 0 : 1);
                 axis |= (gpio_get(JOY1_UP)) ? 0 : 1;
                 axis |= (gpio_get(JOY1_DOWN)) ? 0 : 2;
                 axis |= (gpio_get(JOY1_LEFT)) ? 0 : 4;
                 axis |= (gpio_get(JOY1_RIGHT)) ? 0 : 8;
-                joystick_state &= ~(0xf << 4);
-                joystick_state |= (axis << 4);
+                set_joystick_high_nibble(axis);
             }
             else if (!ui_->get_mouse_enabled()) {
-                mouse_state = (mouse_state & 0xfd) | (gpio_get(JOY0_FIRE) ? 0 : 2);
+                set_mouse_state_bits(0xfd, gpio_get(JOY0_FIRE) ? 0 : 2);
                 axis |= (gpio_get(JOY0_UP)) ? 0 : 1;
                 axis |= (gpio_get(JOY0_DOWN)) ? 0 : 2;
                 axis |= (gpio_get(JOY0_LEFT)) ? 0 : 4;
                 axis |= (gpio_get(JOY0_RIGHT)) ? 0 : 8;
-                joystick_state &= ~0xf;
-                joystick_state |= axis;
+                set_joystick_low_nibble(axis);
             }
         }
         else {
@@ -2216,26 +2214,17 @@ void HidInput::handle_joystick() {
             if (got_input) {
                 if (joystick == 0) {
                     if (!ui_->get_mouse_enabled()) {
-                        mouse_state = (mouse_state & 0xfd) | (button ? 2 : 0);
-                        joystick_state &= ~0xf;
-                        joystick_state |= axis;
+                        set_mouse_state_bits(0xfd, button ? 2 : 0);
+                        set_joystick_low_nibble(axis);
                     }
                 }
                 else {
-                    mouse_state = (mouse_state & 0xfe) | (button ? 1 : 0);
-                    joystick_state &= ~(0xf << 4);
-                    joystick_state |= (axis << 4);
+                    set_mouse_state_bits(0xfe, button ? 1 : 0);
+                    set_joystick_high_nibble(axis);
 
 #if ENABLE_BLUEPAD32
-                    // Special-case for Bluetooth-only mode:
-                    // Many Atari games read Joy0 as the primary joystick.
-                    // When running in pure Bluetooth mode (USB disabled), mirror
-                    // joystick 1 input into joystick 0 as long as mouse is not enabled.
                     if (!usb_runtime_is_enabled() && bt_runtime_is_enabled() && !ui_->get_mouse_enabled()) {
-                        joystick_state &= ~0xf;
-                        joystick_state |= axis;
-                        // Note: we intentionally do NOT mirror the mouse_state buttons here
-                        // to avoid interfering with Atari mouse emulation on Joy0.
+                        set_joystick_low_nibble(axis);
                     }
 #endif
                 }
@@ -2245,7 +2234,26 @@ void HidInput::handle_joystick() {
 }
 
 void HidInput::reset() {
-     std::fill(key_states.begin(), key_states.end(), 0);   
+     std::fill(key_states.begin(), key_states.end(), 0);
+     mouse_state.store(0, std::memory_order_relaxed);
+     joystick_state.store(0, std::memory_order_relaxed);
+}
+
+void HidInput::set_mouse_state_bits(int clear_mask, int set_bits) {
+    const int next = (mouse_state.load(std::memory_order_relaxed) & clear_mask) | set_bits;
+    mouse_state.store(next, std::memory_order_relaxed);
+}
+
+void HidInput::set_joystick_low_nibble(uint8_t axis) {
+    uint8_t next = joystick_state.load(std::memory_order_relaxed);
+    next = (uint8_t)((next & ~0x0fu) | (axis & 0x0fu));
+    joystick_state.store(next, std::memory_order_relaxed);
+}
+
+void HidInput::set_joystick_high_nibble(uint8_t axis) {
+    uint8_t next = joystick_state.load(std::memory_order_relaxed);
+    next = (uint8_t)((next & ~(0x0fu << 4)) | ((axis & 0x0fu) << 4));
+    joystick_state.store(next, std::memory_order_relaxed);
 }
 
 unsigned char HidInput::keydown(const unsigned char code) const {
@@ -2256,11 +2264,11 @@ unsigned char HidInput::keydown(const unsigned char code) const {
 }
 
 int HidInput::mouse_buttons() const {
-    return mouse_state;
+    return mouse_state.load(std::memory_order_relaxed);
 }
 
 unsigned char HidInput::joystick() const {
-    return joystick_state;
+    return joystick_state.load(std::memory_order_relaxed);
 }
 
 bool HidInput::mouse_enabled() const {
