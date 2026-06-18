@@ -21,7 +21,7 @@ Hardware confirmed: **v21.0.5 (`ebafed7`) works** including Xbox/Stadia Bluetoot
 | ✅ | `420e8a4` — non-blocking mount splashes (`3bb2139`) | OK | USB splash; BT pairing still OK |
 | ✅ | `e92dc4e` — atomic cross-core state (`c7fe1ff`) | OK | BT + USB OK |
 | ⏭️ | `c07ad1a` — 2 ms `tuh_task` + splash hold | *skipped* | Redundant (`tuh_task` already ~1 ms with BT on); avoid 2 ms experiment |
-| ⏳ | `204d8b9` — mouse delta accumulation | *next* | |
+| ⏳ | `204d8b9` — mouse delta accumulation (`120fa26`) | *test on hardware* | HidInput only; main.cpp kept 10 ms block |
 
 ### What we proved (June 2026)
 
