@@ -18,11 +18,14 @@ Human docs: `README.md`. Deep technical detail: `docs/DEVELOPER_GUIDE.md`.
 ## Build commands
 
 ```bash
-# Full multi-board build (preferred)
+# Default: Pico 2 W production (fast dev loop)
 ./build-all.sh
 
-# Fast compile check (production, single variant)
-BUILD_VARIANT=production SKIP_VARIANTS=1 CLEAN_BUILD_DIRS=0 ./build-all.sh
+# Incremental rebuild — keep CMake tree between runs
+CLEAN_BUILD_DIRS=0 ./build-all.sh
+
+# Full multi-board release build
+BUILD_BOARDS=all ./build-all.sh
 
 # Single board manual build
 mkdir -p build/build-pico2_w && cd build/build-pico2_w
@@ -30,12 +33,18 @@ cmake ../.. -DPICO_BOARD=pico2_w -DENABLE_DEBUG=0
 make -j$(nproc)
 ```
 
+### `build-all.sh` environment variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `BUILD_BOARDS` | `pico2_w` | `pico2_w`, comma-separated list, or `all` for every board |
+| `BUILD_VARIANT` | `production` | `production`, `debug`, or `speed` |
+| `SKIP_VARIANTS` | `1` | `1` = one variant; `0` = after debug, also build production + speed |
+| `CLEAN_BUILD_DIRS` | `1` | `0` = keep `build/build-*` for incremental rebuilds |
+| `DEBUG` | `0` | `1` = debug OLED screens |
+| `LANGUAGE` | `EN` | `EN`, `FR`, `DE`, `SP`, `IT` |
+
 - UF2 outputs: `dist/atari_ikbd_{pico|pico2|pico_w|pico2_w}_{debug|production|speed}.uf2`
-- `BUILD_VARIANT`: `production` (default), `debug`, or `speed`
-- `SKIP_VARIANTS=1`: build only one variant (default); `0` = after debug, also build production and speed
-- `DEBUG=0`: production UI (default); `1` = debug OLED screens
-- `LANGUAGE`: `EN`, `FR`, `DE`, `SP`, `IT`
-- `CLEAN_BUILD_DIRS=0`: keep `build/build-*` for incremental rebuilds
 - Bluetooth enabled when `PICO_BOARD` is `pico_w` or `pico2_w` (`CMakeLists.txt`)
 
 ---
@@ -107,8 +116,11 @@ GPIO: Atari UART TX=GP4 RX=GP5; OLED I2C GP8/GP9; UI buttons GP16–18. See `inc
 No automated test suite. Verify changes compile and behave on hardware where possible.
 
 ```bash
-# Compile check (fastest)
-BUILD_VARIANT=production SKIP_VARIANTS=1 CLEAN_BUILD_DIRS=0 ./build-all.sh
+# Compile check (fastest — default is Pico 2 W production)
+CLEAN_BUILD_DIRS=0 ./build-all.sh
+
+# Full multi-board compile check
+BUILD_BOARDS=all CLEAN_BUILD_DIRS=0 ./build-all.sh
 
 # Single board
 mkdir -p build/build-pico && cd build/build-pico && cmake ../.. -DPICO_BOARD=pico && make -j4

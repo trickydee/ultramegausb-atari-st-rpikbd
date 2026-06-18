@@ -448,7 +448,7 @@ list(APPEND SOURCES
 
 #### Step 7: Test
 
-1. Build firmware: `./build-all.sh`
+1. Build firmware: `./build-all.sh` (default: Pico 2 W) or `BUILD_BOARDS=all ./build-all.sh`
 2. Flash to Pico
 3. Connect controller
 4. Verify detection (OLED splash screen)
@@ -633,15 +633,34 @@ if (len < expected_len) {
 
 ### Build Scripts
 
-- **`build-all.sh`:** Builds all board variants (standard + speed)
-- **`build-wireless.sh`:** Builds Bluetooth variants
-- **Output:** `.uf2` files in `dist/` directory
+- **`build-all.sh`:** Primary build script. Defaults to **Pico 2 W production** (`BUILD_BOARDS=pico2_w`, `BUILD_VARIANT=production`). Use `BUILD_BOARDS=all` for every board. CMake trees under `build/build-*`; UF2 files in `dist/`.
+
+#### Environment variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `BUILD_BOARDS` | `pico2_w` | `pico2_w`, comma-separated `pico,pico2,pico_w,pico2_w`, or `all` |
+| `BUILD_VARIANT` | `production` | `production` (OLED + minimal log), `debug`, or `speed` (no OLED) |
+| `SKIP_VARIANTS` | `1` | `1` = single variant; `0` = after debug, also build production and speed |
+| `CLEAN_BUILD_DIRS` | `1` | `0` = keep build dirs for incremental rebuilds |
+| `DEBUG` | `0` | `1` = debug OLED UI screens |
+| `LANGUAGE` | `EN` | `EN`, `FR`, `DE`, `SP`, `IT` |
+
+```bash
+./build-all.sh                              # Pico 2 W production
+CLEAN_BUILD_DIRS=0 ./build-all.sh           # incremental
+BUILD_BOARDS=all ./build-all.sh             # all boards
+DEBUG=1 BUILD_BOARDS=all ./build-all.sh     # debug UI, all boards
+```
+
+- **Output:** `dist/atari_ikbd_{board}_{variant}.uf2`
 
 ### Build Variants
 
-- **Standard:** Full features, OLED enabled, logging enabled
-- **Speed:** No OLED, minimal logging, optimized for performance
-- **Debug:** Additional debug displays and verbose logging
+- **Production:** OLED enabled, minimal serial logging (default)
+- **Debug:** OLED enabled, verbose logging (`BUILD_VARIANT=debug`)
+- **Speed:** No OLED, minimal logging (`BUILD_VARIANT=speed`)
+- **Debug UI:** Extra OLED status pages (`DEBUG=1`, independent of variant)
 
 ### Adding New Features
 

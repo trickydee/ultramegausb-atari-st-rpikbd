@@ -246,17 +246,36 @@ You will also need a straight through R12 to RJ12 Cable (All 6 pins connected) t
 Compiling on the mac requires xcode, gcc and arm embedded toolchain. A build can be performed with the following commands:
 
 ```bash
-# Production build (debug disabled)
+# Default: Pico 2 W production only (fastest for BT development)
 ./build-all.sh
 
-# Debug build (enable controller debug screens)
+# Incremental rebuild (keeps build/build-pico2_w/ between runs)
+CLEAN_BUILD_DIRS=0 ./build-all.sh
+
+# All boards, all in dist/
+BUILD_BOARDS=all ./build-all.sh
+
+# Debug OLED screens
 DEBUG=1 ./build-all.sh
 
 # French interface
 LANGUAGE=FR ./build-all.sh
 
-# Outputs: dist/atari_ikbd_pico.uf2 and dist/atari_ikbd_pico2.uf2
+# Output (default run): dist/atari_ikbd_pico2_w_production.uf2
 ```
+
+#### `build-all.sh` environment variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `BUILD_BOARDS` | `pico2_w` | Board(s) to build: `pico2_w`, comma-separated `pico,pico2,pico_w,pico2_w`, or `all` |
+| `BUILD_VARIANT` | `production` | `production` (OLED on, minimal log), `debug` (verbose log), or `speed` (no OLED) |
+| `SKIP_VARIANTS` | `1` | `1` = single variant only; `0` = after a debug build, also build production and speed |
+| `CLEAN_BUILD_DIRS` | `1` | `1` = wipe build trees before/after; `0` = keep `build/build-*` for incremental rebuilds |
+| `DEBUG` | `0` | `1` = debug OLED UI screens (independent of `BUILD_VARIANT`) |
+| `LANGUAGE` | `EN` | `EN`, `FR`, `DE`, `SP`, or `IT` |
+
+UF2 files are written to `dist/` with names like `atari_ikbd_pico2_w_production.uf2`. CMake trees live under `build/build-{pico|pico2|pico_w|pico2_w}/`.
 
 PC (Linux)
 ```

@@ -1,12 +1,35 @@
 # Cherry-pick plan: ebafed7 (working) → 21.0.7 (broken)
 
 **Created:** June 2026  
-**Status:** `picking-cherrys` @ `7a2c46e` — **verified on hardware** (Xbox/Stadia BT OK)  
+**Status:** `picking-cherrys` — **P1 in progress**; Xbox/Stadia BT OK at 10 ms polling  
 **Baseline (verified on hardware):** `ebafed7` — v21.0.5  
 **Regression tip:** `170ac75` — v21.0.7  
-**Current branch tip:** `7a2c46e` — dual-core fixes + build consolidation (no TLV/NVSettings)  
 
-Hardware confirmed: **v21.0.5 (`ebafed7`) works perfectly** including Xbox/Stadia Bluetooth pairing. Everything from **v21.0.6 (`67fa026`)** onward regresses Xbox/Stadia BT.
+Hardware confirmed: **v21.0.5 (`ebafed7`) works** including Xbox/Stadia Bluetooth pairing. Full **v21.0.6 (`67fa026`)** TLV/NVSettings/resume changes still regress BT — deferred.
+
+---
+
+## Progress log (picking-cherrys)
+
+| Step | Commit / change | BT (Xbox/Stadia) | Notes |
+|------|-----------------|------------------|-------|
+| ✅ | `7a2c46e` — dual-core + build consolidation (no TLV/NVSettings) | OK | Baseline cherry-pick from `67fa026` |
+| ✅ | `d664d94` — regression plan doc | OK | |
+| ⚠️ | `cd98008` — cherry-pick `9f83ed6` (2 ms USB+HID) | **Hang on pair** | Stadia pairing lock-up |
+| ✅ | Revert to **10 ms** single block (`main.cpp`) | OK | Proved 2 ms HID path is the culprit |
+| ✅ | `build-all.sh` — `BUILD_BOARDS=pico2_w` default + docs | — | Faster dev builds |
+| ⏳ | `420e8a4` — non-blocking mount splashes | *test next* | |
+
+### What we proved (June 2026)
+
+1. **`7a2c46e` without TLV/NVSettings is BT-safe** — dual-core joystick fix + pico-sdk `setup_tlv` submodule alone did not break pairing on tested hardware.
+2. **Raw `9f83ed6` is NOT BT-safe** — running `tuh_task()` + `handle_mouse`/`handle_keyboard`/`handle_joystick` every **2 ms** caused Stadia (and likely Xbox) pairing hangs. Restoring one **10 ms** block fixed it.
+3. **Do not cherry-pick `9f83ed6` as-is.** When we want USB responsiveness later, use **`c07ad1a` pattern**: 2 ms `tuh_task()` only, 10 ms HID — not 2 ms on everything.
+4. **`bluepad32_poll()` at 1 ms unchanged** — the regression was the extra 2 ms HID/USB work, not BT poll rate.
+
+**Current `main.cpp` timing:** one 10 ms block (USB + HID + UI); `bluepad32_poll()` still 1 ms; serial RX every loop.
+
+**Next picks (revised order):** `420e8a4` → `e92dc4e` → `c07ad1a` (skip re-applying raw `9f83ed6`; `c07ad1a` adds 2 ms `tuh_task` only if desired) → `204d8b9` → `4f42d8e`. Test BT after each.
 
 ---
 
@@ -14,10 +37,10 @@ Hardware confirmed: **v21.0.5 (`ebafed7`) works perfectly** including Xbox/Stadi
 
 | Suspect | What changed |
 |---------|----------------|
-| **Primary** | `67fa026` re-enabled **BTstack TLV flash persistence** — pairing writes link keys to flash during SMP |
-| **Primary** | `67fa026` changed Core 1 resume from **Xbox/Stadia-only** to **all devices** at `on_device_ready` + 10ms |
-| **Secondary** | Board-aware **NVSettings** flash layout (may interact with TLV bank) |
-| **Unlikely** | P1 USB/mouse/splash commits (`9f83ed6`–`4f42d8e`) — Core 0 only, no BT pairing path |
+| **Primary (v21.0.6)** | `67fa026` TLV flash persistence + universal Core 1 resume |
+| **Secondary** | Board-aware **NVSettings** flash layout |
+| **Proven (P1)** | **`9f83ed6` as cherry-picked** — 2 ms HID + USB → Stadia pairing hang; 10 ms OK |
+| **Likely safe** | `420e8a4`–`4f42d8e` mount splash / mouse / atomic (test BT each pick) |
 
 ---
 
@@ -67,17 +90,19 @@ ebafed7  chore: bump version to 21.0.5  ← WORKING BASELINE
 
 ---
 
-### `9f83ed6` — USB polling split — ✅ Safe to cherry-pick
+### `9f83ed6` — USB polling split — ⚠️ DO NOT cherry-pick as-is
 
-- `tuh_task()` every **2 ms** (`INPUT_POLL_INTERVAL_US`)
-- Mouse / keyboard / joystick every **10 ms** (`HID_POLL_INTERVAL_US`)
-- OLED + BT UI remain at 10 ms
+**Hardware result:** Cherry-picked on `picking-cherrys` → Stadia BT pairing hang. Reverting to single **10 ms** block restored pairing.
+
+- Original commit runs `tuh_task()` + all HID handlers every **2 ms**
+- Extra Core 0 load during BT SMP/flash window conflicts with pairing (even though `bluepad32_platform.c` unchanged)
+- **Use `c07ad1a` instead** when adding USB responsiveness: 2 ms `tuh_task()` only, 10 ms mouse/keyboard/joystick
 
 **Files:** `src/main.cpp`
 
 ---
 
-### `420e8a4` — Non-blocking mount splashes — ✅ Safe to cherry-pick
+### `420e8a4` — Non-blocking mount splashes — ✅ Next to cherry-pick
 
 - New `src/mount_splash.c`, `include/mount_splash.h`
 - Replaced `sleep_ms()` OLED blocks in USB mount callbacks
@@ -164,16 +189,15 @@ ebafed7  chore: bump version to 21.0.5  ← WORKING BASELINE
    - **Do not** take `bluepad32_platform.c` resume change or TLV enable yet
    - **Do not** take `NVSettings.cpp` until TLV layout validated with Xbox/Stadia
 
-3. **P1 commits in order** (low risk):
+3. **P1 commits (revised order)** — test BT Xbox/Stadia after each:
    ```bash
-   git cherry-pick 9f83ed6
+   # SKIP raw 9f83ed6 — proved BT-unsafe; keep 10 ms or use c07ad1a split later
    git cherry-pick 420e8a4
    git cherry-pick e92dc4e
-   git cherry-pick c07ad1a
+   git cherry-pick c07ad1a    # 2 ms tuh_task only; verify BT still OK
    git cherry-pick 204d8b9
    git cherry-pick 4f42d8e
    ```
-   Resolve conflicts if any; test USB mouse + splashes + **BT Xbox/Stadia** after each.
 
 4. **TLV / persistent pairing** — separate follow-up on `stadia-xbox-bluetooth-broken` or new branch:
    - Pause Core 1 for all discoveries during pairing
@@ -191,7 +215,7 @@ ebafed7  chore: bump version to 21.0.5  ← WORKING BASELINE
 |----------------|----------|
 | `stadia-xbox-bluetooth-broken` (`d90e00f`) | `CYCLES_PER_LOOP=500`, extended BT pause experiments (still broken) |
 | `q3-26-improvements` (`170ac75`) | Full broken tip |
-| git stash | `BUILD_BOARDS=pico2_w` default, version bump WIP |
+| git stash | `BUILD_BOARDS` default now in `build-all.sh` |
 
 ---
 

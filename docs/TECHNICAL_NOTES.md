@@ -123,9 +123,10 @@ This section gives a high-level view of how the emulator is structured. For full
 - Benefits: Reduced CPU overhead, improved real-time performance
 
 **Build System:**
-- `build-all.sh` script creates both standard and speed mode builds
-- Standard builds: Full features, OLED enabled, logging enabled
-- Speed builds: No OLED, minimal logging, optimized for performance
+- `build-all.sh` defaults to **Pico 2 W production** (`BUILD_BOARDS=pico2_w`). Set `BUILD_BOARDS=all` for every board; `CLEAN_BUILD_DIRS=0` for incremental rebuilds.
+- **Production** (`BUILD_VARIANT=production`, default): OLED on, minimal logging
+- **Debug** (`BUILD_VARIANT=debug`): OLED on, verbose logging
+- **Speed** (`BUILD_VARIANT=speed`): No OLED, minimal logging
 
 **File Sizes (approximate):**
 - Standard RP2040: ~363KB
@@ -314,9 +315,9 @@ This section gives a high-level view of how the emulator is structured. For full
 
 ### Build Scripts
 
-- `build-all.sh` - Builds all board variants (standard + speed)
-- `build-wireless.sh` - Builds Bluetooth variants
-- Output: `.uf2` files in `dist/` directory
+- `build-all.sh` — defaults to Pico 2 W production; `BUILD_BOARDS=all` for every board
+- Output: `dist/atari_ikbd_{board}_{variant}.uf2`; CMake trees in `build/build-*`
+- See `README.md` or `AGENTS.md` for full environment variable list
 
 ---
 

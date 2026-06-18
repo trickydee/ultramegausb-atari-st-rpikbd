@@ -53,7 +53,6 @@ extern "C" {
 
 #define ROMBASE     256
 #define CYCLES_PER_LOOP 1000  // Match logronoid's value - proper 6301 emulation timing (~1MHz)
-#define INPUT_POLL_INTERVAL_US 2000  // USB HID poll (mouse/keyboard/joystick); UI stays at 10ms
 
 extern unsigned char rom_HD6301V1ST_img[];
 extern unsigned int rom_HD6301V1ST_img_len;
@@ -333,7 +332,6 @@ int main() {
 #endif
 
     absolute_time_t ten_ms = get_absolute_time();
-    absolute_time_t input_poll_ms = get_absolute_time();
     absolute_time_t heartbeat_ms = get_absolute_time();
 #if ENABLE_BLUEPAD32
     absolute_time_t bt_poll_ms = get_absolute_time();  // For Bluetooth polling (1ms interval)
@@ -356,9 +354,9 @@ int main() {
 
         AtariSTMouse::instance().update();
 
-        // Fast input path: USB HID at 2ms for responsive mouse/keyboard/joystick (P1)
-        if (absolute_time_diff_us(input_poll_ms, tm) >= INPUT_POLL_INTERVAL_US) {
-            input_poll_ms = tm;
+        // 10ms: USB stack, HID, and UI (pre-9f83ed6 timing — BT pairing experiment)
+        if (absolute_time_diff_us(ten_ms, tm) >= 10000) {
+            ten_ms = tm;
 
             if (usb_runtime_is_enabled()) {
                 tuh_task();
@@ -385,11 +383,6 @@ int main() {
 #endif
 
             HidInput::instance().handle_joystick();
-        }
-
-        // 10ms handler for OLED UI and deferred BT UI updates
-        if (absolute_time_diff_us(ten_ms, tm) >= 10000) {
-            ten_ms = tm;
 
 #if ENABLE_BLUEPAD32
             if (bt_runtime_is_enabled()) {
