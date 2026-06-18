@@ -9,6 +9,7 @@
  */
 
 #include "horipad_controller.h"
+#include "mount_splash.h"
 #include "config.h"
 #include "tusb.h"
 #include "ssd1306.h"
@@ -163,15 +164,9 @@ void horipad_mount_cb(uint8_t dev_addr) {
 #endif
 
 #if ENABLE_OLED_DISPLAY
-    extern ssd1306_t disp;
-    ssd1306_clear(&disp);
-    ssd1306_draw_string(&disp, 25, 10, 2, (char*)"HORI");
-    ssd1306_draw_string(&disp, 5, 35, 1, (char*)"HORIPAD (Switch)");
     char line[20];
     snprintf(line, sizeof(line), "Addr:%d", dev_addr);
-    ssd1306_draw_string(&disp, 25, 50, 1, line);
-    ssd1306_show(&disp);
-    sleep_ms(2000);
+    mount_splash_show(MOUNT_SPLASH_DEFAULT_MS, "HORI", "HORIPAD (Switch)", line);
 #endif
 
     if (!allocate_controller(dev_addr)) {

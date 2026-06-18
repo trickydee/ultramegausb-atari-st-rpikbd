@@ -9,6 +9,8 @@
  */
 
 #include "xinput.h"
+#include "mount_splash.h"
+#include "config.h"
 #include "tusb.h"
 #include "host/usbh.h"
 #include "host/usbh_pvt.h"
@@ -486,13 +488,9 @@ void xinput_mount_cb(uint8_t dev_addr) {
     printf("═══════════════════════════════════════════════════════\n");
     printf("\n");
     
-    // Show on OLED
-    extern ssd1306_t disp;
-    ssd1306_clear(&disp);
-    ssd1306_draw_string(&disp, 20, 10, 2, (char*)"XBOX");
-    ssd1306_draw_string(&disp, 10, 35, 1, (char*)"Controller");
-    ssd1306_draw_string(&disp, 20, 50, 1, (char*)"Detected!");
-    ssd1306_show(&disp);
+#if ENABLE_OLED_DISPLAY
+    mount_splash_show(MOUNT_SPLASH_DEFAULT_MS, "XBOX", "Controller", "Detected!");
+#endif
     
     xinput_init_controller(dev_addr);
 }
