@@ -373,10 +373,13 @@ int main() {
             }
         }
 
-        // HID sampling at 10ms — handle_mouse() feeds set_speed() with per-report deltas;
-        // polling faster made USB/BT mice feel sluggish (smaller deltas each call).
+        // HID sampling at 10ms — drain and accumulate mouse deltas, then one set_speed().
         if (absolute_time_diff_us(hid_poll_ms, tm) >= HID_POLL_INTERVAL_US) {
             hid_poll_ms = tm;
+
+            if (usb_runtime_is_enabled()) {
+                tuh_task();
+            }
 
 #if ENABLE_BLUEPAD32
             if (usb_runtime_is_enabled() || bt_runtime_is_enabled()) {
