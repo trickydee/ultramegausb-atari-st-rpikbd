@@ -204,14 +204,14 @@ bool xinput_init_controller(uint8_t dev_addr) {
     printf("Xbox: Using TinyUSB HID host (vendor-class workaround)\n");
     printf("Xbox: Reports will come via tuh_hid_report_received_cb\n");
     
+#if ENABLE_CONTROLLER_DEBUG
     extern ssd1306_t disp;
-    
-    // Show initialization on OLED
     ssd1306_clear(&disp);
     ssd1306_draw_string(&disp, 20, 10, 2, (char*)"XBOX");
     ssd1306_draw_string(&disp, 5, 35, 1, (char*)"HID Workaround");
     ssd1306_draw_string(&disp, 25, 50, 1, (char*)"Ready!");
     ssd1306_show(&disp);
+#endif
     
     ctrl->initialized = true;
     
@@ -222,17 +222,20 @@ bool xinput_init_controller(uint8_t dev_addr) {
 
 // Callback when initialization packet transfer completes
 static void xbox_init_complete_cb(tuh_xfer_t* xfer) {
+#if ENABLE_CONTROLLER_DEBUG
     extern ssd1306_t disp;
+#endif
     
     if (xfer->result == XFER_RESULT_SUCCESS) {
         printf("Xbox: Init packet sent successfully! Controller should now send data.\n");
         
-        // Show success on OLED
+#if ENABLE_CONTROLLER_DEBUG
         ssd1306_clear(&disp);
         ssd1306_draw_string(&disp, 20, 10, 2, (char*)"XBOX");
         ssd1306_draw_string(&disp, 15, 35, 1, (char*)"Init Sent");
         ssd1306_show(&disp);
         sleep_ms(500);
+#endif
         
         // Start receiving input reports
         tuh_xfer_t xfer_in = {
@@ -247,26 +250,28 @@ static void xbox_init_complete_cb(tuh_xfer_t* xfer) {
         if (tuh_edpt_xfer(&xfer_in)) {
             printf("Xbox: Listening for input reports on endpoint 0x%02X\n", XBOX_EP_IN);
             
-            // Show on OLED
+#if ENABLE_CONTROLLER_DEBUG
             ssd1306_clear(&disp);
             ssd1306_draw_string(&disp, 20, 10, 2, (char*)"XBOX");
             ssd1306_draw_string(&disp, 10, 35, 1, (char*)"Listening");
             ssd1306_show(&disp);
             sleep_ms(500);
+#endif
         } else {
             printf("Xbox: Failed to start listening for reports\n");
             
-            // Show failure on OLED
+#if ENABLE_CONTROLLER_DEBUG
             ssd1306_clear(&disp);
             ssd1306_draw_string(&disp, 20, 10, 2, (char*)"XBOX");
             ssd1306_draw_string(&disp, 5, 35, 1, (char*)"Listen Fail");
             ssd1306_show(&disp);
             sleep_ms(2000);
+#endif
         }
     } else {
         printf("Xbox: Init packet failed with result %d\n", xfer->result);
         
-        // Show failure on OLED
+#if ENABLE_CONTROLLER_DEBUG
         ssd1306_clear(&disp);
         ssd1306_draw_string(&disp, 20, 10, 2, (char*)"XBOX");
         char msg[20];
@@ -274,6 +279,7 @@ static void xbox_init_complete_cb(tuh_xfer_t* xfer) {
         ssd1306_draw_string(&disp, 15, 35, 1, msg);
         ssd1306_show(&disp);
         sleep_ms(2000);
+#endif
     }
 }
 
@@ -281,10 +287,12 @@ static void xbox_init_complete_cb(tuh_xfer_t* xfer) {
 static void xbox_report_received_cb(tuh_xfer_t* xfer) {
     static uint32_t report_count = 0;
     static bool first_report = true;
+#if ENABLE_CONTROLLER_DEBUG
     extern ssd1306_t disp;
+#endif
     
     if (xfer->result == XFER_RESULT_SUCCESS && xfer->actual_len > 0) {
-        // We got SOME data! Show immediately on first report
+#if ENABLE_CONTROLLER_DEBUG
         if (first_report) {
             first_report = false;
             ssd1306_clear(&disp);
@@ -295,11 +303,14 @@ static void xbox_report_received_cb(tuh_xfer_t* xfer) {
             ssd1306_show(&disp);
             sleep_ms(1000);
         }
+#else
+        first_report = false;
+#endif
         
         // Process the report
         xinput_process_report(xfer->daddr, xfer->buffer, xfer->actual_len);
         
-        // Show on OLED every 50 reports (~200ms)
+#if ENABLE_CONTROLLER_DEBUG
         if ((report_count++ % 50) == 0) {
             ssd1306_clear(&disp);
             ssd1306_draw_string(&disp, 20, 10, 2, (char*)"XBOX");
@@ -313,6 +324,9 @@ static void xbox_report_received_cb(tuh_xfer_t* xfer) {
             ssd1306_draw_string(&disp, 5, 50, 1, data_msg);
             ssd1306_show(&disp);
         }
+#else
+        report_count++;
+#endif
         
         // Queue next report (continuous receiving)
         tuh_xfer_t xfer_in = {
@@ -328,25 +342,24 @@ static void xbox_report_received_cb(tuh_xfer_t* xfer) {
     } else {
         printf("Xbox: Report receive failed, result=%d, len=%lu\n", xfer->result, xfer->actual_len);
         
-        // Show error on OLED with specific error code
+#if ENABLE_CONTROLLER_DEBUG
         ssd1306_clear(&disp);
         ssd1306_draw_string(&disp, 20, 10, 2, (char*)"XBOX");
         char msg[20];
         snprintf(msg, sizeof(msg), "Err: %d", xfer->result);
         ssd1306_draw_string(&disp, 15, 35, 1, msg);
         
-        // Also show actual_len to see if timeout vs other issue
         char len_msg[20];
         snprintf(len_msg, sizeof(len_msg), "Len: %lu", xfer->actual_len);
         ssd1306_draw_string(&disp, 15, 50, 1, len_msg);
         ssd1306_show(&disp);
         sleep_ms(2000);
+#endif
     }
 }
 
 bool xinput_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len) {
     static bool first_report_ever = true;
-    extern ssd1306_t disp;
     
     xbox_controller_t* ctrl = find_controller_by_addr(dev_addr);
     if (!ctrl) {
@@ -354,7 +367,6 @@ bool xinput_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len
         return false;
     }
     
-    // Show that we got SOME data!
     if (first_report_ever) {
         first_report_ever = false;
         printf("Xbox: *** FIRST REPORT RECEIVED! ***\n");
@@ -365,6 +377,8 @@ bool xinput_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len
         }
         printf("\n");
         
+#if ENABLE_CONTROLLER_DEBUG
+        extern ssd1306_t disp;
         ssd1306_clear(&disp);
         ssd1306_draw_string(&disp, 15, 10, 2, (char*)"XBOX!");
         char msg[20];
@@ -372,6 +386,7 @@ bool xinput_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len
         ssd1306_draw_string(&disp, 10, 35, 1, msg);
         ssd1306_show(&disp);
         sleep_ms(2000);
+#endif
     }
     
     // Minimum report size check
@@ -413,8 +428,10 @@ bool xinput_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len
         input->stick_right_y = (int16_t)(report[16] | (report[17] << 8));
     }
     
-               input->buttons, input->stick_left_x, input->stick_left_y);
-    }
+#if ENABLE_SERIAL_LOGGING
+    printf("Xbox: buttons=0x%04X stick=(%d,%d)\n",
+           input->buttons, input->stick_left_x, input->stick_left_y);
+#endif
     
     return true;
 }

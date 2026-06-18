@@ -73,6 +73,7 @@ void stadia_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len
     report_count++;
     
     if (first_report || (report_count % 50) == 0) {
+#if ENABLE_CONTROLLER_DEBUG
         extern ssd1306_t disp;
         ssd1306_clear(&disp);
         
@@ -119,6 +120,7 @@ void stadia_process_report(uint8_t dev_addr, const uint8_t* report, uint16_t len
         }
         
         ssd1306_show(&disp);
+#endif
         first_report = false;
     }
     

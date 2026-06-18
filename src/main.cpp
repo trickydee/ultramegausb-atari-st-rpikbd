@@ -54,8 +54,12 @@ extern "C" {
 
 #define ROMBASE     256
 #define CYCLES_PER_LOOP 1000  // Match logronoid's value - proper 6301 emulation timing (~1MHz)
-#define INPUT_POLL_INTERVAL_US 2000   // USB stack service (tuh_task)
-#define HID_POLL_INTERVAL_US   10000  // Mouse/keyboard/joystick — set_speed() needs larger deltas
+// USB stack at 2 ms keeps enumeration/mount callbacks responsive.
+// HID (mouse/keyboard/joystick) at 10 ms: AtariSTMouse::set_speed() maps delta magnitude
+// to quadrature period (MAX_SPEED/delta). Tiny per-tick deltas feel sluggish; we drain and
+// sum up to MOUSE_REPORT_DRAIN_MAX USB reports per 10 ms tick before one set_speed() call.
+#define INPUT_POLL_INTERVAL_US 2000
+#define HID_POLL_INTERVAL_US   10000
 
 extern unsigned char rom_HD6301V1ST_img[];
 extern unsigned int rom_HD6301V1ST_img_len;
@@ -359,10 +363,6 @@ int main() {
 
         AtariSTMouse::instance().update();
 
-#if ENABLE_OLED_DISPLAY
-        mount_splash_poll();
-#endif
-
         // USB stack: service TinyUSB often so enumeration/mount callbacks stay responsive
         if (absolute_time_diff_us(input_poll_ms, tm) >= INPUT_POLL_INTERVAL_US) {
             input_poll_ms = tm;
@@ -370,6 +370,9 @@ int main() {
             if (usb_runtime_is_enabled()) {
                 tuh_task();
                 switch_check_delayed_init();
+#if ENABLE_OLED_DISPLAY
+                mount_splash_service();
+#endif
             }
         }
 
@@ -379,6 +382,9 @@ int main() {
 
             if (usb_runtime_is_enabled()) {
                 tuh_task();
+#if ENABLE_OLED_DISPLAY
+                mount_splash_service();
+#endif
             }
 
 #if ENABLE_BLUEPAD32
@@ -429,6 +435,9 @@ int main() {
             // Immediately poll USB after Bluetooth to prevent USB starvation (if USB enabled)
             if (usb_runtime_is_enabled()) {
                 tuh_task();
+#if ENABLE_OLED_DISPLAY
+                mount_splash_service();
+#endif
             }
         }
 #endif
