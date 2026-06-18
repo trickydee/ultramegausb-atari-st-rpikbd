@@ -1,7 +1,24 @@
 # Release Notes
 
-**Current Version:** 21.0.6  
+**Current Version:** 21.0.7  
 **Last Updated:** June 2026
+
+---
+
+## Version 21.0.7 (June 2026)
+
+### P1 input responsiveness, mount splash, and build versioning
+
+Version 21.0.7 improves Core 0 input handling and OLED mount feedback from the Q3 2026 optimization pass:
+
+- **USB polling:** `tuh_task()` every 2 ms; mouse/keyboard/joystick sampling every 10 ms (larger deltas for quadrature timing)
+- **Mouse:** Drain and accumulate up to 32 USB reports per HID tick; mild burst scaling for fast flicks; `MIN_SPEED` lowered for higher max tracking
+- **Mount splash:** Non-blocking 5 s controller splash with OLED write guard; firmware version on splash footer
+- **Thread safety:** Atomic mouse/joystick state; volatile quadrature registers
+- **Build:** `PROJECT_VERSION_STRING` derived from major/minor/patch; `build-all.sh` auto-bumps patch each run (`SKIP_VERSION_BUMP=1` to disable)
+- **Debug:** Xbox/Stadia production OLED init paths gated behind `ENABLE_CONTROLLER_DEBUG`
+
+Hardware soak completed on target controllers before release.
 
 ---
 

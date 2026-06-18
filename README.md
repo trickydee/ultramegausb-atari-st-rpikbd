@@ -51,6 +51,8 @@ The following USB HID Gamepads/Joysticks are supported (More to come)
 
 **v21.0.6:** P0 correctness fixes (Core 1 BT resume for all gamepads, no USB from Core 1), board-aware NVSettings flash layout, persistent Bluetooth pairing, consolidated `build-all.sh`.
 
+**v21.0.7:** P1 input responsiveness (split USB/HID polling, mouse delta accumulation), stable 5 s mount splash, atomic input state, per-build version bump in `build-all.sh`.
+
 ## Bluetooth Support (Pico 2 W only)
 
 The emulator supports Bluetooth keyboards, mice, and gamepads on the Raspberry Pi Pico 2 W (RP2350). This allows you to use wireless devices without USB cables, providing a completely wireless setup for your Atari ST.
