@@ -62,9 +62,9 @@ private:
     absolute_time_t last_x_us;
     absolute_time_t last_y_us;
 
-    // The mouse registers
-    unsigned int x_reg;
-    unsigned int y_reg;
+    // The mouse registers (Core 0 writes, Core 1 reads via mouse_tick)
+    volatile unsigned int x_reg;
+    volatile unsigned int y_reg;
 };
 
 extern "C" {
