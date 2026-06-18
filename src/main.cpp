@@ -53,6 +53,7 @@ extern "C" {
 
 #define ROMBASE     256
 #define CYCLES_PER_LOOP 1000  // Match logronoid's value - proper 6301 emulation timing (~1MHz)
+#define INPUT_POLL_INTERVAL_US 2000  // USB HID poll (mouse/keyboard/joystick); UI stays at 10ms
 
 extern unsigned char rom_HD6301V1ST_img[];
 extern unsigned int rom_HD6301V1ST_img_len;
@@ -332,6 +333,7 @@ int main() {
 #endif
 
     absolute_time_t ten_ms = get_absolute_time();
+    absolute_time_t input_poll_ms = get_absolute_time();
     absolute_time_t heartbeat_ms = get_absolute_time();
 #if ENABLE_BLUEPAD32
     absolute_time_t bt_poll_ms = get_absolute_time();  // For Bluetooth polling (1ms interval)
@@ -354,18 +356,15 @@ int main() {
 
         AtariSTMouse::instance().update();
 
-        // 10ms handler for USB HID devices and other tasks (matching main branch approach)
-        if (absolute_time_diff_us(ten_ms, tm) >= 10000) {
-            ten_ms = tm;
+        // Fast input path: USB HID at 2ms for responsive mouse/keyboard/joystick (P1)
+        if (absolute_time_diff_us(input_poll_ms, tm) >= INPUT_POLL_INTERVAL_US) {
+            input_poll_ms = tm;
 
-            // USB task processing (moved from separate 5ms handler to 10ms handler)
             if (usb_runtime_is_enabled()) {
                 tuh_task();
+                switch_check_delayed_init();
             }
-            
-            // Mouse handling MUST come before keyboard handling
-            // This ensures wheel pulses are enqueued before they're consumed
-            // Poll mouse if USB or Bluetooth is enabled (mouse can come from either)
+
 #if ENABLE_BLUEPAD32
             if (usb_runtime_is_enabled() || bt_runtime_is_enabled()) {
                 HidInput::instance().handle_mouse(cpu.ncycles);
@@ -375,34 +374,29 @@ int main() {
                 HidInput::instance().handle_mouse(cpu.ncycles);
             }
 #endif
-            
-            // Handle USB devices if USB is enabled
+
             if (usb_runtime_is_enabled()) {
-                // Check for Switch Pro Controller delayed initialization
-                switch_check_delayed_init();
-                
                 HidInput::instance().handle_keyboard();
             }
-            
-            // Handle Bluetooth keyboard/mouse if Bluetooth is enabled
-            // (Bluetooth keyboard/mouse handling is integrated into handle_keyboard/handle_mouse)
 #if ENABLE_BLUEPAD32
             if (bt_runtime_is_enabled()) {
                 HidInput::instance().handle_keyboard();
             }
 #endif
-            
-            // Joystick handler (handles GPIO, USB, and Bluetooth)
+
             HidInput::instance().handle_joystick();
-            
+        }
+
+        // 10ms handler for OLED UI and deferred BT UI updates
+        if (absolute_time_diff_us(ten_ms, tm) >= 10000) {
+            ten_ms = tm;
+
 #if ENABLE_BLUEPAD32
-            // Check if Bluetooth UI update is needed (deferred from BT callbacks)
-            // Only if Bluetooth is enabled
             if (bt_runtime_is_enabled()) {
                 bluepad32_check_ui_update();
             }
 #endif
-            
+
 #if ENABLE_OLED_DISPLAY
             ui.update();
 #endif
