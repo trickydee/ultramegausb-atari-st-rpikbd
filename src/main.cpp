@@ -354,7 +354,7 @@ int main() {
 
         AtariSTMouse::instance().update();
 
-        // 10ms: USB stack, HID, and UI (pre-9f83ed6 timing — BT pairing experiment)
+        // 10ms: USB stack, HID, and UI — handle_mouse() drains/accumulates deltas per tick
         if (absolute_time_diff_us(ten_ms, tm) >= 10000) {
             ten_ms = tm;
 

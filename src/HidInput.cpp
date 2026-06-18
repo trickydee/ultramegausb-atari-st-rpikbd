@@ -1518,118 +1518,134 @@ void HidInput::handle_keyboard() {
 #endif
 }
 
+namespace {
+
+constexpr int MOUSE_REPORT_DRAIN_MAX = 16;
+
+struct UsbMouseSample {
+    int32_t dx = 0;
+    int32_t dy = 0;
+    int wheel_delta = 0;
+    int8_t buttons = 0;
+    bool have_buttons = false;
+};
+
+bool parse_usb_mouse_report(uint8_t dev_key, const uint8_t* js, hid_mouse_report_t* mouse,
+                            bool is_multi_interface_mouse, UsbMouseSample& out) {
+    out = {};
+    HID_ReportInfo_t* info = tuh_hid_get_report_info(dev_key);
+
+    if (is_multi_interface_mouse) {
+        out.buttons = js[0];
+        out.have_buttons = true;
+        out.dx = (int8_t)js[1];
+        out.dy = (int8_t)js[2];
+        if (js[2] == 0xFF && js[1] == 0x00) {
+            out.dy = 0;
+        }
+        if (mouse) {
+            out.wheel_delta = mouse->wheel;
+        }
+        return true;
+    }
+
+    if (info) {
+        int wheel_candidate = 0;
+        bool wheel_found = false;
+
+        for (uint8_t i = 0; i < info->TotalReportItems; ++i) {
+            HID_ReportItem_t* item = &info->ReportItems[i];
+            if (!USB_GetHIDReportItemInfo(js, item)) {
+                continue;
+            }
+            if ((item->Attributes.Usage.Page == USAGE_PAGE_BUTTON) && (item->ItemType == HID_REPORT_ITEM_In)) {
+                out.buttons |= (item->Value ? 1 : 0) << (item->Attributes.Usage.Usage - 1);
+                out.have_buttons = true;
+            } else if ((item->Attributes.Usage.Page == USAGE_PAGE_GENERIC_DCTRL) &&
+                       ((item->Attributes.Usage.Usage == USAGE_X) ||
+                        (item->Attributes.Usage.Usage == USAGE_Y)) &&
+                       (item->ItemType == HID_REPORT_ITEM_In)) {
+                if (item->Attributes.Usage.Usage == USAGE_X) {
+                    out.dx = GET_I32_VALUE(item);
+                } else {
+                    out.dy = GET_I32_VALUE(item);
+                }
+            } else if ((item->Attributes.Usage.Page == USAGE_PAGE_GENERIC_DCTRL) &&
+                       (item->Attributes.Usage.Usage == 0x38) &&
+                       (item->ItemType == HID_REPORT_ITEM_In)) {
+                wheel_candidate = GET_I32_VALUE(item);
+                wheel_found = true;
+            } else if ((item->Attributes.Usage.Page == 0x0C) &&
+                       (item->Attributes.Usage.Usage == 0x0238) &&
+                       (item->ItemType == HID_REPORT_ITEM_In)) {
+                wheel_candidate = GET_I32_VALUE(item);
+                wheel_found = true;
+            }
+        }
+
+        if (wheel_found) {
+            out.wheel_delta = wheel_candidate;
+        } else if (mouse) {
+            out.wheel_delta = mouse->wheel;
+        }
+        return true;
+    }
+
+    if (mouse) {
+        out.wheel_delta = mouse->wheel;
+    }
+    return false;
+}
+
+}  // namespace
+
 void HidInput::handle_mouse(const int64_t cpu_cycles) {
+    (void)cpu_cycles;
+
     int32_t x = 0;
     int32_t y = 0;
-    
-    
-    for (auto it : device) {
-        // Decode if this is a multi-interface mouse (key > 128)
-        uint8_t actual_addr = (it.first >= 128) ? (it.first - 128) : it.first;
-        
-        if (tuh_hid_get_type(it.first) != HID_MOUSE) {
-            continue;
-        }
-        
-        
-        if (tuh_hid_is_mounted(it.first) && !tuh_hid_is_busy(it.first)) {  // Use key, not actual_addr
-            hid_mouse_report_t* mouse = (hid_mouse_report_t*)it.second;
 
-            const uint8_t* js = it.second;
-            HID_ReportInfo_t* info = tuh_hid_get_report_info(it.first);  // Use key
-            
-            // Check if this is a multi-interface mouse (Logitech Unifying)
-            // These have key >= 128 AND are boot protocol mice (have simple 4-byte reports)
-            bool is_multi_interface_mouse = (it.first >= 128);
-            int wheel_delta = 0;
-            
-            if (is_multi_interface_mouse) {
-                // For multi-interface mice (Logitech Unifying), HID parser fails
-                // Use direct boot protocol format parsing instead
-                // Standard boot protocol mouse format:
-                // Byte 0: Buttons
-                // Byte 1: X movement (signed)
-                // Byte 2: Y movement (signed)
-                // Byte 3: Wheel (optional)
-                
-                int8_t buttons = js[0];
-                int8_t dx = (int8_t)js[1];
-                int8_t dy = (int8_t)js[2];
-                
-                // Filter out weird idle value (0xFF in byte 2)
-                if (js[2] == 0xFF && js[1] == 0x00) {
-                    dy = 0;  // Idle state, not actual movement
-                }
-                
-                x = dx;
-                y = dy;
-                
-                // Update button state
-                set_mouse_state_bits(0xfd, (buttons & 0x01) ? 2 : 0);  // Left button
-                set_mouse_state_bits(0xfe, (buttons & 0x02) ? 1 : 0);  // Right button
+    if (usb_runtime_is_enabled()) {
+        tuh_task();
 
-                if (mouse) {
-                    wheel_delta = mouse->wheel;
-                }
-            }
-            else if (info) {
-                // Standard HID parser for regular mice
-                int8_t buttons = 0;
-                int wheel_candidate = 0;
-                bool wheel_found = false;
-
-                for (uint8_t i = 0; i < info->TotalReportItems; ++i) {
-                    HID_ReportItem_t* item = &info->ReportItems[i];
-                    // Update the report item value if it is contained within the current report
-                    if (!(USB_GetHIDReportItemInfo((const uint8_t*)js, item)))
-                        continue;
-                    // Determine what report item is being tested, process updated value as needed
-                    if ((item->Attributes.Usage.Page == USAGE_PAGE_BUTTON) && (item->ItemType == HID_REPORT_ITEM_In)) {
-                        buttons |= (item->Value ? 1 : 0) << (item->Attributes.Usage.Usage - 1);
-                    }
-                    else if ((item->Attributes.Usage.Page == USAGE_PAGE_GENERIC_DCTRL) &&
-                                ((item->Attributes.Usage.Usage == USAGE_X) ||
-                                 (item->Attributes.Usage.Usage == USAGE_Y)) &&
-                                 (item->ItemType == HID_REPORT_ITEM_In)) {
-                        if (item->Attributes.Usage.Usage == USAGE_X) {
-                            x = GET_I32_VALUE(item);
-                        }
-                        else {
-                            y = GET_I32_VALUE(item);
-                        }
-                    }
-                    else if ((item->Attributes.Usage.Page == USAGE_PAGE_GENERIC_DCTRL) &&
-                             (item->Attributes.Usage.Usage == 0x38) &&
-                             (item->ItemType == HID_REPORT_ITEM_In)) {
-                        wheel_candidate = GET_I32_VALUE(item);
-                        wheel_found = true;
-                    }
-                    else if ((item->Attributes.Usage.Page == 0x0C) &&
-                             (item->Attributes.Usage.Usage == 0x0238) &&
-                             (item->ItemType == HID_REPORT_ITEM_In)) {
-                        // Consumer Control AC Pan can be used for wheels on some devices
-                        wheel_candidate = GET_I32_VALUE(item);
-                        wheel_found = true;
-                    }
-                }
-                // Update button state
-                set_mouse_state_bits(0xfd, (buttons & MOUSE_BUTTON_LEFT) ? 2 : 0);
-                set_mouse_state_bits(0xfe, (buttons & MOUSE_BUTTON_RIGHT) ? 1 : 0);
-
-                if (wheel_found) {
-                    wheel_delta = wheel_candidate;
-                } else if (mouse) {
-                    wheel_delta = mouse->wheel;
-                }
-            } else if (mouse) {
-                wheel_delta = mouse->wheel;
+        for (auto it : device) {
+            if (tuh_hid_get_type(it.first) != HID_MOUSE) {
+                continue;
             }
 
-            if (wheel_delta != 0) {
-                enqueue_wheel_pulses(wheel_delta);
+            const bool is_multi_interface_mouse = (it.first >= 128);
+            int drained = 0;
+
+            while (tuh_hid_is_mounted(it.first) && !tuh_hid_is_busy(it.first) &&
+                   drained < MOUSE_REPORT_DRAIN_MAX) {
+                hid_mouse_report_t* mouse = (hid_mouse_report_t*)it.second;
+                const uint8_t* js = it.second;
+                UsbMouseSample sample;
+
+                if (!parse_usb_mouse_report(it.first, js, mouse, is_multi_interface_mouse, sample)) {
+                    break;
+                }
+
+                x += sample.dx;
+                y += sample.dy;
+
+                if (sample.have_buttons) {
+                    if (is_multi_interface_mouse) {
+                        set_mouse_state_bits(0xfd, (sample.buttons & 0x01) ? 2 : 0);
+                        set_mouse_state_bits(0xfe, (sample.buttons & 0x02) ? 1 : 0);
+                    } else {
+                        set_mouse_state_bits(0xfd, (sample.buttons & MOUSE_BUTTON_LEFT) ? 2 : 0);
+                        set_mouse_state_bits(0xfe, (sample.buttons & MOUSE_BUTTON_RIGHT) ? 1 : 0);
+                    }
+                }
+                if (sample.wheel_delta != 0) {
+                    enqueue_wheel_pulses(sample.wheel_delta);
+                }
+
+                hid_app_request_report(it.first, it.second);
+                drained++;
+                tuh_task();
             }
-            // Trigger the next report (use device key, not actual_addr, for multi-interface devices)
-            hid_app_request_report(it.first, it.second);
         }
     }
     // Handle Bluetooth mice
