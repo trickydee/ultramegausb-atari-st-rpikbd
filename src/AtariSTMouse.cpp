@@ -23,7 +23,7 @@
 
 #define MOUSE_MASK 0x33333333
 #define MAX_SPEED 50000.0
-#define MIN_SPEED 650
+#define MIN_SPEED 480
 
 AtariSTMouse& AtariSTMouse::instance() {
     static AtariSTMouse mouse;

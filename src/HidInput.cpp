@@ -1520,7 +1520,20 @@ void HidInput::handle_keyboard() {
 
 namespace {
 
-constexpr int MOUSE_REPORT_DRAIN_MAX = 16;
+constexpr int MOUSE_REPORT_DRAIN_MAX = 32;
+
+// Mild extra gain when accumulated delta exceeds one HID report (fast flick).
+static int scale_mouse_burst(int v) {
+    const int av = v < 0 ? -v : v;
+    if (av <= 96) {
+        return v;
+    }
+    double factor = 1.0 + 0.0035 * static_cast<double>(av - 96);
+    if (factor > 1.45) {
+        factor = 1.45;
+    }
+    return static_cast<int>(static_cast<double>(v) * factor);
+}
 
 struct UsbMouseSample {
     int32_t dx = 0;
@@ -1701,7 +1714,9 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
     // Base multiplier of 1.0 with speed adjustment (0.0-9.0) adds 0.0-0.9
     // This gives a range of 1.0x to 1.9x acceleration
     double accel = 1.0 + ((double)ui_->get_mouse_speed() * 0.1);
-    AtariSTMouse::instance().set_speed((int)((double)x * accel), (int)((double)y * accel));
+    x = scale_mouse_burst(static_cast<int>(static_cast<double>(x) * accel));
+    y = scale_mouse_burst(static_cast<int>(static_cast<double>(y) * accel));
+    AtariSTMouse::instance().set_speed(x, y);
 }
 
 bool HidInput::get_usb_joystick(int addr, uint8_t& axis, uint8_t& button) {

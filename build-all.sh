@@ -21,7 +21,7 @@
 #                       0 after a debug build, also build production and speed
 #   DEBUG             - 0 (default) production UI; 1 = debug OLED screens
 #   LANGUAGE          - EN (default), FR, DE, SP, or IT
-#   BUILD_VARIANT     - production (default), debug, or speed
+#   SKIP_VERSION_BUMP - 1 to keep include/version.h unchanged (default 0 = bump patch each run)
 #
 # IMPORTANT: Build directories (build/build-pico, build/build-pico2, etc.)
 #            should NEVER be committed to git. They are automatically generated
@@ -29,6 +29,40 @@
 ################################################################################
 
 set -e  # Exit on error
+
+bump_firmware_version() {
+    if [ "${SKIP_VERSION_BUMP:-0}" = "1" ]; then
+        return
+    fi
+    local vh="include/version.h"
+    if [ ! -f "$vh" ]; then
+        echo "    Warning: ${vh} not found, skipping version bump"
+        return
+    fi
+    local major minor patch
+    major=$(grep '^#define PROJECT_VERSION_MAJOR' "$vh" | awk '{print $3}')
+    minor=$(grep '^#define PROJECT_VERSION_MINOR' "$vh" | awk '{print $3}')
+    patch=$(grep '^#define PROJECT_VERSION_PATCH' "$vh" | awk '{print $3}')
+    patch=$((patch + 1))
+    cat > "$vh" << EOF
+#ifndef VERSION_H
+#define VERSION_H
+
+#define PROJECT_VERSION_MAJOR ${major}
+#define PROJECT_VERSION_MINOR ${minor}
+#define PROJECT_VERSION_PATCH ${patch}
+
+#define PROJECT_VERSION_STRINGIFY(x) #x
+#define PROJECT_VERSION_TOSTRING(x) PROJECT_VERSION_STRINGIFY(x)
+#define PROJECT_VERSION_STRING \\
+    PROJECT_VERSION_TOSTRING(PROJECT_VERSION_MAJOR) "." \\
+    PROJECT_VERSION_TOSTRING(PROJECT_VERSION_MINOR) "." \\
+    PROJECT_VERSION_TOSTRING(PROJECT_VERSION_PATCH)
+
+#endif // VERSION_H
+EOF
+    echo "    Firmware version bumped to ${major}.${minor}.${patch}"
+}
 
 # Configuration
 LANGUAGE="${LANGUAGE:-EN}"
@@ -66,6 +100,8 @@ DIR_PICO="${BUILD_ROOT}/build-pico"
 JOBS=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
 
 mkdir -p "${BUILD_ROOT}"
+
+bump_firmware_version
 
 # Remove legacy root-level build dirs from older script versions
 for legacy in build-pico build-pico2 build-pico2_w build-picow build-pico_w; do

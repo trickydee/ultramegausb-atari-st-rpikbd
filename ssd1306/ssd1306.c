@@ -33,6 +33,14 @@ SOFTWARE.
 #include "ssd1306.h"
 #include "font.h"
 
+#if ENABLE_OLED_DISPLAY
+#include "mount_splash.h"
+
+static bool ssd1306_oled_allowed(void) {
+    return !mount_splash_blocks_oled();
+}
+#endif
+
 inline static void fancy_write(i2c_inst_t *i2c, uint8_t addr, const uint8_t *src, size_t len, char *name) {
     switch(i2c_write_blocking(i2c, addr, src, len, false)) {
     case PICO_ERROR_GENERIC:
@@ -131,10 +139,20 @@ inline void ssd1306_invert(ssd1306_t *p, uint8_t inv) {
 }
 
 inline void ssd1306_clear(ssd1306_t *p) {
+#if ENABLE_OLED_DISPLAY
+    if (!ssd1306_oled_allowed()) {
+        return;
+    }
+#endif
     memset(p->buffer, 0, p->bufsize);
 }
 
 void ssd1306_draw_pixel(ssd1306_t *p, uint32_t x, uint32_t y) {
+#if ENABLE_OLED_DISPLAY
+    if (!ssd1306_oled_allowed()) {
+        return;
+    }
+#endif
 	if(x>=p->width || y>=p->height) return;
 
     p->buffer[x+p->width*(y>>3)]|=0x1<<(y&0x07); // y>>3==y/8 && y&0x7==y%8
@@ -201,6 +219,11 @@ void ssd1306_draw_string(ssd1306_t *p, uint32_t x, uint32_t y, uint32_t scale, c
 }
 
 void ssd1306_show(ssd1306_t *p) {
+#if ENABLE_OLED_DISPLAY
+    if (!ssd1306_oled_allowed()) {
+        return;
+    }
+#endif
     uint8_t payload[]= {SET_COL_ADDR, 0, p->width-1, SET_PAGE_ADDR, 0, p->pages-1};
     if(p->width==64) {
         payload[1]+=32;

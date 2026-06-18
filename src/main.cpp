@@ -38,6 +38,7 @@
 #include "UserInterface.h"
 #include "xinput_host.h"  // Official tusb_xinput driver
 #include "gamecube_adapter.h"  // GameCube adapter support
+#include "mount_splash.h"
 
 #if ENABLE_BLUEPAD32
 // Use separate initialization file to avoid HID type conflicts between TinyUSB and btstack
@@ -361,6 +362,9 @@ int main() {
             if (usb_runtime_is_enabled()) {
                 tuh_task();
                 switch_check_delayed_init();
+#if ENABLE_OLED_DISPLAY
+                mount_splash_service();
+#endif
             }
 
 #if ENABLE_BLUEPAD32
@@ -406,6 +410,9 @@ int main() {
             // Immediately poll USB after Bluetooth to prevent USB starvation (if USB enabled)
             if (usb_runtime_is_enabled()) {
                 tuh_task();
+#if ENABLE_OLED_DISPLAY
+                mount_splash_service();
+#endif
             }
         }
 #endif
@@ -492,21 +499,15 @@ void tuh_xinput_mount_cb(uint8_t dev_addr, uint8_t instance, const xinputh_inter
     xinput_notify_ui_mount();
     
 #if ENABLE_OLED_DISPLAY
-    extern ssd1306_t disp;
-    ssd1306_clear(&disp);
-    ssd1306_draw_string(&disp, 20, 10, 2, (char*)"XBOX!");
-    
+    const char* subtitle = "Detected!";
     if (xinput_itf->type == XBOX360_WIRED) {
-        ssd1306_draw_string(&disp, 15, 35, 1, (char*)"360 Wired");
+        subtitle = "360 Wired";
     } else if (xinput_itf->type == XBOX360_WIRELESS) {
-        ssd1306_draw_string(&disp, 10, 35, 1, (char*)"360 Wireless");
+        subtitle = "360 Wireless";
     } else if (xinput_itf->type == XBOXONE) {
-        ssd1306_draw_string(&disp, 20, 35, 1, (char*)"Xbox One");
-    } else {
-        ssd1306_draw_string(&disp, 15, 35, 1, (char*)"Detected!");
+        subtitle = "Xbox One";
     }
-    ssd1306_show(&disp);
-    sleep_ms(2000);
+    mount_splash_show(MOUNT_SPLASH_DEFAULT_MS, "XBOX!", subtitle, NULL);
 #endif
     
     // For Xbox 360 Wireless, wait for connection before setting LEDs
