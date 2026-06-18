@@ -38,6 +38,7 @@
 #include "UserInterface.h"
 #include "xinput_host.h"  // Official tusb_xinput driver
 #include "gamecube_adapter.h"  // GameCube adapter support
+#include "mount_splash.h"
 
 #if ENABLE_BLUEPAD32
 // Use separate initialization file to avoid HID type conflicts between TinyUSB and btstack
@@ -53,7 +54,8 @@ extern "C" {
 
 #define ROMBASE     256
 #define CYCLES_PER_LOOP 1000  // Match logronoid's value - proper 6301 emulation timing (~1MHz)
-#define INPUT_POLL_INTERVAL_US 2000  // USB HID poll (mouse/keyboard/joystick); UI stays at 10ms
+#define INPUT_POLL_INTERVAL_US 2000   // USB stack service (tuh_task)
+#define HID_POLL_INTERVAL_US   10000  // Mouse/keyboard/joystick — set_speed() needs larger deltas
 
 extern unsigned char rom_HD6301V1ST_img[];
 extern unsigned int rom_HD6301V1ST_img_len;
@@ -334,6 +336,7 @@ int main() {
 
     absolute_time_t ten_ms = get_absolute_time();
     absolute_time_t input_poll_ms = get_absolute_time();
+    absolute_time_t hid_poll_ms = get_absolute_time();
     absolute_time_t heartbeat_ms = get_absolute_time();
 #if ENABLE_BLUEPAD32
     absolute_time_t bt_poll_ms = get_absolute_time();  // For Bluetooth polling (1ms interval)
@@ -356,7 +359,11 @@ int main() {
 
         AtariSTMouse::instance().update();
 
-        // Fast input path: USB HID at 2ms for responsive mouse/keyboard/joystick (P1)
+#if ENABLE_OLED_DISPLAY
+        mount_splash_poll();
+#endif
+
+        // USB stack: service TinyUSB often so enumeration/mount callbacks stay responsive
         if (absolute_time_diff_us(input_poll_ms, tm) >= INPUT_POLL_INTERVAL_US) {
             input_poll_ms = tm;
 
@@ -364,6 +371,12 @@ int main() {
                 tuh_task();
                 switch_check_delayed_init();
             }
+        }
+
+        // HID sampling at 10ms — handle_mouse() feeds set_speed() with per-report deltas;
+        // polling faster made USB/BT mice feel sluggish (smaller deltas each call).
+        if (absolute_time_diff_us(hid_poll_ms, tm) >= HID_POLL_INTERVAL_US) {
+            hid_poll_ms = tm;
 
 #if ENABLE_BLUEPAD32
             if (usb_runtime_is_enabled() || bt_runtime_is_enabled()) {
@@ -499,21 +512,15 @@ void tuh_xinput_mount_cb(uint8_t dev_addr, uint8_t instance, const xinputh_inter
     xinput_notify_ui_mount();
     
 #if ENABLE_OLED_DISPLAY
-    extern ssd1306_t disp;
-    ssd1306_clear(&disp);
-    ssd1306_draw_string(&disp, 20, 10, 2, (char*)"XBOX!");
-    
+    const char* subtitle = "Detected!";
     if (xinput_itf->type == XBOX360_WIRED) {
-        ssd1306_draw_string(&disp, 15, 35, 1, (char*)"360 Wired");
+        subtitle = "360 Wired";
     } else if (xinput_itf->type == XBOX360_WIRELESS) {
-        ssd1306_draw_string(&disp, 10, 35, 1, (char*)"360 Wireless");
+        subtitle = "360 Wireless";
     } else if (xinput_itf->type == XBOXONE) {
-        ssd1306_draw_string(&disp, 20, 35, 1, (char*)"Xbox One");
-    } else {
-        ssd1306_draw_string(&disp, 15, 35, 1, (char*)"Detected!");
+        subtitle = "Xbox One";
     }
-    ssd1306_show(&disp);
-    sleep_ms(2000);
+    mount_splash_show(MOUNT_SPLASH_DEFAULT_MS, "XBOX!", subtitle, NULL);
 #endif
     
     // For Xbox 360 Wireless, wait for connection before setting LEDs
