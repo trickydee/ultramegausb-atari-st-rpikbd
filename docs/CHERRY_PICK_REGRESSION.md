@@ -1,7 +1,7 @@
 # Cherry-pick plan: ebafed7 (working) → 21.0.7 (broken)
 
 **Created:** June 2026  
-**Status:** `picking-cherrys` — **P1 in progress**; Xbox/Stadia BT OK at 10 ms polling  
+**Status:** `picking-cherrys` — **P1 nearly complete**; Xbox/Stadia BT OK at 10 ms polling  
 **Baseline (verified on hardware):** `ebafed7` — v21.0.5  
 **Regression tip:** `170ac75` — v21.0.7  
 
@@ -22,7 +22,7 @@ Hardware confirmed: **v21.0.5 (`ebafed7`) works** including Xbox/Stadia Bluetoot
 | ✅ | `e92dc4e` — atomic cross-core state (`c7fe1ff`) | OK | BT + USB OK |
 | ⏭️ | `c07ad1a` — 2 ms `tuh_task` + splash hold | *skipped* | Redundant (`tuh_task` already ~1 ms with BT on); avoid 2 ms experiment |
 | ✅ | `204d8b9` — mouse delta accumulation (`120fa26`) | OK | HidInput drain; 10 ms loop kept |
-| ⏳ | `4f42d8e` — stable splash + mouse tuning | *next* | |
+| ⏳ | `4f42d8e` — stable splash + mouse tuning (`212238b`) | *test on hardware* | 5 s splash, drain 32, burst scaling; 10 ms loop kept |
 
 ### What we proved (June 2026)
 
@@ -33,7 +33,7 @@ Hardware confirmed: **v21.0.5 (`ebafed7`) works** including Xbox/Stadia Bluetoot
 
 **Current `main.cpp` timing:** one 10 ms block (USB + HID + UI); `bluepad32_poll()` still 1 ms; `tuh_task()` also ~1 ms when USB+BT enabled.
 
-**Next picks:** `204d8b9` → `4f42d8e`. Test BT after each. Defer `c07ad1a` unless USB-only mount speed becomes an issue.
+**Next picks:** `170ac75` docs/version only (optional). P1 code complete except deferred `c07ad1a` / `9f83ed6`.
 
 ---
 
@@ -195,9 +195,8 @@ ebafed7  chore: bump version to 21.0.5  ← WORKING BASELINE
 
 3. **P1 commits (revised order)** — test BT Xbox/Stadia after each:
    ```bash
-   # DONE: 420e8a4, e92dc4e — SKIP: 9f83ed6, c07ad1a
-   git cherry-pick 204d8b9
-   git cherry-pick 4f42d8e
+   # DONE: 420e8a4, e92dc4e, 204d8b9, 4f42d8e — SKIP: 9f83ed6, c07ad1a
+   # Optional: git cherry-pick 170ac75  # version + release docs only
    ```
 
 4. **TLV / persistent pairing** — separate follow-up on `stadia-xbox-bluetooth-broken` or new branch:
