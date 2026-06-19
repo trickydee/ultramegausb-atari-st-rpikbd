@@ -20,28 +20,12 @@
 #include "NVSettings.h"
 #include <hardware/sync.h>
 #include <string.h>
-#include "pico.h"
-#include "pico/flash.h"
-#include "hardware/flash.h"
+#include "pico.h"  // For PICO_OK
+#include "pico/flash.h"  // For flash_safe_execute() - required to coordinate with Core 1
 
-// Pre-fix layout: always 0x1FF000 (last 4 KiB of 2 MiB), including wrong placement on 4 MiB parts.
-#define FLASH_LOCATION_LEGACY_FIXED  (0x200000u - FLASH_SECTOR_SIZE)
-
-#ifndef PICO_FLASH_BANK_TOTAL_SIZE
-#define PICO_FLASH_BANK_TOTAL_SIZE (FLASH_SECTOR_SIZE * 2u)
-#endif
-
-static uint32_t nv_settings_flash_offset(void) {
-#if PICO_RP2350 && PICO_RP2350_A2_SUPPORTED
-    const uint32_t bt_bank =
-        PICO_FLASH_SIZE_BYTES - FLASH_SECTOR_SIZE - PICO_FLASH_BANK_TOTAL_SIZE;
-#else
-    const uint32_t bt_bank = PICO_FLASH_SIZE_BYTES - PICO_FLASH_BANK_TOTAL_SIZE;
-#endif
-    return bt_bank - FLASH_SECTOR_SIZE;
-}
-
-static uint32_t flash_location = 0;
+// The PICO has 2Mb of flash storage. We will assume the code will not be taking
+// all of this and carve 4K out near the end
+#define FLASH_LOCATION  (0x200000-FLASH_SECTOR_SIZE)
 
 static union {
     Settings settings;
@@ -49,6 +33,8 @@ static union {
 } storage;
 
 NVSettings::NVSettings() {
+    // NV settings disabled for now as the RP2040 seems to crash if you write flash with
+    // interrupts enabled or disabled.
     read();
 }
 
@@ -56,39 +42,36 @@ Settings& NVSettings::get_settings() {
     return storage.settings;
 }
 
+// Flash write callback - executed safely with Core 1 paused
 static void flash_write_callback(void* param) {
-    (void)param;
-    flash_range_erase(flash_location, FLASH_SECTOR_SIZE);
-    flash_range_program(flash_location, &storage.raw[0], FLASH_PAGE_SIZE);
+    (void)param;  // Unused
+    flash_range_erase(FLASH_LOCATION, FLASH_SECTOR_SIZE);
+    flash_range_program(FLASH_LOCATION, &storage.raw[0], FLASH_PAGE_SIZE);
 }
 
 void NVSettings::write() {
+    // Use flash_safe_execute() to coordinate with Core 1
+    // This ensures Core 1 pauses execution during flash operations, preventing freezes
+    // Timeout of 100ms should be sufficient for flash erase/program operations
     int result = flash_safe_execute(flash_write_callback, nullptr, 100);
     if (result != PICO_OK) {
+        // If flash_safe_execute fails, fall back to old method (but this may cause Core 1 freeze)
+        // This should only happen if Core 1 hasn't called flash_safe_execute_core_init()
         uint32_t ints = save_and_disable_interrupts();
-        flash_range_erase(flash_location, FLASH_SECTOR_SIZE);
-        flash_range_program(flash_location, &storage.raw[0], FLASH_PAGE_SIZE);
+        flash_range_erase(FLASH_LOCATION, FLASH_SECTOR_SIZE);
+        flash_range_program(FLASH_LOCATION, &storage.raw[0], FLASH_PAGE_SIZE);
         restore_interrupts(ints);
     }
 }
 
 void NVSettings::read() {
-    flash_location = nv_settings_flash_offset();
-
-    memcpy(&storage.raw[0], (void*)(XIP_BASE + flash_location), FLASH_SECTOR_SIZE);
-    if (storage.settings.version == 1) {
-        return;
+    // Copy from flash to our structure
+    memcpy(&storage.raw[0], (void*)(XIP_BASE + FLASH_LOCATION), FLASH_SECTOR_SIZE);
+    // Make sure flash contained a valid structure
+    if (storage.settings.version != 1) {
+        memset(&storage.raw[0], 0, FLASH_SECTOR_SIZE);
+        storage.settings.version = 1;
+        write();
     }
-
-    if (flash_location != FLASH_LOCATION_LEGACY_FIXED) {
-        memcpy(&storage.raw[0], (void*)(XIP_BASE + FLASH_LOCATION_LEGACY_FIXED), FLASH_SECTOR_SIZE);
-        if (storage.settings.version == 1) {
-            write();
-            return;
-        }
-    }
-
-    memset(&storage.raw[0], 0, FLASH_SECTOR_SIZE);
-    storage.settings.version = 1;
-    write();
 }
+

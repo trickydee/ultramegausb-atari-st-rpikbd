@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Firmware that emulates the Atari ST IKBD (HD6301) on Raspberry Pi Pico boards, routing USB and Bluetooth keyboards, mice, and gamepads to vintage Atari Mega ST / STE / TT computers. Version **21.0.7** (`include/version.h`; `build-all.sh` bumps patch each run).
+Firmware that emulates the Atari ST IKBD (HD6301) on Raspberry Pi Pico boards, routing USB and Bluetooth keyboards, mice, and gamepads to vintage Atari Mega ST / STE / TT computers. Version **21.1.0** (`include/version.h` — canonical; bump on release only).
 
 Human docs: `README.md`. Deep technical detail: `docs/DEVELOPER_GUIDE.md`.
 
@@ -18,11 +18,14 @@ Human docs: `README.md`. Deep technical detail: `docs/DEVELOPER_GUIDE.md`.
 ## Build commands
 
 ```bash
-# Full multi-board build (preferred)
+# Default: Pico 2 W production (fast dev loop)
 ./build-all.sh
 
-# Fast compile check (production, single variant)
-BUILD_VARIANT=production SKIP_VARIANTS=1 CLEAN_BUILD_DIRS=0 ./build-all.sh
+# Incremental rebuild — keep CMake tree between runs
+CLEAN_BUILD_DIRS=0 ./build-all.sh
+
+# Full multi-board release build
+BUILD_BOARDS=all ./build-all.sh
 
 # Single board manual build
 mkdir -p build/build-pico2_w && cd build/build-pico2_w
@@ -30,12 +33,18 @@ cmake ../.. -DPICO_BOARD=pico2_w -DENABLE_DEBUG=0
 make -j$(nproc)
 ```
 
+### `build-all.sh` environment variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `BUILD_BOARDS` | `pico2_w` | `pico2_w`, comma-separated list, or `all` for every board |
+| `BUILD_VARIANT` | `production` | `production`, `debug`, or `speed` |
+| `SKIP_VARIANTS` | `1` | `1` = one variant; `0` = after debug, also build production + speed |
+| `CLEAN_BUILD_DIRS` | `1` | `0` = keep `build/build-*` for incremental rebuilds |
+| `DEBUG` | `0` | `1` = debug OLED screens |
+| `LANGUAGE` | `EN` | `EN`, `FR`, `DE`, `SP`, `IT` |
+
 - UF2 outputs: `dist/atari_ikbd_{pico|pico2|pico_w|pico2_w}_{debug|production|speed}.uf2`
-- `BUILD_VARIANT`: `production` (default), `debug`, or `speed`
-- `SKIP_VARIANTS=1`: build only one variant (default); `0` = after debug, also build production and speed
-- `DEBUG=0`: production UI (default); `1` = debug OLED screens
-- `LANGUAGE`: `EN`, `FR`, `DE`, `SP`, `IT`
-- `CLEAN_BUILD_DIRS=0`: keep `build/build-*` for incremental rebuilds
 - Bluetooth enabled when `PICO_BOARD` is `pico_w` or `pico2_w` (`CMakeLists.txt`)
 
 ---
@@ -69,7 +78,7 @@ Full diagrams and design rationale: `docs/DEVELOPER_GUIDE.md`.
 | `src/*_controller.c` | Per-controller USB drivers |
 | `src/bluepad32_*.c/cpp` | Bluetooth (wireless builds only) |
 | `src/SerialPort.cpp` | Atari UART (7812 baud, FIFO) |
-| `include/config.h` | GPIO pins, clock, debug flags |
+| `include/config.h` | GPIO pins, clock, `CYCLES_PER_LOOP` (default 500), debug flags |
 | `6301/` | HD6301 CPU emulator |
 | `pico-sdk/`, `bluepad32/` | Git submodules — do not modify directly |
 | `hardware/` | KiCad PCB for Mega ST/STE/TT adapter |
@@ -107,8 +116,11 @@ GPIO: Atari UART TX=GP4 RX=GP5; OLED I2C GP8/GP9; UI buttons GP16–18. See `inc
 No automated test suite. Verify changes compile and behave on hardware where possible.
 
 ```bash
-# Compile check (fastest)
-BUILD_VARIANT=production SKIP_VARIANTS=1 CLEAN_BUILD_DIRS=0 ./build-all.sh
+# Compile check (fastest — default is Pico 2 W production)
+CLEAN_BUILD_DIRS=0 ./build-all.sh
+
+# Full multi-board compile check
+BUILD_BOARDS=all CLEAN_BUILD_DIRS=0 ./build-all.sh
 
 # Single board
 mkdir -p build/build-pico && cd build/build-pico && cmake ../.. -DPICO_BOARD=pico && make -j4
@@ -144,14 +156,14 @@ mkdir -p build/build-pico && cd build/build-pico && cmake ../.. -DPICO_BOARD=pic
 - Bumping `include/version.h` or editing `RELEASE_NOTES.md`.
 - Creating git commits or pushing to remote.
 - Modifying `pico-sdk/` or `bluepad32/` submodules.
-- Changing `CYCLES_PER_LOOP`, serial baud rate, or Core 1 loop structure.
+- Changing `CYCLES_PER_LOOP` in `include/config.h` (hardware regression test).
 - Changing binary type (`copy_to_ram` vs XIP) in `CMakeLists.txt`.
 
 ### Never
 
 - Add `sleep` or blocking I/O to Core 1's tight loop.
-- Change `CYCLES_PER_LOOP` from `1000` in `main.cpp` without explicit approval (breaks 1 MHz 6301 timing).
 - Change Atari serial baud from **7812**.
+- Change Core 1 loop structure (tight loop, no delays) without explicit approval.
 - Never commit `build/` directories or local build artifacts.
 - Force-push to `main`/`master`.
 - Refactor unrelated code in the same change.
@@ -161,7 +173,7 @@ mkdir -p build/build-pico && cd build/build-pico && cmake ../.. -DPICO_BOARD=pic
 ## Gotchas
 
 - **USB vs HID poll rate:** Core 0 runs `tuh_task()` every **2 ms** so USB mount/enumeration stays responsive. Mouse, keyboard, and joystick sampling run every **10 ms** because `AtariSTMouse::set_speed()` converts delta magnitude to quadrature timing (`MAX_SPEED / delta`); calling it every 2 ms with single-report deltas feels sluggish. `handle_mouse()` drains and sums up to `MOUSE_REPORT_DRAIN_MAX` USB reports per 10 ms tick before one `set_speed()`. Fast flicks get mild burst scaling above ~96 counts/tick; `MIN_SPEED` caps maximum quadrature rate.
-- **Mount splash OLED:** Production uses `mount_splash_show()` on attach (default **5 s**). Splash is queued in mount callbacks, drawn once by `mount_splash_service()` after `tuh_task()`. `mount_splash_blocks_oled()` suppresses other writers until expiry — do not redraw every poll (full-frame I2C starves mouse input). Firmware version is on the splash footer. `build-all.sh` auto-bumps patch (`SKIP_VERSION_BUMP=1` to disable).
+- **Mount splash OLED:** Production uses `mount_splash_show()` on attach (default **5 s**). Splash is queued in mount callbacks, drawn once by `mount_splash_service()` after `tuh_task()`. `mount_splash_blocks_oled()` suppresses other writers until expiry — do not redraw every poll (full-frame I2C starves mouse input). Footer shows `PROJECT_VERSION_STRING` from `include/version.h`.
 - **Core 1 freeze:** Bluetooth pairing writes flash — Core 1 must pause (`flash_safe_execute`). See `docs/TECHNICAL_NOTES.md`.
 - **BT clock:** 225 MHz for CYW43 stability; 270 MHz can cause stalls. USB-only builds use 270 MHz.
 - **BT binary type:** wireless builds use XIP (RAM constrained); USB-only builds use `copy_to_ram`.

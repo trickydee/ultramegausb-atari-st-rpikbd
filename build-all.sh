@@ -13,14 +13,17 @@
 #   - speed: OLED=0, LOGGING=0 (no OLED, minimal logging)
 #
 # Environment variables:
+#   BUILD_BOARDS      - pico2_w (default), or comma-separated: pico,pico2,pico_w,pico2_w
+#                       use "all" for every board (release builds)
 #   CLEAN_BUILD_DIRS  - 1 (default) remove build-* dirs after UF2 copied to dist/
 #                       0 keep build directories for incremental rebuilds / debugging
 #   SKIP_VARIANTS     - 1 (default) build only the variant selected by BUILD_VARIANT
 #                       0 after a debug build, also build production and speed
 #   DEBUG             - 0 (default) production UI; 1 = debug OLED screens
 #   LANGUAGE          - EN (default), FR, DE, SP, or IT
-#   SKIP_VERSION_BUMP - 1 to keep include/version.h unchanged (default 0 = bump patch each run)
+#   BUILD_VARIANT     - production (default), debug, or speed
 #
+# Firmware version: canonical source is include/version.h (bump there on release).
 # IMPORTANT: Build directories (build/build-pico, build/build-pico2, etc.)
 #            should NEVER be committed to git. They are automatically generated
 #            and cleaned by this script. Make sure .gitignore includes build/
@@ -28,46 +31,44 @@
 
 set -e  # Exit on error
 
-bump_firmware_version() {
-    if [ "${SKIP_VERSION_BUMP:-0}" = "1" ]; then
-        return
-    fi
+read_firmware_version() {
     local vh="include/version.h"
     if [ ! -f "$vh" ]; then
-        echo "    Warning: ${vh} not found, skipping version bump"
-        return
+        echo "ERROR: ${vh} not found (canonical firmware version)" >&2
+        exit 1
     fi
-    local major minor patch
-    major=$(grep '^#define PROJECT_VERSION_MAJOR' "$vh" | awk '{print $3}')
-    minor=$(grep '^#define PROJECT_VERSION_MINOR' "$vh" | awk '{print $3}')
-    patch=$(grep '^#define PROJECT_VERSION_PATCH' "$vh" | awk '{print $3}')
-    patch=$((patch + 1))
-    cat > "$vh" << EOF
-#ifndef VERSION_H
-#define VERSION_H
-
-#define PROJECT_VERSION_MAJOR ${major}
-#define PROJECT_VERSION_MINOR ${minor}
-#define PROJECT_VERSION_PATCH ${patch}
-
-#define PROJECT_VERSION_STRINGIFY(x) #x
-#define PROJECT_VERSION_TOSTRING(x) PROJECT_VERSION_STRINGIFY(x)
-#define PROJECT_VERSION_STRING \\
-    PROJECT_VERSION_TOSTRING(PROJECT_VERSION_MAJOR) "." \\
-    PROJECT_VERSION_TOSTRING(PROJECT_VERSION_MINOR) "." \\
-    PROJECT_VERSION_TOSTRING(PROJECT_VERSION_PATCH)
-
-#endif // VERSION_H
-EOF
-    echo "    Firmware version bumped to ${major}.${minor}.${patch}"
+    FIRMWARE_VERSION_MAJOR=$(grep '^#define PROJECT_VERSION_MAJOR' "$vh" | awk '{print $3}')
+    FIRMWARE_VERSION_MINOR=$(grep '^#define PROJECT_VERSION_MINOR' "$vh" | awk '{print $3}')
+    FIRMWARE_VERSION_PATCH=$(grep '^#define PROJECT_VERSION_PATCH' "$vh" | awk '{print $3}')
+    FIRMWARE_VERSION="${FIRMWARE_VERSION_MAJOR}.${FIRMWARE_VERSION_MINOR}.${FIRMWARE_VERSION_PATCH}"
 }
 
 # Configuration
 LANGUAGE="${LANGUAGE:-EN}"
 DEBUG="${DEBUG:-0}"  # Set to 1 to enable debug OLED screens
 BUILD_VARIANT="${BUILD_VARIANT:-production}"  # production, debug, or speed
+BUILD_BOARDS="${BUILD_BOARDS:-pico2_w}"  # default: Pico 2 W only (fast dev loop)
 SKIP_VARIANTS="${SKIP_VARIANTS:-1}"  # 1 = single variant; 0 = after debug, also build production and speed
 CLEAN_BUILD_DIRS="${CLEAN_BUILD_DIRS:-1}"  # 1 = remove build dirs after successful dist copy
+
+board_enabled() {
+    local board="$1"
+    if [ "${BUILD_BOARDS}" = "all" ]; then
+        return 0
+    fi
+    case ",${BUILD_BOARDS}," in
+        *,"${board}",*) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+prepare_build_dir() {
+    local dir="$1"
+    if [ "${CLEAN_BUILD_DIRS}" = "1" ]; then
+        rm -rf "${dir}"
+    fi
+    mkdir -p "${dir}"
+}
 
 # All CMake build trees live under ./build/ (e.g. build/build-pico2_w)
 BUILD_ROOT="./build"
@@ -79,7 +80,7 @@ JOBS=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
 
 mkdir -p "${BUILD_ROOT}"
 
-bump_firmware_version
+read_firmware_version
 
 # Remove legacy root-level build dirs from older script versions
 for legacy in build-pico build-pico2 build-pico2_w build-picow build-pico_w; do
@@ -108,7 +109,9 @@ esac
 
 echo "================================================================================"
 echo "  Atari ST USB Adapter - Multi-Variant Build"
+echo "  Firmware Version: ${FIRMWARE_VERSION} (from include/version.h)"
 echo "  Build Variant: ${BUILD_VARIANT}"
+echo "  Build Boards: ${BUILD_BOARDS}"
 echo "  Language: ${LANGUAGE}"
 echo "  Debug Mode: ${DEBUG}"
 echo "  OLED Display: ${OLED}"
@@ -161,178 +164,171 @@ echo ""
 # Build for Raspberry Pi Pico 2 W (RP2350 with WiFi/Bluetooth)
 ################################################################################
 
-echo ">>> Building for Raspberry Pi Pico 2 W (RP2350 with WiFi/Bluetooth)..."
-echo ""
+if board_enabled pico2_w; then
+    echo ">>> Building for Raspberry Pi Pico 2 W (RP2350 with WiFi/Bluetooth)..."
+    echo ""
 
-# Check for Bluepad32 submodule (required for Bluetooth)
-BLUEPAD32_OK=false
-if [ -d "./bluepad32/src" ] && [ -f "./bluepad32/src/components/bluepad32/CMakeLists.txt" ]; then
-    BLUEPAD32_OK=true
-    echo "    ✅ Bluepad32 is properly initialized"
-else
-    echo "    ⚠️  Bluepad32 missing - initializing..."
-    if ! git submodule update --init --recursive bluepad32; then
-        echo "    ⚠️  Warning: Bluepad32 initialization failed, skipping Pico 2 W build"
-        BLUEPAD32_OK=false
-    else
+    # Check for Bluepad32 submodule (required for Bluetooth)
+    BLUEPAD32_OK=false
+    if [ -d "./bluepad32/src" ] && [ -f "./bluepad32/src/components/bluepad32/CMakeLists.txt" ]; then
         BLUEPAD32_OK=true
-        echo "    ✅ Bluepad32 initialized successfully"
-    fi
-fi
-
-if [ "$BLUEPAD32_OK" = true ]; then
-    # Clean and create build directory
-    rm -rf ${DIR_PICO2_W}
-    mkdir -p ${DIR_PICO2_W}
-
-    # Configure
-    echo "    Configuring CMake for RP2350 WiFi/Bluetooth (pico2_w)..."
-    if ! cmake -B ${DIR_PICO2_W} -S . \
-        -DPICO_BOARD=pico2_w \
-        -DLANGUAGE="${LANGUAGE}" \
-        -DENABLE_DEBUG="${DEBUG}" \
-        -DENABLE_OLED_DISPLAY="${OLED}" \
-        -DENABLE_SERIAL_LOGGING="${LOGGING}" \
-        > ${DIR_PICO2_W}/cmake.log 2>&1; then
-        echo "    ⚠️  Warning: CMake configuration failed for RP2350 WiFi/Bluetooth (pico2_w)!"
-        tail -20 ${DIR_PICO2_W}/cmake.log
+        echo "    ✅ Bluepad32 is properly initialized"
     else
-        # Build (|| true: set -e must not abort — other board variants should still build)
-        echo "    Compiling firmware for RP2350 WiFi/Bluetooth (this may take longer due to Bluepad32)..."
-        if ! cmake --build "${DIR_PICO2_W}" -j"${JOBS}" \
-            > ${DIR_PICO2_W}/build.log 2>&1; then
-            echo "    ⚠️  Warning: Build failed for RP2350 WiFi/Bluetooth (pico2_w)!"
-            tail -30 ${DIR_PICO2_W}/build.log
+        echo "    ⚠️  Bluepad32 missing - initializing..."
+        if ! git submodule update --init --recursive bluepad32; then
+            echo "    ⚠️  Warning: Bluepad32 initialization failed, skipping Pico 2 W build"
+            BLUEPAD32_OK=false
         else
-            echo "    ✅ RP2350 WiFi/Bluetooth (pico2_w) build complete!"
+            BLUEPAD32_OK=true
+            echo "    ✅ Bluepad32 initialized successfully"
         fi
     fi
-fi
 
-echo ""
+    if [ "$BLUEPAD32_OK" = true ]; then
+        prepare_build_dir "${DIR_PICO2_W}"
+
+        # Configure
+        echo "    Configuring CMake for RP2350 WiFi/Bluetooth (pico2_w)..."
+        if ! cmake -B ${DIR_PICO2_W} -S . \
+            -DPICO_BOARD=pico2_w \
+            -DLANGUAGE="${LANGUAGE}" \
+            -DENABLE_DEBUG="${DEBUG}" \
+            -DENABLE_OLED_DISPLAY="${OLED}" \
+            -DENABLE_SERIAL_LOGGING="${LOGGING}" \
+            > ${DIR_PICO2_W}/cmake.log 2>&1; then
+            echo "    ⚠️  Warning: CMake configuration failed for RP2350 WiFi/Bluetooth (pico2_w)!"
+            tail -20 ${DIR_PICO2_W}/cmake.log
+        else
+            echo "    Compiling firmware for RP2350 WiFi/Bluetooth (this may take longer due to Bluepad32)..."
+            if ! cmake --build "${DIR_PICO2_W}" -j"${JOBS}" \
+                > ${DIR_PICO2_W}/build.log 2>&1; then
+                echo "    ⚠️  Warning: Build failed for RP2350 WiFi/Bluetooth (pico2_w)!"
+                tail -30 ${DIR_PICO2_W}/build.log
+            else
+                echo "    ✅ RP2350 WiFi/Bluetooth (pico2_w) build complete!"
+            fi
+        fi
+    fi
+
+    echo ""
+fi
 
 ################################################################################
 # Build for Raspberry Pi Pico W (RP2040 with WiFi)
 ################################################################################
 
-echo ">>> Building for Raspberry Pi Pico W (RP2040 with WiFi)..."
-echo ""
+if board_enabled pico_w; then
+    echo ">>> Building for Raspberry Pi Pico W (RP2040 with WiFi)..."
+    echo ""
 
-# Clean and create build directory
-rm -rf ${DIR_PICOW}
-mkdir -p ${DIR_PICOW}
+    prepare_build_dir "${DIR_PICOW}"
 
-# Configure
-echo "    Configuring CMake for RP2040 WiFi (pico_w)..."
-cmake -B ${DIR_PICOW} -S . \
-    -DPICO_BOARD=pico_w \
-    -DLANGUAGE="${LANGUAGE}" \
-    -DENABLE_DEBUG="${DEBUG}" \
-    -DENABLE_OLED_DISPLAY="${OLED}" \
-    -DENABLE_SERIAL_LOGGING="${LOGGING}" \
-    > ${DIR_PICOW}/cmake.log 2>&1
+    echo "    Configuring CMake for RP2040 WiFi (pico_w)..."
+    cmake -B ${DIR_PICOW} -S . \
+        -DPICO_BOARD=pico_w \
+        -DLANGUAGE="${LANGUAGE}" \
+        -DENABLE_DEBUG="${DEBUG}" \
+        -DENABLE_OLED_DISPLAY="${OLED}" \
+        -DENABLE_SERIAL_LOGGING="${LOGGING}" \
+        > ${DIR_PICOW}/cmake.log 2>&1
 
-if [ $? -ne 0 ]; then
-    echo "ERROR: CMake configuration failed for RP2040 WiFi (pico_w)!"
-    tail -20 ${DIR_PICOW}/cmake.log
-    exit 1
+    if [ $? -ne 0 ]; then
+        echo "ERROR: CMake configuration failed for RP2040 WiFi (pico_w)!"
+        tail -20 ${DIR_PICOW}/cmake.log
+        exit 1
+    fi
+
+    echo "    Compiling firmware for RP2040 WiFi (pico_w)..."
+    cmake --build "${DIR_PICOW}" -j"${JOBS}" \
+        > ${DIR_PICOW}/build.log 2>&1
+
+    if [ $? -ne 0 ]; then
+        echo "ERROR: Build failed for RP2040 WiFi (pico_w)!"
+        tail -30 ${DIR_PICOW}/build.log
+        exit 1
+    fi
+
+    echo "    ✅ RP2040 WiFi (pico_w) build complete!"
+    echo ""
 fi
-
-# Build
-echo "    Compiling firmware for RP2040 WiFi (pico_w)..."
-cmake --build "${DIR_PICOW}" -j"${JOBS}" \
-    > ${DIR_PICOW}/build.log 2>&1
-
-if [ $? -ne 0 ]; then
-    echo "ERROR: Build failed for RP2040 WiFi (pico_w)!"
-    tail -30 ${DIR_PICOW}/build.log
-    exit 1
-fi
-
-echo "    ✅ RP2040 WiFi (pico_w) build complete!"
-echo ""
 
 ################################################################################
 # Build for Raspberry Pi Pico 2 (RP2350)
 ################################################################################
 
-echo ">>> Building for Raspberry Pi Pico 2 (RP2350)..."
-echo ""
+if board_enabled pico2; then
+    echo ">>> Building for Raspberry Pi Pico 2 (RP2350)..."
+    echo ""
 
-# Clean and create build directory
-rm -rf ${DIR_PICO2}
-mkdir -p ${DIR_PICO2}
+    prepare_build_dir "${DIR_PICO2}"
 
-# Configure
-echo "    Configuring CMake for RP2350..."
-cmake -B ${DIR_PICO2} -S . \
-    -DPICO_BOARD=pico2 \
-    -DLANGUAGE="${LANGUAGE}" \
-    -DENABLE_DEBUG="${DEBUG}" \
-    -DENABLE_OLED_DISPLAY="${OLED}" \
-    -DENABLE_SERIAL_LOGGING="${LOGGING}" \
-    > ${DIR_PICO2}/cmake.log 2>&1
+    echo "    Configuring CMake for RP2350..."
+    cmake -B ${DIR_PICO2} -S . \
+        -DPICO_BOARD=pico2 \
+        -DLANGUAGE="${LANGUAGE}" \
+        -DENABLE_DEBUG="${DEBUG}" \
+        -DENABLE_OLED_DISPLAY="${OLED}" \
+        -DENABLE_SERIAL_LOGGING="${LOGGING}" \
+        > ${DIR_PICO2}/cmake.log 2>&1
 
-if [ $? -ne 0 ]; then
-    echo "ERROR: CMake configuration failed for RP2350!"
-    tail -20 ${DIR_PICO2}/cmake.log
-    exit 1
+    if [ $? -ne 0 ]; then
+        echo "ERROR: CMake configuration failed for RP2350!"
+        tail -20 ${DIR_PICO2}/cmake.log
+        exit 1
+    fi
+
+    echo "    Compiling firmware for RP2350..."
+    cmake --build "${DIR_PICO2}" -j"${JOBS}" \
+        > ${DIR_PICO2}/build.log 2>&1
+
+    if [ $? -ne 0 ]; then
+        echo "ERROR: Build failed for RP2350!"
+        tail -30 ${DIR_PICO2}/build.log
+        exit 1
+    fi
+
+    echo "    ✅ RP2350 build complete!"
+    echo ""
 fi
-
-# Build
-echo "    Compiling firmware for RP2350..."
-cmake --build "${DIR_PICO2}" -j"${JOBS}" \
-    > ${DIR_PICO2}/build.log 2>&1
-
-if [ $? -ne 0 ]; then
-    echo "ERROR: Build failed for RP2350!"
-    tail -30 ${DIR_PICO2}/build.log
-    exit 1
-fi
-
-echo "    ✅ RP2350 build complete!"
-echo ""
 
 ################################################################################
 # Build for Raspberry Pi Pico (RP2040)
 ################################################################################
 
-echo ">>> Building for Raspberry Pi Pico (RP2040)..."
-echo ""
+if board_enabled pico; then
+    echo ">>> Building for Raspberry Pi Pico (RP2040)..."
+    echo ""
 
-# Clean and create build directory
-rm -rf ${DIR_PICO}
-mkdir -p ${DIR_PICO}
+    prepare_build_dir "${DIR_PICO}"
 
-# Configure
-echo "    Configuring CMake for RP2040..."
-cmake -B ${DIR_PICO} -S . \
-    -DPICO_BOARD=pico \
-    -DLANGUAGE="${LANGUAGE}" \
-    -DENABLE_DEBUG="${DEBUG}" \
-    -DENABLE_OLED_DISPLAY="${OLED}" \
-    -DENABLE_SERIAL_LOGGING="${LOGGING}" \
-    > ${DIR_PICO}/cmake.log 2>&1
+    echo "    Configuring CMake for RP2040..."
+    cmake -B ${DIR_PICO} -S . \
+        -DPICO_BOARD=pico \
+        -DLANGUAGE="${LANGUAGE}" \
+        -DENABLE_DEBUG="${DEBUG}" \
+        -DENABLE_OLED_DISPLAY="${OLED}" \
+        -DENABLE_SERIAL_LOGGING="${LOGGING}" \
+        > ${DIR_PICO}/cmake.log 2>&1
 
-if [ $? -ne 0 ]; then
-    echo "ERROR: CMake configuration failed for RP2040!"
-    tail -20 ${DIR_PICO}/cmake.log
-    exit 1
+    if [ $? -ne 0 ]; then
+        echo "ERROR: CMake configuration failed for RP2040!"
+        tail -20 ${DIR_PICO}/cmake.log
+        exit 1
+    fi
+
+    echo "    Compiling firmware for RP2040..."
+    cmake --build "${DIR_PICO}" -j"${JOBS}" \
+        > ${DIR_PICO}/build.log 2>&1
+
+    if [ $? -ne 0 ]; then
+        echo "ERROR: Build failed for RP2040!"
+        tail -30 ${DIR_PICO}/build.log
+        exit 1
+    fi
+
+    echo "    ✅ RP2040 build complete!"
+    echo ""
 fi
-
-# Build
-echo "    Compiling firmware for RP2040..."
-cmake --build "${DIR_PICO}" -j"${JOBS}" \
-    > ${DIR_PICO}/build.log 2>&1
-
-if [ $? -ne 0 ]; then
-    echo "ERROR: Build failed for RP2040!"
-    tail -30 ${DIR_PICO}/build.log
-    exit 1
-fi
-
-echo "    ✅ RP2040 build complete!"
-echo ""
 
 ################################################################################
 # Copy firmware files to dist directory with variant-specific names
@@ -346,44 +342,54 @@ VARIANT_SUFFIX="_${BUILD_VARIANT}"
 
 # Copy RP2040 firmware
 COPIED_PICO=false
-if [ -f "${DIR_PICO}/atari_ikbd_pico.uf2" ]; then
-    cp ${DIR_PICO}/atari_ikbd_pico.uf2 ./dist/atari_ikbd_pico${VARIANT_SUFFIX}.uf2
-    echo "    ✅ Copied atari_ikbd_pico${VARIANT_SUFFIX}.uf2"
-    COPIED_PICO=true
-else
-    echo "    ⚠️  Warning: atari_ikbd_pico.uf2 not found!"
+if board_enabled pico; then
+    if [ -f "${DIR_PICO}/atari_ikbd_pico.uf2" ]; then
+        cp ${DIR_PICO}/atari_ikbd_pico.uf2 ./dist/atari_ikbd_pico${VARIANT_SUFFIX}.uf2
+        echo "    ✅ Copied atari_ikbd_pico${VARIANT_SUFFIX}.uf2"
+        COPIED_PICO=true
+    else
+        echo "    ⚠️  Warning: atari_ikbd_pico.uf2 not found!"
+    fi
 fi
 
 # Copy RP2040 WiFi (Pico W) firmware
 COPIED_PICOW=false
-if [ -f "${DIR_PICOW}/atari_ikbd_pico.uf2" ]; then
-    cp ${DIR_PICOW}/atari_ikbd_pico.uf2 ./dist/atari_ikbd_pico_w${VARIANT_SUFFIX}.uf2
-    echo "    ✅ Copied atari_ikbd_pico_w${VARIANT_SUFFIX}.uf2"
-    COPIED_PICOW=true
-else
-    echo "    ⚠️  Warning: atari_ikbd_pico.uf2 for Pico W (pico_w) not found!"
+if board_enabled pico_w; then
+    if [ -f "${DIR_PICOW}/atari_ikbd_pico.uf2" ]; then
+        cp ${DIR_PICOW}/atari_ikbd_pico.uf2 ./dist/atari_ikbd_pico_w${VARIANT_SUFFIX}.uf2
+        echo "    ✅ Copied atari_ikbd_pico_w${VARIANT_SUFFIX}.uf2"
+        COPIED_PICOW=true
+    else
+        echo "    ⚠️  Warning: atari_ikbd_pico.uf2 for Pico W (pico_w) not found!"
+    fi
 fi
 
 # Copy RP2350 firmware
 COPIED_PICO2=false
-if [ -f "${DIR_PICO2}/atari_ikbd_pico2.uf2" ]; then
-    cp ${DIR_PICO2}/atari_ikbd_pico2.uf2 ./dist/atari_ikbd_pico2${VARIANT_SUFFIX}.uf2
-    echo "    ✅ Copied atari_ikbd_pico2${VARIANT_SUFFIX}.uf2"
-    COPIED_PICO2=true
-else
-    echo "    ⚠️  Warning: atari_ikbd_pico2.uf2 not found!"
+if board_enabled pico2; then
+    if [ -f "${DIR_PICO2}/atari_ikbd_pico2.uf2" ]; then
+        cp ${DIR_PICO2}/atari_ikbd_pico2.uf2 ./dist/atari_ikbd_pico2${VARIANT_SUFFIX}.uf2
+        echo "    ✅ Copied atari_ikbd_pico2${VARIANT_SUFFIX}.uf2"
+        COPIED_PICO2=true
+    else
+        echo "    ⚠️  Warning: atari_ikbd_pico2.uf2 not found!"
+    fi
 fi
 
 # Copy RP2350 WiFi/Bluetooth (Pico 2 W) firmware
 COPIED_PICO2_W=false
-if [ -f "${DIR_PICO2_W}/atari_ikbd_pico2_w.uf2" ]; then
-    cp ${DIR_PICO2_W}/atari_ikbd_pico2_w.uf2 ./dist/atari_ikbd_pico2_w${VARIANT_SUFFIX}.uf2
-    echo "    ✅ Copied atari_ikbd_pico2_w${VARIANT_SUFFIX}.uf2"
-    COPIED_PICO2_W=true
-elif [ -f "${DIR_PICO2_W}/atari_ikbd_pico2.uf2" ]; then
-    cp ${DIR_PICO2_W}/atari_ikbd_pico2.uf2 ./dist/atari_ikbd_pico2_w${VARIANT_SUFFIX}.uf2
-    echo "    ✅ Copied atari_ikbd_pico2_w${VARIANT_SUFFIX}.uf2"
-    COPIED_PICO2_W=true
+if board_enabled pico2_w; then
+    if [ -f "${DIR_PICO2_W}/atari_ikbd_pico2_w.uf2" ]; then
+        cp ${DIR_PICO2_W}/atari_ikbd_pico2_w.uf2 ./dist/atari_ikbd_pico2_w${VARIANT_SUFFIX}.uf2
+        echo "    ✅ Copied atari_ikbd_pico2_w${VARIANT_SUFFIX}.uf2"
+        COPIED_PICO2_W=true
+    elif [ -f "${DIR_PICO2_W}/atari_ikbd_pico2.uf2" ]; then
+        cp ${DIR_PICO2_W}/atari_ikbd_pico2.uf2 ./dist/atari_ikbd_pico2_w${VARIANT_SUFFIX}.uf2
+        echo "    ✅ Copied atari_ikbd_pico2_w${VARIANT_SUFFIX}.uf2"
+        COPIED_PICO2_W=true
+    else
+        echo "    ⚠️  Warning: atari_ikbd_pico2_w.uf2 not found!"
+    fi
 fi
 
 echo ""
@@ -423,6 +429,7 @@ echo "==========================================================================
 echo ""
 echo "Firmware files available in: ./dist/"
 echo ""
+echo "  Firmware Version: ${FIRMWARE_VERSION}"
 echo "  Build Variant: ${BUILD_VARIANT}"
 echo "  - OLED Display: ${OLED}"
 echo "  - Serial Logging: ${LOGGING}"

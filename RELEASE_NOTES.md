@@ -1,38 +1,7 @@
 # Release Notes
 
-**Current Version:** 21.0.7  
+**Current Version:** 21.0.5  
 **Last Updated:** June 2026
-
----
-
-## Version 21.0.7 (June 2026)
-
-### P1 input responsiveness, mount splash, and build versioning
-
-Version 21.0.7 improves Core 0 input handling and OLED mount feedback from the Q3 2026 optimization pass:
-
-- **USB polling:** `tuh_task()` every 2 ms; mouse/keyboard/joystick sampling every 10 ms (larger deltas for quadrature timing)
-- **Mouse:** Drain and accumulate up to 32 USB reports per HID tick; mild burst scaling for fast flicks; `MIN_SPEED` lowered for higher max tracking
-- **Mount splash:** Non-blocking 5 s controller splash with OLED write guard; firmware version on splash footer
-- **Thread safety:** Atomic mouse/joystick state; volatile quadrature registers
-- **Build:** `PROJECT_VERSION_STRING` derived from major/minor/patch; `build-all.sh` auto-bumps patch each run (`SKIP_VERSION_BUMP=1` to disable)
-- **Debug:** Xbox/Stadia production OLED init paths gated behind `ENABLE_CONTROLLER_DEBUG`
-
-Hardware soak completed on target controllers before release.
-
----
-
-## Version 21.0.6 (June 2026)
-
-### P0 correctness, flash layout, and persistent Bluetooth pairing
-
-Version 21.0.6 addresses stability and flash-management issues from the optimization review:
-
-- **Bluetooth:** Resume Core 1 for all gamepad types after enumeration (not only Xbox/Stadia)
-- **Dual-core:** Core 0 owns USB; removed `update_joystick_state()` calls from Core 1 / 6301 port reads
-- **Flash:** Board-aware NVSettings sector below BTstack bank; migration from legacy `0x1FF000`
-- **Pairing:** Re-enabled BTstack TLV flash persistence — controllers stay paired across reboots
-- **Build:** Consolidate all build scripts to `build-all.sh`
 
 ---
 
@@ -386,41 +355,26 @@ To upgrade to the latest version:
 
 ## Build Instructions
 
-### Standard build (all boards, all variants)
-
+### Standard Build:
 ```bash
-git submodule update --init --recursive
 ./build-all.sh
 ```
 
-Produces `dist/atari_ikbd_*_{debug,production,speed}.uf2` for Pico, Pico 2, Pico W, and Pico 2 W.
-
-### Common options
-
+### With Options:
 ```bash
-# Debug OLED screens (default)
+# Enable debug displays
 DEBUG=1 ./build-all.sh
-
-# Production UI (no debug screens)
-DEBUG=0 ./build-all.sh
 
 # French interface
 LANGUAGE=FR ./build-all.sh
 
-# One variant only
-BUILD_VARIANT=production SKIP_VARIANTS=1 ./build-all.sh
-
-# Keep build/build-pico / build/build-pico2 / … for incremental rebuilds
-CLEAN_BUILD_DIRS=0 ./build-all.sh
+# German interface with debug
+LANGUAGE=DE DEBUG=1 ./build-all.sh
 ```
 
-**Outputs (examples):**
-- `dist/atari_ikbd_pico_debug.uf2` — Raspberry Pi Pico (RP2040)
-- `dist/atari_ikbd_pico2_debug.uf2` — Raspberry Pi Pico 2 (RP2350)
-- `dist/atari_ikbd_pico_w_debug.uf2` — Pico W
-- `dist/atari_ikbd_pico2_w_debug.uf2` — Pico 2 W (Bluetooth)
-
-The legacy top-level `build/` directory is not used by `build-all.sh` and may be removed.
+**Outputs:**
+- `dist/atari_ikbd_pico.uf2` - Raspberry Pi Pico
+- `dist/atari_ikbd_pico2.uf2` - Raspberry Pi Pico 2
 
 ---
 

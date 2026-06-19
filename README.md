@@ -49,10 +49,6 @@ The following USB HID Gamepads/Joysticks are supported (More to come)
 
 **v21.0.5:** Build fixes for GCC 15 / current ARM toolchains; `build-all.sh` continues building all board variants if Pico 2 W fails.
 
-**v21.0.6:** P0 correctness fixes (Core 1 BT resume for all gamepads, no USB from Core 1), board-aware NVSettings flash layout, persistent Bluetooth pairing, consolidated `build-all.sh`.
-
-**v21.0.7:** P1 input responsiveness (split USB/HID polling, mouse delta accumulation), stable 5 s mount splash, atomic input state, per-build version bump in `build-all.sh`.
-
 ## Bluetooth Support (Pico 2 W only)
 
 The emulator supports Bluetooth keyboards, mice, and gamepads on the Raspberry Pi Pico 2 W (RP2350). This allows you to use wireless devices without USB cables, providing a completely wireless setup for your Atari ST.
@@ -75,7 +71,9 @@ The devices listed above will work a few seconds after being connected, you can 
 ### Pairing Bluetooth Devices
 
 Pairing is simple - **just put your device into Bluetooth pairing mode**. The emulator will automatically detect and connect to supported devices. The emulator continuously scans for new devices, so you can pair devices at any time without needing to restart.
-Most Bluetooth devices remain paired across reboots. To clear stored pairing keys, press the **right button** on the first splash screen, or unpair at the device.
+Most Bluetooth devices will remain paired and can be unpaired at the device ot by pressing the right - unpair button on the homescreen.
+
+Note: During testing it has been identified that Logitech MX devices require re-pairing after each restart of the emulator.
 
 
 ### Bluetooth Mode Selection
@@ -243,77 +241,91 @@ You will also need a straight through R12 to RJ12 Cable (All 6 pins connected) t
 
 ## Building/Compiling the Emulator Firmware
 
-Use **`build-all.sh`** to build firmware for all supported boards. The script configures separate CMake trees under `build/` (`build/build-pico`, `build/build-pico2`, `build/build-picow`, `build/build-pico2_w`), copies `.uf2` files into `dist/`, and by default removes those build directories after a successful copy.
+### Mac (ARM)  
 
-### Quick start (Mac or Linux)
-
-Requires `cmake`, `git`, and `arm-none-eabi-gcc` (e.g. Homebrew `arm-none-eabi-gcc` on Mac, or `gcc-arm-none-eabi` on Debian/Ubuntu).
+Compiling on the mac requires xcode, gcc and arm embedded toolchain. A build can be performed with the following commands:
 
 ```bash
-git submodule update --init --recursive
+# Default: Pico 2 W production only (fastest for BT development)
 ./build-all.sh
-```
 
-By default this builds the **production** variant for every board. Outputs land in `dist/`, for example:
+# Incremental rebuild (keeps build/build-pico2_w/ between runs)
+CLEAN_BUILD_DIRS=0 ./build-all.sh
 
-- `atari_ikbd_pico_production.uf2` — Raspberry Pi Pico (RP2040)
-- `atari_ikbd_pico2_production.uf2` — Raspberry Pi Pico 2 (RP2350)
-- `atari_ikbd_pico_w_production.uf2` — Pico W (RP2040 + WiFi)
-- `atari_ikbd_pico2_w_production.uf2` — Pico 2 W (RP2350 + Bluetooth)
+# All boards, all in dist/
+BUILD_BOARDS=all ./build-all.sh
 
-To also build debug and speed variants in one run: `BUILD_VARIANT=debug SKIP_VARIANTS=0 ./build-all.sh`
-
-### Common options
-
-```bash
-# Debug variant with verbose logging (also builds production + speed if SKIP_VARIANTS=0)
-BUILD_VARIANT=debug DEBUG=1 SKIP_VARIANTS=0 ./build-all.sh
-
-# Single debug build only
-BUILD_VARIANT=debug DEBUG=1 SKIP_VARIANTS=1 ./build-all.sh
-
-# Speed variant (no OLED)
-BUILD_VARIANT=speed SKIP_VARIANTS=1 ./build-all.sh
+# Debug OLED screens
+DEBUG=1 ./build-all.sh
 
 # French interface
 LANGUAGE=FR ./build-all.sh
 
-# Keep build dirs for faster incremental rebuilds or log inspection
-CLEAN_BUILD_DIRS=0 ./build-all.sh
+# Output (default run): dist/atari_ikbd_pico2_w_production.uf2
 ```
 
-### Environment variables
+#### `build-all.sh` environment variables
 
 | Variable | Default | Description |
-| --- | --- | --- |
-| `BUILD_VARIANT` | `production` | `debug`, `production`, or `speed` (controls OLED/logging profile) |
-| `SKIP_VARIANTS` | `1` | `1` = build only the variant above; `0` = after debug, also build production and speed |
-| `DEBUG` | `0` | `1` = debug OLED screens; `0` = production UI |
-| `LANGUAGE` | `EN` | UI language: `EN`, `FR`, `DE`, `SP`, `IT` |
-| `CLEAN_BUILD_DIRS` | `1` | `1` = delete build dirs after UF2 copied; `0` = keep for incremental builds |
+|----------|---------|-------------|
+| `BUILD_BOARDS` | `pico2_w` | Board(s) to build: `pico2_w`, comma-separated `pico,pico2,pico_w,pico2_w`, or `all` |
+| `BUILD_VARIANT` | `production` | `production` (OLED on, minimal log), `debug` (verbose log), or `speed` (no OLED) |
+| `SKIP_VARIANTS` | `1` | `1` = single variant only; `0` = after a debug build, also build production and speed |
+| `CLEAN_BUILD_DIRS` | `1` | `1` = wipe build trees before/after; `0` = keep `build/build-*` for incremental rebuilds |
+| `DEBUG` | `0` | `1` = debug OLED UI screens (independent of `BUILD_VARIANT`) |
+| `LANGUAGE` | `EN` | `EN`, `FR`, `DE`, `SP`, or `IT` |
 
-### Mac (ARM)
+UF2 files are written to `dist/` with names like `atari_ikbd_pico2_w_production.uf2`. CMake trees live under `build/build-{pico|pico2|pico_w|pico2_w}/`.
 
-Install Xcode command-line tools, then:
-
-```bash
-brew install cmake arm-none-eabi-gcc
-./build-all.sh
+PC (Linux)
 ```
+#Install GCC
+sudo apt install gcc-arm-none-eabi
 
-### Linux
+#Install cmake
+sudo apt install cmake
 
-```bash
-sudo apt install gcc-arm-none-eabi cmake git
+# Clone the main repo in your home folder
 git clone --recursive https://github.com/trickydee/ultramegausb-atari-st-rpikbd.git
+
+# Update submodules
 cd ultramegausb-atari-st-rpikbd
 git submodule update --init --recursive
-./build-all.sh
+
+# Fix missing hidparser include in CMakeLists.txt (if needed)
+# Open file: ultramegausb-atari-st-rpikbd/pico-sdk/src/rp2_common/tinyusb/CMakeLists.txt
+If not present, add this line after line 91:  ${PICO_TINYUSB_PATH}/src/class/hid/hidparser/HIDParser.c
+You should have:
+
+target_sources(tinyusb_host INTERFACE
+            ${PICO_TINYUSB_PATH}/src/portable/raspberrypi/rp2040/hcd_rp2040.c
+            ${PICO_TINYUSB_PATH}/src/portable/raspberrypi/rp2040/rp2040_usb.c
+            ${PICO_TINYUSB_PATH}/src/host/usbh.c
+            ${PICO_TINYUSB_PATH}/src/host/usbh_control.c
+            ${PICO_TINYUSB_PATH}/src/host/hub.c
+            ${PICO_TINYUSB_PATH}/src/class/cdc/cdc_host.c
+            ${PICO_TINYUSB_PATH}/src/class/hid/hid_host.c
+            ${PICO_TINYUSB_PATH}/src/class/hid/hidparser/HIDParser.c
+            ${PICO_TINYUSB_PATH}/src/class/msc/msc_host.c
+            ${PICO_TINYUSB_PATH}/src/class/vendor/vendor_host.c
+            )
+From your ultramegausb-atari-st-rpikbd folder:
+mkdir build
+cd build
+
+# Choose one of the cmake command below according to the language and version number you want to display:
+cmake -DLANGUAGE=EN .. # For English interface
+or
+cmake -DLANGUAGE=FR ..  # For French interface
+or
+cmake -DLANGUAGE=DE ..  # For German interface
+or
+cmake -DLANGUAGE=SP ..  # For Spanish interface
+or
+cmake -DLANGUAGE=IT ..  # For Italian interface
+
+make
 ```
-
-If Pico 2 W (Bluetooth) fails but other boards succeed, check `build/build-pico2_w/build.log` (when `CLEAN_BUILD_DIRS=0`) or re-run with `SKIP_VARIANTS=1` to save time while debugging.
-
-See `docs/DEVELOPER_GUIDE.md` for manual CMake options and adding new features.
 
 ## Downloading the firmware
 If you don't know how or can't build the firmware by yourself, please use the builds in the releases link.

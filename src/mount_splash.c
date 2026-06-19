@@ -104,7 +104,7 @@ void mount_splash_service(void) {
         activate_splash();
     }
     // While active the OLED holds the image; mount_splash_blocks_oled() suppresses
-    // other writers. Do not redraw here — full-frame I2C every 2 ms starves input.
+    // other writers. Do not redraw here — full-frame I2C every poll starves input.
 }
 
 bool mount_splash_poll(void) {

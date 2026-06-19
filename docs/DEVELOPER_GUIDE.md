@@ -448,7 +448,7 @@ list(APPEND SOURCES
 
 #### Step 7: Test
 
-1. Build firmware: `./build-all.sh`
+1. Build firmware: `./build-all.sh` (default: Pico 2 W) or `BUILD_BOARDS=all ./build-all.sh`
 2. Flash to Pico
 3. Connect controller
 4. Verify detection (OLED splash screen)
@@ -633,40 +633,34 @@ if (len < expected_len) {
 
 ### Build Scripts
 
-#### `build-all.sh` (recommended)
+- **`build-all.sh`:** Primary build script. Defaults to **Pico 2 W production** (`BUILD_BOARDS=pico2_w`, `BUILD_VARIANT=production`). Use `BUILD_BOARDS=all` for every board. CMake trees under `build/build-*`; UF2 files in `dist/`.
 
-Primary build entry point. For each board (`pico`, `pico2`, `pico_w`, `pico2_w`) the script:
-
-1. Creates a fresh CMake tree under `build/build-pico`, `build/build-pico2`, `build/build-picow`, or `build/build-pico2_w`
-2. Compiles firmware (Pico 2 W failures are warned but do not stop other boards)
-3. Copies `.uf2` files to `dist/` with a variant suffix (`_debug`, `_production`, `_speed`)
-4. Removes each build subdirectory after a successful copy (unless `CLEAN_BUILD_DIRS=0`)
-
-By default, `./build-all.sh` builds the **production** variant only (`SKIP_VARIANTS=1`). Use `BUILD_VARIANT=debug SKIP_VARIANTS=0` to build debug, production, and speed in one run.
+#### Environment variables
 
 | Variable | Default | Description |
-| --- | --- | --- |
-| `BUILD_VARIANT` | `production` | `debug`, `production`, or `speed` |
-| `SKIP_VARIANTS` | `1` | `0` = after debug, also build production and speed |
-| `DEBUG` | `0` | `1` = debug OLED screens |
+|----------|---------|-------------|
+| `BUILD_BOARDS` | `pico2_w` | `pico2_w`, comma-separated `pico,pico2,pico_w,pico2_w`, or `all` |
+| `BUILD_VARIANT` | `production` | `production` (OLED + minimal log), `debug`, or `speed` (no OLED) |
+| `SKIP_VARIANTS` | `1` | `1` = single variant; `0` = after debug, also build production and speed |
+| `CLEAN_BUILD_DIRS` | `1` | `0` = keep build dirs for incremental rebuilds |
+| `DEBUG` | `0` | `1` = debug OLED UI screens |
 | `LANGUAGE` | `EN` | `EN`, `FR`, `DE`, `SP`, `IT` |
-| `CLEAN_BUILD_DIRS` | `1` | `0` = keep `build/build-*` for incremental rebuilds / logs |
 
 ```bash
-./build-all.sh
-BUILD_VARIANT=production SKIP_VARIANTS=1 DEBUG=0 ./build-all.sh
-CLEAN_BUILD_DIRS=0 ./build-all.sh
+./build-all.sh                              # Pico 2 W production
+CLEAN_BUILD_DIRS=0 ./build-all.sh           # incremental
+BUILD_BOARDS=all ./build-all.sh             # all boards
+DEBUG=1 BUILD_BOARDS=all ./build-all.sh     # debug UI, all boards
 ```
 
-**Output:** `dist/atari_ikbd_pico{,_w,_2,_2_w}_{debug,production,speed}.uf2`
+- **Output:** `dist/atari_ikbd_{board}_{variant}.uf2`
 
 ### Build Variants
 
-| Variant | OLED | Serial logging | Typical use |
-| --- | --- | --- | --- |
-| `debug` | on | verbose | Development, controller debug screens |
-| `production` | on | minimal | Daily use with OLED status |
-| `speed` | off | minimal | Lowest overhead, no display |
+- **Production:** OLED enabled, minimal serial logging (default)
+- **Debug:** OLED enabled, verbose logging (`BUILD_VARIANT=debug`)
+- **Speed:** No OLED, minimal logging (`BUILD_VARIANT=speed`)
+- **Debug UI:** Extra OLED status pages (`DEBUG=1`, independent of variant)
 
 ### Adding New Features
 

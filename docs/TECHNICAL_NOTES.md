@@ -123,10 +123,10 @@ This section gives a high-level view of how the emulator is structured. For full
 - Benefits: Reduced CPU overhead, improved real-time performance
 
 **Build System:**
-- `build-all.sh` builds all four boards (`pico`, `pico2`, `pico_w`, `pico2_w`) and, by default, all three variants (`debug`, `production`, `speed`)
-- CMake output lives under `build/` in per-board subdirectories (`build/build-pico`, `build/build-pico2`, `build/build-picow`, `build/build-pico2_w`)
-- `.uf2` artefacts are collected in `dist/` with variant suffixes; `CLEAN_BUILD_DIRS=1` (default) removes `build-*` after successful copy
-- `SKIP_VARIANTS=1` limits a run to a single variant; `CLEAN_BUILD_DIRS=0` keeps trees for incremental rebuilds
+- `build-all.sh` defaults to **Pico 2 W production** (`BUILD_BOARDS=pico2_w`). Set `BUILD_BOARDS=all` for every board; `CLEAN_BUILD_DIRS=0` for incremental rebuilds.
+- **Production** (`BUILD_VARIANT=production`, default): OLED on, minimal logging
+- **Debug** (`BUILD_VARIANT=debug`): OLED on, verbose logging
+- **Speed** (`BUILD_VARIANT=speed`): No OLED, minimal logging
 
 **File Sizes (approximate):**
 - Standard RP2040: ~363KB
@@ -315,10 +315,9 @@ This section gives a high-level view of how the emulator is structured. For full
 
 ### Build Scripts
 
-- **`build-all.sh`** — Builds all board targets; **production** profile by default (`BUILD_VARIANT=production`, `DEBUG=0`, `SKIP_VARIANTS=1`). Uses per-board directories under `build/` (e.g. `build/build-pico2_w`); copies to `dist/`; optionally cleans build trees after copy (`CLEAN_BUILD_DIRS`, default `1`).
-- **Output:** `.uf2` files in `dist/` (e.g. `atari_ikbd_pico2_w_production.uf2`)
-
-Environment variables: `BUILD_VARIANT`, `SKIP_VARIANTS`, `DEBUG`, `LANGUAGE`, `CLEAN_BUILD_DIRS` — see `README.md` or `build-all.sh` header.
+- `build-all.sh` — defaults to Pico 2 W production; `BUILD_BOARDS=all` for every board
+- Output: `dist/atari_ikbd_{board}_{variant}.uf2`; CMake trees in `build/build-*`
+- See `README.md` or `AGENTS.md` for full environment variable list
 
 ---
 

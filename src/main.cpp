@@ -53,13 +53,6 @@ extern "C" {
 }
 
 #define ROMBASE     256
-#define CYCLES_PER_LOOP 1000  // Match logronoid's value - proper 6301 emulation timing (~1MHz)
-// USB stack at 2 ms keeps enumeration/mount callbacks responsive.
-// HID (mouse/keyboard/joystick) at 10 ms: AtariSTMouse::set_speed() maps delta magnitude
-// to quadrature period (MAX_SPEED/delta). Tiny per-tick deltas feel sluggish; we drain and
-// sum up to MOUSE_REPORT_DRAIN_MAX USB reports per 10 ms tick before one set_speed() call.
-#define INPUT_POLL_INTERVAL_US 2000
-#define HID_POLL_INTERVAL_US   10000
 
 extern unsigned char rom_HD6301V1ST_img[];
 extern unsigned int rom_HD6301V1ST_img_len;
@@ -339,8 +332,6 @@ int main() {
 #endif
 
     absolute_time_t ten_ms = get_absolute_time();
-    absolute_time_t input_poll_ms = get_absolute_time();
-    absolute_time_t hid_poll_ms = get_absolute_time();
     absolute_time_t heartbeat_ms = get_absolute_time();
 #if ENABLE_BLUEPAD32
     absolute_time_t bt_poll_ms = get_absolute_time();  // For Bluetooth polling (1ms interval)
@@ -363,25 +354,13 @@ int main() {
 
         AtariSTMouse::instance().update();
 
-        // USB stack: service TinyUSB often so enumeration/mount callbacks stay responsive
-        if (absolute_time_diff_us(input_poll_ms, tm) >= INPUT_POLL_INTERVAL_US) {
-            input_poll_ms = tm;
+        // 10ms: USB stack, HID, and UI — handle_mouse() drains/accumulates deltas per tick
+        if (absolute_time_diff_us(ten_ms, tm) >= 10000) {
+            ten_ms = tm;
 
             if (usb_runtime_is_enabled()) {
                 tuh_task();
                 switch_check_delayed_init();
-#if ENABLE_OLED_DISPLAY
-                mount_splash_service();
-#endif
-            }
-        }
-
-        // HID sampling at 10ms — drain and accumulate mouse deltas, then one set_speed().
-        if (absolute_time_diff_us(hid_poll_ms, tm) >= HID_POLL_INTERVAL_US) {
-            hid_poll_ms = tm;
-
-            if (usb_runtime_is_enabled()) {
-                tuh_task();
 #if ENABLE_OLED_DISPLAY
                 mount_splash_service();
 #endif
@@ -407,11 +386,6 @@ int main() {
 #endif
 
             HidInput::instance().handle_joystick();
-        }
-
-        // 10ms handler for OLED UI and deferred BT UI updates
-        if (absolute_time_diff_us(ten_ms, tm) >= 10000) {
-            ten_ms = tm;
 
 #if ENABLE_BLUEPAD32
             if (bt_runtime_is_enabled()) {
