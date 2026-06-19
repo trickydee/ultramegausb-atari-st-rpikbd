@@ -293,3 +293,24 @@ Pico firmware includes `${PICO_SDK_PATH}/lib/btstack/src` and links SDK BTstack 
 - [bluepad32 Pico W example](https://github.com/ricardoquesada/bluepad32/blob/main/examples/pico_w/CMakeLists.txt) — `PICO_BTSTACK_PATH` pattern
 - [pico-sdk pico_btstack CMakeLists](https://github.com/raspberrypi/pico-sdk/blob/master/src/rp2_common/pico_btstack/CMakeLists.txt) — `PICO_BTSTACK_PATH` / source list
 - [pico-sdk #2725](https://github.com/raspberrypi/pico-sdk/issues/2725) — multicore + TLV
+
+---
+
+## Flash layout sprint (`feature/flash-layout`)
+
+Step-by-step from v21.1.0 stable BT baseline. Test BT (Xbox/Stadia fresh pair) after **each** step.
+
+| Step | Change | Status |
+|------|--------|--------|
+| **1** | Board-aware `NVSettings` sector below BTstack bank; migrate from `0x1FF000` | ✅ `5c77ee6` — hardware test pending |
+| **2** | Persistent BT pairing — stop boot key wipe; TLV already in pico-sdk | Pending |
+| **3** | Core 1 resume rework — safe universal resume (not blind cherry-pick) | Pending |
+
+### Step 1 — NVSettings flash map
+
+| Board | BTstack bank (SDK default) | NVSettings sector |
+|-------|---------------------------|-------------------|
+| 2 MiB (Pico W) | `0x1FE000`–`0x1FFFFF` (8 KiB) | `0x1FD000` |
+| 4 MiB (Pico 2 W) | `0x3FD000`–`0x3FFFFF` | `0x3FC000` |
+
+Legacy `0x1FF000` overlapped the BT bank on 2 MiB parts and was wrong on 4 MiB parts.
