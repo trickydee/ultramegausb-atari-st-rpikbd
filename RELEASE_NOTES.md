@@ -1,7 +1,24 @@
 # Release Notes
 
-**Current Version:** 21.0.5  
+**Current Version:** 21.1.0  
 **Last Updated:** June 2026
+
+---
+
+## Version 21.1.0 (June 2026)
+
+### Stability and performance improvements
+
+Version 21.1.0 introduces stability and performance improvements.
+
+**What's new:**
+
+- **Mount splash:** Non-blocking controller splash on USB attach (~5 s), with OLED write guard so other UI does not flicker over it; firmware version shown on splash footer
+- **Mouse:** Drain and accumulate up to 32 USB reports per 10 ms HID tick; mild burst scaling for fast flicks; lower `MIN_SPEED` for higher max tracking
+- **Thread safety:** Atomic mouse/joystick state (Core 0 write, Core 1 read); volatile quadrature registers
+- **Dual-core:** Core 0 owns USB input; joystick state no longer updated from Core 1 / 6301 port reads
+- **Core 1 timing:** `CYCLES_PER_LOOP` set to **500** in `include/config.h`
+- **Build:** `build-all.sh` defaults to Pico 2 W for faster dev builds; firmware version read from `include/version.h`
 
 ---
 
