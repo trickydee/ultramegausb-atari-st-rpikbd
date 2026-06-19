@@ -233,13 +233,6 @@ static uni_error_t my_platform_on_device_ready(uni_hid_device_t* d) {
     // Determine device type and mark appropriate storage as connected
     // Only call bluepad32_notify_mount() for gamepads (not keyboards/mice)
     if (uni_hid_device_is_gamepad(d)) {
-        // Check if this is an Xbox or Stadia gamepad (known to cause Core 1 freeze)
-        uint16_t vendor_id = uni_hid_device_get_vendor_id(d);
-        uint16_t product_id = uni_hid_device_get_product_id(d);
-        bool is_xbox_stadia = (vendor_id == 0x045E) ||  // Microsoft (Xbox)
-                              (vendor_id == 0x18D1 && product_id == 0x9400);  // Google (Stadia)
-        
-        // Gamepad - notify HidInput and mark as connected
         bt_gamepad_storage_t* storage = get_gamepad_storage(d);
         if (storage) {
             storage->connected = true;
@@ -248,15 +241,6 @@ static uni_error_t my_platform_on_device_ready(uni_hid_device_t* d) {
         extern void bluepad32_notify_mount(void);
         bluepad32_notify_mount();
         logi("bluepad32_platform: gamepad ready\n");
-        
-        // Resume Core 1 after a short delay to ensure enumeration completes
-        // Note: Core 1 should already be paused from device_discovered/device_connected
-        if (is_xbox_stadia) {
-            logi("[DIAG] Waiting 10ms before resuming Core 1 (already paused from discovery)...\n");
-            sleep_ms(10);  // 10ms delay - minimal pause
-            logi("[DIAG] Resuming Core 1 after Xbox/Stadia enumeration\n");
-            core1_resume_after_bt_enumeration();
-        }
     } else if (uni_hid_device_is_keyboard(d)) {
         // Keyboard - mark as connected and notify UI
         bt_keyboard_storage_t* storage = get_keyboard_storage(d);
@@ -280,6 +264,12 @@ static uni_error_t my_platform_on_device_ready(uni_hid_device_t* d) {
     } else {
         logi("bluepad32_platform: unknown device type ready\n");
     }
+
+    // Resume Core 1 after enumeration for all device types. Discovery may have
+    // paused Core 1 for any gamepad (COD 0x0508), not only Xbox/Stadia.
+    logi("[DIAG] Waiting 10ms before resuming Core 1 after device ready\n");
+    sleep_ms(10);
+    core1_resume_after_bt_enumeration();
     
     return UNI_ERROR_SUCCESS;
 }
