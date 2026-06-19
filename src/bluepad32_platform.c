@@ -122,11 +122,9 @@ static void my_platform_init(int argc, const char** argv) {
 static void my_platform_on_init_complete(void) {
     logi("bluepad32_platform: on_init_complete()\n");
 
-    // Bluetooth keys are now managed manually via the RST button on the splash screen
-    // Keys will persist across reboots (if using TLV/flash persistence)
-    // For in-memory databases, keys don't persist anyway, so deletion is unnecessary
-    // logi("Clearing stored Bluetooth keys...\n");
-    // uni_bt_del_keys_unsafe();
+    // Pairing keys persist in BTstack TLV flash (pico_flash_bank at end of flash).
+    // NVSettings uses the sector below the BT bank — see NVSettings.cpp.
+    // Clear keys manually: right button on ATARI splash (bluepad32_delete_pairing_keys).
 
     // Wait a bit for HCI to be ready (the "HCI not ready" messages suggest it needs time)
     logi("Waiting for HCI to be ready...\n");

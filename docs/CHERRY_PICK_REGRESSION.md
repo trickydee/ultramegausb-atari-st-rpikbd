@@ -2,7 +2,8 @@
 
 **Created:** June 2026  
 **Status:** Merged to **main** @ v21.1.0 — flash layout sprint continues on `feature/flash-layout`  
-**Flash sprint step 1:** Board-aware NVSettings sector (below BTstack bank) — in progress  
+**Flash sprint step 1:** Board-aware NVSettings sector — ✅ hardware OK  
+**Flash sprint step 2:** Persistent BT pairing (TLV flash, no boot key wipe) — in progress  
 **Baseline (verified on hardware):** `ebafed7` — v21.0.5  
 **Regression tip:** `170ac75` — v21.0.7  
 
@@ -302,8 +303,8 @@ Step-by-step from v21.1.0 stable BT baseline. Test BT (Xbox/Stadia fresh pair) a
 
 | Step | Change | Status |
 |------|--------|--------|
-| **1** | Board-aware `NVSettings` sector below BTstack bank; migrate from `0x1FF000` | ✅ `5c77ee6` — hardware test pending |
-| **2** | Persistent BT pairing — stop boot key wipe; TLV already in pico-sdk | Pending |
+| **1** | Board-aware `NVSettings` sector below BTstack bank; migrate from `0x1FF000` | ✅ hardware OK |
+| **2** | Persistent BT pairing — TLV flash, no boot key wipe; clear via splash right btn | ✅ `21.1.1` — hardware test pending |
 | **3** | Core 1 resume rework — safe universal resume (not blind cherry-pick) | Pending |
 
 ### Step 1 — NVSettings flash map
