@@ -1,7 +1,8 @@
 # Cherry-pick plan: ebafed7 (working) → 21.0.7 (broken)
 
 **Created:** June 2026  
-**Status:** `picking-cherrys` @ **v21.1.0** — P1 cherry-pick complete; Xbox/Stadia BT OK  
+**Status:** Merged to **main** @ v21.1.0 — flash layout sprint continues on `feature/flash-layout`  
+**Flash sprint step 1:** Board-aware NVSettings sector (below BTstack bank) — in progress  
 **Baseline (verified on hardware):** `ebafed7` — v21.0.5  
 **Regression tip:** `170ac75` — v21.0.7  
 
