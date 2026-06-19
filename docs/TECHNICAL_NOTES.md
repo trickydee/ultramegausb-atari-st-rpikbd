@@ -2,7 +2,25 @@
 
 This document consolidates technical documentation, performance optimizations, bug fixes, and architecture notes for the Atari ST IKBD emulator.
 
-**Last Updated:** February 2026
+**Last Updated:** June 2026
+
+---
+
+## Current state (v21.1.2)
+
+Authoritative values for **`main`** as of v21.1.2. Sections below may describe older experiments — use this table when in doubt.
+
+| Area | Current behavior |
+|------|------------------|
+| `CYCLES_PER_LOOP` | **500** (`include/config.h`) |
+| Core 0 HID/USB/UI | **10 ms** block (`tuh_task` + mouse/keyboard/joystick + UI) |
+| Bluetooth poll | **~1 ms** (`bluepad32_poll()`; `tuh_task` when USB+BT on) |
+| UART FIFO | **Disabled** — IRQ ring in `SerialPort.cpp` |
+| Serial RX | Polled every Core 0 loop iteration |
+| NVSettings flash | Board-aware sector below BTstack bank (`src/NVSettings.cpp`) |
+| BT pairing | TLV flash persistence; clear via right button on ATARI splash |
+| Core 1 BT resume | All device types in `on_device_ready` (10 ms delay) |
+| CPU clock | **225 MHz** BT builds / **270 MHz** USB-only |
 
 ---
 
@@ -20,8 +38,8 @@ This section gives a high-level view of how the emulator is structured. For full
 
 **Critical constraints:**
 - **Serial baud:** 7812 bps (Atari IKBD standard). RX must be polled frequently (~every loop iteration) to avoid dropping bytes.
-- **Core 1 timing:** `CYCLES_PER_LOOP = 1000` (1 ms of emulated time per iteration). Changing this can break ROM and serial behaviour.
-- **Bluetooth (Pico 2 W):** CYW43 must be initialised before I2C/SPI; Core 1 is paused during flash writes (e.g. pairing storage) to avoid freezes.
+- **Core 1 timing:** `CYCLES_PER_LOOP = 500` in `include/config.h` (emulated batch size per tight-loop iteration). Changing this needs hardware regression testing.
+- **Bluetooth (Pico 2 W):** CYW43 @ 225 MHz; Core 1 paused during BT enumeration flash writes; `flash_safe_execute_core_init()` on Core 1.
 
 **Component interaction:**
 - `hid_app_host.c` attaches HID devices and routes reports to controller-specific code (PS3, PS4, Switch, etc.).
@@ -31,6 +49,8 @@ This section gives a high-level view of how the emulator is structured. For full
 ---
 
 ## Performance Optimizations
+
+> **Note:** Some subsections below describe superseded experiments (e.g. FIFO re-enable, `CYCLES_PER_LOOP = 250`). See [Current state (v21.1.2)](#current-state-v2112) above.
 
 ### Serial Communication Optimizations
 
@@ -190,16 +210,15 @@ This section gives a high-level view of how the emulator is structured. For full
 - **Core 1:** HD6301 emulator (dedicated CPU emulation)
 
 **Core 1 Timing:**
-- Runs in tight loop with `CYCLES_PER_LOOP = 1000` (matches original logronoid implementation)
-- Processes 6301 instructions in batches
-- Handles serial interrupts between batches
-- Accurate 1MHz emulation timing
+- Runs in tight loop with `CYCLES_PER_LOOP = 500` (`include/config.h`)
+- Processes 6301 instructions in batches; SCI polled between batches
+- Emulator runs faster than real 1 MHz hardware (ROM uses TDRE/RDRF handshaking)
 
 **Serial Communication:**
 - Bidirectional UART communication with Atari ST
 - RX: ST → 6301 (commands and data)
 - TX: 6301 → ST (responses and events)
-- Hardware FIFO enabled for reliable buffering
+- IRQ ring buffer; hardware FIFO disabled (logronoid-aligned)
 
 ---
 
@@ -218,8 +237,8 @@ This section gives a high-level view of how the emulator is structured. For full
 
 **Build Configuration:**
 - Bluetooth builds use XIP (Execute In Place) to save RAM
-- Clock speed: 150 MHz (improves CYW43 stability)
-- Conditionally compiled for `pico2_w` board type only
+- Clock speed: **225 MHz** (CYW43 stability; USB-only builds use 270 MHz)
+- Conditionally compiled for `pico_w` / `pico2_w` board types
 
 ---
 

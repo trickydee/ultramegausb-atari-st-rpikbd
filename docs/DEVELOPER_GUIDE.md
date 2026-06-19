@@ -103,10 +103,10 @@ Emulates the Atari ST IKBD (Intelligent Keyboard) controller using a Raspberry P
 
 ### Critical Timing Constraints
 
-- **6301 Clock:** Emulated at 1MHz (CYCLES_PER_LOOP = 1000 cycles per iteration)
+- **6301 Clock:** Emulated in batches of `CYCLES_PER_LOOP` cycles per Core 1 iteration (**500** default in `include/config.h`)
 - **Serial Baud Rate:** 7812 bits/second (Atari ST standard)
 - **Core 1 Loop:** No delays - tight loop for maximum performance
-- **Core 0 Polling:** USB/Bluetooth polled every 10ms, serial RX checked every loop iteration
+- **Core 0 Polling:** USB/Bluetooth/HID/UI in a 10 ms block; `bluepad32_poll()` ~1 ms; serial RX checked every loop iteration
 
 ### Communication Between Cores
 
@@ -515,12 +515,11 @@ list(APPEND SOURCES
 - **Independence:** Core 1 unaffected by USB/Bluetooth operations
 - **Real Hardware:** Matches original design (separate microcontroller)
 
-### Why CYCLES_PER_LOOP = 1000?
+### Why CYCLES_PER_LOOP = 500?
 
-- **Emulated Clock:** HD6301 runs at 1MHz
-- **Timing Accuracy:** 1000 cycles ≈ 1ms at 1MHz
-- **Historical:** Matches logronoid's reference implementation
-- **Critical:** Changing this affects serial timing and compatibility
+- **Emulated batch size:** Each Core 1 loop iteration runs 500 emulated 6301 cycles before checking interrupts again
+- **Default:** Set in `include/config.h` (logronoid reference used 1000; 500 hardware-tested on v21.1.0+)
+- **Tuning:** Smaller batches yield more frequent loop checks (flash-safe pause, serial housekeeping); needs ST hardware regression test if changed
 
 ### Why XIP Mode for Bluetooth Builds?
 
@@ -540,8 +539,7 @@ list(APPEND SOURCES
 
 - **Flash Conflicts:** Bluetooth pairing writes to flash (TLV storage)
 - **Core 1 Freeze Risk:** Core 1 accessing flash during BT write can freeze
-- **Solution:** Pause Core 1 during enumeration, resume after
-- **Timing:** 10ms delay after device ready ensures BTStack operations complete
+- **Solution:** Pause Core 1 during enumeration; resume for **all** device types in `on_device_ready` (10 ms delay)
 
 ### Why Serial RX Checked Every Loop Iteration?
 

@@ -1,11 +1,9 @@
 # Cherry-pick plan: ebafed7 (working) → 21.0.7 (broken)
 
 **Created:** June 2026  
-**Status:** Merged to **main** @ v21.1.0 — flash layout sprint continues on `feature/flash-layout`  
-**Flash sprint step 1:** Board-aware NVSettings sector — ✅ hardware OK  
-**Flash sprint step 3:** Core 1 universal resume — ✅ hardware OK (`21.1.2`)  
+**Status:** Complete — **`main` @ v21.1.2** (cherry-pick + flash layout sprint merged)  
 **Baseline (verified on hardware):** `ebafed7` — v21.0.5  
-**Regression tip:** `170ac75` — v21.0.7  
+**Regression tip (avoided):** `170ac75` — v21.0.7  
 
 Hardware confirmed: **v21.0.5 (`ebafed7`) works** including Xbox/Stadia Bluetooth pairing. Full **v21.0.6 (`67fa026`)** TLV/NVSettings/resume changes still regress BT — deferred.
 
@@ -297,7 +295,7 @@ Pico firmware includes `${PICO_SDK_PATH}/lib/btstack/src` and links SDK BTstack 
 
 ---
 
-## Flash layout sprint (`feature/flash-layout`)
+## Flash layout sprint — complete (merged to `main` @ v21.1.2)
 
 Step-by-step from v21.1.0 stable BT baseline. Test BT (Xbox/Stadia fresh pair) after **each** step.
 
