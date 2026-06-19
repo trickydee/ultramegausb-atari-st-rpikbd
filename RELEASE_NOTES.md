@@ -1,7 +1,21 @@
 # Release Notes
 
-**Current Version:** 21.1.0  
+**Current Version:** 21.1.2  
 **Last Updated:** June 2026
+
+---
+
+## Version 21.1.2 (June 2026)
+
+### Flash layout and Bluetooth persistence
+
+Version 21.1.2 introduces flash layout fixes and Bluetooth improvements.
+
+**What's new:**
+
+- **NVSettings:** Board-aware flash sector below the BTstack bank (fixes overlap on Pico W; correct address on Pico 2 W); migrates from legacy `0x1FF000`
+- **Bluetooth pairing:** Controllers stay paired across reboots (BTstack TLV flash); clear keys via right button on ATARI splash
+- **Dual-core:** Resume Core 1 after all Bluetooth device types finish enumeration (not only Xbox/Stadia)
 
 ---
 
