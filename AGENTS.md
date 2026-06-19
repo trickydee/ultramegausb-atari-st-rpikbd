@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Firmware that emulates the Atari ST IKBD (HD6301) on Raspberry Pi Pico boards, routing USB and Bluetooth keyboards, mice, and gamepads to vintage Atari Mega ST / STE / TT computers. Version **21.0.7+** (`include/version.h`; `build-all.sh` bumps patch each run).
+Firmware that emulates the Atari ST IKBD (HD6301) on Raspberry Pi Pico boards, routing USB and Bluetooth keyboards, mice, and gamepads to vintage Atari Mega ST / STE / TT computers. Version **21.1.0** (`include/version.h` — canonical; bump on release only).
 
 Human docs: `README.md`. Deep technical detail: `docs/DEVELOPER_GUIDE.md`.
 
@@ -173,7 +173,7 @@ mkdir -p build/build-pico && cd build/build-pico && cmake ../.. -DPICO_BOARD=pic
 ## Gotchas
 
 - **USB vs HID poll rate:** Core 0 runs `tuh_task()` every **2 ms** so USB mount/enumeration stays responsive. Mouse, keyboard, and joystick sampling run every **10 ms** because `AtariSTMouse::set_speed()` converts delta magnitude to quadrature timing (`MAX_SPEED / delta`); calling it every 2 ms with single-report deltas feels sluggish. `handle_mouse()` drains and sums up to `MOUSE_REPORT_DRAIN_MAX` USB reports per 10 ms tick before one `set_speed()`. Fast flicks get mild burst scaling above ~96 counts/tick; `MIN_SPEED` caps maximum quadrature rate.
-- **Mount splash OLED:** Production uses `mount_splash_show()` on attach (default **5 s**). Splash is queued in mount callbacks, drawn once by `mount_splash_service()` after `tuh_task()`. `mount_splash_blocks_oled()` suppresses other writers until expiry — do not redraw every poll (full-frame I2C starves mouse input). Firmware version is on the splash footer. `build-all.sh` auto-bumps patch (`SKIP_VERSION_BUMP=1` to disable).
+- **Mount splash OLED:** Production uses `mount_splash_show()` on attach (default **5 s**). Splash is queued in mount callbacks, drawn once by `mount_splash_service()` after `tuh_task()`. `mount_splash_blocks_oled()` suppresses other writers until expiry — do not redraw every poll (full-frame I2C starves mouse input). Footer shows `PROJECT_VERSION_STRING` from `include/version.h`.
 - **Core 1 freeze:** Bluetooth pairing writes flash — Core 1 must pause (`flash_safe_execute`). See `docs/TECHNICAL_NOTES.md`.
 - **BT clock:** 225 MHz for CYW43 stability; 270 MHz can cause stalls. USB-only builds use 270 MHz.
 - **BT binary type:** wireless builds use XIP (RAM constrained); USB-only builds use `copy_to_ram`.

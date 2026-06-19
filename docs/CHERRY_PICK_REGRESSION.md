@@ -1,7 +1,7 @@
 # Cherry-pick plan: ebafed7 (working) → 21.0.7 (broken)
 
 **Created:** June 2026  
-**Status:** `picking-cherrys` — **P1 nearly complete**; Xbox/Stadia BT OK at 10 ms polling  
+**Status:** `picking-cherrys` @ **v21.1.0** — P1 cherry-pick complete; Xbox/Stadia BT OK  
 **Baseline (verified on hardware):** `ebafed7` — v21.0.5  
 **Regression tip:** `170ac75` — v21.0.7  
 
@@ -22,7 +22,7 @@ Hardware confirmed: **v21.0.5 (`ebafed7`) works** including Xbox/Stadia Bluetoot
 | ✅ | `e92dc4e` — atomic cross-core state (`c7fe1ff`) | OK | BT + USB OK |
 | ⏭️ | `c07ad1a` — 2 ms `tuh_task` + splash hold | *skipped* | Redundant (`tuh_task` already ~1 ms with BT on); avoid 2 ms experiment |
 | ✅ | `204d8b9` — mouse delta accumulation (`120fa26`) | OK | HidInput drain; 10 ms loop kept |
-| ⏳ | `4f42d8e` — stable splash + mouse tuning (`212238b`) | *test on hardware* | 5 s splash, drain 32, burst scaling; 10 ms loop kept |
+| ✅ | `4f42d8e` — stable splash + mouse tuning (`212238b`) | OK | 5 s splash, drain 32, burst scaling; 10 ms loop kept |
 
 ### What we proved (June 2026)
 
@@ -151,8 +151,7 @@ ebafed7  chore: bump version to 21.0.5  ← WORKING BASELINE
 - `mount_splash_blocks_oled()` — suppress other OLED writers while active
 - Draw once per splash (no full-frame I2C every poll)
 - Mouse: drain cap **32**, `scale_mouse_burst()`, lower `MIN_SPEED`
-- `PROJECT_VERSION_STRING` from version macros
-- `build-all.sh` auto-bumps patch (`SKIP_VERSION_BUMP=1` to disable)
+- `PROJECT_VERSION_STRING` from `include/version.h` (canonical; bump on release only)
 
 **Files:** `mount_splash.c`, `mount_splash.h`, `ssd1306.c`, `HidInput.cpp`, `AtariSTMouse.cpp`, `include/version.h`, `build-all.sh`, controller sources, `AGENTS.md`
 
