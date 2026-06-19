@@ -22,6 +22,7 @@
 #   DEBUG             - 0 (default) production UI; 1 = debug OLED screens
 #   LANGUAGE          - EN (default), FR, DE, SP, or IT
 #   BUILD_VARIANT     - production (default), debug, or speed
+#   CYCLES_PER_LOOP     - emulated 6301 cycles per Core 1 iteration (default 500; use 1000 for logronoid baseline)
 #
 # Firmware version: canonical source is include/version.h (bump there on release).
 # IMPORTANT: Build directories (build/build-pico, build/build-pico2, etc.)
@@ -48,6 +49,7 @@ LANGUAGE="${LANGUAGE:-EN}"
 DEBUG="${DEBUG:-0}"  # Set to 1 to enable debug OLED screens
 BUILD_VARIANT="${BUILD_VARIANT:-production}"  # production, debug, or speed
 BUILD_BOARDS="${BUILD_BOARDS:-pico2_w}"  # default: Pico 2 W only (fast dev loop)
+CYCLES_PER_LOOP="${CYCLES_PER_LOOP:-500}"
 SKIP_VARIANTS="${SKIP_VARIANTS:-1}"  # 1 = single variant; 0 = after debug, also build production and speed
 CLEAN_BUILD_DIRS="${CLEAN_BUILD_DIRS:-1}"  # 1 = remove build dirs after successful dist copy
 
@@ -112,6 +114,7 @@ echo "  Atari ST USB Adapter - Multi-Variant Build"
 echo "  Firmware Version: ${FIRMWARE_VERSION} (from include/version.h)"
 echo "  Build Variant: ${BUILD_VARIANT}"
 echo "  Build Boards: ${BUILD_BOARDS}"
+echo "  CYCLES_PER_LOOP: ${CYCLES_PER_LOOP}"
 echo "  Language: ${LANGUAGE}"
 echo "  Debug Mode: ${DEBUG}"
 echo "  OLED Display: ${OLED}"
@@ -195,6 +198,7 @@ if board_enabled pico2_w; then
             -DENABLE_DEBUG="${DEBUG}" \
             -DENABLE_OLED_DISPLAY="${OLED}" \
             -DENABLE_SERIAL_LOGGING="${LOGGING}" \
+            -DCYCLES_PER_LOOP="${CYCLES_PER_LOOP}" \
             > ${DIR_PICO2_W}/cmake.log 2>&1; then
             echo "    ⚠️  Warning: CMake configuration failed for RP2350 WiFi/Bluetooth (pico2_w)!"
             tail -20 ${DIR_PICO2_W}/cmake.log
@@ -230,6 +234,7 @@ if board_enabled pico_w; then
         -DENABLE_DEBUG="${DEBUG}" \
         -DENABLE_OLED_DISPLAY="${OLED}" \
         -DENABLE_SERIAL_LOGGING="${LOGGING}" \
+        -DCYCLES_PER_LOOP="${CYCLES_PER_LOOP}" \
         > ${DIR_PICOW}/cmake.log 2>&1
 
     if [ $? -ne 0 ]; then
@@ -269,6 +274,7 @@ if board_enabled pico2; then
         -DENABLE_DEBUG="${DEBUG}" \
         -DENABLE_OLED_DISPLAY="${OLED}" \
         -DENABLE_SERIAL_LOGGING="${LOGGING}" \
+        -DCYCLES_PER_LOOP="${CYCLES_PER_LOOP}" \
         > ${DIR_PICO2}/cmake.log 2>&1
 
     if [ $? -ne 0 ]; then
@@ -308,6 +314,7 @@ if board_enabled pico; then
         -DENABLE_DEBUG="${DEBUG}" \
         -DENABLE_OLED_DISPLAY="${OLED}" \
         -DENABLE_SERIAL_LOGGING="${LOGGING}" \
+        -DCYCLES_PER_LOOP="${CYCLES_PER_LOOP}" \
         > ${DIR_PICO}/cmake.log 2>&1
 
     if [ $? -ne 0 ]; then

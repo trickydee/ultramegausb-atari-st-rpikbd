@@ -97,6 +97,11 @@ else()
     message(STATUS "Serial Logging: MINIMAL (speed mode)")
 endif()
 
+# HD6301 emulator: emulated cycles per Core 1 tight-loop iteration (smaller = more frequent loop checks)
+set(CYCLES_PER_LOOP "500" CACHE STRING "Emulated 6301 cycles per Core 1 loop (500 default; logronoid baseline was 1000)")
+add_definitions(-DCYCLES_PER_LOOP=${CYCLES_PER_LOOP})
+message(STATUS "CYCLES_PER_LOOP: ${CYCLES_PER_LOOP}")
+
 # Bluepad32 Bluetooth support (wireless boards only)
 # Pico W (pico_w) and Pico 2 W (pico2_w) both have CYW43, but RAM is tight on Pico W.
 # Enable at your own risk on Pico W.
