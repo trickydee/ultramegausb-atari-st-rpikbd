@@ -24,15 +24,12 @@ Human docs: `README.md`. Deep technical detail: `docs/DEVELOPER_GUIDE.md`.
 # Incremental rebuild — keep CMake tree between runs
 CLEAN_BUILD_DIRS=0 ./build-all.sh
 
-# Logronoid baseline (1000 emulated cycles per Core 1 iteration)
-CYCLES_PER_LOOP=1000 ./build-all.sh
-
 # Full multi-board release build
 BUILD_BOARDS=all ./build-all.sh
 
 # Single board manual build
 mkdir -p build/build-pico2_w && cd build/build-pico2_w
-cmake ../.. -DPICO_BOARD=pico2_w -DENABLE_DEBUG=0 -DCYCLES_PER_LOOP=500
+cmake ../.. -DPICO_BOARD=pico2_w -DENABLE_DEBUG=0
 make -j$(nproc)
 ```
 
@@ -41,7 +38,6 @@ make -j$(nproc)
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `BUILD_BOARDS` | `pico2_w` | `pico2_w`, comma-separated list, or `all` for every board |
-| `CYCLES_PER_LOOP` | `500` | Emulated 6301 cycles per Core 1 loop (`1000` = logronoid baseline) |
 | `BUILD_VARIANT` | `production` | `production`, `debug`, or `speed` |
 | `SKIP_VARIANTS` | `1` | `1` = one variant; `0` = after debug, also build production + speed |
 | `CLEAN_BUILD_DIRS` | `1` | `0` = keep `build/build-*` for incremental rebuilds |
@@ -82,7 +78,7 @@ Full diagrams and design rationale: `docs/DEVELOPER_GUIDE.md`.
 | `src/*_controller.c` | Per-controller USB drivers |
 | `src/bluepad32_*.c/cpp` | Bluetooth (wireless builds only) |
 | `src/SerialPort.cpp` | Atari UART (7812 baud, FIFO) |
-| `include/config.h` | GPIO pins, clock, debug flags |
+| `include/config.h` | GPIO pins, clock, `CYCLES_PER_LOOP` (default 500), debug flags |
 | `6301/` | HD6301 CPU emulator |
 | `pico-sdk/`, `bluepad32/` | Git submodules — do not modify directly |
 | `hardware/` | KiCad PCB for Mega ST/STE/TT adapter |
@@ -160,6 +156,7 @@ mkdir -p build/build-pico && cd build/build-pico && cmake ../.. -DPICO_BOARD=pic
 - Bumping `include/version.h` or editing `RELEASE_NOTES.md`.
 - Creating git commits or pushing to remote.
 - Modifying `pico-sdk/` or `bluepad32/` submodules.
+- Changing `CYCLES_PER_LOOP` in `include/config.h` (hardware regression test).
 - Changing binary type (`copy_to_ram` vs XIP) in `CMakeLists.txt`.
 
 ### Never

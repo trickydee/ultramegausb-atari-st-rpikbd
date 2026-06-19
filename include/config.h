@@ -62,6 +62,11 @@
   #define ENABLE_DEBUG 0
 #endif
 
+// Emulated 6301 cycles per Core 1 tight-loop iteration (smaller = more frequent loop checks)
+#ifndef CYCLES_PER_LOOP
+  #define CYCLES_PER_LOOP 500
+#endif
+
 // HD6301 emulation speed multiplier (1 = stock timing)
 #ifndef HD6301_OVERCLOCK_NUM
   #define HD6301_OVERCLOCK_NUM 1

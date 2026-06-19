@@ -53,9 +53,6 @@ extern "C" {
 }
 
 #define ROMBASE     256
-#ifndef CYCLES_PER_LOOP
-#define CYCLES_PER_LOOP 500  // Override via CMake -DCYCLES_PER_LOOP=N (logronoid used 1000)
-#endif
 
 extern unsigned char rom_HD6301V1ST_img[];
 extern unsigned int rom_HD6301V1ST_img_len;
