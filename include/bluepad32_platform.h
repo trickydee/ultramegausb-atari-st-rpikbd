@@ -52,6 +52,9 @@ bool bluepad32_llamatron_axes(uint8_t* joy1_axis, uint8_t* joy1_fire,
 // Delete all stored Bluetooth pairing keys
 void bluepad32_delete_pairing_keys(void);
 
+// Device name for OLED mapping screen ('J', 'K', 'M' + slot index)
+const char* bluepad32_get_device_name(char device_type, int idx);
+
 #ifdef __cplusplus
 }
 #endif

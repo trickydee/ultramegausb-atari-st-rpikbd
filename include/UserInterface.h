@@ -35,9 +35,8 @@ public:
 
     enum PAGE {
         PAGE_SPLASH,
-        PAGE_MOUSE,
-        PAGE_JOY0,
-        PAGE_JOY1,
+        PAGE_DEVICES,
+        PAGE_MAPPING,
         PAGE_SERIAL,
         PAGE_USB_DEBUG,
         PAGE_PRO_INIT
@@ -46,8 +45,12 @@ public:
     void init();
 
     /**
-     * Update the user interface with the current USB connection state
+     * Update USB and Bluetooth device counts for the UI
      */
+    void device_connect_state(int usb_kb, int usb_mouse, int usb_joy,
+                              int bt_kb, int bt_mouse, int bt_joy);
+
+    /** @deprecated Use device_connect_state() */
     void usb_connect_state(int kb, int mouse, int joy);
 
     /**
@@ -81,6 +84,9 @@ public:
      */
     void update();
 
+    /** Request OLED redraw (e.g. map labels changed without count change). */
+    void invalidate() { dirty = true; }
+
     /**
      * Serial transmission for logging to screen
      */
@@ -88,9 +94,8 @@ public:
 
 private:
     void update_serial();
-    void update_status();
-    void update_mouse();
-    void update_joy(int index);
+    void update_devices();
+    void update_mapping();
     void update_usb_debug();
     void update_pro_init();
     void update_splash();
@@ -101,9 +106,12 @@ private:
     PAGE        page = PAGE_SPLASH;
     NVSettings  settings;
     bool        dirty = true;
-    int         num_kb = 0;
-    int         num_mouse = 0;
-    int         num_joy = 0;
+    int         usb_kb = 0;
+    int         usb_mouse = 0;
+    int         usb_joy = 0;
+    int         bt_kb = 0;
+    int         bt_mouse = 0;
+    int         bt_joy = 0;
     std::deque<std::string> serial_lines;
     absolute_time_t serial_tm;
     uint        btn_gpio[3];

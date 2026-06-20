@@ -8,6 +8,7 @@
 
 #include "switch_controller.h"
 #include "mount_splash.h"
+#include "usb_device_map.h"
 #include "tusb.h"
 #include "ssd1306.h"
 #include "config.h"
@@ -595,6 +596,7 @@ void switch_mount_cb(uint8_t dev_addr) {
     // Allocate controller first
     switch_controller_t* ctrl = allocate_controller(dev_addr);
     if (ctrl) {
+        usb_map_register_gamepad(dev_addr, controller_name);
         // Schedule delayed initialization for Pro Controller
         if (vid == SWITCH_VENDOR_ID && pid == SWITCH_PRO_CONTROLLER) {
             pro_needs_init = true;
@@ -611,6 +613,7 @@ void switch_mount_cb(uint8_t dev_addr) {
 
 void switch_unmount_cb(uint8_t dev_addr) {
     printf("Switch controller unmount (addr=%d)\n", dev_addr);
+    usb_map_unregister_gamepad(dev_addr);
     
     // Clear delayed init state if this was the Pro Controller
     if (dev_addr == pro_dev_addr) {

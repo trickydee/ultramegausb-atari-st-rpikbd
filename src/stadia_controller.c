@@ -7,6 +7,7 @@
 
 #include "stadia_controller.h"
 #include "mount_splash.h"
+#include "usb_device_map.h"
 #include "tusb.h"
 #include "ssd1306.h"
 #include "config.h"
@@ -239,6 +240,7 @@ void stadia_mount_cb(uint8_t dev_addr) {
     stadia_controller_t* ctrl = allocate_controller(dev_addr);
     if (ctrl) {
         printf("Stadia: Controller registered and ready!\n");
+        usb_map_register_gamepad(dev_addr, "Stadia");
     } else {
         printf("Stadia: ERROR - Failed to allocate controller!\n");
     }
@@ -246,6 +248,7 @@ void stadia_mount_cb(uint8_t dev_addr) {
 
 void stadia_unmount_cb(uint8_t dev_addr) {
     printf("Stadia controller unmount (addr=%d)\n", dev_addr);
+    usb_map_unregister_gamepad(dev_addr);
     free_controller(dev_addr);
 }
 

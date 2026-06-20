@@ -39,6 +39,7 @@
 #include "xinput_host.h"  // Official tusb_xinput driver
 #include "gamecube_adapter.h"  // GameCube adapter support
 #include "mount_splash.h"
+#include "usb_device_map.h"
 
 #if ENABLE_BLUEPAD32
 // Use separate initialization file to avoid HID type conflicts between TinyUSB and btstack
@@ -490,6 +491,20 @@ void tuh_xinput_mount_cb(uint8_t dev_addr, uint8_t instance, const xinputh_inter
     }
     printf("Xbox controller mounted: %s (addr=%d, inst=%d)\n", type_str, dev_addr, instance);
     
+    const char* map_name = "Xbox";
+    switch (xinput_itf->type) {
+        case XBOX360_WIRED:
+        case XBOX360_WIRELESS:
+            map_name = "Xbox 360";
+            break;
+        case XBOXONE:
+            map_name = "Xbox One";
+            break;
+        default:
+            break;
+    }
+    usb_map_register_gamepad(dev_addr, map_name);
+    
     // Register with Atari mapper
     xinput_register_controller(dev_addr, xinput_itf);
     
@@ -524,6 +539,8 @@ void tuh_xinput_mount_cb(uint8_t dev_addr, uint8_t instance, const xinputh_inter
 // XInput unmount callback
 void tuh_xinput_umount_cb(uint8_t dev_addr, uint8_t instance) {
     printf("Xbox controller unmounted: addr=%d, inst=%d\n", dev_addr, instance);
+    
+    usb_map_unregister_gamepad(dev_addr);
     
     // Unregister from Atari mapper
     xinput_unregister_controller(dev_addr);

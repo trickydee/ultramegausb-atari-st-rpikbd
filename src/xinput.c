@@ -10,6 +10,7 @@
 
 #include "xinput.h"
 #include "mount_splash.h"
+#include "usb_device_map.h"
 #include "config.h"
 #include "tusb.h"
 #include "host/usbh.h"
@@ -198,6 +199,7 @@ bool xinput_init_controller(uint8_t dev_addr) {
         if (!ctrl) {
             return false;
         }
+        usb_map_register_gamepad(dev_addr, "Xbox");
     }
     
     printf("Xbox: Initializing controller at address %d\n", dev_addr);
@@ -514,6 +516,7 @@ void xinput_mount_cb(uint8_t dev_addr) {
 
 void xinput_unmount_cb(uint8_t dev_addr) {
     printf("Xbox: Controller unmounted at address %d\n", dev_addr);
+    usb_map_unregister_gamepad(dev_addr);
     free_controller(dev_addr);
 }
 

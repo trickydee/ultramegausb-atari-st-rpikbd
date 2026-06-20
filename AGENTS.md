@@ -196,6 +196,7 @@ mkdir -p build/build-pico && cd build/build-pico && cmake ../.. -DPICO_BOARD=pic
 
 | Document | When |
 |----------|------|
+| `docs/FUTURE_WORK.md` | Deferred experiments, regression lessons, roadmap |
 | `docs/DEVELOPER_GUIDE.md` | Architecture, adding controllers, design decisions |
 | `docs/TECHNICAL_NOTES.md` | Timing optimisations, serial fixes |
 | `docs/USB_DEBUGGING_METHODOLOGY.md` | USB enumeration debugging |

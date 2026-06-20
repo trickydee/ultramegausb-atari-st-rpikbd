@@ -119,6 +119,7 @@ set(SOURCES
     src/HidInput.cpp
     src/util.cpp
     src/mount_splash.c
+    src/usb_device_map.c
     src/UserInterface.cpp
     ${LANG_SRC}  # Specific language source file
     src/NVSettings.cpp

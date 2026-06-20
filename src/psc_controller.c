@@ -10,6 +10,7 @@
 
 #include "psc_controller.h"
 #include "mount_splash.h"
+#include "usb_device_map.h"
 #include "config.h"
 #include "tusb.h"
 #include "ssd1306.h"
@@ -130,6 +131,8 @@ void psc_mount_cb(uint8_t dev_addr) {
 #if ENABLE_SERIAL_LOGGING
         printf("PSC: Failed to allocate controller\n");
 #endif
+    } else {
+        usb_map_register_gamepad(dev_addr, "PSC");
     }
 }
 
@@ -137,5 +140,6 @@ void psc_unmount_cb(uint8_t dev_addr) {
 #if ENABLE_SERIAL_LOGGING
     printf("PSC: Controller unmount (addr=%d)\n", dev_addr);
 #endif
+    usb_map_unregister_gamepad(dev_addr);
     free_controller(dev_addr);
 }

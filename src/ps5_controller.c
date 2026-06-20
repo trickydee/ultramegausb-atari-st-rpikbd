@@ -9,6 +9,7 @@
 
 #include "ps5_controller.h"
 #include "mount_splash.h"
+#include "usb_device_map.h"
 #include "config.h"
 #include "tusb.h"
 #include "ssd1306.h"
@@ -209,6 +210,7 @@ void ps5_mount_cb(uint8_t dev_addr) {
 #if ENABLE_SERIAL_LOGGING
         printf("PS5: Controller registered\n");
 #endif
+        usb_map_register_gamepad(dev_addr, "PS5");
     }
 }
 
@@ -216,5 +218,6 @@ void ps5_unmount_cb(uint8_t dev_addr) {
 #if ENABLE_SERIAL_LOGGING
     printf("PS5: Controller unmounted at address %d\n", dev_addr);
 #endif
+    usb_map_unregister_gamepad(dev_addr);
     free_controller(dev_addr);
 }

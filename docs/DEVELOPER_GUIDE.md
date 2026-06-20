@@ -748,6 +748,7 @@ DEBUG=1 ./build-all.sh
 
 ### Reference Documentation
 
+- **`docs/FUTURE_WORK.md`:** Deferred work, regression lessons, BTstack experiments, hardware checklists
 - **`docs/USB_DEBUGGING_METHODOLOGY.md`:** Detailed USB debugging guide
 - **`docs/TECHNICAL_NOTES.md`:** Performance optimizations and bug fixes
 - **`docs/IMPLEMENTATION_HISTORY.md`:** Controller implementation history
@@ -793,6 +794,7 @@ When adding a new controller:
 
 - **`README.md`:** User-facing documentation
 - **`RELEASE_NOTES.md`:** Version history and changes
+- **`docs/FUTURE_WORK.md`:** Deferred experiments, regression notes, roadmap
 - **`docs/IMPLEMENTATION_HISTORY.md`:** Controller implementation summaries
 - **`docs/TECHNICAL_NOTES.md`:** Technical details, optimizations, bug fixes
 - **`docs/USB_DEBUGGING_METHODOLOGY.md`:** USB debugging guide

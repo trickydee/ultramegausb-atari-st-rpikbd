@@ -34,6 +34,7 @@
 #include "gamecube_adapter.h"
 #include "switch_controller.h"
 #include "stadia_controller.h"
+#include "usb_device_map.h"
 #include "xinput.h"
 #include "runtime_toggle.h"  // For usb_runtime_is_enabled() and bt_runtime_is_enabled()
 #include <map>
@@ -153,19 +154,41 @@ uint32_t get_ps4_success() { return g_ps4_success; }
 uint32_t get_xbox_success() { return g_xbox_success; }
 uint32_t get_switch_success() { return g_switch_success; }
 
-// Functions for Xbox controller to notify UI of mount/unmount
-void xinput_notify_ui_mount() {
+#if ENABLE_BLUEPAD32
+extern "C" {
+    int bluepad32_get_connected_count(void);
+    int bluepad32_get_keyboard_count(void);
+    int bluepad32_get_mouse_count(void);
+}
+#endif
+
+static void notify_ui_device_counts(void) {
+    if (!ui_) {
+        return;
+    }
+#if ENABLE_BLUEPAD32
+    ui_->device_connect_state(
+        kb_count, mouse_count, joy_count + xinput_joy_count,
+        bluepad32_get_keyboard_count(), bluepad32_get_mouse_count(),
+        bluepad32_get_connected_count());
+#else
+    ui_->device_connect_state(kb_count, mouse_count, joy_count + xinput_joy_count, 0, 0, 0);
+#endif
+}
+
+extern "C" void hid_request_ui_refresh(void) {
     if (ui_) {
-        // Total joysticks = HID joysticks + Xbox controllers
-        ui_->usb_connect_state(kb_count, mouse_count, joy_count + xinput_joy_count);
+        ui_->invalidate();
     }
 }
 
+// Functions for Xbox controller to notify UI of mount/unmount
+void xinput_notify_ui_mount() {
+    notify_ui_device_counts();
+}
+
 void xinput_notify_ui_unmount() {
-    if (ui_) {
-        // Total joysticks = HID joysticks + Xbox controllers
-        ui_->usb_connect_state(kb_count, mouse_count, joy_count + xinput_joy_count);
-    }
+    notify_ui_device_counts();
 }
 
 // GameCube adapter mount/unmount notifications (same pattern as Xbox)
@@ -190,7 +213,6 @@ void gc_notify_unmount(uint8_t dev_addr) {
 #if ENABLE_BLUEPAD32
 // Functions for Bluetooth gamepad to notify UI of mount/unmount
 extern "C" {
-    // Forward declaration - implemented in bluepad32_platform.c
     int bluepad32_get_connected_count(void);
     bool bluepad32_get_gamepad(int idx, void* out_gamepad);
     bool bluepad32_to_atari_joystick(const void* gp_ptr, uint8_t* axis, uint8_t* button);
@@ -232,47 +254,29 @@ extern "C" void bluepad32_notify_unmount() {
 
 // Called from bluepad32_platform.c when a Bluetooth keyboard connects
 extern "C" void bluepad32_notify_keyboard_mount() {
-    kb_count++;
-    if (ui_) {
-        ui_->usb_connect_state(kb_count, mouse_count, joy_count + xinput_joy_count + bt_joy_count);
-    }
+    bluepad32_notify_ui_update();
 }
 
 // Called from bluepad32_platform.c when a Bluetooth keyboard disconnects
 extern "C" void bluepad32_notify_keyboard_unmount() {
-    if (kb_count > 0) {
-        kb_count--;
-        if (ui_) {
-            ui_->usb_connect_state(kb_count, mouse_count, joy_count + xinput_joy_count + bt_joy_count);
-        }
-    }
+    bluepad32_notify_ui_update();
 }
 
 // Called from bluepad32_platform.c when a Bluetooth mouse connects
 extern "C" void bluepad32_notify_mouse_mount() {
-    mouse_count++;
-    if (ui_) {
-        ui_->usb_connect_state(kb_count, mouse_count, joy_count + xinput_joy_count + bt_joy_count);
-    }
+    bluepad32_notify_ui_update();
 }
 
 // Called from bluepad32_platform.c when a Bluetooth mouse disconnects
 extern "C" void bluepad32_notify_mouse_unmount() {
-    if (mouse_count > 0) {
-        mouse_count--;
-        if (ui_) {
-            ui_->usb_connect_state(kb_count, mouse_count, joy_count + xinput_joy_count + bt_joy_count);
-        }
-    }
+    bluepad32_notify_ui_update();
 }
 
 // Check if UI update is needed and perform it (called from main loop)
 void bluepad32_check_ui_update() {
     if (g_bt_ui_update_needed) {
         g_bt_ui_update_needed = false;
-        if (ui_) {
-            ui_->usb_connect_state(kb_count, mouse_count, joy_count + xinput_joy_count + bt_joy_count);
-        }
+        notify_ui_device_counts();
     }
 }
 #endif
@@ -438,6 +442,7 @@ void tuh_hid_mounted_cb(uint8_t dev_addr) {
             device[actual_addr] = new uint8_t[sizeof(hid_keyboard_report_t)];
             hid_app_request_report(actual_addr, device[actual_addr]);
             ++kb_count;
+            usb_map_set_keyboard("USB Keyboard");
         }
     }
     else if (tp == HID_MOUSE) {
@@ -447,6 +452,7 @@ void tuh_hid_mounted_cb(uint8_t dev_addr) {
             device[actual_addr] = new uint8_t[tuh_hid_get_report_size(actual_addr)];
             hid_app_request_report(actual_addr, device[actual_addr]);
             ++mouse_count;
+            usb_map_set_mouse("USB Mouse");
         } else {
             // Address already used - this is a multi-interface device
             // Add mouse with offset address
@@ -455,6 +461,7 @@ void tuh_hid_mounted_cb(uint8_t dev_addr) {
             // Use mouse_key here so find_device() finds the MOUSE device, not keyboard
             hid_app_request_report(mouse_key, device[mouse_key]);
             ++mouse_count;
+            usb_map_set_mouse("USB Mouse");
         }
     }
     else if (tp == HID_JOYSTICK) {
@@ -471,6 +478,9 @@ void tuh_hid_mounted_cb(uint8_t dev_addr) {
             device[actual_addr] = new uint8_t[tuh_hid_get_report_size(actual_addr)];
             hid_app_request_report(actual_addr, device[actual_addr]);
             ++joy_count;
+            if (!usb_map_gamepad_registered(actual_addr)) {
+                usb_map_register_gamepad(actual_addr, "USB Gamepad");
+            }
         }
         
         // Check if this is a Stadia controller and show splash screen
@@ -480,10 +490,7 @@ void tuh_hid_mounted_cb(uint8_t dev_addr) {
             stadia_mount_cb(actual_addr);
         }
     }
-    if (ui_) {
-        // Total joysticks = HID joysticks + Xbox controllers
-        ui_->usb_connect_state(kb_count, mouse_count, joy_count + xinput_joy_count);
-    }
+    notify_ui_device_counts();
 }
 
 void tuh_hid_unmounted_cb(uint8_t dev_addr) {
@@ -491,23 +498,30 @@ void tuh_hid_unmounted_cb(uint8_t dev_addr) {
     if (tp == HID_KEYBOARD) {
         // printf("A keyboard device (address %d) is unmounted\r\n", dev_addr);
         --kb_count;
+        if (kb_count <= 0) {
+            kb_count = 0;
+            usb_map_clear_keyboard();
+        }
     }
     else if (tp == HID_MOUSE) {
         // printf("A mouse device (address %d) is unmounted\r\n", dev_addr);
         --mouse_count;
+        if (mouse_count <= 0) {
+            mouse_count = 0;
+            usb_map_clear_mouse();
+        }
     }
     else if (tp == HID_JOYSTICK) {
         // printf("A joystick device (address %d) is unmounted\r\n", dev_addr);
         --joy_count;
+        usb_map_unregister_gamepad(dev_addr);
     }
     auto it = device.find(dev_addr);
     if (it != device.end()) {
         delete[] it->second;
         device.erase(it);
     }
-    if (ui_) {
-        ui_->usb_connect_state(kb_count, mouse_count, joy_count);
-    }
+    notify_ui_device_counts();
 }
 
 // invoked ISR context

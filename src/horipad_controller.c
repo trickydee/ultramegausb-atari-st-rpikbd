@@ -10,6 +10,7 @@
 
 #include "horipad_controller.h"
 #include "mount_splash.h"
+#include "usb_device_map.h"
 #include "config.h"
 #include "tusb.h"
 #include "ssd1306.h"
@@ -173,6 +174,8 @@ void horipad_mount_cb(uint8_t dev_addr) {
 #if ENABLE_SERIAL_LOGGING
         printf("HORIPAD: Failed to allocate controller\n");
 #endif
+    } else {
+        usb_map_register_gamepad(dev_addr, "HORIPAD");
     }
 }
 
@@ -180,5 +183,6 @@ void horipad_unmount_cb(uint8_t dev_addr) {
 #if ENABLE_SERIAL_LOGGING
     printf("HORIPAD: Controller unmount (addr=%d)\n", dev_addr);
 #endif
+    usb_map_unregister_gamepad(dev_addr);
     free_controller(dev_addr);
 }

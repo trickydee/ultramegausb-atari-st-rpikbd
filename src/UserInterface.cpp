@@ -26,6 +26,7 @@
 #include "runtime_toggle.h"  // Runtime USB/Bluetooth toggle control
 #include "bluepad32_platform.h"  // For bluepad32_delete_pairing_keys()
 #endif
+#include "usb_device_map.h"
 
 // Forward declare Xbox debug counters (defined in main.cpp and xinput_atari.cpp)
 extern "C" {
@@ -97,13 +98,22 @@ void UserInterface::init() {
     serial_tm = get_absolute_time();
 }
 
-void UserInterface::usb_connect_state(int kb, int mouse, int joy) {
-    if ((num_kb != kb) || (num_mouse != mouse) || (num_joy != joy)) {
+void UserInterface::device_connect_state(int usb_kb_in, int usb_mouse_in, int usb_joy_in,
+                                         int bt_kb_in, int bt_mouse_in, int bt_joy_in) {
+    if ((usb_kb != usb_kb_in) || (usb_mouse != usb_mouse_in) || (usb_joy != usb_joy_in) ||
+        (bt_kb != bt_kb_in) || (bt_mouse != bt_mouse_in) || (bt_joy != bt_joy_in)) {
         dirty = true;
     }
-    num_kb = kb;
-    num_mouse = mouse;
-    num_joy = joy;
+    usb_kb = usb_kb_in;
+    usb_mouse = usb_mouse_in;
+    usb_joy = usb_joy_in;
+    bt_kb = bt_kb_in;
+    bt_mouse = bt_mouse_in;
+    bt_joy = bt_joy_in;
+}
+
+void UserInterface::usb_connect_state(int kb, int mouse, int joy) {
+    device_connect_state(kb, mouse, joy, 0, 0, 0);
 }
 
 int8_t UserInterface::get_mouse_speed() {
@@ -137,37 +147,89 @@ void UserInterface::update_serial() {
 	ssd1306_draw_string(&disp, 34, 0, 1, (char*)"V " PROJECT_VERSION_STRING);	    
 }
 
-void UserInterface::update_status() {
+void UserInterface::update_devices() {
     char buf[32];
-    // stdio_init_all();
-    // Get the current CPU frequency
-    uint32_t cpu_freq = clock_get_hz(clk_sys);
-    //uint32_t cpu_freq = 123;
     ssd1306_clear(&disp);
-    sprintf(buf, "%s %d", get_translation("USB Keyboard"), num_kb);
-    ssd1306_draw_string(&disp, 0, 0, 1,  buf);
-    sprintf(buf, "%s %d", get_translation("USB Mouse"), num_mouse);
-    ssd1306_draw_string(&disp, 0, 9, 1,  buf);
-    sprintf(buf, "%s %d", get_translation("USB Joystick"), num_joy);
-    ssd1306_draw_string(&disp, 0, 18, 1, buf);
-    sprintf(buf, "%s", get_translation(settings.get_settings().mouse_enabled ? "Mouse enabled" : "Joy 0 enabled"));
-    ssd1306_draw_string(&disp, 0, 27, 1, buf);
-    sprintf(buf, "CPU: %.2f MHz", static_cast<double>(cpu_freq) / 1000000.0);
-    ssd1306_draw_string(&disp, 0, 36, 1, buf);
-}
+    ssd1306_draw_string(&disp, 0, 0, 1, (char*)"Devices");
 
-void UserInterface::update_mouse() {
-    char buf[32];
-    ssd1306_draw_string(&disp, 0, 45, 1, get_translation("Mouse speed"));
+#if ENABLE_BLUEPAD32
+    sprintf(buf, "Keybd   U %d BT %d", usb_kb, bt_kb);
+    ssd1306_draw_string(&disp, 0, 9, 1, buf);
+    sprintf(buf, "Mouse   U %d BT %d", usb_mouse, bt_mouse);
+    ssd1306_draw_string(&disp, 0, 18, 1, buf);
+    sprintf(buf, "Game    U %d BT %d", usb_joy, bt_joy);
+    ssd1306_draw_string(&disp, 0, 27, 1, buf);
+#else
+    sprintf(buf, "Keybd   U %d", usb_kb);
+    ssd1306_draw_string(&disp, 0, 9, 1, buf);
+    sprintf(buf, "Mouse   U %d", usb_mouse);
+    ssd1306_draw_string(&disp, 0, 18, 1, buf);
+    sprintf(buf, "Game    U %d", usb_joy);
+    ssd1306_draw_string(&disp, 0, 27, 1, buf);
+#endif
+
+    ssd1306_draw_string(&disp, 0, 36, 1, get_translation("Mouse speed"));
     sprintf(buf, "[==============]");
     buf[settings.get_settings().mouse_speed - MOUSE_MIN] = '*';
-    ssd1306_draw_string(&disp, 0, 54, 1, buf);
+    ssd1306_draw_string(&disp, 0, 45, 1, buf);
 }
 
-void UserInterface::update_joy(int index) {
-    char buf[32];
-    sprintf(buf, "Joy %d: %s", index, (settings.get_settings().joy_device & (1 << index)) ? "DSub" : "USB");
-    ssd1306_draw_string(&disp, 0, 54, 1, buf);
+void UserInterface::update_mapping() {
+    char buf[64];
+    ssd1306_clear(&disp);
+    ssd1306_draw_string(&disp, 0, 0, 1, (char*)"Map Devices");
+
+    auto draw_joy_line = [&](int y, const char* label, int dsub_bit, int bt_idx, int usb_slot) {
+        if (settings.get_settings().joy_device & (1 << dsub_bit)) {
+            snprintf(buf, sizeof(buf), "%s:DSub Phy", label);
+        } else {
+            const char* name = NULL;
+#if ENABLE_BLUEPAD32
+            name = bluepad32_get_device_name('J', bt_idx);
+#endif
+            if (!name) {
+                name = usb_map_get_gamepad(usb_slot);
+            }
+            if (name) {
+                snprintf(buf, sizeof(buf), "%s:%.20s", label, name);
+            } else {
+                snprintf(buf, sizeof(buf), "%s: --", label);
+            }
+        }
+        ssd1306_draw_string(&disp, 0, y, 1, buf);
+    };
+
+    // J2 = first gamepad slot; J1 = second (matches routing: joy1 then joy0)
+    draw_joy_line(9, "J2", 1, 0, 0);
+    draw_joy_line(18, "J1", 0, 1, 1);
+
+    const char* kname = NULL;
+#if ENABLE_BLUEPAD32
+    kname = bluepad32_get_device_name('K', 0);
+#endif
+    if (!kname) {
+        kname = usb_map_get_keyboard();
+    }
+    if (kname) {
+        snprintf(buf, sizeof(buf), "K1:%.20s", kname);
+        ssd1306_draw_string(&disp, 0, 27, 1, buf);
+    } else {
+        ssd1306_draw_string(&disp, 0, 27, 1, (char*)"K1: --");
+    }
+
+    const char* mname = NULL;
+#if ENABLE_BLUEPAD32
+    mname = bluepad32_get_device_name('M', 0);
+#endif
+    if (!mname) {
+        mname = usb_map_get_mouse();
+    }
+    if (mname) {
+        snprintf(buf, sizeof(buf), "M1:%.20s", mname);
+        ssd1306_draw_string(&disp, 0, 36, 1, buf);
+    } else {
+        ssd1306_draw_string(&disp, 0, 36, 1, (char*)"M1: --");
+    }
 }
 
 void UserInterface::update_splash() {
@@ -378,7 +440,7 @@ void UserInterface::update_usb_debug() {
     ssd1306_draw_string(&disp, 0, 0, 1, (char*)"USB Debug Info");
     
     // Device counts
-    sprintf(buf, "KB:%d Mouse:%d Joy:%d", num_kb, num_mouse, num_joy);
+    sprintf(buf, "KB:%d Mouse:%d Joy:%d", usb_kb, usb_mouse, usb_joy);
     ssd1306_draw_string(&disp, 0, 12, 1, buf);
     
     // Mount and report stats
@@ -431,9 +493,7 @@ void UserInterface::on_button_down(int i) {
         pg = ((pg + 1) % (PAGE_USB_DEBUG));
     #endif
 #else
-        // Production / speed builds (logging disabled): only cycle core pages
-        // PAGE enum: SPLASH, MOUSE, JOY0, JOY1, SERIAL, ...
-        // Limit cycle to 0..3 (SPLASH, MOUSE, JOY0, JOY1)
+        // Production / speed builds (logging disabled): SPLASH, DEVICES, MAPPING
         pg = ((pg + 1) % PAGE_SERIAL);
 #endif
         page = (PAGE)pg;
@@ -475,15 +535,15 @@ void UserInterface::on_button_down(int i) {
             printf("Bluetooth not available in this build\n");
 #endif
         }
-        else if (page == PAGE_MOUSE) {
+        else if (page == PAGE_DEVICES) {
             if (settings.get_settings().mouse_speed > MOUSE_MIN) {
                 --settings.get_settings().mouse_speed;
                 settings.write();
                 dirty = true;
             }
         }
-        else if ((page == PAGE_JOY0) || (page == PAGE_JOY1)) {
-            settings.get_settings().joy_device ^= (1 << (page - PAGE_JOY0));
+        else if (page == PAGE_MAPPING) {
+            settings.get_settings().joy_device ^= (1 << 1);  // J2 / Joy1 -> DSub
             settings.write();
             dirty = true;
         }
@@ -503,15 +563,15 @@ void UserInterface::on_button_down(int i) {
             printf("Bluetooth not available in this build\n");
 #endif
         }
-        else if (page == PAGE_MOUSE) {
+        else if (page == PAGE_DEVICES) {
             if (settings.get_settings().mouse_speed < MOUSE_MAX) {
                 ++settings.get_settings().mouse_speed;
                 settings.write();
                 dirty = true;
             }
         }
-        else if ((page == PAGE_JOY0) || (page == PAGE_JOY1)) {
-            settings.get_settings().joy_device ^= (1 << (page - PAGE_JOY0));
+        else if (page == PAGE_MAPPING) {
+            settings.get_settings().joy_device ^= (1 << 0);  // J1 / Joy0 -> DSub
             settings.write();
             dirty = true;
         }
@@ -533,17 +593,11 @@ void UserInterface::update() {
     if (dirty) {
         dirty = false;
 
-        if (page == PAGE_MOUSE) {
-            update_status();
-            update_mouse();
+        if (page == PAGE_DEVICES) {
+            update_devices();
         }
-        else if (page == PAGE_JOY0) {
-            update_status();
-            update_joy(0);
-        }
-        else if (page == PAGE_JOY1) {
-            update_status();
-            update_joy(1);
+        else if (page == PAGE_MAPPING) {
+            update_mapping();
         }
         else if (page == PAGE_SERIAL) {
 #if ENABLE_SERIAL_LOGGING

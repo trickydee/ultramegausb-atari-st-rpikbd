@@ -1,7 +1,24 @@
 # Release Notes
 
-**Current Version:** 21.1.2  
+**Current Version:** 21.1.3  
 **Last Updated:** June 2026
+
+---
+
+## Version 21.1.3 (June 2026)
+
+### OLED UI alignment and Map Devices
+
+Version 21.1.3 aligns the production OLED UI with the ultramegausb Amiga firmware and improves device mapping visibility.
+
+**What's new:**
+
+- **Devices page:** Amiga-style `Keybd` / `Mouse` / `Game` rows with separate USB and Bluetooth counts; mouse speed on same page
+- **Map Devices page:** Replaces separate Joy0/Joy1 pages; shows J2/J1/K1/M1 routing labels with DSub toggle (L/R buttons)
+- **USB device names:** New `usb_device_map` module; per-controller mount labels (PS5, Xbox, Stadia, etc.) on Map Devices
+- **Bluetooth names:** Device names from Bluepad32 surfaced on Map Devices (gamepad, keyboard, mouse)
+- **Fixes:** PS5 and other HID controllers no longer overwritten by generic "USB Gamepad"; Xbox registers via XInput mount path
+- **Docs:** `docs/UI_UNIFICATION.md` (handoff for future gamepad cycling); `docs/FUTURE_WORK.md` replaces cherry-pick regression notes
 
 ---
 

@@ -8,6 +8,7 @@
 
 #include "ps4_controller.h"
 #include "mount_splash.h"
+#include "usb_device_map.h"
 #include "tusb.h"
 #include "ssd1306.h"
 #include <stdio.h>
@@ -270,11 +271,13 @@ void ps4_mount_cb(uint8_t dev_addr) {
     ps4_controller_t* ctrl = allocate_controller(dev_addr);
     if (ctrl) {
         printf("PS4: Controller registered and ready!\n");
+        usb_map_register_gamepad(dev_addr, "PS4");
     }
 }
 
 void ps4_unmount_cb(uint8_t dev_addr) {
     printf("PS4: Controller unmounted at address %d\n", dev_addr);
+    usb_map_unregister_gamepad(dev_addr);
     free_controller(dev_addr);
 }
 
