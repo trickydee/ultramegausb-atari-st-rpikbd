@@ -6,9 +6,9 @@ This document consolidates technical documentation, performance optimizations, b
 
 ---
 
-## Current state (v22.1.0)
+## Current state (v22.1.1)
 
-Authoritative values as of **v22.1.0**. Sections below may describe older experiments — use this table when in doubt.
+Authoritative values as of **v22.1.1**. Sections below may describe older experiments — use this table when in doubt.
 
 | Area | Current behavior |
 |------|------------------|

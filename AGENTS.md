@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Firmware that emulates the Atari ST IKBD (HD6301) on Raspberry Pi Pico boards, routing USB and Bluetooth keyboards, mice, and gamepads to vintage Atari Mega ST / STE / TT computers. Version **22.1.0** (`include/version.h`).
+Firmware that emulates the Atari ST IKBD (HD6301) on Raspberry Pi Pico boards, routing USB and Bluetooth keyboards, mice, and gamepads to vintage Atari Mega ST / STE / TT computers. Version **22.1.1** (`include/version.h`).
 
 Human docs: `README.md`. UI alignment handoff: `docs/UI_UNIFICATION.md`. Deep technical detail: `docs/DEVELOPER_GUIDE.md`.
 
@@ -65,6 +65,20 @@ USB/BT → hid_app_host.c / bluepad32 → HidInput.cpp → serial → Core 1 (63
 | `pico2_w` | RP2350 | Yes (recommended) |
 
 Full diagrams and design rationale: `docs/DEVELOPER_GUIDE.md`.
+
+### Core 0 main-loop timing
+
+| Interval | What runs |
+|----------|-----------|
+| **Every loop** (~continuous) | `handle_rx_from_st()`, `SerialPort::drain_tx_log()`, `AtariSTMouse::update()` |
+| **10 ms** | `tuh_task()`, `switch_check_delayed_init()`, `mount_splash_service()`, `handle_mouse()` → `handle_keyboard()` → `handle_joystick()`, `bluepad32_check_ui_update()`, `ui.update()` |
+| **1 ms** (wireless builds, BT on) | `bluepad32_poll()`; then `tuh_task()` + `mount_splash_service()` if USB is on (anti-starvation) |
+
+- **`handle_mouse()` / `handle_keyboard()` / `handle_joystick()`** run on the **10 ms** tick only — not 2 ms. A 2 ms HID poll was tried (`cd98008`) and reverted (`f3fa3ea`) because it broke BLE gamepad pairing.
+- Call **`handle_keyboard()` exactly once** per 10 ms tick (`usb_runtime_is_enabled() \|\| bt_runtime_is_enabled()`). A second call drains `wheel_pulses` and clears one-frame scroll→arrow injections before the Atari sees them.
+- **`handle_mouse()` before `handle_keyboard()`** on every 10 ms tick so scroll wheel pulses are enqueued then applied in the same tick.
+- Wheel scroll → cursor keys is applied **after** all keyboard sources in `handle_keyboard()` (BT `peek` rebuilds `key_states` every tick).
+- USB mice: all entries in the `device` map with `HID_MOUSE`. BT mice: poll every slot (`MAX_BT_MICE` = 2), not index 0 only.
 
 ---
 
@@ -233,6 +247,7 @@ See `docs/FUTURE_WORK.md` for the open Xbox/Stadia BT + KB/mouse regression.
 ### Always
 
 - Poll serial RX every Core 0 loop iteration (not on a 10 ms timer).
+- Call `handle_keyboard()` once per 10 ms tick when USB or BT is enabled.
 - Keep UART hardware FIFO enabled in `SerialPort.cpp`.
 - Check specific controllers in `hid_app_host.c` before generic HID parsing.
 - Read surrounding code and a sibling controller before editing.
@@ -260,13 +275,14 @@ See `docs/FUTURE_WORK.md` for the open Xbox/Stadia BT + KB/mouse regression.
 
 ## Gotchas
 
-- **USB vs HID poll rate:** Core 0 runs `tuh_task()` every **2 ms** so USB mount/enumeration stays responsive. Mouse, keyboard, and joystick sampling run every **10 ms** because `AtariSTMouse::set_speed()` converts delta magnitude to quadrature timing (`MAX_SPEED / delta`); calling it every 2 ms with single-report deltas feels sluggish. `handle_mouse()` drains and sums up to `MOUSE_REPORT_DRAIN_MAX` USB reports per 10 ms tick before one `set_speed()`. Fast flicks get mild burst scaling above ~96 counts/tick; `MIN_SPEED` caps maximum quadrature rate.
-- **Mount splash OLED:** Production uses `mount_splash_show()` on attach (default **5 s**). Splash is queued in mount callbacks, drawn once by `mount_splash_service()` after `tuh_task()`. `mount_splash_blocks_oled()` suppresses other writers until expiry — do not redraw every poll (full-frame I2C starves mouse input). Footer shows `PROJECT_VERSION_DISPLAY` on debug builds (`-dbgN`), else `PROJECT_VERSION_STRING`.
+- **USB vs HID poll rate:** `handle_mouse()`, `handle_keyboard()`, and `handle_joystick()` run every **10 ms**. `tuh_task()` also runs on the 10 ms tick and again on each **1 ms** `bluepad32_poll()` when USB+BT are on (~10 extra calls per 10 ms window). `AtariSTMouse::set_speed()` converts delta magnitude to quadrature timing (`MAX_SPEED / delta`); `handle_mouse()` drains up to `MOUSE_REPORT_DRAIN_MAX` USB reports per 10 ms tick before one `set_speed()`. Fast flicks get mild burst scaling above ~96 counts/tick; `MIN_SPEED` caps maximum quadrature rate.
+- **Mount splash OLED:** Production uses `mount_splash_show()` on attach (default **5 s**). Splash is queued in mount callbacks, drawn once by `mount_splash_service()` after `tuh_task()` (10 ms and 1 ms BT paths). `mount_splash_blocks_oled()` suppresses other writers until expiry — do not redraw every poll (full-frame I2C starves mouse input). Footer shows `PROJECT_VERSION_DISPLAY` on debug builds (`-dbgN`), else `PROJECT_VERSION_STRING`.
 - **Core 1 freeze:** Bluetooth pairing writes flash — Core 1 must pause (`flash_safe_execute`). See `docs/TECHNICAL_NOTES.md`. Pause is **refcounted** (`g_core1_pause_depth` in `main.cpp`): gamepad discovery pauses once; `on_device_ready` resumes once. KB/mouse (BLE) do not pause. **`[DIAG]` logs can show `pause_depth=0` while `[CYCLES_FROZEN!]`** — Core 1 halted inside the emulator loop, not stuck in the pause spin. Use `BUILD_VARIANT=debug` and the Serial diagnostics section above.
 - **Xbox/Stadia BT + KB/mouse (resolved v22.1.0):** **BLE HID gamepads** (Stadia, Xbox Wireless — CoD `0x0508`, HID-over-GATT). Refcounted Core 1 pause; `busy_wait_us()` in BT callbacks only; `BT_GAMEPAD_DISCOVERY_SETTLE_MS` + `BT_GAMEPAD_CORE1_RESUME_DELAY_MS` in `config.h`. See `RELEASE_NOTES.md` §22.1.0.
 - **BT callbacks (Bluepad32):** Never call `sleep_ms()` or `__wfe()` on Core 0 inside platform callbacks — IRQs may be constrained and the whole adapter (UI included) can hang. Use `busy_wait_us()` for short delays (`bt_callback_busy_wait_ms` in `bluepad32_platform.c`). Defer long work to the main loop when possible.
 - **BT binary type:** wireless builds use XIP (RAM constrained); USB-only builds use `copy_to_ram`.
-- **Controller detected, no input:** check report parsing and `HidInput.cpp` priority chain.
+- **Mouse wheel → cursor keys:** Scroll enqueues pulses in `handle_mouse()`; `handle_keyboard()` applies them last. Core 1 reads **`keydown()`** (not `key_states` directly) — `wheel_hold_frames[]` keeps cursor up/down visible for several 10 ms ticks so BT keyboard `peek` cannot erase wheel before the 6301 matrix scan.
+- **Multiple BT mice:** Poll all `MAX_BT_MICE` slots in `handle_mouse()`, not `bluepad32_get_mouse(0)` only.
 - **Atari comms failures:** baud, FIFO, RX queue overflow, or Core 1 not running.
 - **Pico 2 W build failure:** other boards still build; check `build/build-pico2_w/build.log` when `CLEAN_BUILD_DIRS=0`.
 

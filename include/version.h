@@ -3,7 +3,7 @@
 
 #define PROJECT_VERSION_MAJOR 22
 #define PROJECT_VERSION_MINOR 1
-#define PROJECT_VERSION_PATCH 0
+#define PROJECT_VERSION_PATCH 1
 
 // Increment when flashing a new diagnostic/debug firmware (serial-logging builds).
 #ifndef ENABLE_SERIAL_LOGGING

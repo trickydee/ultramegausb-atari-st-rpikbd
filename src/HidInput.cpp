@@ -97,6 +97,10 @@ extern ssd1306_t disp;  // External reference to display
 #define ATARI_KEY_P       25  // Atari ST scancode for 'P'
 #define ATARI_KEY_O       24  // Atari ST scancode for 'O'
 #define MAX_WHEEL_PULSES  32
+#define WHEEL_HOLD_TICKS  4   // 10 ms ticks; Core 1 reads via keydown(), not key_states directly
+#if ENABLE_BLUEPAD32
+#define BT_MOUSE_SLOTS    2  // MAX_BT_MICE in bluepad32_platform.c
+#endif
 
 #define GET_I32_VALUE(item)     (int32_t)(item->Value | ((item->Value & (1 << (item->Attributes.BitSize-1))) ? ~((1 << item->Attributes.BitSize) - 1) : 0))
 #define JOY_GPIO_INIT(io)       gpio_init(io); gpio_set_dir(io, GPIO_IN); gpio_pull_up(io);
@@ -130,6 +134,7 @@ static bool g_llama_paused = false;  // Track pause state to toggle between P an
 
 static std::deque<uint8_t> wheel_pulses;
 static std::bitset<128> wheel_prev_mask;
+static volatile uint8_t wheel_hold_frames[128] = {0};
 
 static void enqueue_wheel_pulses(int delta) {
     if (delta == 0) {
@@ -149,8 +154,19 @@ static void enqueue_wheel_pulses(int delta) {
         }
         wheel_pulses.push_back(key);
     }
+
+    // Core 1 reads keydown() while Core 0 rebuilds key_states (BT keyboard peek).
+    wheel_hold_frames[key] = WHEEL_HOLD_TICKS;
 }
 
+static void decay_wheel_hold_frames() {
+    if (wheel_hold_frames[ATARI_CURSOR_UP] > 0) {
+        wheel_hold_frames[ATARI_CURSOR_UP]--;
+    }
+    if (wheel_hold_frames[ATARI_CURSOR_DOWN] > 0) {
+        wheel_hold_frames[ATARI_CURSOR_DOWN]--;
+    }
+}
 
 extern "C" {
 
@@ -1527,7 +1543,7 @@ void HidInput::handle_keyboard() {
                 }
             }
             
-            // Update key states
+            // Update key states (include mouse wheel pulses like USB keyboard path)
             for (int i = 1; i < key_states.size(); ++i) {
                 bool down = false;
                 for (int j = 0; j < 6; ++j) {
@@ -1535,6 +1551,9 @@ void HidInput::handle_keyboard() {
                         down = true;
                         break;
                     }
+                }
+                if (wheel_press_mask.test(i)) {
+                    down = true;
                 }
                 key_states[i] = down ? 1 : 0;
             }
@@ -1555,6 +1574,15 @@ void HidInput::handle_keyboard() {
         }
     }
 #endif
+
+    // Apply wheel after USB and BT keyboard paths (BT peek rebuilds key_states every tick).
+    for (size_t idx = 0; idx < wheel_press_mask.size(); ++idx) {
+        if (wheel_press_mask.test(idx)) {
+            key_states[idx] = 1;
+        }
+    }
+
+    decay_wheel_hold_frames();
 }
 
 namespace {
@@ -1715,47 +1743,33 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
         } __attribute__((packed)) bt_mouse_t;
         
         bt_mouse_t bt_mouse;
-        int bt_mouse_count = bluepad32_get_mouse_count();
-        
-        // Process first connected Bluetooth mouse
-        if (bt_mouse_count > 0) {
-            if (bluepad32_get_mouse(0, &bt_mouse)) {
+
+        for (int mi = 0; mi < BT_MOUSE_SLOTS; ++mi) {
+            if (!bluepad32_get_mouse(mi, &bt_mouse)) {
 #if ENABLE_SERIAL_LOGGING
-                hid_bt_ms_get++;
+                if (mi == 0) {
+                    hid_bt_ms_miss++;
+                }
 #endif
-            int32_t bt_x = bt_mouse.delta_x;
-            int32_t bt_y = bt_mouse.delta_y;
+                continue;
+            }
 #if ENABLE_SERIAL_LOGGING
-            if (bt_x != 0 || bt_y != 0) {
+            hid_bt_ms_get++;
+            if (bt_mouse.delta_x != 0 || bt_mouse.delta_y != 0) {
                 hid_bt_ms_move++;
             }
 #endif
-            
-            // Accumulate with USB mouse movement
-            x += bt_x;
-            y += bt_y;
-            
-            // Extract button states using bitmasks (matching logronoid's approach)
-            // UNI_MOUSE_BUTTON_LEFT = BIT(0) = 0x01
-            // UNI_MOUSE_BUTTON_RIGHT = BIT(1) = 0x02
+
+            x += bt_mouse.delta_x;
+            y += bt_mouse.delta_y;
+
             bool left_down = (bt_mouse.buttons & 0x01) != 0;
             bool right_down = (bt_mouse.buttons & 0x02) != 0;
-            
-            // Update button state (match USB mouse button handling)
-            // Atari ST mouse_state: bit 1 = left button (0x02), bit 0 = right button (0x01)
-            set_mouse_state_bits(0xfd, left_down ? 2 : 0);   // Left button
-            set_mouse_state_bits(0xfe, right_down ? 1 : 0);  // Right button
-            
-            // Handle scroll wheel (matching USB mouse behavior)
-            // Note: scroll_wheel is int8_t, so values are -128 to 127
-            // Positive = scroll down, negative = scroll up
+            set_mouse_state_bits(0xfd, left_down ? 2 : 0);
+            set_mouse_state_bits(0xfe, right_down ? 1 : 0);
+
             if (bt_mouse.scroll_wheel != 0) {
                 enqueue_wheel_pulses(bt_mouse.scroll_wheel);
-            }
-            } else {
-#if ENABLE_SERIAL_LOGGING
-                hid_bt_ms_miss++;
-#endif
             }
         }
     }
@@ -2320,6 +2334,7 @@ void HidInput::handle_joystick() {
 
 void HidInput::reset() {
      std::fill(key_states.begin(), key_states.end(), 0);
+     memset((void*)wheel_hold_frames, 0, sizeof(wheel_hold_frames));
      mouse_state.store(0, std::memory_order_relaxed);
      joystick_state.store(0, std::memory_order_relaxed);
 }
@@ -2343,6 +2358,9 @@ void HidInput::set_joystick_high_nibble(uint8_t axis) {
 
 unsigned char HidInput::keydown(const unsigned char code) const {
     if (code < 128) {
+        if (wheel_hold_frames[code] > 0) {
+            return 1;
+        }
         return key_states[code];
     }
     return 0;

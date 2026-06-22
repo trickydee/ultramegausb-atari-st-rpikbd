@@ -1,7 +1,23 @@
 # Release Notes
 
-**Current Version:** 22.1.0  
+**Current Version:** 22.1.1  
 **Last Updated:** June 2026
+
+---
+
+## Version 22.1.1 (June 2026)
+
+### Mouse wheel and multi-mouse fixes (Bluetooth)
+
+Version 22.1.1 fixes regressions in scroll-wheel and multi-mouse handling when Bluetooth keyboards and mice are used together on Pico 2 W.
+
+**Fixes:**
+
+- **Scroll wheel → cursor keys:** `handle_keyboard()` was called twice per 10 ms tick when USB and BT were both enabled, draining wheel pulses before the Atari saw them. Now called once per tick (same guard as `handle_mouse()`).
+- **Wheel + paired keyboard:** BT keyboard `peek` rebuilds `key_states` every tick; wheel pulses are applied after all keyboard sources, and `wheel_hold_frames[]` in `keydown()` keeps cursor up/down visible to Core 1 for several ticks.
+- **Multiple Bluetooth mice:** Poll all `MAX_BT_MICE` slots in `handle_mouse()`, not index 0 only.
+
+**Docs:** `AGENTS.md` — corrected Core 0 timing (10 ms HID + 1 ms BT poll; not 2 ms).
 
 ---
 

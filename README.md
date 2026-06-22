@@ -49,6 +49,8 @@ The following USB HID Gamepads/Joysticks are supported (More to come)
 
 **v21.0.5:** Build fixes for GCC 15 / current ARM toolchains; `build-all.sh` continues building all board variants if Pico 2 W fails.
 
+**v22.1.1:** Fixes mouse scroll wheel (cursor up/down) and multiple Bluetooth mice when a keyboard is paired; single `handle_keyboard()` per tick.
+
 **v22.1.0:** OLED Devices / Map Devices UI; USB/BT device names on Map Devices; **BLE gamepad pairing fix** for Google Stadia and Xbox Wireless when BLE keyboard/mouse already connected (HID-over-GATT, flash-safe Core 1 timing).
 
 ## Bluetooth Support (Pico 2 W only)
@@ -111,7 +113,7 @@ The emulator supports several keyboard shortcuts for convenient control:
 | **Ctrl+F9** | Toggle Joystick 0 | Switches Joystick 0 between D-SUB and USB |
 | **Ctrl+F10** | Toggle Joystick 1 | Switches Joystick 1 between D-SUB and USB |
 | **Ctrl+F11** | XRESET | Triggers HD6301 hardware reset (like power cycling the IKBD) |
-| **Ctrl+F12** | Toggle Mouse Mode | Switches between USB mouse and joystick 0 * |
+| **Ctrl+F12** | Toggle Mouse Mode | Switches between USB mouse and joystick 0    * |
 | **Alt+/** | INSERT Key | Sends Atari ST INSERT key (useful for sending mouse click on Logitech Mac USB keyboards) |
 | **Alt+[** | Keypad /** | Sends Atari ST keypad divide key |
 | **Alt+]** | Keypad *** | Sends Atari ST keypad multiply key |

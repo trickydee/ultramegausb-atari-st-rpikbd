@@ -461,11 +461,12 @@ int main() {
             }
 #endif
 
-            if (usb_runtime_is_enabled()) {
+#if ENABLE_BLUEPAD32
+            if (usb_runtime_is_enabled() || bt_runtime_is_enabled()) {
                 HidInput::instance().handle_keyboard();
             }
-#if ENABLE_BLUEPAD32
-            if (bt_runtime_is_enabled()) {
+#else
+            if (usb_runtime_is_enabled()) {
                 HidInput::instance().handle_keyboard();
             }
 #endif
