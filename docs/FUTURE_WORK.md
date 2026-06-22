@@ -2,6 +2,7 @@
 
 **Last updated:** June 2026  
 **Current release:** `main` @ **v21.1.2**  
+**Active branch:** `feature/ui-alignment` @ **v21.1.3** (`fae81c3`) — OLED UI alignment + Map Devices; **not merged to `main`**. Open BT regression below.  
 **Purpose:** Deferred experiments, roadmap, and **lessons learned** — what broke Bluetooth, what we tried, what to avoid. Sprint history is in §Archive.
 
 ---
@@ -18,6 +19,7 @@
 | **`docs/custom-mappings.md`** | Yes | Per-controller Atari mapping reference |
 | **`RELEASE_NOTES.md`** | Yes | Version changelog |
 | **`AGENTS.md`** | Yes | Agent/build conventions |
+| **`docs/UI_UNIFICATION.md`** | Yes | OLED UI (v22.1.0), Map Devices, BLE gamepad pairing fix notes |
 | **`docs/OPTIMIZATION_REVIEW.md`** | No (local) | Deep-dive timing/flash analysis; conclusions mirrored here and in `TECHNICAL_NOTES.md` |
 | **`docs/COMPARISON_RP2_ATARIST.md`** | No (local) | Logronoid / rp2-atarist-rpikb alignment notes |
 | **`DOCUMENTATION_ANALYSIS.md`** | No (root) | Meta audit for doc completeness — optional |
@@ -30,6 +32,7 @@
 
 | Priority | Item | Status | Notes |
 |----------|------|--------|-------|
+| **P1** | **Xbox/Stadia BT + KB/mouse** | **Resolved v22.1.0** | BLE HID gamepad pairing (Stadia, Xbox Wireless) with BLE KB/mouse connected — Core 1 flash-safe timing fixed. See §Xbox/Stadia BT regression (June 2026). |
 | — | **BTstack v1.8+** | **Blocked** | v1.7-rc1 hardware fail; v1.8+ needs pico-sdk [#2996](https://github.com/raspberrypi/pico-sdk/pull/2996) + bluepad32 `hids_host` port. Stay on **pico-sdk pin v1.6.2**. |
 | — | **2 ms USB+HID poll** (`9f83ed6`) | **Rejected** | Stadia/Xbox pairing hang; keep **10 ms** HID block. Optional later: 2 ms `tuh_task` only (`c07ad1a`) — not tested on hardware recently. |
 | P2 | **pico-sdk submodule upgrade** | Open | Re-apply `setup_tlv()` before `hci_init()` patch in `btstack_cyw43.c` after any SDK bump. |
@@ -38,7 +41,47 @@
 | P3 | **NVSettings write debounce** | Open | Reduce flash wear from frequent UI writes. |
 | P3 | **Pico W soak** | Open | 2 MiB flash overlap was fixed in NVSettings map; limited BT RAM — validate on hardware. |
 | P3 | **UART hardware FIFO A/B test** | Open | Currently FIFO off (logronoid baseline). |
+| P3 | **Map Devices — cycle gamepad per port** | Open | Design + checklist in `docs/UI_UNIFICATION.md` §Planned. |
 | P3 | **Customizable controller mappings** | Open | Starting point: `docs/custom-mappings.md`. |
+
+---
+
+## Xbox/Stadia BT regression (June 2026) — **resolved in v22.1.0**
+
+### Symptoms (before fix)
+
+- BT keyboard and mouse worked until a **Google Stadia** or **Xbox Wireless** controller was paired over Bluetooth.
+- Adapter could hang (including OLED) or keyboard/mouse stopped reaching the Atari ST.
+- PS5 (BLE) unaffected in the same session.
+
+### Bluetooth type
+
+Stadia and Xbox Wireless (Xbox One S, Series X|S) pair as **BLE HID gamepads** — **Bluetooth Low Energy**, **HID-over-GATT**, Class of Device **0x0508**. Same BLE radio as MX keyboards/mice, but a longer pairing path (bonding + flash TLV writes). Not BR/EDR classic in the traces captured on Pico 2 W.
+
+### Root cause
+
+Race between BTstack `flash_safe_execute` and Core 1 in the HD6301 XIP emulator. `sleep_ms()` / `__wfe()` in Bluepad32 callbacks could freeze Core 0 entirely.
+
+### Shipped fix (v22.1.0)
+
+- Refcounted `g_core1_pause_depth`
+- `busy_wait_us()` only in BT callbacks (`bt_callback_busy_wait_ms`)
+- `BT_GAMEPAD_DISCOVERY_SETTLE_MS` (30 ms), `BT_GAMEPAD_CORE1_RESUME_DELAY_MS` (100 ms)
+- Core 1 pause loop uses `__wfe()` for flash lockout
+- `[DIAG]` builds: `BUILD_VARIANT=debug` → `22.1.0-dbgN`
+
+Full write-up: `RELEASE_NOTES.md` §22.1.0.
+
+### Historical investigation (v21.1.3 era)
+
+| Change | File | Risk |
+|--------|------|------|
+| Device names + `notify_ui_device_update()` | `bluepad32_platform.c` | Low–medium |
+| USB `usb_device_map` / Map Devices OLED | various | None for BT fix |
+
+Leading hypotheses (pre-fix): Core 1 pause refcount; flash timing; callback blocking. All addressed in v22.1.0.
+
+Full UI handoff: `docs/UI_UNIFICATION.md`.
 
 ---
 
@@ -104,6 +147,7 @@ Updating `bluepad32/external/btstack` alone does **not** change the Pico UF2.
 
 Use after **any** change touching Bluetooth, flash layout, `main.cpp` timing, or BTstack/bluepad32 pins:
 
+- [ ] **Multi-device BT:** KB + mouse connected, then pair Xbox/Stadia — KB/mouse still work on ST
 - [ ] Xbox BT — fresh pair + reboot reconnect
 - [ ] Stadia BT — fresh pair + reboot reconnect
 - [ ] DualSense / Switch BT — pair + IKBD responds (not frozen)

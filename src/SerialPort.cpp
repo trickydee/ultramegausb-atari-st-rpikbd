@@ -231,6 +231,19 @@ void SerialPort::drain_tx_log() {
 // These bypass the C++ SerialPort class AND Pico SDK functions to avoid flash latency
 // Using direct hardware register access for maximum speed
 extern "C" {
+
+#if ENABLE_SERIAL_LOGGING
+static volatile uint32_t g_diag_uart_tx_wait_spins = 0;
+#endif
+
+uint32_t diag_uart_tx_wait_spins(void) {
+#if ENABLE_SERIAL_LOGGING
+    return g_diag_uart_tx_wait_spins;
+#else
+    return 0;
+#endif
+}
+
 void __not_in_flash_func(serial_send)(unsigned char data) {
     // Direct hardware register access - CRITICAL: bypasses all SDK functions in flash
     // Use cached hardware pointer to avoid any flash access
@@ -253,6 +266,9 @@ void __not_in_flash_func(serial_send)(unsigned char data) {
     // TXFF bit is 1 when FIFO is full, 0 when there's space
     // BUSY bit is 1 when UART is transmitting, but we can still write to FIFO
     while (g_uart_hw->fr & UART_UARTFR_TXFF_BITS) {
+#if ENABLE_SERIAL_LOGGING
+        g_diag_uart_tx_wait_spins++;
+#endif
         // FIFO full, wait (should be rare with 32-byte FIFO)
         // This is a tight loop in RAM, so it's fast
     }

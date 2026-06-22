@@ -18,6 +18,8 @@
 */
 #pragma once
 
+#include "config.h"
+
 #ifdef __cplusplus
 #include <stdexcept>
 #include <vector>
@@ -111,6 +113,10 @@ int st_mouse_enabled();
  * (handle_joystick); Core 1 must not call USB or TinyUSB from here.
  */
 void update_joystick_state();
+
+#if ENABLE_SERIAL_LOGGING
+void hid_diag_log_snapshot(void);
+#endif
 
 #ifdef __cplusplus
 }

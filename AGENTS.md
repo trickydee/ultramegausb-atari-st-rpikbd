@@ -1,8 +1,8 @@
 # AGENTS.md
 
-Firmware that emulates the Atari ST IKBD (HD6301) on Raspberry Pi Pico boards, routing USB and Bluetooth keyboards, mice, and gamepads to vintage Atari Mega ST / STE / TT computers. Version **21.1.2** (`include/version.h` — canonical; bump on release only).
+Firmware that emulates the Atari ST IKBD (HD6301) on Raspberry Pi Pico boards, routing USB and Bluetooth keyboards, mice, and gamepads to vintage Atari Mega ST / STE / TT computers. Version **22.1.0** (`include/version.h`).
 
-Human docs: `README.md`. Deep technical detail: `docs/DEVELOPER_GUIDE.md`.
+Human docs: `README.md`. UI alignment handoff: `docs/UI_UNIFICATION.md`. Deep technical detail: `docs/DEVELOPER_GUIDE.md`.
 
 ---
 
@@ -38,7 +38,7 @@ make -j$(nproc)
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `BUILD_BOARDS` | `pico2_w` | `pico2_w`, comma-separated list, or `all` for every board |
-| `BUILD_VARIANT` | `production` | `production`, `debug`, or `speed` |
+| `BUILD_VARIANT` | `production` | `production`, `debug` (`ENABLE_SERIAL_LOGGING=1`, `[DIAG]` logs), or `speed` |
 | `SKIP_VARIANTS` | `1` | `1` = one variant; `0` = after debug, also build production + speed |
 | `CLEAN_BUILD_DIRS` | `1` | `0` = keep `build/build-*` for incremental rebuilds |
 | `DEBUG` | `0` | `1` = debug OLED screens |
@@ -136,7 +136,95 @@ mkdir -p build/build-pico && cd build/build-pico && cmake ../.. -DPICO_BOARD=pic
 - [ ] Llamatron dual-stick works if applicable (`Ctrl+F4`)
 
 **USB debugging:** `docs/USB_DEBUGGING_METHODOLOGY.md`  
-**Timing / serial issues:** `docs/TECHNICAL_NOTES.md`
+**Timing / serial issues:** `docs/TECHNICAL_NOTES.md`  
+**BT regression / `[DIAG]` interpretation:** `docs/FUTURE_WORK.md`, `docs/UI_UNIFICATION.md`
+
+---
+
+## Serial diagnostics (`[DIAG]` builds)
+
+Use a **debug variant** when investigating Bluetooth, Core 1 freezes, or input routing. Production builds set `ENABLE_SERIAL_LOGGING=0` and omit `[DIAG]` lines.
+
+### Build and flash
+
+```bash
+# Pico 2 W diagnostic firmware (incremental rebuild)
+BUILD_VARIANT=debug CLEAN_BUILD_DIRS=0 ./build-all.sh
+```
+
+- Output: `dist/atari_ikbd_pico2_w_debug.uf2`
+- `build-all.sh` maps `BUILD_VARIANT=debug` → `ENABLE_SERIAL_LOGGING=1` (OLED on, verbose log).
+- `BUILD_VARIANT=production` → `ENABLE_SERIAL_LOGGING=0` (minimal log). Do not rely on production UF2 for serial diagnosis.
+
+### Serial capture
+
+- **Port:** UART0 @ **115200** 8N1 — **GP0 = TX**, GP1 = RX (not USB CDC).
+- **Confirm correct firmware** before testing — boot must show:
+  - `Firmware version: 22.1.0-dbg1` (or current `-dbgN`)
+  - `[DIAG] firmware 22.1.0-dbg1 (Core1 phase/pc, BT storage+getters, HidInput consume)`
+- OLED splash / mount footer also show `v22.1.0-dbg1` via `PROJECT_VERSION_DISPLAY`.
+
+If you only see Bluepad32/BTstack lines and no `[DIAG]` heartbeat, you are on old or production firmware.
+
+### Version label (`include/version.h`)
+
+| Macro | Purpose |
+|-------|---------|
+| `PROJECT_VERSION_STRING` | Release version only, e.g. `22.1.0` |
+| `PROJECT_VERSION_DISPLAY` | User-visible label; adds `-dbgN` when `ENABLE_SERIAL_LOGGING=1` |
+| `PROJECT_DIAG_BUILD` | Increment **N** each time you flash a new diagnostic UF2 (`-dbg1`, `-dbg2`, …) |
+
+- Bump `PROJECT_DIAG_BUILD` when iterating on diagnostic firmware — **no need to bump patch** for each flash.
+- Bump `PROJECT_VERSION_PATCH` only for a real release (ask first per boundaries below).
+
+### Adding `[DIAG]` logs
+
+| Location | Pattern |
+|----------|---------|
+| `src/main.cpp` (Core 0) | `printf("[DIAG] ...\n")` inside `#if ENABLE_SERIAL_LOGGING` |
+| `src/bluepad32_platform.c` | `logi("[DIAG] ...\n")` (Bluepad32 routes to UART when logging on) |
+| Pause state | `core1_get_pause_depth()`, `core1_is_paused()` — do not read `g_core1_*` from other files |
+
+**Conventions:**
+
+- Prefix every diagnostic line with `[DIAG]` so logs are grep-friendly.
+- Throttle noisy counters (see `bt_diag_maybe_log()` — every 5 s in `bluepad32_platform.c`).
+- Heartbeat in `main.cpp` runs every **10 s** when `ENABLE_SERIAL_LOGGING=1`.
+- Declare `extern "C"` helpers at **file scope** in `main.cpp` — never nest `extern "C" { }` inside a function (breaks the build).
+
+**Existing instrumentation (v22.1.0-dbg1):**
+
+- **Boot:** pause/resume refcount (`core1_pause_for_bt_enumeration` / `core1_resume_after_bt_enumeration` in `main.cpp`).
+- **BT discovery:** pause on gamepad COD `0x0508` or Xbox/Stadia name (`bluepad32_platform.c`); slot index logged on `device ready`.
+- **Device ready:** type, name, `pause_depth` before/after 10 ms resume delay.
+- **Heartbeat (10 s):** Core 0 loops, BT poll count, Core 1 `hb` / `cycles` / `loops`, **`phase`** (`PAUSED` / `TX_EMPTY` / `RUN_CLOCKS` / `LOOP_DONE`), **`pc`** at last `hd6301_run_clocks` entry, `run_in` vs `run_out`, `pause_spins`, `sci_busy`, `rx_q`, `uart_tx_spin`, `pause_depth`, `BT(kb=… mouse=… joy=…)`, `[CYCLES_FROZEN!]` / `[LOOPS_FROZEN!]`.
+- **BT reports (5 s):** HID callback counts per class + `pause_depth` (from `on_controller_data`).
+- **BT storage snapshot (5 s):** per-slot `connected` / `updated` / name for GP/KB/MS; callback drops; getter `ok` vs `noupd`.
+- **HidInput snapshot (5 s):** `kb_get` / `kb_peek` / `kb_none` / `kb_keys`, `ms_get` / `ms_miss` / `ms_move`, `joy_get`, `mouse_en`, `joy`, `mouse_btn`.
+
+### Interpreting freeze (`phase` + `run_in`/`run_out`)
+
+| `phase` when frozen | `run_in` > `run_out` | Likely cause |
+|---------------------|----------------------|--------------|
+| `RUN_CLOCKS` | yes | Stuck inside `hd6301_run_clocks` / `instr_exec` |
+| `TX_EMPTY` | no | Stuck in `serial_send` UART wait (`uart_tx_spin` climbing) |
+| `PAUSED` | no | Pause spin (should still increment `loops` unless wedged in `busy_wait`) |
+| `LOOP_TOP` / `LOOP_DONE` | no | Stuck between phases (rare) |
+
+If `kb_in=0` in callbacks but storage shows `c=1 u=0`, Bluepad32 stopped delivering KB reports. If `kb_in>0` but `HidInput kb_get=0` and `kb_noupd` high, polling faster than consumption or getter path issue.
+
+### Reading logs (Stadia/Xbox regression example)
+
+Healthy Core 1: `cycles` and `loops` increase every heartbeat; no `FROZEN` tags.
+
+| Observation | Meaning |
+|---------------|---------|
+| `pause_depth=1` during pairing, `0` after `device ready` resume | Refcount pause path behaved as designed |
+| `pause_depth=0` but `[CYCLES_FROZEN!]` `[LOOPS_FROZEN!]` | Core 1 stuck **outside** the pause loop (e.g. inside `hd6301_run_clocks` or flash-safe path) — not a stuck pause flag |
+| `BT reports/5s: kb=0 mouse=0 joy=…` while heartbeat still shows `BT(kb=1 mouse=1 …)` | Connections alive but HID reports not reaching handlers — separate data-path issue |
+| OLED responsive, Atari input dead | Core 0 + UI OK; suspect Core 1 emulator or 6301→UART path |
+
+See `docs/FUTURE_WORK.md` for the open Xbox/Stadia BT + KB/mouse regression.
 
 ---
 
@@ -153,7 +241,7 @@ mkdir -p build/build-pico && cd build/build-pico && cmake ../.. -DPICO_BOARD=pic
 
 ### Ask first
 
-- Bumping `include/version.h` or editing `RELEASE_NOTES.md`.
+- Bumping `PROJECT_VERSION_PATCH` (or minor/major) or editing `RELEASE_NOTES.md`.
 - Creating git commits or pushing to remote.
 - Modifying `pico-sdk/` or `bluepad32/` submodules.
 - Changing `CYCLES_PER_LOOP` in `include/config.h` (hardware regression test).
@@ -173,9 +261,10 @@ mkdir -p build/build-pico && cd build/build-pico && cmake ../.. -DPICO_BOARD=pic
 ## Gotchas
 
 - **USB vs HID poll rate:** Core 0 runs `tuh_task()` every **2 ms** so USB mount/enumeration stays responsive. Mouse, keyboard, and joystick sampling run every **10 ms** because `AtariSTMouse::set_speed()` converts delta magnitude to quadrature timing (`MAX_SPEED / delta`); calling it every 2 ms with single-report deltas feels sluggish. `handle_mouse()` drains and sums up to `MOUSE_REPORT_DRAIN_MAX` USB reports per 10 ms tick before one `set_speed()`. Fast flicks get mild burst scaling above ~96 counts/tick; `MIN_SPEED` caps maximum quadrature rate.
-- **Mount splash OLED:** Production uses `mount_splash_show()` on attach (default **5 s**). Splash is queued in mount callbacks, drawn once by `mount_splash_service()` after `tuh_task()`. `mount_splash_blocks_oled()` suppresses other writers until expiry — do not redraw every poll (full-frame I2C starves mouse input). Footer shows `PROJECT_VERSION_STRING` from `include/version.h`.
-- **Core 1 freeze:** Bluetooth pairing writes flash — Core 1 must pause (`flash_safe_execute`). See `docs/TECHNICAL_NOTES.md`.
-- **BT clock:** 225 MHz for CYW43 stability; 270 MHz can cause stalls. USB-only builds use 270 MHz.
+- **Mount splash OLED:** Production uses `mount_splash_show()` on attach (default **5 s**). Splash is queued in mount callbacks, drawn once by `mount_splash_service()` after `tuh_task()`. `mount_splash_blocks_oled()` suppresses other writers until expiry — do not redraw every poll (full-frame I2C starves mouse input). Footer shows `PROJECT_VERSION_DISPLAY` on debug builds (`-dbgN`), else `PROJECT_VERSION_STRING`.
+- **Core 1 freeze:** Bluetooth pairing writes flash — Core 1 must pause (`flash_safe_execute`). See `docs/TECHNICAL_NOTES.md`. Pause is **refcounted** (`g_core1_pause_depth` in `main.cpp`): gamepad discovery pauses once; `on_device_ready` resumes once. KB/mouse (BLE) do not pause. **`[DIAG]` logs can show `pause_depth=0` while `[CYCLES_FROZEN!]`** — Core 1 halted inside the emulator loop, not stuck in the pause spin. Use `BUILD_VARIANT=debug` and the Serial diagnostics section above.
+- **Xbox/Stadia BT + KB/mouse (resolved v22.1.0):** **BLE HID gamepads** (Stadia, Xbox Wireless — CoD `0x0508`, HID-over-GATT). Refcounted Core 1 pause; `busy_wait_us()` in BT callbacks only; `BT_GAMEPAD_DISCOVERY_SETTLE_MS` + `BT_GAMEPAD_CORE1_RESUME_DELAY_MS` in `config.h`. See `RELEASE_NOTES.md` §22.1.0.
+- **BT callbacks (Bluepad32):** Never call `sleep_ms()` or `__wfe()` on Core 0 inside platform callbacks — IRQs may be constrained and the whole adapter (UI included) can hang. Use `busy_wait_us()` for short delays (`bt_callback_busy_wait_ms` in `bluepad32_platform.c`). Defer long work to the main loop when possible.
 - **BT binary type:** wireless builds use XIP (RAM constrained); USB-only builds use `copy_to_ram`.
 - **Controller detected, no input:** check report parsing and `HidInput.cpp` priority chain.
 - **Atari comms failures:** baud, FIFO, RX queue overflow, or Core 1 not running.
@@ -196,7 +285,8 @@ mkdir -p build/build-pico && cd build/build-pico && cmake ../.. -DPICO_BOARD=pic
 
 | Document | When |
 |----------|------|
-| `docs/FUTURE_WORK.md` | Deferred experiments, regression lessons, roadmap |
+| `docs/UI_UNIFICATION.md` | OLED UI (v22.1.0), Map Devices, gamepad cycling plan |
+| `docs/FUTURE_WORK.md` | Deferred experiments, regression lessons, `[DIAG]` log interpretation |
 | `docs/DEVELOPER_GUIDE.md` | Architecture, adding controllers, design decisions |
 | `docs/TECHNICAL_NOTES.md` | Timing optimisations, serial fixes |
 | `docs/USB_DEBUGGING_METHODOLOGY.md` | USB enumeration debugging |

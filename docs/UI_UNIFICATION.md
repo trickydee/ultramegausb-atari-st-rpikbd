@@ -1,7 +1,7 @@
 # UI unification (Atari ST)
 
 **Last updated:** June 2026  
-**Branch / context:** `feature/ui-alignment` (from `main` @ v21.1.2+)  
+**Context:** **v22.1.0** — UI alignment + BLE gamepad pairing fix shipped.  
 **Design reference:** ultramegausb Amiga firmware OLED UI (Devices + Map Devices page structure)  
 **Audience:** Developers continuing this work (including follow-up LLM sessions)
 
@@ -295,12 +295,18 @@ Input routing (today — automatic)
 
 ---
 
-## Known open issues (outside this doc’s scope)
+## Known open issues
 
-| Issue | Notes |
-|-------|-------|
-| **Stadia BT pairing lock** | Regressed during UI work; deferred. Suspect OLED refresh / `notify_ui_device_update()` during BT enumeration vs Core 1 `flash_safe_execute`. See `docs/FUTURE_WORK.md`, `docs/TECHNICAL_NOTES.md`. |
-| **Map Devices shows auto-assignment** | Until Phase 2 above, labels reflect connection order / priority, not user cycle selection. |
+| Issue | Status | Notes |
+|-------|--------|-------|
+| **Xbox/Stadia BT + KB/mouse stop** | **Resolved v22.1.0** | BLE HID gamepad pairing (Stadia, Xbox Wireless) with BLE KB/mouse — flash-safe Core 1 timing. See `RELEASE_NOTES.md` §22.1.0. |
+| **Map Devices shows auto-assignment** | Open | Until gamepad-cycling Phase 2, labels reflect connection order / priority, not user selection. |
+
+### Xbox/Stadia BT — resolved (v22.1.0)
+
+**Was:** Pairing **BLE HID gamepads** (Google Stadia, Xbox Wireless — CoD `0x0508`, HID-over-GATT) while BLE keyboard/mouse connected could hang or stop IKBD output.
+
+**Fix:** Refcounted Core 1 pause, `busy_wait_us()` in BT callbacks, discovery/resume delays in `config.h`. See `RELEASE_NOTES.md` §22.1.0.
 
 ---
 

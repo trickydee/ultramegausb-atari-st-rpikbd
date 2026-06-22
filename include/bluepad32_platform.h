@@ -55,6 +55,9 @@ void bluepad32_delete_pairing_keys(void);
 // Device name for OLED mapping screen ('J', 'K', 'M' + slot index)
 const char* bluepad32_get_device_name(char device_type, int idx);
 
+// Throttled storage/getter snapshot for [DIAG] regression builds
+void bluepad32_diag_log_snapshot(void);
+
 #ifdef __cplusplus
 }
 #endif

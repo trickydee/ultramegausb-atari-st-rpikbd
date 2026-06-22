@@ -60,7 +60,7 @@ static void draw_splash(void) {
     if (splash_detail[0]) {
         draw_centered(splash_detail, 42, 1);
     }
-    draw_centered("v" PROJECT_VERSION_STRING, 54, 1);
+    draw_centered("v" PROJECT_VERSION_DISPLAY, 54, 1);
     ssd1306_show(&disp);
     mount_splash_set_drawing(false);
 }

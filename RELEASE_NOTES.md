@@ -1,7 +1,41 @@
 # Release Notes
 
-**Current Version:** 21.1.3  
+**Current Version:** 22.1.0  
 **Last Updated:** June 2026
+
+---
+
+## Version 22.1.0 (June 2026)
+
+### Bluetooth Xbox & Stadia pairing with keyboard + mouse
+
+Version 22.1.0 fixes a regression where pairing a **Google Stadia** or **Xbox Wireless** controller over Bluetooth — while a BLE keyboard and mouse were already connected — could hang the adapter or stop keyboard/mouse input reaching the Atari ST.
+
+**Bluetooth technology (clarification):**
+
+| Device | Bluetooth type | How it pairs on Pico 2 W |
+|--------|----------------|---------------------------|
+| **Google Stadia** | **BLE** (Bluetooth Low Energy) | **HID-over-GATT** gamepad; Class of Device **0x0508** (joystick/gamepad) |
+| **Xbox Wireless** (Xbox One S, Series X\|S, etc.) | **BLE** | Same **HID-over-GATT** gamepad path; CoD **0x0508** or name match |
+| **Logitech MX Keys / MX Master** (typical) | **BLE** | HID-over-GATT keyboard/mouse — simpler enumeration, different CoD |
+| **PS5 DualSense** (Bluetooth) | **BLE** | Separate Bluepad32 path; unaffected by this fix |
+
+Stadia and Xbox are **not** USB-only devices when paired over Bluetooth — they use the **same BLE radio** as MX keyboards/mice, but as **BLE HID gamepads** with a longer pairing sequence (GATT service discovery, bonding, **flash writes** for pairing keys). That extra work runs on Core 0 while Core 1 must stay out of XIP flash via `flash_safe_execute` — the root cause of the hang.
+
+**Fixes:**
+
+- **Refcounted Core 1 pause** on gamepad discovery (CoD `0x0508` or name `Stadia`/`Xbox`); single resume after `device ready`
+- **`busy_wait_us()` only in BT callbacks** — `sleep_ms()` / `__wfe()` on Core 0 inside Bluepad32 callbacks could freeze the entire adapter (UI included)
+- **Discovery settle** (`BT_GAMEPAD_DISCOVERY_SETTLE_MS`, 30 ms) after pause so Core 1 leaves the HD6301 emulator before pairing flash
+- **Resume delay** (`BT_GAMEPAD_CORE1_RESUME_DELAY_MS`, 100 ms) after gamepad enumeration completes
+- **Core 1 pause loop** uses `__wfe()` so multicore flash lockout can run during BTstack TLV writes
+- **`[DIAG]` debug builds** (`22.1.0-dbgN`) for serial investigation (`BUILD_VARIANT=debug`); production stays quiet
+
+**Also in this release (from v21.1.3 UI work):**
+
+- **Devices** / **Map Devices** OLED pages (Amiga-style layout)
+- USB device name registry (`usb_device_map`); Xbox XInput and per-controller labels on Map Devices
+- Bluetooth device names on Map Devices
 
 ---
 

@@ -202,3 +202,7 @@ void __not_in_flash_func(hd6301_tx_empty)(int empty) {
 int __not_in_flash_func(hd6301_sci_busy)() {
   return (iram[TRCSR] & RDRF) ? 1 : 0;
 }
+
+uint16_t __not_in_flash_func(hd6301_get_pc)(void) {
+  return reg_getpc();
+}

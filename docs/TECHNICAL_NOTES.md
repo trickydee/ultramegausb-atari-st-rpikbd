@@ -6,9 +6,9 @@ This document consolidates technical documentation, performance optimizations, b
 
 ---
 
-## Current state (v21.1.2)
+## Current state (v22.1.0)
 
-Authoritative values for **`main`** as of v21.1.2. Sections below may describe older experiments — use this table when in doubt.
+Authoritative values as of **v22.1.0**. Sections below may describe older experiments — use this table when in doubt.
 
 | Area | Current behavior |
 |------|------------------|
@@ -19,7 +19,7 @@ Authoritative values for **`main`** as of v21.1.2. Sections below may describe o
 | Serial RX | Polled every Core 0 loop iteration |
 | NVSettings flash | Board-aware sector below BTstack bank (`src/NVSettings.cpp`) |
 | BT pairing | TLV flash persistence; clear via right button on ATARI splash |
-| Core 1 BT resume | All device types in `on_device_ready` (10 ms delay) |
+| Core 1 BT gamepad | Refcounted pause on BLE gamepad discovery (CoD `0x0508` / Stadia / Xbox); `busy_wait_us()` settle + resume delays (`config.h`); **no `sleep_ms` in BT callbacks** |
 | CPU clock | **225 MHz** BT builds / **270 MHz** USB-only |
 
 ---

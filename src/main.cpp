@@ -24,9 +24,11 @@
 #include "pico/multicore.h"
 #include "pico/flash.h"  // For flash_safe_execute_core_init() - required for Bluetooth flash coordination
 #include "hardware/clocks.h"
+#include "hardware/sync.h"
 #include "hardware/uart.h"
 #include "pico/stdio_uart.h"
 #include "config.h"
+#include "version.h"
 #include "6301.h"
 #include "cpu.h"
 #include "util.h"
@@ -51,6 +53,13 @@
 // Forward declarations
 extern "C" {
     void switch_check_delayed_init(void);
+#if ENABLE_BLUEPAD32
+    int bluepad32_get_keyboard_count(void);
+    int bluepad32_get_mouse_count(void);
+    int bluepad32_get_connected_count(void);
+    void bluepad32_diag_log_snapshot(void);
+#endif
+    uint32_t diag_uart_tx_wait_spins(void);
 }
 
 #define ROMBASE     256
@@ -161,15 +170,85 @@ void __not_in_flash_func(setup_hd6301)() {
 static volatile uint32_t g_core1_heartbeat_counter = 0;
 static volatile uint32_t g_core1_cycle_count = 0;
 static volatile uint32_t g_core1_loop_counter = 0;  // Simple loop counter to detect if Core 1 is running
-static volatile bool g_core1_paused = false;  // Flag to pause Core 1 during BT enumeration
+static volatile bool g_core1_paused = false;  // True while pause depth > 0
+static volatile uint32_t g_core1_pause_depth = 0;
+
+// Core 1 location breadcrumbs for freeze diagnosis (read by Core 0 heartbeat)
+enum : uint32_t {
+    CORE1_PHASE_LOOP_TOP = 0,
+    CORE1_PHASE_PAUSED = 1,
+    CORE1_PHASE_TX_EMPTY = 2,
+    CORE1_PHASE_RUN_CLOCKS = 3,
+    CORE1_PHASE_LOOP_DONE = 4,
+};
+static volatile uint32_t g_core1_phase = CORE1_PHASE_LOOP_TOP;
+static volatile uint32_t g_core1_pc_at_run = 0;
+static volatile uint32_t g_core1_run_enter = 0;
+static volatile uint32_t g_core1_run_exit = 0;
+static volatile uint32_t g_core1_pause_spins = 0;
+
+static const char* core1_phase_name(uint32_t phase) {
+    switch (phase) {
+        case CORE1_PHASE_PAUSED: return "PAUSED";
+        case CORE1_PHASE_TX_EMPTY: return "TX_EMPTY";
+        case CORE1_PHASE_RUN_CLOCKS: return "RUN_CLOCKS";
+        case CORE1_PHASE_LOOP_DONE: return "LOOP_DONE";
+        default: return "LOOP_TOP";
+    }
+}
+
+extern "C" uint32_t core1_get_diag_phase(void) { return g_core1_phase; }
+extern "C" uint32_t core1_get_diag_pc(void) { return g_core1_pc_at_run; }
+extern "C" uint32_t core1_get_run_enter(void) { return g_core1_run_enter; }
+extern "C" uint32_t core1_get_run_exit(void) { return g_core1_run_exit; }
+extern "C" uint32_t core1_get_pause_spins(void) { return g_core1_pause_spins; }
 
 // Functions to pause/resume Core 1 (called from BT callbacks)
 extern "C" void core1_pause_for_bt_enumeration(void) {
+    uint32_t depth = ++g_core1_pause_depth;
+    __dmb();
     g_core1_paused = true;
+    __dmb();
+#if ENABLE_SERIAL_LOGGING
+    printf("[DIAG] Core1 PAUSE depth=%lu\n", (unsigned long)depth);
+#endif
+}
+
+// Poll until Core 1 has entered the pause loop. Uses busy_wait only — safe inside
+// BT callbacks where sleep_ms/__wfe may not advance (IRQs constrained).
+extern "C" void core1_wait_for_pause_active(uint32_t timeout_ms) {
+    uint32_t limit = timeout_ms * 100u;  // 10 us steps
+    for (uint32_t i = 0; i < limit; i++) {
+        if (g_core1_pause_spins > 0 || g_core1_phase == CORE1_PHASE_PAUSED) {
+            return;
+        }
+        busy_wait_us(10);
+    }
 }
 
 extern "C" void core1_resume_after_bt_enumeration(void) {
-    g_core1_paused = false;
+    if (g_core1_pause_depth == 0) {
+#if ENABLE_SERIAL_LOGGING
+        printf("[DIAG] Core1 RESUME ignored (depth already 0)\n");
+#endif
+        return;
+    }
+    uint32_t depth = --g_core1_pause_depth;
+    __dmb();
+    g_core1_paused = (g_core1_pause_depth != 0);
+    __dmb();
+#if ENABLE_SERIAL_LOGGING
+    printf("[DIAG] Core1 RESUME depth=%lu paused=%d\n",
+           (unsigned long)depth, g_core1_paused ? 1 : 0);
+#endif
+}
+
+extern "C" uint32_t core1_get_pause_depth(void) {
+    return g_core1_pause_depth;
+}
+
+extern "C" int core1_is_paused(void) {
+    return g_core1_paused ? 1 : 0;
 }
 
 void __not_in_flash_func(core1_entry)() {
@@ -202,26 +281,29 @@ void __not_in_flash_func(core1_entry)() {
     uint32_t last_heartbeat_loop = 0;
     
     while (true) {
-        // CRITICAL: Update loop counter FIRST to detect if Core 1 is frozen
-        // This counter increments every loop, independent of emulator state
-        g_core1_loop_counter++;  // Simple increment - if this stops, Core 1 is truly frozen
-        
-        // Check if Core 1 should be paused (during BT gamepad enumeration)
+        g_core1_loop_counter++;
+        g_core1_phase = CORE1_PHASE_LOOP_TOP;
+
         if (g_core1_paused) {
-            // Pause Core 1 to avoid flash access conflicts during BT enumeration
-            // Use busy_wait_us for short delays to avoid timer dependency
-            busy_wait_us(1000);  // 1ms delay - short enough to resume quickly
-            continue;  // Skip emulation loop while paused
+            g_core1_phase = CORE1_PHASE_PAUSED;
+            g_core1_pause_spins++;
+            // Yield so multicore lockout FIFO IRQ (flash_safe_execute) can preempt Core 1
+            __wfe();
+            continue;
         }
-        
+
         count += CYCLES_PER_LOOP;
-        g_core1_cycle_count = count;  // Update global counter (non-blocking)
-        
-        // Update the tx serial port status based on actual buffer state
-        // Use C wrapper function that's in RAM for better performance
+        g_core1_cycle_count = count;
+
+        g_core1_phase = CORE1_PHASE_TX_EMPTY;
         hd6301_tx_empty(serial_send_buf_empty());
 
+        g_core1_run_enter++;
+        g_core1_pc_at_run = hd6301_get_pc();
+        g_core1_phase = CORE1_PHASE_RUN_CLOCKS;
         hd6301_run_clocks(CYCLES_PER_LOOP);
+        g_core1_run_exit++;
+        g_core1_phase = CORE1_PHASE_LOOP_DONE;
 
         loop_count++;
         
@@ -249,6 +331,7 @@ int main() {
     uint actual_console_baud = uart_set_baudrate(uart0, 115200);
     printf("Console UART configured: requested 115200, actual %u baud\n", actual_console_baud);
     uart_puts(uart0, "UART0 console ready (115200 8N1)\r\n");
+    printf("Firmware version: %s\n", PROJECT_VERSION_DISPLAY);
 
     // Note: stdio_init_all() not called as it may interfere with SerialPort UART setup
     // Initialize TinyUSB for USB HID device support (concurrent with Bluetooth)
@@ -341,6 +424,7 @@ int main() {
     static uint32_t loop_count = 0;
     
     printf("Main loop: Starting...\n");
+    printf("[DIAG] heartbeat every 10s: Core1 phase/pc, BT storage, HidInput consume, CYCLES_FROZEN\n");
     
     while (true) {
         absolute_time_t tm = get_absolute_time();
@@ -432,10 +516,20 @@ int main() {
             last_core1_cycles = core1_cycles;
             last_core1_loops = core1_loops;
 #if ENABLE_BLUEPAD32
-            printf("Main loop: HEARTBEAT - loops=%lu, BT polls=%lu, Core1: hb=%lu cycles=%lu loops=%lu%s%s\n", 
+            printf("Main loop: HEARTBEAT - loops=%lu, BT polls=%lu, Core1: hb=%lu cycles=%lu loops=%lu phase=%s pc=%04lX run_in=%lu run_out=%lu pause_spins=%lu pause_depth=%lu paused=%d sci_busy=%d rx_q=%d uart_tx_spin=%lu BT(kb=%d mouse=%d joy=%d)%s%s\n",
                    loop_count, bt_poll_count, core1_heartbeat, core1_cycles, core1_loops,
+                   core1_phase_name(g_core1_phase), (unsigned long)g_core1_pc_at_run,
+                   (unsigned long)g_core1_run_enter, (unsigned long)g_core1_run_exit,
+                   (unsigned long)g_core1_pause_spins,
+                   (unsigned long)core1_get_pause_depth(), core1_is_paused(),
+                   hd6301_sci_busy(), rx_queue_count,
+                   (unsigned long)diag_uart_tx_wait_spins(),
+                   bluepad32_get_keyboard_count(), bluepad32_get_mouse_count(),
+                   bluepad32_get_connected_count(),
                    core1_frozen ? " [CYCLES_FROZEN!]" : "",
                    core1_loops_frozen ? " [LOOPS_FROZEN!]" : "");
+            bluepad32_diag_log_snapshot();
+            hid_diag_log_snapshot();
 #else
             printf("Main loop: HEARTBEAT - loops=%lu, Core1: hb=%lu cycles=%lu loops=%lu%s%s\n", 
                    loop_count, core1_heartbeat, core1_cycles, core1_loops,

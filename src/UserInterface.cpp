@@ -241,7 +241,7 @@ void UserInterface::update_splash() {
     // Branding + version for ultramegausb.com
     ssd1306_draw_string(&disp, 4, 24, 1, (char*)"ultramegausb.com");
     // Move version up one line from the original bottom position
-    ssd1306_draw_string(&disp, 40, 40, 1, (char*)"v" PROJECT_VERSION_STRING);
+    ssd1306_draw_string(&disp, 40, 40, 1, (char*)"v" PROJECT_VERSION_DISPLAY);
     
 #if ENABLE_BLUEPAD32
     // Show USB/Bluetooth status on splash screen (bottom row)

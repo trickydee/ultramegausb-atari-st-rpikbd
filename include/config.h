@@ -101,6 +101,16 @@
   #define ENABLE_SERIAL_LOGGING 1
 #endif
 
+// Delay before resuming Core 1 after BT gamepad enumeration (flash-safe pairing).
+#ifndef BT_GAMEPAD_CORE1_RESUME_DELAY_MS
+  #define BT_GAMEPAD_CORE1_RESUME_DELAY_MS 100
+#endif
+// After pausing Core 1 on gamepad discovery, wait before BTstack pairing flash writes.
+// Debug logi/printf masked a race; production needs an explicit settle window.
+#ifndef BT_GAMEPAD_DISCOVERY_SETTLE_MS
+  #define BT_GAMEPAD_DISCOVERY_SETTLE_MS 30
+#endif
+
 // If the OLED display is disabled, also disable all OLED-based debug displays
 #if !ENABLE_OLED_DISPLAY
   #undef ENABLE_CONTROLLER_DEBUG

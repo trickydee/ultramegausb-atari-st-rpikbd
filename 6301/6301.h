@@ -84,6 +84,7 @@ void hd6301_run_clocks(COUNTER_VAR clocks);
 int hd6301_receive_byte(u_char byte_in); // just passing through
 void hd6301_tx_empty(int empty);
 int hd6301_sci_busy();
+uint16_t hd6301_get_pc(void);
 
 #define MOUSE_MASK 0x33333333 // 20bit on real HW?
 

@@ -44,6 +44,20 @@
 #include <bitset>
 #include <cstring>
 
+#if ENABLE_SERIAL_LOGGING
+#include "pico/time.h"
+
+static uint32_t hid_bt_kb_get = 0;
+static uint32_t hid_bt_kb_peek = 0;
+static uint32_t hid_bt_kb_none = 0;
+static uint32_t hid_bt_kb_keys_sent = 0;
+static uint32_t hid_bt_ms_get = 0;
+static uint32_t hid_bt_ms_miss = 0;
+static uint32_t hid_bt_ms_move = 0;
+static uint32_t hid_bt_joy_get = 0;
+static absolute_time_t hid_diag_last_snapshot = {0};
+#endif
+
 #if ENABLE_OLED_DISPLAY
 extern ssd1306_t disp;  // External reference to display
 #endif
@@ -1135,16 +1149,22 @@ void HidInput::handle_keyboard() {
         bt_keyboard_t bt_kb;
         int bt_kb_count = bluepad32_get_keyboard_count();
         
-        // Process first connected Bluetooth keyboard
         if (bt_kb_count > 0) {
-            bt_keyboard_t bt_kb;
-            // Try to get keyboard data (marks as read)
             bool has_data = bluepad32_get_keyboard(0, &bt_kb);
-            
-            // If no new data, peek at current state (for shortcuts)
+#if ENABLE_SERIAL_LOGGING
+            if (has_data) {
+                hid_bt_kb_get++;
+            } else if (bluepad32_peek_keyboard(0, &bt_kb)) {
+                has_data = true;
+                hid_bt_kb_peek++;
+            } else {
+                hid_bt_kb_none++;
+            }
+#else
             if (!has_data) {
                 has_data = bluepad32_peek_keyboard(0, &bt_kb);
             }
+#endif
             
             if (has_data) {
                 // Convert Bluepad32 keyboard format to TinyUSB format
@@ -1526,6 +1546,11 @@ void HidInput::handle_keyboard() {
                                           (kb_report.modifier & KEYBOARD_MODIFIER_RIGHTCTRL)) ? 1 : 0;
                 key_states[ATARI_ALT] = ((kb_report.modifier & KEYBOARD_MODIFIER_LEFTALT) ||
                                           (kb_report.modifier & KEYBOARD_MODIFIER_RIGHTALT)) ? 1 : 0;
+#if ENABLE_SERIAL_LOGGING
+                if (kb_report.modifier != 0 || key_count > 0) {
+                    hid_bt_kb_keys_sent++;
+                }
+#endif
             }
         }
     }
@@ -1693,11 +1718,18 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
         int bt_mouse_count = bluepad32_get_mouse_count();
         
         // Process first connected Bluetooth mouse
-        if (bt_mouse_count > 0 && bluepad32_get_mouse(0, &bt_mouse)) {
-            // Extract movement deltas (Bluepad32 clamps to -127 to 127)
-            // Use deltas directly (matching Logronoid's approach) - acceleration will be applied later
+        if (bt_mouse_count > 0) {
+            if (bluepad32_get_mouse(0, &bt_mouse)) {
+#if ENABLE_SERIAL_LOGGING
+                hid_bt_ms_get++;
+#endif
             int32_t bt_x = bt_mouse.delta_x;
             int32_t bt_y = bt_mouse.delta_y;
+#if ENABLE_SERIAL_LOGGING
+            if (bt_x != 0 || bt_y != 0) {
+                hid_bt_ms_move++;
+            }
+#endif
             
             // Accumulate with USB mouse movement
             x += bt_x;
@@ -1719,6 +1751,11 @@ void HidInput::handle_mouse(const int64_t cpu_cycles) {
             // Positive = scroll down, negative = scroll up
             if (bt_mouse.scroll_wheel != 0) {
                 enqueue_wheel_pulses(bt_mouse.scroll_wheel);
+            }
+            } else {
+#if ENABLE_SERIAL_LOGGING
+                hid_bt_ms_miss++;
+#endif
             }
         }
     }
@@ -2242,6 +2279,9 @@ void HidInput::handle_joystick() {
                         } bt_gamepad;
                         
                         if (bluepad32_get_gamepad(bt_index, &bt_gamepad)) {
+#if ENABLE_SERIAL_LOGGING
+                            hid_bt_joy_get++;
+#endif
                             uint8_t bt_axis = 0;
                             uint8_t bt_button = 0;
                             if (bluepad32_to_atari_joystick(&bt_gamepad, &bt_axis, &bt_button)) {
@@ -2340,4 +2380,40 @@ void update_joystick_state() {
     // Joystick/mouse state is refreshed on Core 0 in handle_joystick().
     // Core 1 reads cached state via st_joystick() / st_mouse_buttons() only.
 }
+
+#if ENABLE_SERIAL_LOGGING
+extern "C" void hid_diag_log_snapshot(void) {
+    absolute_time_t now = get_absolute_time();
+    if (absolute_time_diff_us(hid_diag_last_snapshot, now) < 5000000) {
+        return;
+    }
+    hid_diag_last_snapshot = now;
+
+    int mouse_en = HidInput::instance().mouse_enabled() ? 1 : 0;
+    int joy_state = HidInput::instance().joystick();
+    int mouse_btn = HidInput::instance().mouse_buttons();
+
+    printf("[DIAG] HidInput/5s: kb_get=%lu kb_peek=%lu kb_none=%lu kb_keys=%lu "
+           "ms_get=%lu ms_miss=%lu ms_move=%lu joy_get=%lu "
+           "mouse_en=%d joy=0x%02x mouse_btn=0x%02x\n",
+           (unsigned long)hid_bt_kb_get,
+           (unsigned long)hid_bt_kb_peek,
+           (unsigned long)hid_bt_kb_none,
+           (unsigned long)hid_bt_kb_keys_sent,
+           (unsigned long)hid_bt_ms_get,
+           (unsigned long)hid_bt_ms_miss,
+           (unsigned long)hid_bt_ms_move,
+           (unsigned long)hid_bt_joy_get,
+           mouse_en, joy_state & 0xff, mouse_btn & 0xff);
+
+    hid_bt_kb_get = 0;
+    hid_bt_kb_peek = 0;
+    hid_bt_kb_none = 0;
+    hid_bt_kb_keys_sent = 0;
+    hid_bt_ms_get = 0;
+    hid_bt_ms_miss = 0;
+    hid_bt_ms_move = 0;
+    hid_bt_joy_get = 0;
+}
+#endif
 
