@@ -303,6 +303,7 @@ See `docs/FUTURE_WORK.md` for the open Xbox/Stadia BT + KB/mouse regression.
 |----------|------|
 | `docs/UI_UNIFICATION.md` | OLED UI (v22.1.0), Map Devices, gamepad cycling plan |
 | `docs/FUTURE_WORK.md` | Deferred experiments, regression lessons, `[DIAG]` log interpretation |
+| `docs/BT_PAIRING_HANDOFF.md` | Portable BT pairing-hang notes (Atari / Amiga / ADB / other dual-core Pico HID hosts) |
 | `docs/DEVELOPER_GUIDE.md` | Architecture, adding controllers, design decisions |
 | `docs/TECHNICAL_NOTES.md` | Timing optimisations, serial fixes |
 | `docs/USB_DEBUGGING_METHODOLOGY.md` | USB enumeration debugging |

@@ -70,7 +70,7 @@ Race between BTstack `flash_safe_execute` and Core 1 in the HD6301 XIP emulator.
 - Core 1 pause loop uses `__wfe()` for flash lockout
 - `[DIAG]` builds: `BUILD_VARIANT=debug` → `22.1.0-dbgN`
 
-Full write-up: `RELEASE_NOTES.md` §22.1.0.
+Full write-up: `RELEASE_NOTES.md` §22.1.0. Portable handoff for sibling projects (Amiga, Apple ADB, etc.): `docs/BT_PAIRING_HANDOFF.md`.
 
 ### Historical investigation (v21.1.3 era)
 
