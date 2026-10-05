@@ -1,7 +1,23 @@
 # Release Notes
 
-**Current Version:** 22.1.1  
-**Last Updated:** June 2026
+**Current Version:** 23.1.0
+
+**Last Updated:** 5 October 2026
+
+---
+
+## Version 23.1.0 (5 October 2026)
+
+- Fix Bluetooth bond storage during single-core startup so paired devices reconnect after power cycling.
+- Fix gamepad slot allocation and connected-device indexing so controllers appear in Devices and deliver input after keyboard/mouse reconnects.
+- Preserve BLE display names across reconnects, using the device's model string when no advertised or saved name is available.
+- Keep the UART0 diagnostic console at 115200 baud after the startup clock change. Atari UART1 remains at 7812 baud.
+- Update hardware menu buttons: Up on GP18, Enter/page on GP16, Down on GP17. Rename Left/Right button identifiers to Up/Down.
+- Remove temporary bond diagnostics while retaining the existing debug-build instrumentation.
+
+Pico 2 W hardware testing confirmed reconnects, gamepad input, device names, the console baud fix, and the swapped buttons. Stadia reconnect timing and stick thresholds are unchanged.
+
+Reproducing the tested Bluetooth build requires the external Bluepad32 revision and clean BTstack override documented in [the reconnect build notes](docs/BLUEPAD32_NATIVE_RECONNECT_TEST.md).
 
 ---
 

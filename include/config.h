@@ -26,10 +26,10 @@
 #define SSD1306_WIDTH       128
 #define SSD1306_HEIGHT      64
 
-// GPIO assignments for UI buttons
-#define GPIO_BUTTON_LEFT    18
-#define GPIO_BUTTON_MIDDLE  17
-#define GPIO_BUTTON_RIGHT   16
+// GPIO assignments for UI actions (Up=GP18, Enter=GP16, Down=GP17)
+#define GPIO_BUTTON_UP      18
+#define GPIO_BUTTON_MIDDLE  16
+#define GPIO_BUTTON_DOWN    17
 
 // GPIO assignments for serial connection to Atari ST
 #define UART_TX             4

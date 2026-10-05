@@ -53,9 +53,9 @@ extern "C" {
 #define DEBOUNCE_COUNT 10
 
 enum BUTTONS {
-    BUTTON_LEFT,
+    BUTTON_UP,
     BUTTON_MIDDLE,
-    BUTTON_RIGHT
+    BUTTON_DOWN
 };
 
 UserInterface::UserInterface() {
@@ -75,9 +75,9 @@ void UserInterface::init() {
     ssd1306_init(&disp, SSD1306_WIDTH, SSD1306_HEIGHT, SSD1306_ADDR, SSD1306_I2C);
 
     // Setup GPIO for buttons
-    btn_gpio[0] = GPIO_BUTTON_LEFT;
+    btn_gpio[0] = GPIO_BUTTON_UP;
     btn_gpio[1] = GPIO_BUTTON_MIDDLE;
-    btn_gpio[2] = GPIO_BUTTON_RIGHT;
+    btn_gpio[2] = GPIO_BUTTON_DOWN;
     for (int i = 0; i < 3; ++i) {
         gpio_init(btn_gpio[i]);
         gpio_set_dir(btn_gpio[i], GPIO_IN);
@@ -268,7 +268,7 @@ void UserInterface::update_splash() {
     ssd1306_draw_string(&disp, 0, 55, 1, mode_line);
     
     // Show button label on splash screen
-    // Right button: RST (Reset Bluetooth keys) - only show if BT is enabled
+    // Down button: RST (Reset Bluetooth keys) - only show if BT is enabled
     if (bt_enabled) {
         ssd1306_draw_string(&disp, 100, 55, 1, (char*)"RST");
     }
@@ -499,7 +499,7 @@ void UserInterface::on_button_down(int i) {
         page = (PAGE)pg;
         dirty = true;
     }
-    else if (i == BUTTON_LEFT) {
+    else if (i == BUTTON_UP) {
         if (page == PAGE_SPLASH) {
             // On ATARI splash screen, toggle USB/Bluetooth modes
 #if ENABLE_BLUEPAD32
@@ -548,7 +548,7 @@ void UserInterface::on_button_down(int i) {
             dirty = true;
         }
     }
-    else if (i == BUTTON_RIGHT) {
+    else if (i == BUTTON_DOWN) {
         if (page == PAGE_SPLASH) {
             // On ATARI splash screen, delete stored Bluetooth pairing keys
 #if ENABLE_BLUEPAD32

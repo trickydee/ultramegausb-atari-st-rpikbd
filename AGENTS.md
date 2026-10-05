@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Firmware that emulates the Atari ST IKBD (HD6301) on Raspberry Pi Pico boards, routing USB and Bluetooth keyboards, mice, and gamepads to vintage Atari Mega ST / STE / TT computers. Version **22.1.1** (`include/version.h`).
+Firmware that emulates the Atari ST IKBD (HD6301) on Raspberry Pi Pico boards, routing USB and Bluetooth keyboards, mice, and gamepads to vintage Atari Mega ST / STE / TT computers. Version **23.1.0** (`include/version.h`).
 
 Human docs: `README.md`. UI alignment handoff: `docs/UI_UNIFICATION.md`. Deep technical detail: `docs/DEVELOPER_GUIDE.md`.
 

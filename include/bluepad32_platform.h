@@ -14,7 +14,7 @@ extern "C" {
 
 // Forward declaration to avoid including uni.h (which causes HID type conflicts with TinyUSB)
 // The actual type is uni_gamepad_t, but we use void* in the API to avoid conflicts
-// Get gamepad data for a specific index (0-3)
+// Get data by connected-gamepad index (0 to connected_count - 1)
 // Returns true if gamepad is connected and has data
 // out_gamepad must point to a struct matching uni_gamepad_t layout
 bool bluepad32_get_gamepad(int idx, void* out_gamepad);
@@ -52,7 +52,8 @@ bool bluepad32_llamatron_axes(uint8_t* joy1_axis, uint8_t* joy1_fire,
 // Delete all stored Bluetooth pairing keys
 void bluepad32_delete_pairing_keys(void);
 
-// Device name for OLED mapping screen ('J', 'K', 'M' + slot index)
+// Device name for OLED mapping screen: 'J' uses connected-gamepad index;
+// 'K' and 'M' use their storage slot index.
 const char* bluepad32_get_device_name(char device_type, int idx);
 
 // Throttled storage/getter snapshot for [DIAG] regression builds

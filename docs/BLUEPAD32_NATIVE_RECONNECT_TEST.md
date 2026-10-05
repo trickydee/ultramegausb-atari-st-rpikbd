@@ -92,3 +92,87 @@ Cleanup validation: Pico 2 W debug and production builds both passed through
 `build-all.sh` with the dependency overrides above. ELF checks confirm the
 startup guard remains and temporary storage wrappers/log strings are absent.
 `bash -n build-all.sh` and `git diff --check` passed.
+
+
+## Gamepad slot regression follow-up (2026-10-05)
+
+A later UART capture (still containing dbg3 BOND diagnostics) shows both Stadia
+and DualSense reaching device-ready in GP2 and sending reports (`joy_in` rises,
+GP2 updated=1), while `joy_ok` and HidInput `joy_get` remain zero. The connected
+counter is correct, but input and the mapping UI address gamepads by ordinal
+0/1 and were reading raw storage slots instead.
+
+The pre-existing disconnect handler called allocating storage getters for all
+three device classes. Keyboard/mouse disconnects could therefore reserve empty
+gamepad mappings that were not released because connected was false. Successful
+keyboard/mouse off/on reconnect testing exposed this fault.
+
+The follow-up separates non-allocating lookup from ready-time allocation and
+unconditionally releases a disconnected device's mappings. Gamepad data/name
+APIs now share connected-device enumeration, so genuine gaps after unplugging
+one of multiple gamepads also work. Internal maps remain stable while connected.
+Temporary bond diagnostics stay removed. Build label: `22.2.0-dbg5`.
+
+Hardware retest: connect keyboard and mouse, cycle both off/on, then pair Stadia
+or DualSense. Verify the gamepad appears in Map Devices and joystick input works;
+existing diagnostics should show joy_ok/joy_get increasing while controls move.
+With two gamepads, disconnect the first and verify the remaining controller is
+listed and usable. Finally repeat keyboard/mouse reconnects. Hardware validation
+of this follow-up is pending; no new commit was requested for the follow-up.
+
+Pico 2 W debug build passed through `build-all.sh`; diff whitespace and UF2
+block/version checks passed. Startup flash guard remains in the ELF.
+Follow-up UF2 SHA256: `e7d5a05ccf335905bca21ad7add2c92849f90622eaf2c92347ef17778c4c483a`.
+
+## BLE display-name retention (22.2.0-dbg6)
+
+Ported the name-persistence portion of the Amiga adapter's
+`src/bluepad32_bonded_reconnect.c` into `src/bluepad32_ble_names.c`, preserving
+its implementation and copyright. No shared Bluepad32 changes. The BLE connect
+callback restores saved names when discovery yields a generic BLE label, then
+saves genuine names. Metadata uses the existing TLV store, keyed by bond slot
+and checked against identity address/type. Recycled slots cannot inherit another
+identity's name. Generic fallback names do not overwrite saved names, unchanged
+records skip flash writes, and clear-pairing also removes saved name metadata.
+
+Existing Atari bonds have no saved name yet: connect each device once in pairing
+mode to learn its advertised name. Then test device off/on and an adapter restart
+without re-pairing. This image also includes the pending gamepad slot fix.
+
+Pico 2 W debug build passed via `build-all.sh` with the same dependency overrides.
+UF2 block/version checks passed; final ELF includes all three name helpers and
+the startup flash guard. The reused name-storage code was compared byte-for-byte
+with the Amiga implementation. Hardware verification is pending; changes remain
+uncommitted. Temporary bond instrumentation is still absent.
+
+## Model-name fallback and console baud (22.2.0-dbg7)
+
+Observe the existing Device Information query through an adapter-local linker
+wrapper. Restore a saved name first; otherwise use the successful Model Number
+string when the device has no useful advertised name. Bluepad32 receives every
+original event and query status. Its single-client callback is retained when a
+duplicate query is rejected. No extra GATT queries or shared dependency edits.
+Existing bonds can now acquire a model name on reconnect without re-pairing;
+devices that expose neither a name nor a model still use the generic label.
+
+The boot clock change switches clk_peri from 150 MHz to 48 MHz on Pico 2 W,
+which previously slowed UART0 from 115200 to approximately 36864 baud. Drain
+UART0 before the existing clock change, then recalculate only UART0's divisor.
+UART1 is still initialized afterward at 7812 baud; its configuration and the
+system clock selection are unchanged. Stadia reconnect and stick mapping are
+unchanged.
+
+Pico 2 W debug build passed via build-all.sh. A host harness checked model
+fallback, saved/advertised name priority, failed/empty model reads, missing
+devices, rejected duplicate queries, event forwarding and subsequent queries.
+UF2 structure/version and final ELF wrapper symbols were checked. Hardware
+retest: keep the console at 115200 from reset, reconnect the existing keyboard
+and mouse bonds, check model names in Devices, and verify Atari input as usual.
+
+## Release 23.1.0 (2026-10-05)
+
+The user confirmed the gamepad routing fix, model names, stable UART0 console
+baud, and swapped hardware buttons on Pico 2 W. The final button identifiers
+are Up (GP18), Middle/Enter (GP16), and Down (GP17); the naming-only follow-up
+preserves behavior. Release version is 23.1.0, with the diagnostic counter reset
+to 1. Production validation uses the same dependency overrides above.

@@ -49,6 +49,8 @@ The following USB HID Gamepads/Joysticks are supported (More to come)
 
 **v21.0.5:** Build fixes for GCC 15 / current ARM toolchains; `build-all.sh` continues building all board variants if Pico 2 W fails.
 
+**v23.1.0:** Bluetooth reconnect and device-name fixes, restored gamepad routing, stable 115200-baud debug console, and updated Up/Enter/Down hardware buttons. See [release notes](RELEASE_NOTES.md) and [Bluetooth build dependencies](docs/BLUEPAD32_NATIVE_RECONNECT_TEST.md).
+
 **v22.1.1:** Fixes mouse scroll wheel (cursor up/down) and multiple Bluetooth mice when a keyboard is paired; single `handle_keyboard()` per tick.
 
 **v22.1.0:** OLED Devices / Map Devices UI; USB/BT device names on Map Devices; **BLE gamepad pairing fix** for Google Stadia and Xbox Wireless when BLE keyboard/mouse already connected (HID-over-GATT, flash-safe Core 1 timing).

@@ -358,7 +358,12 @@ int main() {
     uint32_t clock_khz = DEFAULT_CPU_CLOCK_KHZ;
     #endif
     
-    if (!set_sys_clock_khz(clock_khz, false))
+    // The SDK switches clk_peri to 48 MHz. Finish boot output first, then
+    // recalculate UART0's divisor before printing at the new clock rate.
+    uart_tx_wait_blocking(uart0);
+    bool clock_changed = set_sys_clock_khz(clock_khz, false);
+    uart_set_baudrate(uart0, 115200);
+    if (!clock_changed)
       printf("system clock %d MHz failed\n", clock_khz / 1000);
     else
       printf("system clock now %d MHz\n", clock_khz / 1000);

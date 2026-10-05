@@ -14,6 +14,7 @@
 #include "sdkconfig.h"
 #include "config.h"
 #include "version.h"
+#include "bluepad32_ble_names.h"
 
 #if ENABLE_SERIAL_LOGGING
 #define DIAG_LOGI(...) logi(__VA_ARGS__)
@@ -158,22 +159,27 @@ static void notify_ui_device_update(void) {
     bluepad32_notify_ui_update();
 }
 
-// Find the first available slot for a device type, or find existing slot if device already mapped
-static int find_slot(uni_hid_device_t* d, uni_hid_device_t** device_map, int max_slots) {
-    // First, check if device is already mapped
+// Lookup must not reserve a slot: reports and disconnects probe multiple classes.
+static int lookup_slot(uni_hid_device_t* d, uni_hid_device_t** device_map, int max_slots) {
+    if (!d) return -1;
     for (int i = 0; i < max_slots; i++) {
-        if (device_map[i] == d) {
-            return i;
-        }
+        if (device_map[i] == d) return i;
     }
-    // Find first free slot
+    return -1;
+}
+
+// Allocate only when a device becomes ready in its actual controller class.
+static int find_slot(uni_hid_device_t* d, uni_hid_device_t** device_map, int max_slots) {
+    if (!d) return -1;
+    int existing = lookup_slot(d, device_map, max_slots);
+    if (existing >= 0) return existing;
     for (int i = 0; i < max_slots; i++) {
         if (device_map[i] == NULL) {
             device_map[i] = d;
             return i;
         }
     }
-    return -1;  // No free slot
+    return -1;
 }
 
 // Clear slot when device disconnects
@@ -188,7 +194,7 @@ static void clear_slot(uni_hid_device_t* d, uni_hid_device_t** device_map, int m
 
 // Get the storage slot for a device based on its controller class
 static bt_gamepad_storage_t* get_gamepad_storage(uni_hid_device_t* d) {
-    int idx = find_slot(d, gamepad_device_map, MAX_BT_GAMEPADS);
+    int idx = lookup_slot(d, gamepad_device_map, MAX_BT_GAMEPADS);
     if (idx >= 0) {
         return &bt_gamepads[idx];
     }
@@ -196,7 +202,7 @@ static bt_gamepad_storage_t* get_gamepad_storage(uni_hid_device_t* d) {
 }
 
 static bt_keyboard_storage_t* get_keyboard_storage(uni_hid_device_t* d) {
-    int idx = find_slot(d, keyboard_device_map, MAX_BT_KEYBOARDS);
+    int idx = lookup_slot(d, keyboard_device_map, MAX_BT_KEYBOARDS);
     if (idx >= 0) {
         return &bt_keyboards[idx];
     }
@@ -204,7 +210,7 @@ static bt_keyboard_storage_t* get_keyboard_storage(uni_hid_device_t* d) {
 }
 
 static bt_mouse_storage_t* get_mouse_storage(uni_hid_device_t* d) {
-    int idx = find_slot(d, mouse_device_map, MAX_BT_MICE);
+    int idx = lookup_slot(d, mouse_device_map, MAX_BT_MICE);
     if (idx >= 0) {
         return &bt_mice[idx];
     }
@@ -287,7 +293,7 @@ static void my_platform_on_init_complete(void) {
 
     // Pairing keys persist in BTstack TLV flash (pico_flash_bank at end of flash).
     // NVSettings uses the sector below the BT bank — see NVSettings.cpp.
-    // Clear keys manually: right button on ATARI splash (bluepad32_delete_pairing_keys).
+    // Clear keys manually: down button on ATARI splash (bluepad32_delete_pairing_keys).
 
     // Wait a bit for HCI to be ready (the "HCI not ready" messages suggest it needs time)
     logi("Waiting for HCI to be ready...\n");
@@ -344,6 +350,13 @@ static uni_error_t my_platform_on_device_discovered(bd_addr_t addr, const char* 
 }
 
 static void my_platform_on_device_connected(uni_hid_device_t* d) {
+    // Directed reconnect advertisements omit the original device name.
+    if (d->conn.protocol == UNI_BT_CONN_PROTOCOL_BLE) {
+        if (!d->name[0] || strncmp(d->name, "BLE ", 4) == 0)
+            ultrausbt_restore_ble_name(d);
+        ultrausbt_save_ble_name(d);
+    }
+
     logi("bluepad32_platform: device connected: %p\n", d);
 
     // Discovery already pauses Core 1 for gamepads (COD 0x0508 / Xbox / Stadia name).
@@ -370,7 +383,6 @@ static void my_platform_on_device_disconnected(uni_hid_device_t* d) {
         gp_storage->updated = false;
         memset(&gp_storage->gamepad, 0, sizeof(gp_storage->gamepad));
         gp_storage->name[0] = '\0';
-        clear_slot(d, gamepad_device_map, MAX_BT_GAMEPADS);
         extern void bluepad32_notify_unmount(void);
         bluepad32_notify_unmount();
     }
@@ -381,7 +393,6 @@ static void my_platform_on_device_disconnected(uni_hid_device_t* d) {
         kb_storage->updated = false;
         memset(&kb_storage->keyboard, 0, sizeof(kb_storage->keyboard));
         kb_storage->name[0] = '\0';
-        clear_slot(d, keyboard_device_map, MAX_BT_KEYBOARDS);
         extern void bluepad32_notify_keyboard_unmount(void);
         bluepad32_notify_keyboard_unmount();
     }
@@ -392,10 +403,14 @@ static void my_platform_on_device_disconnected(uni_hid_device_t* d) {
         mouse_storage->updated = false;
         memset(&mouse_storage->mouse, 0, sizeof(mouse_storage->mouse));
         mouse_storage->name[0] = '\0';
-        clear_slot(d, mouse_device_map, MAX_BT_MICE);
         extern void bluepad32_notify_mouse_unmount(void);
         bluepad32_notify_mouse_unmount();
     }
+
+    // Also release mappings for devices that never reached connected state.
+    clear_slot(d, gamepad_device_map, MAX_BT_GAMEPADS);
+    clear_slot(d, keyboard_device_map, MAX_BT_KEYBOARDS);
+    clear_slot(d, mouse_device_map, MAX_BT_MICE);
 
     notify_ui_device_update();
 }
@@ -600,24 +615,27 @@ struct uni_platform* get_my_platform(void) {
     return &plat;
 }
 
+// Public gamepad indices enumerate connected devices, not internal storage slots.
+static bt_gamepad_storage_t* connected_gamepad_at(int idx) {
+    if (idx < 0) return NULL;
+    for (int i = 0; i < MAX_BT_GAMEPADS; i++) {
+        if (bt_gamepads[i].connected && idx-- == 0) return &bt_gamepads[i];
+    }
+    return NULL;
+}
+
 // Public API to get Bluetooth gamepad data
 // Uses void* to avoid exposing uni_gamepad_t in header (prevents HID type conflicts)
 bool bluepad32_get_gamepad(int idx, void* out_gamepad) {
-    if (idx < 0 || idx >= MAX_BT_GAMEPADS || !out_gamepad) {
-        return false;
-    }
-    
-    if (bt_gamepads[idx].connected && bt_gamepads[idx].updated) {
-        uni_gamepad_t* gp = (uni_gamepad_t*)out_gamepad;
-        *gp = bt_gamepads[idx].gamepad;
-        bt_gamepads[idx].updated = false;
+    bt_gamepad_storage_t* storage = connected_gamepad_at(idx);
+    if (!storage || !out_gamepad) return false;
+    if (storage->updated) {
+        *(uni_gamepad_t*)out_gamepad = storage->gamepad;
+        storage->updated = false;
         bt_diag_joy_get_ok++;
         return true;
     }
-    if (bt_gamepads[idx].connected) {
-        bt_diag_joy_get_noupd++;
-    }
-    
+    bt_diag_joy_get_noupd++;
     return false;
 }
 
@@ -713,6 +731,7 @@ int bluepad32_get_mouse_count(void) {
 
 // Delete all stored Bluetooth pairing keys
 void bluepad32_delete_pairing_keys(void) {
+    ultrausbt_clear_ble_names();
     uni_bt_del_keys_unsafe();
 }
 
@@ -721,11 +740,10 @@ const char* bluepad32_get_device_name(char device_type, int idx) {
         return NULL;
     }
     switch (device_type) {
-        case 'J':
-            if (idx < MAX_BT_GAMEPADS && bt_gamepads[idx].connected) {
-                return bt_gamepads[idx].name;
-            }
-            break;
+        case 'J': {
+            bt_gamepad_storage_t* storage = connected_gamepad_at(idx);
+            return storage ? storage->name : NULL;
+        }
         case 'K':
             if (idx < MAX_BT_KEYBOARDS && bt_keyboards[idx].connected) {
                 return bt_keyboards[idx].name;
@@ -741,4 +759,3 @@ const char* bluepad32_get_device_name(char device_type, int idx) {
     }
     return NULL;
 }
-

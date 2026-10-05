@@ -145,6 +145,7 @@ set(SOURCES
 # Add Bluepad32 source files if enabled
 if(ENABLE_BLUEPAD32)
     list(APPEND SOURCES
+        src/bluepad32_ble_names.c
         src/bluepad32_platform.c
         src/bluepad32_atari.cpp
         src/bluepad32_init.c
@@ -203,6 +204,7 @@ if(ENABLE_BLUEPAD32)
     # Permit flash operations during single-core boot; use SDK lockout after launch.
     target_sources(atari_ikbd PRIVATE src/flash_boot_guard.c)
     target_link_options(atari_ikbd PRIVATE "LINKER:--wrap=flash_safe_execute")
+    target_link_options(atari_ikbd PRIVATE "LINKER:--wrap=device_information_service_client_query")
 
     # Add include directory for btstack_config.h to bluepad32 library
     target_include_directories(bluepad32 PRIVATE ${CMAKE_SOURCE_DIR}/src)
@@ -239,4 +241,3 @@ else()
     set_target_properties(atari_ikbd PROPERTIES OUTPUT_NAME "atari_ikbd_pico")
     message(STATUS "Output files will be named: atari_ikbd_pico.*")
 endif()
-

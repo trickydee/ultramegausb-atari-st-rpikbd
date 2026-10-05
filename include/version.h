@@ -1,15 +1,15 @@
 #ifndef VERSION_H
 #define VERSION_H
 
-#define PROJECT_VERSION_MAJOR 22
-#define PROJECT_VERSION_MINOR 2
+#define PROJECT_VERSION_MAJOR 23
+#define PROJECT_VERSION_MINOR 1
 #define PROJECT_VERSION_PATCH 0
 
 // Increment when flashing a new diagnostic/debug firmware (serial-logging builds).
 #ifndef ENABLE_SERIAL_LOGGING
 #define ENABLE_SERIAL_LOGGING 0
 #endif
-#define PROJECT_DIAG_BUILD 4
+#define PROJECT_DIAG_BUILD 1
 
 #define PROJECT_VERSION_STRINGIFY(x) #x
 #define PROJECT_VERSION_TOSTRING(x) PROJECT_VERSION_STRINGIFY(x)
