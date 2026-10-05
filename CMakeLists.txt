@@ -97,6 +97,8 @@ else()
     message(STATUS "Serial Logging: MINIMAL (speed mode)")
 endif()
 
+set(BLUEPAD32_SOURCE_DIR "${CMAKE_SOURCE_DIR}/bluepad32" CACHE PATH "Bluepad32 source checkout")
+
 # Bluepad32 Bluetooth support (wireless boards only)
 # Pico W (pico_w) and Pico 2 W (pico2_w) both have CYW43, but RAM is tight on Pico W.
 # Enable at your own risk on Pico W.
@@ -173,10 +175,10 @@ target_include_directories(
 if(ENABLE_BLUEPAD32)
     target_include_directories(
         atari_ikbd PRIVATE
-        ${CMAKE_SOURCE_DIR}/bluepad32/src/components/bluepad32/include
+        ${BLUEPAD32_SOURCE_DIR}/src/components/bluepad32/include
         ${CMAKE_SOURCE_DIR}/src # For btstack_config.h and sdkconfig.h
         ${CMAKE_SOURCE_DIR}/include # For bluepad32_init.h
-        ${PICO_SDK_PATH}/lib/btstack/src # For btstack headers
+        ${PICO_BTSTACK_PATH}/src # For btstack headers
     )
 endif()
 
@@ -191,8 +193,17 @@ target_link_libraries(atari_ikbd pico_stdlib pico_multicore hardware_i2c hardwar
 # Add Bluepad32 libraries if enabled
 if(ENABLE_BLUEPAD32)
     # Add bluepad32 subdirectory first
-    add_subdirectory(${CMAKE_SOURCE_DIR}/bluepad32/src/components/bluepad32 libbluepad32)
-    
+    add_subdirectory(${BLUEPAD32_SOURCE_DIR}/src/components/bluepad32 libbluepad32)
+    message(STATUS "Bluepad32 source: ${BLUEPAD32_SOURCE_DIR}")
+    # Macro-only bridge for newer Bluepad32 with the existing SDK's BTstack.
+    # Restrict to C so SDK assembly never receives C declarations.
+    target_compile_options(bluepad32 PRIVATE
+        "$<$<COMPILE_LANGUAGE:C>:-include;${CMAKE_SOURCE_DIR}/src/bluepad32_sdk_compat.h>")
+
+    # Permit flash operations during single-core boot; use SDK lockout after launch.
+    target_sources(atari_ikbd PRIVATE src/flash_boot_guard.c)
+    target_link_options(atari_ikbd PRIVATE "LINKER:--wrap=flash_safe_execute")
+
     # Add include directory for btstack_config.h to bluepad32 library
     target_include_directories(bluepad32 PRIVATE ${CMAKE_SOURCE_DIR}/src)
     
@@ -228,5 +239,4 @@ else()
     set_target_properties(atari_ikbd PROPERTIES OUTPUT_NAME "atari_ikbd_pico")
     message(STATUS "Output files will be named: atari_ikbd_pico.*")
 endif()
-
 

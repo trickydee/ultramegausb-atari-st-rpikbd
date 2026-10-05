@@ -2,14 +2,14 @@
 #define VERSION_H
 
 #define PROJECT_VERSION_MAJOR 22
-#define PROJECT_VERSION_MINOR 1
-#define PROJECT_VERSION_PATCH 1
+#define PROJECT_VERSION_MINOR 2
+#define PROJECT_VERSION_PATCH 0
 
 // Increment when flashing a new diagnostic/debug firmware (serial-logging builds).
 #ifndef ENABLE_SERIAL_LOGGING
 #define ENABLE_SERIAL_LOGGING 0
 #endif
-#define PROJECT_DIAG_BUILD 1
+#define PROJECT_DIAG_BUILD 4
 
 #define PROJECT_VERSION_STRINGIFY(x) #x
 #define PROJECT_VERSION_TOSTRING(x) PROJECT_VERSION_STRINGIFY(x)
@@ -24,7 +24,7 @@
 #define PROJECT_VERSION_SUFFIX ""
 #endif
 
-// Full label: e.g. "22.1.0" (production) or "22.1.0-dbg1" (debug + serial logging)
+// Debug builds append -dbgN to distinguish diagnostic firmware.
 #define PROJECT_VERSION_DISPLAY PROJECT_VERSION_STRING PROJECT_VERSION_SUFFIX
 
 #endif // VERSION_H

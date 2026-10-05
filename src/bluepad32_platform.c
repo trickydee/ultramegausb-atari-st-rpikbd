@@ -335,6 +335,9 @@ static uni_error_t my_platform_on_device_discovered(bd_addr_t addr, const char* 
         store_pending_name_by_addr(addr, name);
     }
     
+    // Bluepad32 filters ordinary discovery before this callback. Its native
+    // bonded directed reconnect passes an empty name and CoD=0 after checking
+    // the bond/address type; accept it without overwriting an existing name.
     // Accept all HID devices: gamepads, keyboards, and mice
     logi("  -> Accepting device (will attempt connection)\n");
     return UNI_ERROR_SUCCESS;

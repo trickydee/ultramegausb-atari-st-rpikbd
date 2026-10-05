@@ -46,6 +46,7 @@
 #if ENABLE_BLUEPAD32
 // Use separate initialization file to avoid HID type conflicts between TinyUSB and btstack
 #include "bluepad32_init.h"
+#include "flash_boot_guard.h"
 #endif
 
 #include "runtime_toggle.h"  // Runtime USB/Bluetooth toggle control
@@ -392,6 +393,9 @@ int main() {
 #endif
 
     // The second CPU core is dedicated to the HD6301 emulation.
+#if ENABLE_BLUEPAD32
+    flash_boot_guard_core1_launching();
+#endif
     multicore_launch_core1(core1_entry);
 
     // Force mouse enabled at startup
