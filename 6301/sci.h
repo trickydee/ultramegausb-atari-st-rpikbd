@@ -18,6 +18,7 @@
 #define serial_int()\
   (((ireg_getb (TRCSR) & RDRF) && (ireg_getb (TRCSR) & RIE))\
    || ((ireg_getb (TRCSR) & TDRE) && (ireg_getb (TRCSR) & TIE)))
+extern void sci_reset_receive_status P_((void));
 extern int sci_in P_((u_char *s, int nbytes));
 extern int sci_print P_((void));
 extern u_char trcsr_getb P_((u_int offs));

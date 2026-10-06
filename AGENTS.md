@@ -309,3 +309,10 @@ See `docs/FUTURE_WORK.md` for the open Xbox/Stadia BT + KB/mouse regression.
 | `docs/USB_DEBUGGING_METHODOLOGY.md` | USB enumeration debugging |
 | `docs/custom-mappings.md` | Controller button mappings |
 | `RELEASE_NOTES.md` | Version history |
+
+### IKBD diagnostic verbosity
+
+Use `IKBD_DEBUG_LEVEL=0..3` with debug builds: 0 disables added IKBD output,
+1 (default) keeps summaries, 2 adds snapshot dumps, and 3 adds wire traces.
+Levels 2/3 perturb timing; start compatibility testing at level 1. Existing
+BT/heartbeat logs are separate. See `docs/DRAGONNELS_DIAGNOSTICS.md`.

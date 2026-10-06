@@ -43,6 +43,10 @@ void __not_in_flash_func(instr_exec)() {
    */
   struct opcode *opptr;
   int interrupted = 0;    /* 1 = HW interrupt occured */
+#if ENABLE_SERIAL_LOGGING
+  diag_instruction_pc = reg_getpc();
+  diag_instruction_opcode = 0x100;
+#endif
 
 #ifndef M6800
 
@@ -94,7 +98,37 @@ void __not_in_flash_func(instr_exec)() {
     }
 #endif
 
-    opptr = &opcodetab [mem_getb (reg_getpc ())];
+    u_char opcode = mem_getb (reg_getpc ());
+#if ENABLE_SERIAL_LOGGING
+    diag_instruction_opcode = opcode;
+    int in_ram = diag_instruction_pc >= 0x80 && diag_instruction_pc < 0x100;
+    if (in_ram && !diag_was_ram)
+      __atomic_fetch_add(&diag_ram_entries, 1, __ATOMIC_RELAXED);
+    if (diag_was_ram && diag_instruction_pc >= 0xf000)
+      __atomic_fetch_add(&diag_rom_returns, 1, __ATOMIC_RELAXED);
+    diag_was_ram = in_ram;
+    // Core 1 owns the snapshot; Core 0 only requests it.
+    uint32_t capture_reason = __atomic_load_n(&diag_rx_capture_requested, __ATOMIC_ACQUIRE);
+    if (capture_reason) {
+      __atomic_store_n(&diag_rx_capture_requested, 0, __ATOMIC_RELAXED);
+      hd6301_record_memory_fault(0, 0, capture_reason);
+    }
+    // Keep only custom-RAM instructions and the first byte beyond RAM.
+    if (diag_instruction_pc >= 0x80 && diag_instruction_pc <= 0x100 &&
+        !__atomic_load_n(&diag_memory_fault_ready, __ATOMIC_RELAXED)) {
+      hd6301_instruction_trace_t *entry = &diag_trace[diag_trace_head];
+      entry->pc = diag_instruction_pc;
+      entry->opcode = opcode;
+      entry->x = reg_getix();
+      entry->sp = reg_getsp();
+      entry->d = reg_getaccd();
+      entry->ccr = reg_getccr();
+      entry->trcsr = iram[TRCSR];
+      diag_trace_head = (diag_trace_head + 1) % HD6301_DIAG_TRACE_SIZE;
+      if (diag_trace_count < HD6301_DIAG_TRACE_SIZE) ++diag_trace_count;
+    }
+#endif
+    opptr = &opcodetab [opcode];
     reg_incpc (1);
     (*opptr->op_func) ();
   }

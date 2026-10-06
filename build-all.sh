@@ -22,6 +22,7 @@
 #                       0 after a debug build, also build production and speed
 #   DEBUG             - 0 (default) production UI; 1 = debug OLED screens
 #   LANGUAGE          - EN (default), FR, DE, SP, or IT
+#   IKBD_DEBUG_LEVEL  - 1 (default): summaries; 0=off, 2=dumps, 3=wire traces
 #   BUILD_VARIANT     - production (default), debug, or speed
 #
 # Firmware version: canonical source is include/version.h (bump there on release).
@@ -211,6 +212,7 @@ if board_enabled pico2_w; then
             -DENABLE_DEBUG="${DEBUG}" \
             -DENABLE_OLED_DISPLAY="${OLED}" \
             -DENABLE_SERIAL_LOGGING="${LOGGING}" \
+            -DIKBD_DEBUG_LEVEL="${IKBD_DEBUG_LEVEL:-1}" \
             > ${DIR_PICO2_W}/cmake.log 2>&1; then
             echo "    ⚠️  Warning: CMake configuration failed for RP2350 WiFi/Bluetooth (pico2_w)!"
             tail -20 ${DIR_PICO2_W}/cmake.log
@@ -249,6 +251,7 @@ if board_enabled pico_w; then
         -DENABLE_DEBUG="${DEBUG}" \
         -DENABLE_OLED_DISPLAY="${OLED}" \
         -DENABLE_SERIAL_LOGGING="${LOGGING}" \
+        -DIKBD_DEBUG_LEVEL="${IKBD_DEBUG_LEVEL:-1}" \
         > ${DIR_PICOW}/cmake.log 2>&1
 
     if [ $? -ne 0 ]; then
@@ -288,6 +291,7 @@ if board_enabled pico2; then
         -DENABLE_DEBUG="${DEBUG}" \
         -DENABLE_OLED_DISPLAY="${OLED}" \
         -DENABLE_SERIAL_LOGGING="${LOGGING}" \
+        -DIKBD_DEBUG_LEVEL="${IKBD_DEBUG_LEVEL:-1}" \
         > ${DIR_PICO2}/cmake.log 2>&1
 
     if [ $? -ne 0 ]; then
@@ -327,6 +331,7 @@ if board_enabled pico; then
         -DENABLE_DEBUG="${DEBUG}" \
         -DENABLE_OLED_DISPLAY="${OLED}" \
         -DENABLE_SERIAL_LOGGING="${LOGGING}" \
+        -DIKBD_DEBUG_LEVEL="${IKBD_DEBUG_LEVEL:-1}" \
         > ${DIR_PICO}/cmake.log 2>&1
 
     if [ $? -ne 0 ]; then

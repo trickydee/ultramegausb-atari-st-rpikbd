@@ -101,6 +101,12 @@
   #define ENABLE_SERIAL_LOGGING 1
 #endif
 
+// IKBD diagnostic output: 0=off, 1=summaries, 2=snapshot dumps, 3=wire bytes.
+// Requires ENABLE_SERIAL_LOGGING; levels 2/3 can perturb input timing.
+#ifndef IKBD_DEBUG_LEVEL
+  #define IKBD_DEBUG_LEVEL 1
+#endif
+
 // Delay before resuming Core 1 after BT gamepad enumeration (flash-safe pairing).
 #ifndef BT_GAMEPAD_CORE1_RESUME_DELAY_MS
   #define BT_GAMEPAD_CORE1_RESUME_DELAY_MS 100

@@ -93,6 +93,7 @@ private:
 extern "C" {
 #endif
 
+void serial_diag_service(int buttons);
 void serial_send(unsigned char data);
 int serial_send_buf_empty(void);
 

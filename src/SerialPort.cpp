@@ -20,6 +20,7 @@
 #include "pico.h"  // Includes all platform definitions including __not_in_flash_func
 #include "hardware/uart.h"
 #include "hardware/irq.h"
+#include "hardware/timer.h"
 #include "config.h"
 
 #define UART_ID uart1
@@ -45,6 +46,73 @@ static volatile uint16_t tx_log_tail = 0;
 // Cached UART hardware pointer - set at initialization, used in critical path
 // This avoids calling uart_get_hw() which might access flash
 static uart_hw_t* g_uart_hw = nullptr;
+
+#if ENABLE_SERIAL_LOGGING && (IKBD_DEBUG_LEVEL >= 3)
+// Separate single-producer rings: UART RX IRQ and emulator TX, consumed by Core 0.
+struct WireEvent { uint32_t us; uint8_t byte; };
+struct WireTrace {
+    WireEvent events[512];
+    uint32_t head, tail, dropped;
+};
+static WireTrace wire_rx, wire_tx;
+static uint32_t wire_rx_last_us, wire_rx_burst_us;
+static void __not_in_flash_func(wire_record)(WireTrace* trace, uint8_t byte) {
+    uint32_t head = __atomic_load_n(&trace->head, __ATOMIC_RELAXED);
+    uint32_t next = (head + 1) & 511;
+    if (next == __atomic_load_n(&trace->tail, __ATOMIC_ACQUIRE)) {
+        __atomic_store_n(&trace->dropped, __atomic_load_n(&trace->dropped, __ATOMIC_RELAXED) + 1, __ATOMIC_RELAXED);
+        return;
+    }
+    uint32_t now = timer_hw->timerawl;
+    if (trace == &wire_rx) {
+        if ((uint32_t)(now - wire_rx_last_us) < 5000)
+            __atomic_store_n(&wire_rx_burst_us, now, __ATOMIC_RELAXED);
+        wire_rx_last_us = now;
+    }
+    trace->events[head] = {now, byte};
+    __atomic_store_n(&trace->head, next, __ATOMIC_RELEASE);
+}
+static void wire_drain(WireTrace& trace, const char* direction) {
+    uint32_t tail = __atomic_load_n(&trace.tail, __ATOMIC_RELAXED);
+    uint32_t head = __atomic_load_n(&trace.head, __ATOMIC_ACQUIRE);
+    if (tail == head) return;
+    uint32_t base = trace.events[tail].us;
+    printf("[WIRE] %s us=%lu:", direction, (unsigned long)base);
+    for (unsigned n = 0; n < 32 && tail != head; ++n) {
+        const auto event = trace.events[tail];
+        printf(" %02X+%lX", event.byte, (unsigned long)(event.us - base));
+        tail = (tail + 1) & 511;
+    }
+    __atomic_store_n(&trace.tail, tail, __ATOMIC_RELEASE);
+    printf("\n");
+}
+#endif
+
+extern "C" void serial_diag_service(int buttons) {
+#if ENABLE_SERIAL_LOGGING && (IKBD_DEBUG_LEVEL >= 3)
+    static int last_buttons = -1;
+    static uint32_t last_drain, last_drops_rx, last_drops_tx;
+    uint32_t now = timer_hw->timerawl;
+    // Retain wire records in RAM while a fast incoming command/upload is active.
+    uint32_t burst = __atomic_load_n(&wire_rx_burst_us, __ATOMIC_RELAXED);
+    if (burst && (uint32_t)(now - burst) < 200000) return;
+    if (buttons != last_buttons) {
+        printf("[WIRE] BUTTON us=%lu state=%02X\n", (unsigned long)now, buttons & 255);
+        last_buttons = buttons;
+    }
+    if ((uint32_t)(now - last_drain) < 20000) return;
+    last_drain = now;
+    wire_drain(wire_rx, "RX");
+    wire_drain(wire_tx, "TX");
+    uint32_t rx = __atomic_load_n(&wire_rx.dropped, __ATOMIC_RELAXED);
+    uint32_t tx = __atomic_load_n(&wire_tx.dropped, __ATOMIC_RELAXED);
+    if (rx != last_drops_rx || tx != last_drops_tx) {
+        printf("[WIRE] TRACE_DROPS rx=%lu tx=%lu\n", (unsigned long)rx, (unsigned long)tx);
+        last_drops_rx = rx;
+        last_drops_tx = tx;
+    }
+#endif
+}
 
 // Put byte into ring buffer (called from ISR)
 static inline void rx_buffer_put(uint8_t data) {
@@ -101,6 +169,9 @@ static void on_uart_irq(void) {
         // Read all available data from UART and put into ring buffer
         while (uart_is_readable(UART_ID)) {
             uint8_t ch = uart_getc(UART_ID);
+#if ENABLE_SERIAL_LOGGING && (IKBD_DEBUG_LEVEL >= 3)
+            wire_record(&wire_rx, ch);
+#endif
             rx_buffer_put(ch);
         }
     }
@@ -276,6 +347,9 @@ void __not_in_flash_func(serial_send)(unsigned char data) {
     // Write byte to data register - this starts transmission
     // The UART hardware will automatically transmit when data is written to DR
     g_uart_hw->dr = data;
+#if ENABLE_SERIAL_LOGGING && (IKBD_DEBUG_LEVEL >= 3)
+    wire_record(&wire_tx, data);
+#endif
     
     // Buffer TX data for non-critical path processing (UI update)
     // This is safe to call from critical path as it's just a simple buffer write

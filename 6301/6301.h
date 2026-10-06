@@ -86,6 +86,35 @@ void hd6301_tx_empty(int empty);
 int hd6301_sci_busy();
 uint16_t hd6301_get_pc(void);
 
+#define HD6301_DIAG_TRACE_SIZE 16
+#define HD6301_DIAG_RX_BLOCKED 2
+#define HD6301_DIAG_UPLOAD 3
+typedef struct {
+    uint16_t pc, x, sp, d;
+    uint8_t opcode, ccr, trcsr;
+} hd6301_instruction_trace_t;
+
+// First fault or blocked-RX capture is immutable; memory-fault count continues increasing.
+typedef struct {
+    // write: 0=read fault, 1=write fault, HD6301_DIAG_RX_BLOCKED=state capture.
+    uint32_t address, value, write, instruction_pc, opcode, pc, x, sp, d, ccr;
+    uint32_t trcsr, subroutine;
+    uint8_t code[3];
+    uint8_t controller_ram[128];
+    uint32_t consumed_total;
+    uint8_t consumed[512];
+    uint32_t trace_count;
+    hd6301_instruction_trace_t trace[HD6301_DIAG_TRACE_SIZE];
+} hd6301_memory_fault_t;
+int hd6301_memory_fault_snapshot(hd6301_memory_fault_t *out, uint32_t *count);
+int hd6301_memory_fault_pending(void);
+void hd6301_record_memory_fault(uint32_t address, uint32_t value, uint32_t write);
+void hd6301_request_rx_blocked_capture(void);
+void hd6301_request_upload_capture(void);
+void hd6301_diag_lifecycle(uint32_t *resets, uint32_t *reset_pc,
+                           uint32_t *ram_entries, uint32_t *rom_returns);
+
+
 #define MOUSE_MASK 0x33333333 // 20bit on real HW?
 
 extern unsigned int mouse_x_counter;

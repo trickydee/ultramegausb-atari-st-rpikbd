@@ -61,8 +61,7 @@ mem_getb (addr)
       else
     return ram[addr];
   } else {
-    error ("mem_getb: addr=%04x, subroutine %04x\n",
-      addr, callstack_peek_addr ());
+    hd6301_record_memory_fault(addr, 0, 0);
     return 0;
   }
 }
@@ -107,8 +106,7 @@ mem_putb (addr, value)
       else
     ram [addr] = value;
   } else {
-    error ("mem_putb: addr=%04x, subroutine %04x\n",
-      addr, callstack_peek_addr ());
+    hd6301_record_memory_fault(addr, value, 1);
   }
 }
 

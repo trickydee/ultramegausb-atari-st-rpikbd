@@ -83,6 +83,21 @@ int crashed = 0;
 
 #define abs_quick(i) ( (i>=0) ? (i) : -(i))
 
+#if ENABLE_SERIAL_LOGGING
+static uint32_t diag_instruction_pc;
+static uint32_t diag_instruction_opcode = 0x100; // Interrupt entry / no opcode yet.
+static hd6301_memory_fault_t diag_memory_fault;
+static uint32_t diag_memory_fault_ready;
+static uint32_t diag_memory_fault_count;
+static uint32_t diag_rx_capture_requested;
+static uint32_t diag_resets, diag_reset_pc, diag_ram_entries, diag_rom_returns;
+static int diag_was_ram;
+static hd6301_instruction_trace_t diag_trace[HD6301_DIAG_TRACE_SIZE];
+static uint32_t diag_trace_head, diag_trace_count;
+static uint8_t diag_consumed[512];
+static uint32_t diag_consumed_total;
+#endif
+
 // base
 #include "cpu.c"
 #include "fprinthe.c"
@@ -101,6 +116,88 @@ int crashed = 0;
 #include "sci.c"
 #include "timer.c"
 #include "callstac.c"
+
+void __not_in_flash_func(hd6301_record_memory_fault)(uint32_t address, uint32_t value, uint32_t write) {
+#if ENABLE_SERIAL_LOGGING
+  // Single producer (emulator). Publish only after the complete snapshot is ready.
+  uint32_t count = __atomic_load_n(&diag_memory_fault_count, __ATOMIC_RELAXED);
+  if (write < HD6301_DIAG_RX_BLOCKED && count != UINT32_MAX)
+    __atomic_store_n(&diag_memory_fault_count, count + 1, __ATOMIC_RELAXED);
+  if (__atomic_load_n(&diag_memory_fault_ready, __ATOMIC_RELAXED)) return;
+  diag_memory_fault.address = address;
+  diag_memory_fault.value = value;
+  diag_memory_fault.write = write;
+  diag_memory_fault.instruction_pc = diag_instruction_pc;
+  diag_memory_fault.opcode = diag_instruction_opcode;
+  diag_memory_fault.pc = reg_getpc();
+  diag_memory_fault.x = reg_getix();
+  diag_memory_fault.sp = reg_getsp();
+  diag_memory_fault.d = reg_getaccd();
+  diag_memory_fault.ccr = reg_getccr();
+  diag_memory_fault.trcsr = iram[TRCSR];
+  diag_memory_fault.subroutine = callstack_peek_addr();
+  // Raw instruction bytes without invoking memory-mapped register callbacks.
+  for (unsigned i = 0; i < 3; ++i) {
+    uint32_t a = (diag_instruction_pc + i) & 0xffff;
+    diag_memory_fault.code[i] = !ram ? 0xff :
+        a >= 0xf000 ? ram[a - 0xf000 + 256] :
+        a >= 0x80 && a < 0x100 ? ram[a] : 0xff;
+  }
+  for (unsigned i = 0; i < 128; ++i)
+    diag_memory_fault.controller_ram[i] = ram ? ram[0x80 + i] : 0xff;
+  diag_memory_fault.consumed_total = diag_consumed_total;
+  for (unsigned i = 0; i < 512; ++i)
+    diag_memory_fault.consumed[i] = diag_consumed[i];
+  diag_memory_fault.trace_count = diag_trace_count;
+  for (unsigned i = 0; i < diag_trace_count; ++i)
+    diag_memory_fault.trace[i] = diag_trace[(diag_trace_head + HD6301_DIAG_TRACE_SIZE - diag_trace_count + i) % HD6301_DIAG_TRACE_SIZE];
+  __atomic_store_n(&diag_memory_fault_ready, 1, __ATOMIC_RELEASE);
+#endif
+}
+
+void hd6301_request_rx_blocked_capture(void) {
+#if ENABLE_SERIAL_LOGGING
+  __atomic_store_n(&diag_rx_capture_requested, HD6301_DIAG_RX_BLOCKED, __ATOMIC_RELEASE);
+#endif
+}
+
+void hd6301_request_upload_capture(void) {
+#if ENABLE_SERIAL_LOGGING
+  __atomic_store_n(&diag_rx_capture_requested, HD6301_DIAG_UPLOAD, __ATOMIC_RELEASE);
+#endif
+}
+
+void hd6301_diag_lifecycle(uint32_t *resets, uint32_t *reset_pc,
+                           uint32_t *ram_entries, uint32_t *rom_returns) {
+#if ENABLE_SERIAL_LOGGING
+  *resets = __atomic_load_n(&diag_resets, __ATOMIC_RELAXED);
+  *reset_pc = __atomic_load_n(&diag_reset_pc, __ATOMIC_RELAXED);
+  *ram_entries = __atomic_load_n(&diag_ram_entries, __ATOMIC_RELAXED);
+  *rom_returns = __atomic_load_n(&diag_rom_returns, __ATOMIC_RELAXED);
+#else
+  *resets = *reset_pc = *ram_entries = *rom_returns = 0;
+#endif
+}
+
+int hd6301_memory_fault_pending(void) {
+#if ENABLE_SERIAL_LOGGING
+  return __atomic_load_n(&diag_memory_fault_ready, __ATOMIC_ACQUIRE) != 0;
+#else
+  return 0;
+#endif
+}
+
+int hd6301_memory_fault_snapshot(hd6301_memory_fault_t *out, uint32_t *count) {
+#if ENABLE_SERIAL_LOGGING
+  if (!__atomic_load_n(&diag_memory_fault_ready, __ATOMIC_ACQUIRE)) return 0;
+  *out = diag_memory_fault;
+  *count = __atomic_load_n(&diag_memory_fault_count, __ATOMIC_RELAXED);
+  return 1;
+#else
+  return 0;
+#endif
+}
+
 
 // Interface with Steem
 
@@ -124,8 +221,13 @@ int __not_in_flash_func(hd6301_destroy)() {
 
 
 int __not_in_flash_func(hd6301_reset)(int Cold) {
+#if ENABLE_SERIAL_LOGGING
+  __atomic_store_n(&diag_reset_pc, reg_getpc(), __ATOMIC_RELAXED);
+  __atomic_fetch_add(&diag_resets, 1, __ATOMIC_RELAXED);
+#endif
   TRACE("6301 emu cpu reset (cold %d)\n",Cold);
   crashed = 0;
+  sci_reset_receive_status();
   cpu_reset();
   if(Cold)
   {

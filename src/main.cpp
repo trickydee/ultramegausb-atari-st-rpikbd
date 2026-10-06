@@ -92,23 +92,125 @@ static void clear_rx_queue() {
  * Read bytes from the physical serial port and pass them to the HD6301
  * Uses software queue to buffer bytes when 6301 RDR is busy
  */
+#if ENABLE_SERIAL_LOGGING
+// Core 0 owns both histories. Stop recording as soon as Core 1 publishes a fault.
+struct IkbdByteHistory {
+    uint8_t bytes[512];
+    uint32_t total;
+};
+static IkbdByteHistory ikbd_received, ikbd_delivered;
+static uint32_t ikbd_rx_window, ikbd_upload_seq, ikbd_execute_seq;
+static bool ikbd_upload_seen, ikbd_execute_seen, ikbd_upload_requested;
+static absolute_time_t ikbd_upload_time;
+static void ikbd_watch_upload(uint8_t byte) {
+    if (hd6301_memory_fault_pending()) return;
+    ikbd_rx_window = (ikbd_rx_window << 8) | byte;
+    // Raw Dragonnels signatures, not a general IKBD command parser.
+    bool upload = ikbd_rx_window == 0x2000a00e;
+    bool execute = (ikbd_rx_window & 0xffffff) == 0x2200a0;
+    if (upload && !ikbd_upload_seen) {
+        ikbd_upload_seq = ikbd_received.total - 4;
+        ikbd_upload_seen = true;
+    }
+    if (execute && !ikbd_execute_seen) {
+        ikbd_execute_seq = ikbd_received.total - 3;
+        ikbd_execute_seen = true;
+    }
+    if ((upload || execute) && !ikbd_upload_requested)
+        ikbd_upload_time = get_absolute_time();
+}
+static void ikbd_record_byte(IkbdByteHistory& history, uint8_t byte) {
+    if (hd6301_memory_fault_pending()) return;
+    history.bytes[history.total % 512] = byte;
+    ++history.total;
+}
+
+static hd6301_memory_fault_t ikbd_dump;
+static bool ikbd_dump_active;
+static uint32_t ikbd_dump_row;
+
+static void ikbd_dump_service(absolute_time_t now) {
+    static absolute_time_t last_line = nil_time;
+    if (!ikbd_dump_active || absolute_time_diff_us(last_line, now) < 20000) return;
+    last_line = now;
+    uint32_t row = ikbd_dump_row++;
+    if (row < ikbd_dump.trace_count) {
+        const auto& t = ikbd_dump.trace[row];
+        printf("[DIAG] IKBD trace %lu pc=%04X op=%02X X=%04X SP=%04X D=%04X CCR=%02X SCI=%02X\n",
+               (unsigned long)row, t.pc, t.opcode, t.x, t.sp, t.d, t.ccr, t.trcsr);
+        return;
+    }
+    row -= ikbd_dump.trace_count;
+    if (row < 8) {
+        printf("[DIAG] IKBD RAM %04lX:", (unsigned long)(0x80 + row * 16));
+        for (unsigned i = 0; i < 16; ++i) printf(" %02X", ikbd_dump.controller_ram[row * 16 + i]);
+        printf("\n");
+        return;
+    }
+    row -= 8;
+    IkbdByteHistory* histories[] = {&ikbd_received, &ikbd_delivered};
+    const char* labels[] = {"RX", "DELIVER"};
+    for (unsigned h = 0; h < 2; ++h) {
+        const auto& history = *histories[h];
+        uint32_t length = history.total < 512 ? history.total : 512;
+        uint32_t rows = (length + 15) / 16;
+        if (row < rows) {
+            uint32_t start = history.total - length + row * 16;
+            printf("[DIAG] IKBD %s seq=%lu total=%lu:", labels[h], (unsigned long)start, (unsigned long)history.total);
+            for (unsigned i = 0; i < 16 && row * 16 + i < length; ++i)
+                printf(" %02X", history.bytes[(start + i) % 512]);
+            printf("\n");
+            return;
+        }
+        row -= rows;
+    }
+    uint32_t consumed_length = ikbd_dump.consumed_total < 512 ? ikbd_dump.consumed_total : 512;
+    if (row < (consumed_length + 15) / 16) {
+        uint32_t start = ikbd_dump.consumed_total - consumed_length + row * 16;
+        printf("[DIAG] IKBD READ seq=%lu total=%lu:", (unsigned long)start, (unsigned long)ikbd_dump.consumed_total);
+        for (unsigned i = 0; i < 16 && row * 16 + i < consumed_length; ++i)
+            printf(" %02X", ikbd_dump.consumed[(start + i) % 512]);
+        printf("\n");
+        return;
+    }
+    printf("[DIAG] IKBD capture END (READ=CPU RDR reads acknowledging previously observed RDRF)\n");
+    ikbd_dump_active = false;
+}
+#endif
+
+static void __not_in_flash_func(drain_atari_rx_queue)() {
+    while (rx_queue_count > 0 && !hd6301_sci_busy()) {
+        unsigned char queued_byte = rx_queue[rx_queue_tail];
+#if ENABLE_SERIAL_LOGGING
+        ikbd_record_byte(ikbd_delivered, queued_byte);
+#endif
+        hd6301_receive_byte(queued_byte);
+        rx_queue_tail = (rx_queue_tail + 1) % RX_QUEUE_SIZE;
+        rx_queue_count--;
+    }
+}
+
 static void __not_in_flash_func(handle_rx_from_st)() {
     unsigned char data;
     static int bytes_deferred_count = 0;
     static int queue_full_count = 0;
     
-    // First, try to drain the software queue (feed buffered bytes to 6301)
-    while (rx_queue_count > 0 && !hd6301_sci_busy()) {
-        unsigned char queued_byte = rx_queue[rx_queue_tail];
-        hd6301_receive_byte(queued_byte);
-        rx_queue_tail = (rx_queue_tail + 1) % RX_QUEUE_SIZE;
-        rx_queue_count--;
-    }
-    
+    drain_atari_rx_queue();
+
     // Now read new bytes from UART and queue them if 6301 is busy
     while (SerialPort::instance().recv(data)) {
-        if (!hd6301_sci_busy()) {
-            // 6301 RDR is available - send directly
+#if ENABLE_SERIAL_LOGGING
+        ikbd_record_byte(ikbd_received, data);
+        ikbd_watch_upload(data);
+#endif
+        // Core 1 may have consumed a byte since the initial drain. Older
+        // queued bytes must be delivered before this newly received byte.
+        drain_atari_rx_queue();
+        if (rx_queue_count == 0 && !hd6301_sci_busy()) {
+            // No older bytes remain; direct delivery preserves receive order.
+#if ENABLE_SERIAL_LOGGING
+            ikbd_record_byte(ikbd_delivered, data);
+#endif
             hd6301_receive_byte(data);
         } else {
             // 6301 RDR is busy - queue the byte
@@ -333,6 +435,9 @@ int main() {
     printf("Console UART configured: requested 115200, actual %u baud\n", actual_console_baud);
     uart_puts(uart0, "UART0 console ready (115200 8N1)\r\n");
     printf("Firmware version: %s\n", PROJECT_VERSION_DISPLAY);
+#if ENABLE_SERIAL_LOGGING
+    printf("[DIAG] IKBD debug level: %d (0=off, 1=summary, 2=dump, 3=wire)\n", IKBD_DEBUG_LEVEL);
+#endif
 
     // Note: stdio_init_all() not called as it may interfere with SerialPort UART setup
     // Initialize TinyUSB for USB HID device support (concurrent with Bluetooth)
@@ -443,8 +548,74 @@ int main() {
         // At 7812 baud, bytes arrive every ~1.28ms - must not miss them!
         handle_rx_from_st();
         
+#if ENABLE_SERIAL_LOGGING && (IKBD_DEBUG_LEVEL >= 1)
+        if ((ikbd_upload_seen || ikbd_execute_seen) && !ikbd_upload_requested &&
+            !hd6301_memory_fault_pending() &&
+            absolute_time_diff_us(ikbd_upload_time, tm) >= 1000000) {
+            hd6301_request_upload_capture();
+            ikbd_upload_requested = true;
+            printf("[DIAG] IKBD upload capture requested: upload=%d seq=%lu execute=%d seq=%lu\n",
+                   ikbd_upload_seen, (unsigned long)ikbd_upload_seq,
+                   ikbd_execute_seen, (unsigned long)ikbd_execute_seq);
+        }
+        static bool rx_blocked_tracking = false;
+        static bool rx_blocked_requested = false;
+        static absolute_time_t rx_blocked_since = nil_time;
+        if (!rx_blocked_requested && !hd6301_memory_fault_pending()) {
+            if (rx_queue_count >= 8 && hd6301_sci_busy()) {
+                if (!rx_blocked_tracking) {
+                    rx_blocked_tracking = true;
+                    rx_blocked_since = tm;
+                } else if (absolute_time_diff_us(rx_blocked_since, tm) >= 1000000) {
+                    hd6301_request_rx_blocked_capture();
+                    rx_blocked_requested = true;
+                    printf("[DIAG] IKBD blocked RX capture requested: queue=%d busy for >=1s\n", rx_queue_count);
+                }
+            } else {
+                rx_blocked_tracking = false;
+            }
+        }
+        static bool memory_fault_reported = false;
+        static absolute_time_t memory_fault_tm = nil_time;
+        static uint32_t memory_fault_last_count = 0;
+        if (!memory_fault_reported || absolute_time_diff_us(memory_fault_tm, tm) >= 5000000) {
+            // Keep the expanded snapshot off Core 0's small stack.
+            auto& fault = ikbd_dump;
+            uint32_t count;
+            if (hd6301_memory_fault_snapshot(&fault, &count)) {
+                if (!memory_fault_reported) {
+                    printf("[DIAG] IKBD %s: %s addr=%08lX value=%02lX insn_pc=%04lX opcode=%03lX bytes=%02X %02X %02X pc=%04lX X=%04lX SP=%04lX D=%04lX CCR=%02lX TRCSR=%02lX sub=%04lX\n",
+                           fault.write == HD6301_DIAG_UPLOAD ? "upload snapshot" : (fault.write == HD6301_DIAG_RX_BLOCKED ? "blocked RX snapshot" : "first memory fault"),
+                           fault.write >= HD6301_DIAG_RX_BLOCKED ? "STATE" : (fault.write ? "WRITE" : "READ"), (unsigned long)fault.address,
+                           (unsigned long)fault.value, (unsigned long)fault.instruction_pc,
+                           (unsigned long)fault.opcode, fault.code[0], fault.code[1], fault.code[2],
+                           (unsigned long)fault.pc, (unsigned long)fault.x, (unsigned long)fault.sp,
+                           (unsigned long)fault.d, (unsigned long)fault.ccr,
+                           (unsigned long)fault.trcsr, (unsigned long)fault.subroutine);
+#if (IKBD_DEBUG_LEVEL >= 2)
+                    ikbd_dump_row = 0;
+                    ikbd_dump_active = true;
+#endif
+                    memory_fault_reported = true;
+                }
+                if (count != memory_fault_last_count) {
+                    printf("[DIAG] IKBD memory faults total=%lu (first snapshot retained until adapter restart)\n", (unsigned long)count);
+                    memory_fault_last_count = count;
+                }
+                memory_fault_tm = tm;
+            }
+        }
+#endif
+
+#if ENABLE_SERIAL_LOGGING && (IKBD_DEBUG_LEVEL >= 2)
+        ikbd_dump_service(tm);
+#endif
+
         // Drain TX log buffer for UI display (non-critical path)
         SerialPort::instance().drain_tx_log();
+#if ENABLE_SERIAL_LOGGING && (IKBD_DEBUG_LEVEL >= 3)
+        serial_diag_service(HidInput::instance().mouse_buttons());
+#endif
 
         AtariSTMouse::instance().update();
 
@@ -516,6 +687,15 @@ int main() {
 #if ENABLE_SERIAL_LOGGING
         if (absolute_time_diff_us(heartbeat_ms, tm) >= 10000000) {
             heartbeat_ms = tm;
+#if IKBD_DEBUG_LEVEL >= 1
+            uint32_t resets, reset_pc, ram_entries, rom_returns;
+            hd6301_diag_lifecycle(&resets, &reset_pc, &ram_entries, &rom_returns);
+            printf("[DIAG] IKBD lifecycle: resets=%lu last_reset_pc=%04lX ram_entries=%lu direct_ram_to_rom=%lu RX=%lu DELIVER=%lu upload=%d execute=%d\n",
+                   (unsigned long)resets, (unsigned long)reset_pc,
+                   (unsigned long)ram_entries, (unsigned long)rom_returns,
+                   (unsigned long)ikbd_received.total, (unsigned long)ikbd_delivered.total,
+                   ikbd_upload_seen, ikbd_execute_seen);
+#endif
             uint32_t core1_heartbeat = g_core1_heartbeat_counter;
             uint32_t core1_cycles = g_core1_cycle_count;
             uint32_t core1_loops = g_core1_loop_counter;

@@ -87,6 +87,12 @@ else()
     message(STATUS "OLED Display: DISABLED (speed mode)")
 endif()
 
+set(IKBD_DEBUG_LEVEL "1" CACHE STRING "IKBD diagnostics: 0=off, 1=summary, 2=dump, 3=wire")
+if(NOT IKBD_DEBUG_LEVEL MATCHES "^[0-3]$")
+    message(FATAL_ERROR "IKBD_DEBUG_LEVEL must be 0, 1, 2 or 3")
+endif()
+add_compile_definitions(IKBD_DEBUG_LEVEL=${IKBD_DEBUG_LEVEL})
+
 # Serial logging mode (0=minimal, 1=verbose)
 set(ENABLE_SERIAL_LOGGING "1" CACHE STRING "Enable verbose serial logging (0 or 1)")
 if(ENABLE_SERIAL_LOGGING EQUAL "1")

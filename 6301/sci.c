@@ -36,6 +36,13 @@ $0013    | B | TDR   | Transmit Data Register                         | W0
  * increment number of outstanding rx interrupts
  */
 
+// Core 1 owns the status-read acknowledgement state.
+static u_char sci_rx_status_seen;
+
+void __not_in_flash_func(sci_reset_receive_status)(void) {
+  sci_rx_status_seen = 0;
+}
+
 int __not_in_flash_func(sci_in)(u_char *s, int nbytes) {
   // detect OVR condition, set flag at once (unlike ACIA)
   if (iram[TRCSR] & RDRF)
@@ -86,6 +93,7 @@ reads or writes the status/control register $11 (often).
 u_char __not_in_flash_func(trcsr_getb)(u_int offs) {
   unsigned char rv;
   rv = ireg_getb(TRCSR);
+  if (cpu_isrunning()) sci_rx_status_seen |= rv & (RDRF | ORFE);
   return rv;
 }
 
@@ -115,26 +123,23 @@ void __not_in_flash_func(trcsr_putb)(u_int offs, u_char value) {
  * Assume RIE is enabled.
  */
 u_char __not_in_flash_func(rdr_getb)(u_int offs) {
-  if (cpu_isrunning())
-  {
-    /*
-     * If recvbuf is not empty, eat a byte from it
-     * into RDR
-     */
-
-    if (iram[TRCSR] & RDRF)
-    {
-      TRACE("6301 (PC %X)\n", reg_getpc());
-      iram[TRCSR] &= ~RDRF;
+  // Copy data before acknowledging it: Core 0 may refill as soon as RDRF clears.
+  u_char value = ireg_getb(RDR);
+  if (cpu_isrunning()) {
+    u_char acknowledged = sci_rx_status_seen;
+    sci_rx_status_seen = 0;
+    // A byte arriving after an empty status read must remain pending.
+    __atomic_thread_fence(__ATOMIC_RELEASE);
+    if (acknowledged) iram[TRCSR] &= ~acknowledged;
+#if ENABLE_SERIAL_LOGGING
+    if ((acknowledged & RDRF) &&
+        !__atomic_load_n(&diag_memory_fault_ready, __ATOMIC_RELAXED)) {
+      diag_consumed[diag_consumed_total % 512] = value;
+      ++diag_consumed_total;
     }
-    if (iram[TRCSR] & ORFE)
-    {
-      TRACE("6301 clear OVR\n");
-      iram[TRCSR] &= ~ORFE; // clear overrun bit - we don't check if read TRCSR first
-    }
-
+#endif
   }
-  return ireg_getb(RDR);
+  return value;
 }
 
 /*
@@ -153,7 +158,7 @@ void __not_in_flash_func(tdr_putb)(u_int offs, u_char value) {
    * start generating tx int. request immediately
    */
 
-  trcsr = trcsr_getb(TRCSR);
+  trcsr = ireg_getb(TRCSR);
 
   /*  Double buffer allows 1 byte waiting in TDR while another is being
     shifted, but not more. 
