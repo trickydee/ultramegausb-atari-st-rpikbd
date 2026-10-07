@@ -218,7 +218,7 @@ This section gives a high-level view of how the emulator is structured. For full
 - Bidirectional UART communication with Atari ST
 - RX: ST → 6301 (commands and data)
 - TX: 6301 → ST (responses and events)
-- IRQ ring buffer; hardware FIFO disabled (logronoid-aligned)
+- IRQ ring buffer; hardware FIFO disabled (bytes captured immediately in ISR)
 
 ---
 

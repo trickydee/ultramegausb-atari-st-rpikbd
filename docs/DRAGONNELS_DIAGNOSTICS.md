@@ -299,3 +299,10 @@ logs. Production remains controlled by ENABLE_SERIAL_LOGGING=0.
 Startup explicitly prints the selected level. No serial or reset behavior
 changes. Latest user capture still identifies dbg11; it is not evidence of
 wire output from dbg12. For general compatibility testing use dbg13 level 1.
+
+## Hardware validation update — 7 October 2026
+
+User reports Froggies, Pandemonium and Carrier Command working on the Mega ST.
+Dragonnels also works with Ctrl+F11 after selection; the apparent reload
+failure was traced to accidentally toggling mouse input off with Ctrl+F12.
+These are user hardware observations, not exhaustive compatibility tests.

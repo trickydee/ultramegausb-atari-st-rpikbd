@@ -21,7 +21,7 @@
 | **`AGENTS.md`** | Yes | Agent/build conventions |
 | **`docs/UI_UNIFICATION.md`** | Yes | OLED UI (v22.1.0), Map Devices, BLE gamepad pairing fix notes |
 | **`docs/OPTIMIZATION_REVIEW.md`** | No (local) | Deep-dive timing/flash analysis; conclusions mirrored here and in `TECHNICAL_NOTES.md` |
-| **`docs/COMPARISON_RP2_ATARIST.md`** | No (local) | Logronoid / rp2-atarist-rpikb alignment notes |
+| **`docs/COMPARISON_RP2_ATARIST.md`** | No (local) | rp2-atarist-rpikb alignment notes |
 | **`DOCUMENTATION_ANALYSIS.md`** | No (root) | Meta audit for doc completeness — optional |
 
 **Rule of thumb:** put **new experiments and “don’t do this again”** here; put **how the code works today** in `TECHNICAL_NOTES.md` / `DEVELOPER_GUIDE.md`; put **what shipped in vX.Y** in `RELEASE_NOTES.md` and `IMPLEMENTATION_HISTORY.md`.
@@ -40,7 +40,7 @@
 | P2 | **RAM-hot Core 1** (XIP builds) | Open | Copy 6301 ROM/RAM hot for Pico 2 W BT builds — see `OPTIMIZATION_REVIEW.md` locally. |
 | P3 | **NVSettings write debounce** | Open | Reduce flash wear from frequent UI writes. |
 | P3 | **Pico W soak** | Open | 2 MiB flash overlap was fixed in NVSettings map; limited BT RAM — validate on hardware. |
-| P3 | **UART hardware FIFO A/B test** | Open | Currently FIFO off (logronoid baseline). |
+| P3 | **UART hardware FIFO A/B test** | Open | Currently FIFO off (IRQ captures each byte immediately). |
 | P3 | **Map Devices — cycle gamepad per port** | Open | Design + checklist in `docs/UI_UNIFICATION.md` §Planned. |
 | P3 | **Customizable controller mappings** | Open | Starting point: `docs/custom-mappings.md`. |
 

@@ -518,7 +518,7 @@ list(APPEND SOURCES
 ### Why CYCLES_PER_LOOP = 500?
 
 - **Emulated batch size:** Each Core 1 loop iteration runs 500 emulated 6301 cycles before checking interrupts again
-- **Default:** Set in `include/config.h` (logronoid reference used 1000; 500 hardware-tested on v21.1.0+)
+- **Default:** Set in `include/config.h` (500 hardware-tested on v21.1.0+; earlier experiments used 1000)
 - **Tuning:** Smaller batches yield more frequent loop checks (flash-safe pause, serial housekeeping); needs ST hardware regression test if changed
 
 ### Why XIP Mode for Bluetooth Builds?
@@ -532,7 +532,6 @@ list(APPEND SOURCES
 
 - **CYW43 Stability:** CYW43 chip has issues at very high speeds (270MHz causes STALL timeouts)
 - **Balance:** 225MHz provides good performance and stability
-- **Reference:** Matches logronoid's stable configuration
 - **USB Builds:** Use 270MHz (no Bluetooth constraints)
 
 ### Why Core 1 Pause During Bluetooth Enumeration?

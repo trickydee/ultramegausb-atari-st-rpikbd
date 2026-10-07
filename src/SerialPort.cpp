@@ -31,7 +31,7 @@
 #define STOP_BITS 1
 #define PARITY    UART_PARITY_NONE
 
-// IRQ-based ring buffer for received data (matching logronoid's implementation)
+// IRQ-based ring buffer for received data
 #define RX_BUFFER_SIZE 256
 static volatile uint8_t rx_buffer[RX_BUFFER_SIZE];
 static volatile uint16_t rx_head = 0;
@@ -121,7 +121,7 @@ static inline void rx_buffer_put(uint8_t data) {
         rx_buffer[rx_head] = data;
         rx_head = next_head;
     }
-    // If buffer is full, byte is silently dropped (matches logronoid's behavior)
+    // If buffer is full, byte is silently dropped
 }
 
 // Get byte from ring buffer (called from main loop)
@@ -192,7 +192,7 @@ void SerialPort::open() {
     gpio_set_function(UART_TX, GPIO_FUNC_UART);
     gpio_set_function(UART_RX, GPIO_FUNC_UART);
     
-    // Set pull-up on RX line (matching logronoid's code)
+    // Set pull-up on RX line
     gpio_pull_up(UART_RX);
     gpio_disable_pulls(UART_TX);
     
@@ -211,8 +211,7 @@ void SerialPort::open() {
     // Use raw mode (no CRLF translation)
     uart_set_translate_crlf(UART_ID, false);
 
-    // Disable FIFO (matching logronoid's implementation)
-    // IRQ-based approach doesn't need FIFO - bytes are captured immediately
+    // Disable FIFO — IRQ captures each byte immediately
     uart_set_fifo_enabled(UART_ID, false);
     
     // Cache the UART hardware pointer for use in critical path (RAM functions)

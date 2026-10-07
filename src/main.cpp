@@ -358,7 +358,7 @@ void __not_in_flash_func(core1_entry)() {
     // CRITICAL: Initialize flash-safe execution FIRST
     // This allows Core 0 to coordinate with Core 1 when Bluetooth writes to flash (TLV storage)
     // Without this, Core 1 can freeze when Bluetooth tries to access flash
-    // This matches logronoid's implementation and is required for proper flash coordination
+    // Required for proper flash coordination with Core 0 Bluetooth TLV writes
     flash_safe_execute_core_init();
     
     // Wait for Core 0 to finish initializing UART0 and other peripherals
@@ -377,7 +377,7 @@ void __not_in_flash_func(core1_entry)() {
     // Instead, set a flag that Core 0 can check
     g_core1_heartbeat_counter = 0xFFFFFFFF;  // Magic value to indicate Core 1 started
     
-    // Pure tight loop - NO DELAYS (matching logronoid's implementation)
+    // Pure tight loop - NO DELAYS
     // This makes Core 1 completely independent of timer system and Core 0's USB/Bluetooth operations
     // Core 1 runs at maximum speed, only limited by CPU clock
     uint32_t loop_count = 0;
@@ -417,7 +417,7 @@ void __not_in_flash_func(core1_entry)() {
             g_core1_heartbeat_counter++;  // Increment counter (non-blocking atomic operation)
         }
 
-        // NO DELAY - pure tight loop (matching logronoid's approach)
+        // NO DELAY - pure tight loop
         // Core 1 runs continuously without yielding, making it completely independent
         // of Core 0's USB/Bluetooth operations and timer interrupts
     }
@@ -453,12 +453,12 @@ int main() {
 #endif
 
     // Clock speed configuration
-    // For Bluetooth builds, use 225MHz (matching logronoid's stable configuration)
+    // For Bluetooth builds, use 225MHz for CYW43 stability
     // CYW43 chip has issues at very high clock speeds (270MHz causes STALL timeouts)
     // 225MHz provides good balance between performance and stability
     #if ENABLE_BLUEPAD32
-    uint32_t clock_khz = 225000;  // 225 MHz for Bluetooth builds (matching logronoid)
-    printf("Bluetooth build: Using 225 MHz (matching logronoid's config)\n");
+    uint32_t clock_khz = 225000;  // 225 MHz for Bluetooth builds
+    printf("Bluetooth build: Using 225 MHz\n");
     #else
     uint32_t clock_khz = DEFAULT_CPU_CLOCK_KHZ;
     #endif
@@ -666,7 +666,6 @@ int main() {
         
 #if ENABLE_BLUEPAD32
         // Poll Bluetooth frequently (every 1ms) for responsive controller input
-        // Matching logronoid's approach of frequent Bluetooth polling
         // Only poll if Bluetooth is enabled at runtime
         if (bt_runtime_is_enabled() && bluepad32_is_enabled() && absolute_time_diff_us(bt_poll_ms, tm) >= 1000) {
             bt_poll_ms = tm;
