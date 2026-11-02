@@ -219,3 +219,28 @@ Legacy `0x1FF000` overlapped the BT bank on 2 MiB parts and was wrong on 4 MiB p
 - Original Xbox/Stadia BT fix: commit `4047c52` (Dec 2025), RAM-only keys era
 - [pico/flash.h](https://github.com/raspberrypi/pico-sdk/blob/master/src/rp2_common/pico_flash/include/pico/flash.h) — `flash_safe_execute_core_init()` on Core 1
 - Local deep-dive: `docs/OPTIMIZATION_REVIEW.md` (gitignored) — flash layout §2, BT Core 1 resume §3
+
+## Temporary Bluepad32 fork — switch back after upstream merge
+
+The Bluepad32 submodule URL uses `https://github.com/trickydee/bluepad32.git`
+while the bonded BLE HID reconnect PR awaits upstream acceptance.
+
+This URL change does not update the pinned submodule revision: the adapter
+still pins `0453b07b5808f51dc4faf294a9771a4da58ff82f`. That revision predates
+our reconnect fix. Earlier diagnostic builds used the external checkout at
+`28ac7526840f32c7ec8cb63bff8c6281d49ad498` through `BLUEPAD32_SOURCE_DIR`.
+The published fork PR branch `codex/ble-reconnect-pr` currently contains the
+fix at `f7e94489be6ae29064a98c24c090dc5a5917c177`, on a newer base. Selecting
+and validating a reproducible submodule pin containing the fix remains a
+follow-up; changing the URL alone must not be described as enabling it.
+
+Once upstream accepts the fix:
+
+1. Verify an upstream commit contains the reconnect fix and select that pin.
+2. Change `.gitmodules` back to `https://github.com/ricardoquesada/bluepad32.git`.
+3. Run `git submodule sync -- bluepad32` and initialise/update the submodule.
+4. Build with the repository's pinned checkout (no external source override),
+   then test bonded keyboard/mouse reconnection, device names, Xbox/Stadia
+   pairing, and Atari demo compatibility before committing the migration.
+
+Keep the fork available until the replacement upstream pin is validated.
