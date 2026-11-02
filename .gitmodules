@@ -5,3 +5,4 @@
 [submodule "bluepad32"]
 	path = bluepad32
 	url = https://github.com/trickydee/bluepad32.git
+	branch = codex/ble-reconnect-pr

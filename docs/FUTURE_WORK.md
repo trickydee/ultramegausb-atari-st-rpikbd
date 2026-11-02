@@ -225,22 +225,26 @@ Legacy `0x1FF000` overlapped the BT bank on 2 MiB parts and was wrong on 4 MiB p
 The Bluepad32 submodule URL uses `https://github.com/trickydee/bluepad32.git`
 while the bonded BLE HID reconnect PR awaits upstream acceptance.
 
-This URL change does not update the pinned submodule revision: the adapter
-still pins `0453b07b5808f51dc4faf294a9771a4da58ff82f`. That revision predates
-our reconnect fix. Earlier diagnostic builds used the external checkout at
-`28ac7526840f32c7ec8cb63bff8c6281d49ad498` through `BLUEPAD32_SOURCE_DIR`.
-The published fork PR branch `codex/ble-reconnect-pr` currently contains the
-fix at `f7e94489be6ae29064a98c24c090dc5a5917c177`, on a newer base. Selecting
-and validating a reproducible submodule pin containing the fix remains a
-follow-up; changing the URL alone must not be described as enabling it.
+The adapter pins `f7e94489be6ae29064a98c24c090dc5a5917c177`, the latest
+`codex/ble-reconnect-pr` branch commit checked on 2 November 2026. This
+includes the bonded BLE HID reconnect fix. The user reports this fork fix
+has been tested on this adapter and other adapters. `.gitmodules` names
+that branch for explicit remote updates; normal submodule updates retain
+the exact committed revision. The fork's `main` branch does not contain
+this fix commit, so do not substitute its tip without checking the fix.
 
 Once upstream accepts the fix:
 
 1. Verify an upstream commit contains the reconnect fix and select that pin.
 2. Change `.gitmodules` back to `https://github.com/ricardoquesada/bluepad32.git`.
-3. Run `git submodule sync -- bluepad32` and initialise/update the submodule.
+3. Remove or update the fork-specific `branch` setting, then run `git submodule sync -- bluepad32` and initialise/update the submodule.
 4. Build with the repository's pinned checkout (no external source override),
    then test bonded keyboard/mouse reconnection, device names, Xbox/Stadia
    pairing, and Atari demo compatibility before committing the migration.
 
 Keep the fork available until the replacement upstream pin is validated.
+
+Pin validation: Pico 2 W debug build passed using the pinned Bluepad32
+checkout and a clean export of the SDK-pinned BTstack (local SDK edits were
+excluded). SCI receive regression tests passed. No new hardware test was
+performed during this pin update.
